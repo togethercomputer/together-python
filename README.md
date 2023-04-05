@@ -1,2 +1,1 @@
-# together
-Python client for Together's Cloud Platform (tentatively)
+Python client for Together's Cloud Platform
