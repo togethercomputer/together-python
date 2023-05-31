@@ -17,7 +17,6 @@ def inference_args(parser):
     )
     parser.add_argument("--top-k", default=40, type=int, help="top-k for the LM")
 
-    # change this to only work when SUBCOMMAND = list-models
     parser.add_argument(
         "--all",
         default=False,
