@@ -9,7 +9,7 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     return re.split("|".join(stop), text)[0]
 
 
-def dispatch_inference(args):
+def dispatch_inference(args) -> None:
     inference = Inference(
         args.key,
         # endpoint_url=,
@@ -60,7 +60,7 @@ class Inference:
         self,
         prompt: str,
         stop: Optional[List[str]] = None,
-    ):
+    ) -> str:
         parameter_payload = {
             "model": self.model,
             "prompt": prompt,

@@ -9,7 +9,7 @@ from together.files import Files
 import urllib.parse
 
 
-def dispatch_api(args):
+def dispatch_api(args) -> None:
     api = API()
     if args.api == "list-models":
         if args.all:
@@ -30,7 +30,7 @@ class API:
         self.together_api_key = together_api_key
         self.endpoint_url = endpoint_url
 
-    def get_supply(self):
+    def get_supply(self) -> dict:
         model_list_endpoint = "https://computer.together.xyz"
         response = requests.get(
             model_list_endpoint,
@@ -42,7 +42,7 @@ class API:
 
         return response
 
-    def print_all_models(self):
+    def print_all_models(self) -> None:
         model_names = self.get_supply()["result"].keys()
 
         model_names = [
@@ -51,7 +51,7 @@ class API:
         for name in model_names:
             print(name)
 
-    def print_available_models(self):
+    def print_available_models(self) -> None:
         res = self.get_supply()
         names = res["result"].keys()
         available_models = [

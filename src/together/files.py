@@ -4,7 +4,7 @@ import posixpath
 from typing import Optional
 
 
-def dispatch_files(args):
+def dispatch_files(args) -> None:
     files = Files(args.key)
 
     if args.files == "list_files":
@@ -37,7 +37,7 @@ class Files:
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
 
-    def list_files(self):
+    def list_files(self) -> dict:
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
@@ -50,7 +50,7 @@ class Files:
 
         return response
 
-    def upload_file(self, file):
+    def upload_file(self, file) -> dict:
         files = {"file": open(file, "rb")}
 
         data = {"purpose": "fine-tune"}
@@ -68,7 +68,7 @@ class Files:
 
         return response
 
-    def delete_file(self, file_id):
+    def delete_file(self, file_id) -> dict:
         delete_url = urllib.parse.urljoin(self.endpoint_url, file_id)
 
         headers = {
@@ -83,7 +83,7 @@ class Files:
 
         return response
 
-    def retrieve_file(self, file_id):
+    def retrieve_file(self, file_id) -> dict:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
 
         headers = {
@@ -98,7 +98,7 @@ class Files:
 
         return response
 
-    def retrieve_file_content(self, file_id, output_file):
+    def retrieve_file_content(self, file_id, output_file) -> None:
         relative_path = posixpath.join(file_id, "content")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -115,4 +115,4 @@ class Files:
         # write to file
         open(output_file, "wb").write(response.content)
 
-        return response  # this should be null
+        #return response  # this should be null

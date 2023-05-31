@@ -4,7 +4,7 @@ import urllib.parse
 import posixpath
 
 
-def dispatch_finetune(args):
+def dispatch_finetune(args) -> None:
     finetune = Finetune(args.key)
 
     if args.finetune == "create_finetune":
@@ -68,7 +68,7 @@ class Finetune:
         classification_positive_class: Optional[str] = None,
         classification_betas: Optional[list] = None,
         suffix: Optional[str] = None,
-    ):
+    ) -> dict:
         parameter_payload = {
             "training_file": training_file,
             "validation_file": validation_file,
@@ -100,7 +100,7 @@ class Finetune:
 
         return response
 
-    def list_finetune(self):
+    def list_finetune(self) -> dict:
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
@@ -113,7 +113,7 @@ class Finetune:
 
         return response
 
-    def retrieve_finetune(self, fine_tune_id: str):
+    def retrieve_finetune(self, fine_tune_id: str) -> dict:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, fine_tune_id)
 
         headers = {
@@ -128,7 +128,7 @@ class Finetune:
 
         return response
 
-    def cancel_finetune(self, fine_tune_id: str):
+    def cancel_finetune(self, fine_tune_id: str) -> dict:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -144,7 +144,7 @@ class Finetune:
 
         return response  # this should be null
 
-    def list_finetune_events(self, fine_tune_id: str):
+    def list_finetune_events(self, fine_tune_id: str) -> dict:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
@@ -161,7 +161,7 @@ class Finetune:
 
         return response
 
-    def delete_finetune_model(self, model: str):
+    def delete_finetune_model(self, model: str) -> dict:
         model_url = "https://api.together.xyz/api/models"
         delete_url = urllib.parse.urljoin(model_url, model)
 
