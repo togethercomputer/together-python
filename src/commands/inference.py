@@ -1,5 +1,30 @@
 def inference_args(parser):
-    parser.add_argument("--model", default=None, help="name/path of the model")
+    parser.add_argument(
+        "--key",
+        default=None,
+        type=str,
+        help="Together API Key",
+        required=True,
+    )
+    parser.add_argument(
+        "--prompt",
+        default=None,
+        type=str,
+        help="Prompt to complete",
+        required=True,
+    )
+    parser.add_argument(
+        "--model",
+        default=None,
+        type=str,
+        help="name/path of the model",
+    )
+    parser.add_argument(
+        "--task",
+        default=None,
+        type=str,
+        help="task",
+    )
     parser.add_argument(
         "--max-tokens",
         default=128,
@@ -7,21 +32,41 @@ def inference_args(parser):
         help="the maximum number of tokens to generate",
     )
     parser.add_argument(
-        "--sample",
-        default=True,
-        action="store_true",
-        help="indicates whether to sample",
+        "--stop-words",
+        default=None,
+        nargs="+",
+        type=str,
+        help="stop word",
     )
     parser.add_argument(
-        "--temperature", default=0.6, type=float, help="temperature for the LM"
+        "--temperature",
+        default=0.7,
+        type=float,
+        help="temperature for the LM",
     )
-    parser.add_argument("--top-k", default=40, type=int, help="top-k for the LM")
-
     parser.add_argument(
-        "--all",
-        default=False,
-        action="store_true",
-        help="list all models (available and unavailable)",
+        "--top-p",
+        default=0.7,
+        type=float,
+        help="top-p for the LM",
+    )
+    parser.add_argument(
+        "--top-k",
+        default=50,
+        type=int,
+        help="top-k for the LM",
+    )
+    parser.add_argument(
+        "--repetition-penalty",
+        default=None,
+        type=float,
+        help="repetition penaltyfor the LM",
+    )
+    parser.add_argument(
+        "--logprobs",
+        default=None,
+        type=int,
+        help="logprobs for the LM",
     )
 
     return parser
