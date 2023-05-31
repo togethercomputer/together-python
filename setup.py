@@ -12,9 +12,5 @@ setup(
     install_requires=[
         "typer",
         "requests",
-        "rich",
-        "loguru",
-        "huggingface-hub",
-        "pynvml",
     ],
 )
