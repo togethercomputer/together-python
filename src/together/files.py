@@ -1,7 +1,8 @@
-import requests
-import urllib.parse
 import posixpath
+import urllib.parse
 from typing import Optional
+
+import requests
 
 
 def dispatch_files(args) -> None:
@@ -60,9 +61,7 @@ class Files:
 
         # send request
         try:
-            response = requests.post(
-                self.endpoint_url, headers=headers, files=files, data=data
-            ).json()
+            response = requests.post(self.endpoint_url, headers=headers, files=files, data=data).json()
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
@@ -115,4 +114,4 @@ class Files:
         # write to file
         open(output_file, "wb").write(response.content)
 
-        #return response  # this should be null
+        # return response  # this should be null

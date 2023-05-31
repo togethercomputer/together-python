@@ -1,12 +1,12 @@
-import requests
 import json
+import urllib.parse
 from typing import Optional
 
-from together.inference import Inference
-from together.finetune import Finetune
-from together.files import Files
+import requests
 
-import urllib.parse
+from together.files import Files
+from together.finetune import Finetune
+from together.inference import Inference
 
 
 def dispatch_api(args) -> None:
@@ -45,18 +45,14 @@ class API:
     def print_all_models(self) -> None:
         model_names = self.get_supply()["result"].keys()
 
-        model_names = [
-            sub[:-1] for sub in model_names
-        ]  # remove the ? after the model names
+        model_names = [sub[:-1] for sub in model_names]  # remove the ? after the model names
         for name in model_names:
             print(name)
 
     def print_available_models(self) -> None:
         res = self.get_supply()
         names = res["result"].keys()
-        available_models = [
-            name[:-1] for name in names if res["result"][name]["num_asks"] > 0
-        ]
+        available_models = [name[:-1] for name in names if res["result"][name]["num_asks"] > 0]
 
         for model_name in available_models:
             print(model_name)

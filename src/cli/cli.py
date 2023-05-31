@@ -2,15 +2,15 @@
 
 import argparse
 
-from together.api import dispatch_api
-from together.inference import dispatch_inference
-from together.finetune import dispatch_finetune
-from together.files import dispatch_files
-
 from commands.api import api_args
-from commands.inference import inference_args
-from commands.finetune import finetune_args
 from commands.files import files_args
+from commands.finetune import finetune_args
+from commands.inference import inference_args
+
+from together.api import dispatch_api
+from together.files import dispatch_files
+from together.finetune import dispatch_finetune
+from together.inference import dispatch_inference
 
 
 def main():

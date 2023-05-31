@@ -1,7 +1,8 @@
-import requests
-from typing import Optional
-import urllib.parse
 import posixpath
+import urllib.parse
+from typing import Optional
+
+import requests
 
 
 def dispatch_finetune(args) -> None:
@@ -92,9 +93,7 @@ class Finetune:
 
         # send request
         try:
-            response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload
-            ).json()
+            response = requests.post(self.endpoint_url, headers=headers, json=parameter_payload).json()
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by fine-tune endpoint: {e}")
 

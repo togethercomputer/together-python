@@ -1,7 +1,8 @@
-import requests
-from typing import Optional, List
 import re
 import urllib.parse
+from typing import List, Optional
+
+import requests
 
 
 def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
@@ -81,9 +82,7 @@ class Inference:
 
         # send request
         try:
-            response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload
-            )
+            response = requests.post(self.endpoint_url, headers=headers, json=parameter_payload)
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by inference endpoint: {e}")
 

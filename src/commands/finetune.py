@@ -128,9 +128,7 @@ def finetune_args(parser):
     )
 
     # Delete finetune model
-    delete_finetune_model_parser = finetune_subparser.add_parser(
-        "delete-finetune-model"
-    )
+    delete_finetune_model_parser = finetune_subparser.add_parser("delete-finetune-model")
     delete_finetune_model_parser.add_argument(
         "--model",
         "-m",
