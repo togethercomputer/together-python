@@ -1,7 +1,9 @@
+#! python
+
 import argparse
-from api import API
-from finetune import Finetune
-from files import Files
+from together.src.api import API
+from together.src.finetune import Finetune
+from together.src.files import Files
 import json
 
 
