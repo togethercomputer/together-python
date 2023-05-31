@@ -31,4 +31,4 @@ quality = ["black~=23.1", "ruff>=0.0.241,<=0.0.259"]
 "Bug Tracker" = "https://github.com/togethercomputer/together/issues"
 
 [project.scripts]
-together = "together.cli:main"
+together = "cli.cli:main"
