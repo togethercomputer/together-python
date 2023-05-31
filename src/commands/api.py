@@ -9,6 +9,6 @@ def api_args(parser):
         default=False,
         action="store_true",
     )
-    raw_supply_subparser = api_subparser.add_parser("get_raw_supply")
+    api_subparser.add_parser("get_raw_supply")
 
     return parser

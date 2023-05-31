@@ -32,13 +32,13 @@ def main():
 
     api_parse = subparser.add_parser("api")
     api_parse = api_args(api_parse)
-    
+
     args = parser.parse_args()
     if args.base == "complete":
         print("complete")
     elif args.base == "finetune":
         finetune = Finetune(args.key)
-        
+
         if args.finetune == "create_finetune":
             response = finetune.create_finetune(
                 training_file=args.training_file,  # training file_id

@@ -1,9 +1,7 @@
 def finetune_args(parser):
     # Required key for any finetune operation
     # TODO get key from env var
-    parser.add_argument(
-        "--key", "-k", help="Together API Key", type=str, required=True
-    )
+    parser.add_argument("--key", "-k", help="Together API Key", type=str, required=True)
 
     finetune_subparser = parser.add_subparsers(dest="finetune")
 
@@ -34,28 +32,28 @@ def finetune_args(parser):
         "--n_epochs",
         "-ne",
         default=4,
-        help="The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.",
+        help="The number of epochs to train the model for.",
         type=int,
     )
     create_finetune_parser.add_argument(
         "--batch_size",
         "-b",
         default=None,
-        help="The batch size to use for training. The batch size is the number of training examples used to train a single forward and backward pass.",
+        help="The batch size to use for training.",
         type=int,
     )
     create_finetune_parser.add_argument(
         "--learning_rate_multiplier",
         "-lrm",
         default=None,
-        help="The learning rate multiplier to use for training. The fine-tuning learning rate is the original learning rate used for pretraining multiplied by this value.",
+        help="The learning rate multiplier to use for training.",
         type=float,
     )
     create_finetune_parser.add_argument(
         "--prompt_loss_weight",
         "-plw",
         default=0.01,
-        help="The weight to use for loss on the prompt tokens. This controls how much the model tries to learn to generate the prompt (as compared to the completion which always has a weight of 1.0), and can add a stabilizing effect to training when completions are short.",
+        help="The weight to use for loss on the prompt tokens.",
         type=float,
     )
     create_finetune_parser.add_argument(
@@ -63,7 +61,7 @@ def finetune_args(parser):
         "-ccm",
         default=False,
         action="store_true",
-        help="If set, we calculate classification-specific metrics such as accuracy and F-1 score using the validation set at the end of every epoch",
+        help="Calculate classification-specific metrics using the validation set.",
     )
     create_finetune_parser.add_argument(
         "--classification_n_classes",
@@ -83,20 +81,20 @@ def finetune_args(parser):
         "--classification_betas",
         "-cb",
         default=None,
-        help="If this is provided, we calculate F-beta scores at the specified beta values. The F-beta score is a generalization of F-1 score. This is only used for binary classification.",
+        help="Calculate F-beta scores at the specified beta values.",
         type=list,
     )
     create_finetune_parser.add_argument(
         "--suffix",
         "-s",
         default=None,
-        help="A string of up to 40 characters that will be added to your fine-tuned model name.",
+        help="Up to 40 characters that will be added to your fine-tuned model name.",
         type=str,
     )
     # End of create_finetune
 
     # List_Finetune
-    list_finetune_parser = finetune_subparser.add_parser("list_finetune")
+    finetune_subparser.add_parser("list_finetune")
     retrieve_finetune_parser = finetune_subparser.add_parser("retrieve_finetune")
     retrieve_finetune_parser.add_argument(
         "--fine_tune_id",
