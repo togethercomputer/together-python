@@ -1,5 +1,5 @@
 import requests
-from typing import Optional, Union, List
+from typing import Optional, List
 import re
 
 
@@ -16,7 +16,7 @@ class Inference:
     Should be a task that returns `generated_text` or `summary_text`."""
     model: Optional[str] = None
     max_tokens: Optional[int] = None
-    # stop_word: Optional[str] = None    # TODO stop_words not working? Using LangChain workaround for now...
+    # stop_word: Optional[str] = None    # TODO enable stop_words
     temperature: Optional[float] = None
     top_p: Optional[float] = None
     top_k: Optional[int] = None
@@ -61,7 +61,7 @@ class Inference:
 
         generated_text = response.json()
 
-        # TODO Add exception when generated_text has error, See langchain implementation + together docs
+        # TODO Add exception when generated_text has error, See together docs
 
         text = generated_text["output"]["choices"][0]["text"]
 

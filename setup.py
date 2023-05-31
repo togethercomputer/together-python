@@ -1,5 +1,16 @@
 from setuptools import setup, find_packages
 
+REQUIRED_PKGS = [
+    "typer",
+    "requests",
+]
+
+QUALITY_REQUIRE = ["black~=23.1", "ruff>=0.0.241,<=0.0.259"]
+
+EXTRAS_REQUIRE = {
+    "quality": QUALITY_REQUIRE,
+}
+
 setup(
     name="together",
     author="togethercomputer",
@@ -9,8 +20,7 @@ setup(
     scripts=["together/bin/together"],
     package_dir={"together": "together"},
     packages=find_packages(),
-    install_requires=[
-        "typer",
-        "requests",
-    ],
+    install_requires=REQUIRED_PKGS,
+    extras_require=EXTRAS_REQUIRE,
+    python_requires=">=3.8.11",
 )

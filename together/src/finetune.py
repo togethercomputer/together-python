@@ -1,5 +1,5 @@
 import requests
-from typing import Optional, Union, List
+from typing import Optional
 import urllib.parse
 import posixpath
 
