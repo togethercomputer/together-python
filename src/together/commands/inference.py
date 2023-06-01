@@ -78,10 +78,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="temperature for the LM",
     )
 
-    inf_parser.set_defaults(func=run_complete)
+    inf_parser.set_defaults(func=_run_complete)
 
 
-def run_complete(args: argparse.Namespace) -> None:
+def _run_complete(args: argparse.Namespace) -> None:
     inference = Inference(
         endpoint_url=args.endpoint,
         task=args.task,
