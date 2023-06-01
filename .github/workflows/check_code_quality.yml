@@ -4,12 +4,12 @@ on:
   push:
     branches: [ main ]
     paths:
-      - "together/**.py"
+      - "src/together/**.py"
 
   pull_request:
     branches: [ main ]
     paths:
-      - "together/**.py"
+      - "src/together/**.py"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
