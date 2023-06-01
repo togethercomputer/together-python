@@ -1,4 +1,7 @@
-def files_args(parser):
+import argparse
+
+
+def files_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     files_subparser = parser.add_subparsers(dest="files")
 
     files_subparser.add_parser("list_files")

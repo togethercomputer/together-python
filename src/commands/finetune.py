@@ -1,4 +1,7 @@
-def finetune_args(parser):
+import argparse
+
+
+def finetune_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     finetune_subparser = parser.add_subparsers(dest="finetune")
 
     # Create_finetune
@@ -78,7 +81,8 @@ def finetune_args(parser):
         "-cb",
         default=None,
         help="Calculate F-beta scores at the specified beta values.",
-        type=list,
+        nargs="+",
+        type=float,
     )
     create_finetune_parser.add_argument(
         "--suffix",
@@ -124,7 +128,9 @@ def finetune_args(parser):
     )
 
     # Delete finetune model
-    delete_finetune_model_parser = finetune_subparser.add_parser("delete-finetune-model")
+    delete_finetune_model_parser = finetune_subparser.add_parser(
+        "delete-finetune-model"
+    )
     delete_finetune_model_parser.add_argument(
         "--model",
         "-m",

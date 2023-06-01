@@ -1,12 +1,13 @@
+import argparse
 import os
 import posixpath
 import urllib.parse
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import requests
 
 
-def dispatch_finetune(args) -> None:
+def dispatch_finetune(args: argparse.Namespace) -> None:
     finetune = Finetune(args.key)
 
     if args.finetune == "create_finetune":
@@ -51,10 +52,12 @@ class Finetune:
     def __init__(
         self,
         together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: Optional[str] = "https://api.together.xyz/",
+        endpoint_url: str = "https://api.together.xyz/",
     ) -> None:
         if together_api_key is None:
-            raise Exception("TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`.")
+            raise Exception(
+                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+            )
 
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/fine-tunes/")
@@ -71,9 +74,9 @@ class Finetune:
         compute_classification_metrics: Optional[bool] = False,
         classification_n_classes: Optional[int] = None,
         classification_positive_class: Optional[str] = None,
-        classification_betas: Optional[list] = None,
+        classification_betas: Optional[List[Any]] = None,
         suffix: Optional[str] = None,
-    ) -> dict:
+    ) -> Dict[Any, Any]:
         parameter_payload = {
             "training_file": training_file,
             "validation_file": validation_file,
@@ -97,26 +100,30 @@ class Finetune:
 
         # send request
         try:
-            response = requests.post(self.endpoint_url, headers=headers, json=parameter_payload).json()
+            response = dict(
+                requests.post(
+                    self.endpoint_url, headers=headers, json=parameter_payload
+                ).json()
+            )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by fine-tune endpoint: {e}")
 
         return response
 
-    def list_finetune(self) -> dict:
+    def list_finetune(self) -> Dict[Any, Any]:
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
 
         # send request
         try:
-            response = requests.get(self.endpoint_url, headers=headers).json()
+            response = dict(requests.get(self.endpoint_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def retrieve_finetune(self, fine_tune_id: str) -> dict:
+    def retrieve_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, fine_tune_id)
 
         headers = {
@@ -125,13 +132,13 @@ class Finetune:
 
         # send request
         try:
-            response = requests.get(retrieve_url, headers=headers).json()
+            response = dict(requests.get(retrieve_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def cancel_finetune(self, fine_tune_id: str) -> dict:
+    def cancel_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -141,13 +148,13 @@ class Finetune:
 
         # send request
         try:
-            response = requests.post(retrieve_url, headers=headers).json()
+            response = dict(requests.post(retrieve_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response  # this should be null
 
-    def list_finetune_events(self, fine_tune_id: str) -> dict:
+    def list_finetune_events(self, fine_tune_id: str) -> Dict[Any, Any]:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
@@ -158,13 +165,13 @@ class Finetune:
 
         # send request
         try:
-            response = requests.get(retrieve_url, headers=headers).json()
+            response = dict(requests.get(retrieve_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def delete_finetune_model(self, model: str) -> dict:
+    def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
         model_url = "https://api.together.xyz/api/models"
         delete_url = urllib.parse.urljoin(model_url, model)
 
@@ -174,7 +181,7 @@ class Finetune:
 
         # send request
         try:
-            response = requests.delete(delete_url, headers=headers).json()
+            response = dict(requests.delete(delete_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 

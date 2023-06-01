@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-quality = ["black~=23.1", "ruff>=0.0.241,<=0.0.259"]
+quality = ["black~=23.1", "ruff>=0.0.241,<=0.0.259", "mypy>=1.3.0"]
 
 [project.urls]
 "Homepage" = "https://github.com/togethercomputer/together"
@@ -34,14 +34,12 @@ quality = ["black~=23.1", "ruff>=0.0.241,<=0.0.259"]
 together = "cli.cli:main"
 
 [tool.black]
-line-length = 119
 target-version = ['py37']
 
 [tool.ruff]
 # Never enforce `E501` (line length violations).
 ignore = ["C901", "E501", "E741", "W605"]
 select = ["C", "E", "F", "I", "W"]
-line-length = 119
 
 # Ignore import violations in all `__init__.py` files.
 [tool.ruff.per-file-ignores]

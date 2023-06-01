@@ -1,4 +1,7 @@
-def api_args(parser):
+import argparse
+
+
+def api_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     api_subparser = parser.add_subparsers(dest="api")
 
     list_model_subparser = api_subparser.add_parser("list-models")

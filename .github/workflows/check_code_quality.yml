@@ -39,6 +39,10 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install .[quality]
+    - name: Check formatting with mypy
+      run: |
+        source venv/bin/activate
+        mypy --strict .
     - name: Check style with black
       run: |
         source venv/bin/activate

@@ -1,4 +1,7 @@
-def inference_args(parser):
+import argparse
+
+
+def inference_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--prompt",
         default=None,

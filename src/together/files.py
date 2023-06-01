@@ -1,12 +1,13 @@
+import argparse
 import os
 import posixpath
 import urllib.parse
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import requests
 
 
-def dispatch_files(args) -> None:
+def dispatch_files(args: argparse.Namespace) -> None:
     files = Files(args.key)
 
     if args.files == "list_files":
@@ -34,28 +35,30 @@ class Files:
     def __init__(
         self,
         together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: Optional[str] = "https://api.together.xyz/",
+        endpoint_url: str = "https://api.together.xyz/",
     ) -> None:
         if together_api_key is None:
-            raise Exception("TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`.")
+            raise Exception(
+                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+            )
 
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
 
-    def list_files(self) -> dict:
+    def list_files(self) -> Dict[Any, Any]:
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
 
         # send request
         try:
-            response = requests.get(self.endpoint_url, headers=headers).json()
+            response = dict(requests.get(self.endpoint_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def upload_file(self, file) -> dict:
+    def upload_file(self, file: str) -> Dict[Any, Any]:
         files = {"file": open(file, "rb")}
 
         data = {"purpose": "fine-tune"}
@@ -65,13 +68,17 @@ class Files:
 
         # send request
         try:
-            response = requests.post(self.endpoint_url, headers=headers, files=files, data=data).json()
+            response = dict(
+                requests.post(
+                    self.endpoint_url, headers=headers, files=files, data=data
+                ).json()
+            )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def delete_file(self, file_id) -> dict:
+    def delete_file(self, file_id: str) -> Dict[Any, Any]:
         delete_url = urllib.parse.urljoin(self.endpoint_url, file_id)
 
         headers = {
@@ -80,13 +87,13 @@ class Files:
 
         # send request
         try:
-            response = requests.delete(delete_url, headers=headers).json()
+            response = dict(requests.delete(delete_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def retrieve_file(self, file_id) -> dict:
+    def retrieve_file(self, file_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
 
         headers = {
@@ -95,13 +102,13 @@ class Files:
 
         # send request
         try:
-            response = requests.get(retrieve_url, headers=headers).json()
+            response = dict(requests.get(retrieve_url, headers=headers).json())
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
         return response
 
-    def retrieve_file_content(self, file_id, output_file) -> None:
+    def retrieve_file_content(self, file_id: str, output_file: str) -> Any:
         relative_path = posixpath.join(file_id, "content")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -118,4 +125,4 @@ class Files:
         # write to file
         open(output_file, "wb").write(response.content)
 
-        # return response  # this should be null
+        return response  # this should be null

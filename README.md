@@ -11,5 +11,6 @@ Python client for Together's Cloud Platform
 3. From the root of the repo, run
     - `black .`
     - `ruff .`
-    - And if necessary, `ruff . --fix`
+      - And if necessary, `ruff . --fix`
+    - `mypy --strict .`
 4. Create a PR

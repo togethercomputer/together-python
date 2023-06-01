@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 import urllib.parse
@@ -11,7 +12,7 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     return re.split("|".join(stop), text)[0]
 
 
-def dispatch_inference(args) -> None:
+def dispatch_inference(args: argparse.Namespace) -> None:
     inference = Inference(
         args.key,
         # endpoint_url=,
@@ -33,8 +34,8 @@ def dispatch_inference(args) -> None:
 class Inference:
     def __init__(
         self,
-        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: Optional[str] = "https://api.together.xyz/",
+        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY"),
+        endpoint_url: str = "https://api.together.xyz/",
         task: Optional[str] = None,
         model: Optional[str] = None,
         max_tokens: Optional[int] = 128,
@@ -47,10 +48,16 @@ class Inference:
         # TODO stream_tokens: Optional[bool] = None
     ) -> None:
         if together_api_key is None:
-            raise Exception("TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`.")
+            raise Exception(
+                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+            )
 
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/api/inference")
+
+        if self.endpoint_url is None:
+            raise Exception("Error: Invalid endpoint URL provided.")
+
         self.task = task
         self.model = model
         self.max_tokens = max_tokens
@@ -86,7 +93,9 @@ class Inference:
 
         # send request
         try:
-            response = requests.post(self.endpoint_url, headers=headers, json=parameter_payload)
+            response = requests.post(
+                self.endpoint_url, headers=headers, json=parameter_payload
+            )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by inference endpoint: {e}")
 
@@ -95,7 +104,7 @@ class Inference:
         # TODO Add exception when generated_text has error, See together docs
 
         try:
-            text = generated_text["output"]["choices"][0]["text"]
+            text = str(generated_text["output"]["choices"][0]["text"])
         except Exception as e:
             raise ValueError(f"Error raised: {e}")
 

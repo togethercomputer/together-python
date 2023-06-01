@@ -13,13 +13,15 @@ from together.finetune import dispatch_finetune
 from together.inference import dispatch_inference
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="CLI client for Together API",
         prog="together",
     )
 
-    parser.add_argument("--key", "-k", help="Together API Key", type=str, required=False)
+    parser.add_argument(
+        "--key", "-k", help="Together API Key", type=str, required=False
+    )
 
     subparser = parser.add_subparsers(dest="base")
 
