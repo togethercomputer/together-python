@@ -1,4 +1,5 @@
 import json
+import os
 import urllib.parse
 from typing import Optional
 
@@ -24,9 +25,12 @@ def dispatch_api(args) -> None:
 class API:
     def __init__(
         self,
-        together_api_key: Optional[str],
+        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
         endpoint_url: Optional[str] = "https://api.together.xyz/",
     ) -> None:
+        if together_api_key is None:
+            raise Exception("TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`.")
+
         self.together_api_key = together_api_key
         self.endpoint_url = endpoint_url
 

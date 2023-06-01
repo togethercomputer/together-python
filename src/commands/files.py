@@ -1,8 +1,4 @@
 def files_args(parser):
-    # Required key for any finetune operation
-    # TODO get key from env var
-    parser.add_argument("--key", "-k", help="Together API Key", type=str, required=True)
-
     files_subparser = parser.add_subparsers(dest="files")
 
     files_subparser.add_parser("list_files")

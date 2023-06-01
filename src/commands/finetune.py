@@ -1,8 +1,4 @@
 def finetune_args(parser):
-    # Required key for any finetune operation
-    # TODO get key from env var
-    parser.add_argument("--key", "-k", help="Together API Key", type=str, required=True)
-
     finetune_subparser = parser.add_subparsers(dest="finetune")
 
     # Create_finetune

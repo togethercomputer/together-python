@@ -1,3 +1,4 @@
+import os
 import re
 import urllib.parse
 from typing import List, Optional
@@ -32,7 +33,7 @@ def dispatch_inference(args) -> None:
 class Inference:
     def __init__(
         self,
-        together_api_key: str = None,
+        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
         endpoint_url: Optional[str] = "https://api.together.xyz/",
         task: Optional[str] = None,
         model: Optional[str] = None,
@@ -45,6 +46,9 @@ class Inference:
         logprobs: Optional[int] = None,
         # TODO stream_tokens: Optional[bool] = None
     ) -> None:
+        if together_api_key is None:
+            raise Exception("TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`.")
+
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/api/inference")
         self.task = task

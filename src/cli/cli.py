@@ -19,6 +19,8 @@ def main():
         prog="together",
     )
 
+    parser.add_argument("--key", "-k", help="Together API Key", type=str, required=False)
+
     subparser = parser.add_subparsers(dest="base")
 
     complete_parse = subparser.add_parser("complete")

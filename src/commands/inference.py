@@ -1,12 +1,5 @@
 def inference_args(parser):
     parser.add_argument(
-        "--key",
-        default=None,
-        type=str,
-        help="Together API Key",
-        required=True,
-    )
-    parser.add_argument(
         "--prompt",
         default=None,
         type=str,
