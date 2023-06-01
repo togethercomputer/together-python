@@ -1,8 +1,6 @@
-import argparse
-import json
 import os
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import requests
 
@@ -11,37 +9,35 @@ from together.finetune import Finetune
 from together.inference import Inference
 
 
-def dispatch_api(args: argparse.Namespace) -> None:
-    api = API()
-    if args.api == "list-models":
-        if args.all:
-            api.print_all_models()
-        else:
-            api.print_available_models()
-    elif args.api == "get-raw-supply":
-        response = api.get_supply()
-        print(json.dumps(response))
+DEFAULT_ENDPOINT = "https://api.together.xyz/"
+DEFAULT_SUPPLY_ENDPOINT = "https://computer.together.xyz"
 
 
 class API:
     def __init__(
         self,
-        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: str = "https://api.together.xyz/",
+        endpoint_url: Optional[str] = None,
+        supply_endpoint_url: Optional[str] = None,
     ) -> None:
-        if together_api_key is None:
+        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
+        if self.together_api_key is None:
             raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+                "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
 
-        self.together_api_key = together_api_key
-        self.endpoint_url = endpoint_url
+        if endpoint_url is None:
+            endpoint_url = DEFAULT_ENDPOINT
 
-    def get_supply(self) -> Dict[Any, Any]:
-        model_list_endpoint = "https://computer.together.xyz"
+        if supply_endpoint_url is None:
+            supply_endpoint_url = DEFAULT_SUPPLY_ENDPOINT
+
+        self.endpoint_url = endpoint_url
+        self.supply_endpoint_url = supply_endpoint_url
+
+    def get_supply(self) -> Dict[str, Any]:
         response = dict(
             requests.get(
-                model_list_endpoint,
+                self.supply_endpoint_url,
                 json={
                     "method": "together_getDepth",
                     "id": 1,
@@ -51,28 +47,24 @@ class API:
 
         return response
 
-    def print_all_models(self) -> None:
-        model_names = self.get_supply()["result"].keys()
+    def get_all_models(self) -> List[str]:
+        models = cast(List[str], self.get_supply()["result"].keys())
 
-        model_names = [
-            sub[:-1] for sub in model_names
-        ]  # remove the ? after the model names
-        for name in model_names:
-            print(name)
+        models = [str(sub[:-1]) for sub in models]  # remove the ? after the model names
 
-    def print_available_models(self) -> None:
+        return models
+
+    def get_available_models(self) -> List[str]:
         res = self.get_supply()
         names = res["result"].keys()
         available_models = [
             name[:-1] for name in names if res["result"][name]["num_asks"] > 0
         ]
 
-        for model_name in available_models:
-            print(model_name)
+        return available_models
 
     def finetune(self) -> Finetune:
         return Finetune(
-            together_api_key=self.together_api_key,
             endpoint_url=str(
                 urllib.parse.urljoin(self.endpoint_url, "/v1/fine-tunes/")
             ),
@@ -80,13 +72,11 @@ class API:
 
     def complete(self, **model_kwargs: Any) -> Inference:
         return Inference(
-            together_api_key=self.together_api_key,
             endpoint_url=str(urllib.parse.urljoin(self.endpoint_url, "/api/inference")),
             **model_kwargs,
         )
 
     def files(self) -> Files:
         return Files(
-            together_api_key=self.together_api_key,
             endpoint_url=urllib.parse.urljoin(self.endpoint_url, "/v1/files/"),
         )

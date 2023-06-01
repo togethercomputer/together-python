@@ -1,4 +1,3 @@
-import argparse
 import os
 import re
 import urllib.parse
@@ -7,35 +6,18 @@ from typing import List, Optional
 import requests
 
 
+DEFAULT_ENDPOINT = "https://api.together.xyz/"
+
+
 def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     """Cut off the text as soon as any stop words occur."""
     return re.split("|".join(stop), text)[0]
 
 
-def dispatch_inference(args: argparse.Namespace) -> None:
-    inference = Inference(
-        args.key,
-        # endpoint_url=,
-        task=args.task,
-        model=args.model,
-        max_tokens=args.max_tokens,
-        # stop_word= args.stop_word,
-        temperature=args.temperature,
-        top_p=args.top_p,
-        top_k=args.top_k,
-        repetition_penalty=args.repetition_penalty,
-        logprobs=args.logprobs,
-    )
-
-    response = inference.inference(args.prompt, stop=args.stop_words)
-    print(response)
-
-
 class Inference:
     def __init__(
         self,
-        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY"),
-        endpoint_url: str = "https://api.together.xyz/",
+        endpoint_url: Optional[str] = None,
         task: Optional[str] = None,
         model: Optional[str] = None,
         max_tokens: Optional[int] = 128,
@@ -47,10 +29,14 @@ class Inference:
         logprobs: Optional[int] = None,
         # TODO stream_tokens: Optional[bool] = None
     ) -> None:
+        together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if together_api_key is None:
             raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+                "TOGETHER_API_KEY not found. Please set it as an environment variable"
             )
+
+        if endpoint_url is None:
+            endpoint_url = DEFAULT_ENDPOINT
 
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/api/inference")

@@ -7,6 +7,9 @@ from typing import Any, Dict, Optional
 import requests
 
 
+DEFAULT_ENDPOINT = "https://api.together.xyz/"
+
+
 def dispatch_files(args: argparse.Namespace) -> None:
     files = Files(args.key)
 
@@ -34,15 +37,17 @@ def dispatch_files(args: argparse.Namespace) -> None:
 class Files:
     def __init__(
         self,
-        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: str = "https://api.together.xyz/",
+        endpoint_url: Optional[str] = None,
     ) -> None:
-        if together_api_key is None:
+        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
+        if self.together_api_key is None:
             raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+                "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
 
-        self.together_api_key = together_api_key
+        if endpoint_url is None:
+            endpoint_url = DEFAULT_ENDPOINT
+
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
 
     def list_files(self) -> Dict[Any, Any]:

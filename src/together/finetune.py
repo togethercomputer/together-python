@@ -1,4 +1,3 @@
-import argparse
 import os
 import posixpath
 import urllib.parse
@@ -7,59 +6,23 @@ from typing import Any, Dict, List, Optional
 import requests
 
 
-def dispatch_finetune(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.key)
-
-    if args.finetune == "create_finetune":
-        response = finetune.create_finetune(
-            training_file=args.training_file,  # training file_id
-            validation_file=args.validation_file,  # validation file_id
-            model=args.model,
-            n_epochs=args.n_epochs,
-            batch_size=args.batch_size,
-            learning_rate_multiplier=args.learning_rate_multiplier,
-            prompt_loss_weight=args.prompt_loss_weight,
-            compute_classification_metrics=args.compute_classification_metrics,
-            classification_n_classes=args.classification_n_classes,
-            classification_positive_class=args.classification_positive_class,
-            classification_betas=args.classification_betas,
-            suffix=args.suffix,
-        )
-        print(response)
-
-    elif args.finetune == "list_finetune":
-        response = finetune.list_finetune()
-        print(response)
-
-    elif args.finetune == "retrieve_finetune":
-        response = finetune.retrieve_finetune(args.fine_tune_id)
-        print(response)
-
-    elif args.finetune == "cancel_finetune":
-        response = finetune.cancel_finetune(args.fine_tune_id)
-        print(response)
-
-    elif args.finetune == "list_finetune_events":
-        response = finetune.list_finetune_events(args.fine_tune_id)
-        print(response)
-
-    elif args.finetune == "delete_finetune_model":
-        response = finetune.delete_finetune_model(args.model)
-        print(response)
+DEFAULT_ENDPOINT = "https://api.together.xyz/"
 
 
 class Finetune:
     def __init__(
         self,
-        together_api_key: Optional[str] = os.environ.get("TOGETHER_API_KEY", None),
-        endpoint_url: str = "https://api.together.xyz/",
+        endpoint_url: Optional[str] = None,
     ) -> None:
-        if together_api_key is None:
+        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
+        if self.together_api_key is None:
             raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable or using `--key`."
+                "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
 
-        self.together_api_key = together_api_key
+        if endpoint_url is None:
+            endpoint_url = DEFAULT_ENDPOINT
+
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/fine-tunes/")
 
     def create_finetune(
