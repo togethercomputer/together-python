@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from together.api import API
 
@@ -45,5 +46,5 @@ def _run_list(args: argparse.Namespace) -> None:
 
 def _run_raw(args: argparse.Namespace) -> None:
     api = API()
-    response = api.get_supply()
+    response = json.dumps(api.get_supply())
     print(response)
