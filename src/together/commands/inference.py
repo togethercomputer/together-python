@@ -71,6 +71,12 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         type=int,
         help="logprobs for the LM",
     )
+    inf_parser.add_argument(
+        "--raw",
+        default=False,
+        action="store_true",
+        help="temperature for the LM",
+    )
 
     inf_parser.set_defaults(func=run_complete)
 
@@ -87,7 +93,12 @@ def run_complete(args: argparse.Namespace) -> None:
         top_k=args.top_k,
         repetition_penalty=args.repetition_penalty,
         logprobs=args.logprobs,
+        raw=args.raw,
     )
 
-    response = inference.inference(prompt=args.prompt, stop=args.stop_words)
-    print(response)
+    if not args.raw:
+        response = inference.inference(prompt=args.prompt, stop=args.stop_words)
+        print(response)
+    else:
+        raw_response = inference.raw_inference(prompt=args.prompt)
+        print(raw_response)

@@ -1,7 +1,7 @@
 import os
 import re
 import urllib.parse
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import requests
 
@@ -27,6 +27,7 @@ class Inference:
         top_k: Optional[int] = 50,
         repetition_penalty: Optional[float] = None,
         logprobs: Optional[int] = None,
+        raw: Optional[bool] = False,
         # TODO stream_tokens: Optional[bool] = None
     ) -> None:
         together_api_key = os.environ.get("TOGETHER_API_KEY", None)
@@ -53,6 +54,8 @@ class Inference:
         self.top_k = top_k
         self.repetition_penalty = repetition_penalty
         self.logprobs = logprobs
+
+        self.raw = raw
 
     def inference(
         self,
@@ -88,7 +91,6 @@ class Inference:
         generated_text = response.json()
 
         # TODO Add exception when generated_text has error, See together docs
-
         try:
             text = str(generated_text["output"]["choices"][0]["text"])
         except Exception as e:
@@ -99,3 +101,37 @@ class Inference:
             text = _enforce_stop_tokens(text, stop)
 
         return text
+
+    def raw_inference(
+        self,
+        prompt: str,
+    ) -> Dict[str, str]:
+        parameter_payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "top_p": self.top_p,
+            "top_k": self.top_k,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+            # "stop": self.stop_word,
+            "repetition_penalty": self.repetition_penalty,
+            "logprobs": self.logprobs,
+        }
+
+        # HTTP headers for authorization
+        headers = {
+            "Authorization": f"Bearer {self.together_api_key}",
+            "Content-Type": "application/json",
+        }
+
+        # send request
+        try:
+            response = requests.post(
+                self.endpoint_url, headers=headers, json=parameter_payload
+            )
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            raise ValueError(f"Error raised by inference endpoint: {e}")
+
+        generated_text = dict(response.json())
+
+        return generated_text
