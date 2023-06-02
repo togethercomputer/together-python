@@ -11,15 +11,15 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
     child_parsers = parser.add_subparsers(required=True)
 
-    add_create(child_parsers)
-    add_list(child_parsers)
-    add_retrieve(child_parsers)
-    add_cancel(child_parsers)
-    add_list_events(child_parsers)
-    add_delete_model(child_parsers)
+    _add_create(child_parsers)
+    _add_list(child_parsers)
+    _add_retrieve(child_parsers)
+    _add_cancel(child_parsers)
+    _add_list_events(child_parsers)
+    _add_delete_model(child_parsers)
 
 
-def add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Create_finetune
     create_finetune_parser = parser.add_parser("create-finetune")
     create_finetune_parser.add_argument(
@@ -107,18 +107,18 @@ def add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> N
         help="Up to 40 characters that will be added to your fine-tuned model name.",
         type=str,
     )
-    create_finetune_parser.set_defaults(func=run_create)
+    create_finetune_parser.set_defaults(func=_run_create)
 
     # End of create_finetune
 
 
-def add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List_Finetune
     list_parser = parser.add_parser("list-finetune")
-    list_parser.set_defaults(func=run_list)
+    list_parser.set_defaults(func=_run_list)
 
 
-def add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     retrieve_finetune_parser = parser.add_parser("retrieve-finetune")
     retrieve_finetune_parser.add_argument(
         "--fine-tune-id",
@@ -128,10 +128,10 @@ def add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) ->
         type=str,
         required=True,
     )
-    retrieve_finetune_parser.set_defaults(func=run_create)
+    retrieve_finetune_parser.set_defaults(func=_run_retrieve)
 
 
-def add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Cancel Finetune
     cancel_finetune_parser = parser.add_parser("cancel-finetune")
     cancel_finetune_parser.add_argument(
@@ -142,10 +142,10 @@ def add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> N
         type=str,
         required=True,
     )
-    cancel_finetune_parser.set_defaults(func=run_create)
+    cancel_finetune_parser.set_defaults(func=_run_cancel)
 
 
-def add_list_events(
+def _add_list_events(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     # List finetune events
@@ -158,10 +158,10 @@ def add_list_events(
         type=str,
         required=True,
     )
-    list_finetune_events_parser.set_defaults(func=run_create)
+    list_finetune_events_parser.set_defaults(func=_run_list_events)
 
 
-def add_delete_model(
+def _add_delete_model(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     # Delete finetune model
@@ -174,10 +174,10 @@ def add_delete_model(
         type=str,
         required=True,
     )
-    delete_finetune_model_parser.set_defaults(func=run_create)
+    delete_finetune_model_parser.set_defaults(func=_run_delete_model)
 
 
-def run_create(args: argparse.Namespace) -> None:
+def _run_create(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
 
     response = finetune.create_finetune(
@@ -198,31 +198,31 @@ def run_create(args: argparse.Namespace) -> None:
     print(response)
 
 
-def run_list(args: argparse.Namespace) -> None:
+def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune()
     print(response)
 
 
-def run_retrieve(args: argparse.Namespace) -> None:
+def _run_retrieve(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.retrieve_finetune(args.fine_tune_id)
     print(response)
 
 
-def run_cancel(args: argparse.Namespace) -> None:
+def _run_cancel(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.cancel_finetune(args.fine_tune_id)
     print(response)
 
 
-def run_list_events(args: argparse.Namespace) -> None:
+def _run_list_events(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune_events(args.fine_tune_id)
     print(response)
 
 
-def run_delete_model(args: argparse.Namespace) -> None:
+def _run_delete_model(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.delete_finetune_model(args.model)
     print(response)
