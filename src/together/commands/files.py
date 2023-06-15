@@ -19,12 +19,12 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    list_parser = parser.add_parser("list-files")
+    list_parser = parser.add_parser("list")
     list_parser.set_defaults(func=_run_list)
 
 
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    upload_file_parser = parser.add_parser("upload-file")
+    upload_file_parser = parser.add_parser("upload")
     upload_file_parser.add_argument(
         "--file",
         "-f",
@@ -36,7 +36,7 @@ def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 
 
 def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    delete_file_parser = parser.add_parser("delete-file")
+    delete_file_parser = parser.add_parser("delete")
     delete_file_parser.add_argument(
         "--file-id",
         "-f",
@@ -48,7 +48,7 @@ def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 
 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    retrieve_file_parser = parser.add_parser("retrieve-file")
+    retrieve_file_parser = parser.add_parser("retrieve")
     retrieve_file_parser.add_argument(
         "--file-id",
         "-f",
@@ -62,7 +62,7 @@ def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -
 def _add_retrieve_content(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
-    retrieve_file_content_parser = parser.add_parser("retrieve-file-content")
+    retrieve_file_content_parser = parser.add_parser("retrieve-content")
     retrieve_file_content_parser.add_argument(
         "--file-id",
         "-f",

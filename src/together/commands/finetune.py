@@ -21,7 +21,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Create_finetune
-    create_finetune_parser = parser.add_parser("create-finetune")
+    create_finetune_parser = parser.add_parser("create")
     create_finetune_parser.add_argument(
         "--training-file",
         "-t",
@@ -114,12 +114,12 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List_Finetune
-    list_parser = parser.add_parser("list-finetune")
+    list_parser = parser.add_parser("list")
     list_parser.set_defaults(func=_run_list)
 
 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    retrieve_finetune_parser = parser.add_parser("retrieve-finetune")
+    retrieve_finetune_parser = parser.add_parser("retrieve")
     retrieve_finetune_parser.add_argument(
         "--fine-tune-id",
         "-ft",
@@ -133,7 +133,7 @@ def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -
 
 def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Cancel Finetune
-    cancel_finetune_parser = parser.add_parser("cancel-finetune")
+    cancel_finetune_parser = parser.add_parser("cancel")
     cancel_finetune_parser.add_argument(
         "--fine-tune-id",
         "-ft",
@@ -149,7 +149,7 @@ def _add_list_events(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     # List finetune events
-    list_finetune_events_parser = parser.add_parser("list-finetune-events")
+    list_finetune_events_parser = parser.add_parser("list-events")
     list_finetune_events_parser.add_argument(
         "--fine-tune-id",
         "-ft",
@@ -165,7 +165,7 @@ def _add_delete_model(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     # Delete finetune model
-    delete_finetune_model_parser = parser.add_parser("delete-finetune-model")
+    delete_finetune_model_parser = parser.add_parser("delete-model")
     delete_finetune_model_parser.add_argument(
         "--model",
         "-m",
