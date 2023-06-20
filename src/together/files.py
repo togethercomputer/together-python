@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import posixpath
 import urllib.parse
@@ -34,6 +35,16 @@ def dispatch_files(args: argparse.Namespace) -> None:
         print(response)
 
 
+def validate_json(file: str) -> bool:
+    with open(file) as f:
+        try:
+            for line in f:
+                json.loads(line)
+        except ValueError:
+            return False
+        return True
+
+
 class Files:
     def __init__(
         self,
@@ -64,20 +75,22 @@ class Files:
         return response
 
     def upload_file(self, file: str) -> Dict[Any, Any]:
-        files = {"file": open(file, "rb")}
-
         data = {"purpose": "fine-tune"}
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
 
+        if not validate_json(file=file):
+            raise ValueError("Could not load file: invalid .jsonl file detected.")
+
         # send request
         try:
-            response = dict(
-                requests.post(
-                    self.endpoint_url, headers=headers, files=files, data=data
-                ).json()
-            )
+            with open(file, "rb") as f:
+                response = dict(
+                    requests.post(
+                        self.endpoint_url, headers=headers, files={"file": f}, data=data
+                    ).json()
+                )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
