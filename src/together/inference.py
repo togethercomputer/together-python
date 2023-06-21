@@ -116,7 +116,12 @@ class Inference:
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        response_json = dict(response.json())
+        try:
+            response_json = dict(response.json())
+        except Exception as e:
+            raise ValueError(
+                f"Error raised: {e} \nResponse status code: {str(response.status_code)} \nRaw response: {str(response.content)}"
+            )
 
         if raw:
             return response_json

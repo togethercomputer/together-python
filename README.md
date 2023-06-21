@@ -1,9 +1,13 @@
 Python client for Together's Cloud Platform
 
 ## Installation
+`pip install git+https://github.com/togethercomputer/together.git`
+
+OR
 1. Clone this repo
 2. `pip install -e .`
-3. Run `together --help` to see available commands
+
+Run `together --help` to see available commands
 
 ## Contributing
 1. Clone the repo and make your changes
