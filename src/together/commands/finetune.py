@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from together.finetune import Finetune
 
@@ -201,28 +202,28 @@ def _run_create(args: argparse.Namespace) -> None:
 def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune()
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.retrieve_finetune(args.fine_tune_id)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.cancel_finetune(args.fine_tune_id)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_list_events(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune_events(args.fine_tune_id)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_delete_model(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.delete_finetune_model(args.model)
-    print(response)
+    print(json.dumps(response))

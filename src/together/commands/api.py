@@ -41,10 +41,10 @@ def _run_list(args: argparse.Namespace) -> None:
     else:
         response = api.get_available_models()
 
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_raw(args: argparse.Namespace) -> None:
     api = API()
     response = json.dumps(api.get_supply())
-    print(response)
+    print(json.dumps(response))

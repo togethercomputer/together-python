@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from together.files import Files
 
@@ -84,28 +85,28 @@ def _add_retrieve_content(
 def _run_list(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
     response = files.list_files()
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_upload(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
     response = files.upload_file(args.file)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_delete(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
     response = files.delete_file(args.file_id)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
     response = files.retrieve_file(args.file_id)
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
     response = files.retrieve_file_content(args.file_id, args.output)
-    print(response)
+    print(json.dumps(response))
