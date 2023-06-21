@@ -34,6 +34,8 @@ class Inference:
         seed: Optional[int] = 42,
         results: Optional[int] = 1,
         output: Optional[str] = "text2img",
+        height: Optional[int] = 512,
+        width: Optional[int] = 512,
     ) -> None:
         together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if together_api_key is None:
@@ -65,6 +67,8 @@ class Inference:
         self.seed = seed
         self.results = results
         self.output_file_name = output
+        self.height = height
+        self.width = width
 
     def inference(
         self,
@@ -92,6 +96,8 @@ class Inference:
                 "mode": self.task,
                 "steps": self.steps,
                 "seed": self.seed,
+                "height": self.height,
+                "width": self.width,
             }
         else:
             raise ValueError("Invalid task supplied")

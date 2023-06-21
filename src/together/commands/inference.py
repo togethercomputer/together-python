@@ -105,6 +105,18 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         type=str,
         help="File name for text2img output images '-X.png' will be appended to this name, where X is a number.",
     )
+    inf_parser.add_argument(
+        "--height",
+        default=512,
+        type=int,
+        help="Height for images in text2img results",
+    )
+    inf_parser.add_argument(
+        "--width",
+        default=512,
+        type=int,
+        help="Width for images in text2img results",
+    )
 
     inf_parser.set_defaults(func=_run_complete)
 
@@ -125,6 +137,8 @@ def _run_complete(args: argparse.Namespace) -> None:
         seed=args.seed,
         results=args.results,
         output=args.output,
+        height=args.height,
+        width=args.width,
     )
 
     response = inference.inference(
