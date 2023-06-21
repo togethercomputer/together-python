@@ -108,5 +108,9 @@ def _run_retrieve(args: argparse.Namespace) -> None:
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
     files = Files(args.endpoint)
-    response = files.retrieve_file_content(args.file_id, args.output)
+    response = files.retrieve_file_content(args.file_id)
+
+    # write remote-file contents to output file
+    open(args.output, "wb").write(response.content)
+
     print(json.dumps(response))

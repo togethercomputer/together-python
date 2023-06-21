@@ -35,17 +35,25 @@ class API:
         self.supply_endpoint_url = supply_endpoint_url
 
     def get_supply(self) -> Dict[str, Any]:
-        response = dict(
-            requests.get(
+        try:
+            response = requests.get(
                 self.supply_endpoint_url,
                 json={
                     "method": "together_getDepth",
                     "id": 1,
                 },
-            ).json()
-        )
+            )
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response
+        try:
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
+
+        return response_json
 
     def get_all_models(self) -> List[str]:
         models = cast(List[str], self.get_supply()["result"].keys())

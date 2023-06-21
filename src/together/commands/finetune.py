@@ -17,7 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     _add_retrieve(child_parsers)
     _add_cancel(child_parsers)
     _add_list_events(child_parsers)
-    _add_delete_model(child_parsers)
+    # _add_delete_model(child_parsers)
 
 
 def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -162,20 +162,20 @@ def _add_list_events(
     list_finetune_events_parser.set_defaults(func=_run_list_events)
 
 
-def _add_delete_model(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-) -> None:
-    # Delete finetune model
-    delete_finetune_model_parser = parser.add_parser("delete-model")
-    delete_finetune_model_parser.add_argument(
-        "--model",
-        "-m",
-        default=None,
-        help="Model name",
-        type=str,
-        required=True,
-    )
-    delete_finetune_model_parser.set_defaults(func=_run_delete_model)
+# def _add_delete_model(
+#     parser: argparse._SubParsersAction[argparse.ArgumentParser],
+# ) -> None:
+#     # Delete finetune model
+#     delete_finetune_model_parser = parser.add_parser("delete-model")
+#     delete_finetune_model_parser.add_argument(
+#         "--model",
+#         "-m",
+#         default=None,
+#         help="Model name",
+#         type=str,
+#         required=True,
+#     )
+#     delete_finetune_model_parser.set_defaults(func=_run_delete_model)
 
 
 def _run_create(args: argparse.Namespace) -> None:
@@ -223,7 +223,7 @@ def _run_list_events(args: argparse.Namespace) -> None:
     print(json.dumps(response))
 
 
-def _run_delete_model(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint)
-    response = finetune.delete_finetune_model(args.model)
-    print(json.dumps(response))
+# def _run_delete_model(args: argparse.Namespace) -> None:
+#     finetune = Finetune(args.endpoint)
+#     response = finetune.delete_finetune_model(args.model)
+#     print(json.dumps(response))

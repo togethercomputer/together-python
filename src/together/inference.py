@@ -103,7 +103,7 @@ class Inference:
             response = requests.post(
                 self.endpoint_url, headers=headers, json=parameter_payload
             )
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
+        except requests.exceptions.RequestException as e:
             raise ValueError(f"Error raised by inference endpoint: {e}")
 
         try:

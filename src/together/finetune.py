@@ -63,15 +63,20 @@ class Finetune:
 
         # send request
         try:
-            response = dict(
-                requests.post(
-                    self.endpoint_url, headers=headers, json=parameter_payload
-                ).json()
+            response = requests.post(
+                self.endpoint_url, headers=headers, json=parameter_payload
             )
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by fine-tune endpoint: {e}")
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response
+        try:
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
+
+        return response_json
 
     def list_finetune(self) -> Dict[Any, Any]:
         headers = {
@@ -80,11 +85,18 @@ class Finetune:
 
         # send request
         try:
-            response = dict(requests.get(self.endpoint_url, headers=headers).json())
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            response = requests.get(self.endpoint_url, headers=headers)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response
+        try:
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
+
+        return response_json
 
     def retrieve_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, fine_tune_id)
@@ -95,11 +107,18 @@ class Finetune:
 
         # send request
         try:
-            response = dict(requests.get(retrieve_url, headers=headers).json())
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            response = requests.get(retrieve_url, headers=headers)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response
+        try:
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
+
+        return response_json
 
     def cancel_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
@@ -111,11 +130,18 @@ class Finetune:
 
         # send request
         try:
-            response = dict(requests.post(retrieve_url, headers=headers).json())
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            response = requests.post(retrieve_url, headers=headers)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response  # this should be null
+        try:
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
+
+        return response_json
 
     def list_finetune_events(self, fine_tune_id: str) -> Dict[Any, Any]:
         # TODO enable stream
@@ -128,24 +154,38 @@ class Finetune:
 
         # send request
         try:
-            response = dict(requests.get(retrieve_url, headers=headers).json())
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            response = requests.get(retrieve_url, headers=headers)
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        return response
-
-    def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
-        model_url = "https://api.together.xyz/api/models"
-        delete_url = urllib.parse.urljoin(model_url, model)
-
-        headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
-        }
-
-        # send request
         try:
-            response = dict(requests.delete(delete_url, headers=headers).json())
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            response_json = dict(response.json())
+        except Exception:
+            raise ValueError(
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            )
 
-        return response
+        return response_json
+
+    # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
+    #     model_url = "https://api.together.xyz/api/models"
+    #     delete_url = urllib.parse.urljoin(model_url, model)
+
+    #     headers = {
+    #         "Authorization": f"Bearer {self.together_api_key}",
+    #     }
+
+    #     # send request
+    #     try:
+    #         response = requests.delete(delete_url, headers=headers)
+    #     except requests.exceptions.RequestException as e:
+    #         raise ValueError(f"Error raised by inference endpoint: {e}")
+
+    #     try:
+    #         response_json = dict(response.json())
+    #     except Exception as e:
+    #         raise ValueError(
+    #             f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+    #         )
+
+    #     return response_json
