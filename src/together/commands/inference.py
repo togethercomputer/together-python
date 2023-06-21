@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import re
+from typing import List
 
 from together.inference import Inference
 
@@ -121,6 +124,11 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     inf_parser.set_defaults(func=_run_complete)
 
 
+def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
+    """Cut off the text as soon as any stop words occur."""
+    return re.split("|".join(stop), text)[0]
+
+
 def _run_complete(args: argparse.Namespace) -> None:
     inference = Inference(
         endpoint_url=args.endpoint,
@@ -136,12 +144,38 @@ def _run_complete(args: argparse.Namespace) -> None:
         steps=args.steps,
         seed=args.seed,
         results=args.results,
-        output=args.output,
         height=args.height,
         width=args.width,
     )
 
-    response = inference.inference(
-        prompt=args.prompt, stop=args.stop_words, raw=args.raw
-    )
-    print(response)
+    response = inference.inference(prompt=args.prompt, stop=args.stop_words)
+
+    if args.raw:
+        print(response)
+    else:
+        if args.task == "text2text":
+            # TODO Add exception when generated_text has error, See together docs
+            try:
+                text = str(response["output"]["choices"][0]["text"])
+            except Exception as e:
+                raise ValueError(f"Error raised: {e}")
+
+            if args.stop_words is not None:
+                # TODO remove this and permanently implement api stop_word
+                text = _enforce_stop_tokens(text, args.stop_words)
+
+        elif args.task == "text2img":
+            try:
+                images = response["output"]["choices"]
+
+                for i in range(len(images)):
+                    with open(f"{args.output_file_name}-{i}.png", "wb") as f:
+                        f.write(base64.b64decode(images[i]["image_base64"]))
+            except Exception as e:  # This is the correct syntax
+                raise ValueError(f"Unknown error raised: {e}")
+
+            text = f"Output images saved to {args.output_file_name}-X.png"
+        else:
+            raise ValueError("Invalid task supplied")
+
+        print(text)

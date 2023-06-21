@@ -1,18 +1,11 @@
-import base64
 import os
-import re
 import urllib.parse
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import requests
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
-
-
-def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
-    """Cut off the text as soon as any stop words occur."""
-    return re.split("|".join(stop), text)[0]
 
 
 class Inference:
@@ -33,7 +26,6 @@ class Inference:
         steps: Optional[int] = 50,
         seed: Optional[int] = 42,
         results: Optional[int] = 1,
-        output: Optional[str] = "text2img",
         height: Optional[int] = 512,
         width: Optional[int] = 512,
     ) -> None:
@@ -66,7 +58,6 @@ class Inference:
         self.steps = steps
         self.seed = seed
         self.results = results
-        self.output_file_name = output
         self.height = height
         self.width = width
 
@@ -74,8 +65,7 @@ class Inference:
         self,
         prompt: str,
         stop: Optional[List[str]] = None,
-        raw: Optional[bool] = False,
-    ) -> Union[str, Dict[str, str]]:
+    ) -> Dict[str, Any]:
         if self.task == "text2text":
             parameter_payload = {
                 "model": self.model,
@@ -118,40 +108,9 @@ class Inference:
 
         try:
             response_json = dict(response.json())
-        except Exception as e:
+        except Exception:
             raise ValueError(
-                f"Error raised: {e} \nResponse status code: {str(response.status_code)} \nRaw response: {str(response.content)}"
+                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
             )
 
-        if raw:
-            return response_json
-
-        if self.task == "text2text":
-            # TODO Add exception when generated_text has error, See together docs
-            try:
-                text = str(response_json["output"]["choices"][0]["text"])
-            except Exception as e:
-                raise ValueError(f"Error raised: {e}")
-
-            if stop is not None:
-                # TODO remove this and permanently implement api stop_word
-                text = _enforce_stop_tokens(text, stop)
-
-            return_text = text
-        elif self.task == "text2img":
-            try:
-                images = response_json["output"]["choices"]
-
-                for i in range(len(images)):
-                    with open(f"{self.output_file_name}-{i}.png", "wb") as f:
-                        f.write(base64.b64decode(images[i]["image_base64"]))
-            except (
-                requests.exceptions.RequestException
-            ) as e:  # This is the correct syntax
-                raise ValueError(f"Unknown error raised: {e}")
-
-            return_text = f"Output images saved to {self.output_file_name}-X.png"
-        else:
-            raise ValueError("Invalid task supplied")
-
-        return return_text
+        return response_json
