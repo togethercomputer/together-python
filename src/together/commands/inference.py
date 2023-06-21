@@ -121,16 +121,13 @@ def _run_complete(args: argparse.Namespace) -> None:
         top_k=args.top_k,
         repetition_penalty=args.repetition_penalty,
         logprobs=args.logprobs,
-        raw=args.raw,
         steps=args.steps,
         seed=args.seed,
         results=args.results,
         output=args.output,
     )
 
-    if not args.raw:
-        response = inference.inference(prompt=args.prompt, stop=args.stop_words)
-        print(response)
-    else:
-        raw_response = inference.raw_inference(prompt=args.prompt)
-        print(raw_response)
+    response = inference.inference(
+        prompt=args.prompt, stop=args.stop_words, raw=args.raw
+    )
+    print(response)

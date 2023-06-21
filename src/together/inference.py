@@ -2,7 +2,7 @@ import base64
 import os
 import re
 import urllib.parse
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -60,8 +60,6 @@ class Inference:
         self.repetition_penalty = repetition_penalty
         self.logprobs = logprobs
 
-        self.raw = raw
-
         # text2img arguments
         self.steps = steps
         self.seed = seed
@@ -72,7 +70,8 @@ class Inference:
         self,
         prompt: str,
         stop: Optional[List[str]] = None,
-    ) -> str:
+        raw: Optional[bool] = False,
+    ) -> Union[str, Dict[str, str]]:
         if self.task == "text2text":
             parameter_payload = {
                 "model": self.model,
@@ -111,7 +110,10 @@ class Inference:
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        response_json = response.json()
+        response_json = dict(response.json())
+
+        if raw:
+            return response_json
 
         if self.task == "text2text":
             # TODO Add exception when generated_text has error, See together docs
@@ -142,37 +144,3 @@ class Inference:
             raise ValueError("Invalid task supplied")
 
         return return_text
-
-    def raw_inference(
-        self,
-        prompt: str,
-    ) -> Dict[str, str]:
-        parameter_payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "top_p": self.top_p,
-            "top_k": self.top_k,
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            # "stop": self.stop_word,
-            "repetition_penalty": self.repetition_penalty,
-            "logprobs": self.logprobs,
-        }
-
-        # HTTP headers for authorization
-        headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
-            "Content-Type": "application/json",
-        }
-
-        # send request
-        try:
-            response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload
-            )
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by inference endpoint: {e}")
-
-        generated_text = dict(response.json())
-
-        return generated_text
