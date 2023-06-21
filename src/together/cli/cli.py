@@ -27,7 +27,10 @@ def main() -> None:
     files.add_parser(subparser)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except AttributeError:
+        parser.print_help()
 
 
 if __name__ == "__main__":
