@@ -1,7 +1,8 @@
+import base64
 import os
 import re
 import urllib.parse
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -18,7 +19,7 @@ class Inference:
     def __init__(
         self,
         endpoint_url: Optional[str] = None,
-        task: Optional[str] = None,
+        task: Optional[str] = "text2text",
         model: Optional[str] = None,
         max_tokens: Optional[int] = 128,
         # stop_word: Optional[str] = None,
@@ -29,6 +30,12 @@ class Inference:
         logprobs: Optional[int] = None,
         raw: Optional[bool] = False,
         # TODO stream_tokens: Optional[bool] = None
+        steps: Optional[int] = 50,
+        seed: Optional[int] = 42,
+        results: Optional[int] = 1,
+        output: Optional[str] = "text2img",
+        height: Optional[int] = 512,
+        width: Optional[int] = 512,
     ) -> None:
         together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if together_api_key is None:
@@ -55,24 +62,45 @@ class Inference:
         self.repetition_penalty = repetition_penalty
         self.logprobs = logprobs
 
-        self.raw = raw
+        # text2img arguments
+        self.steps = steps
+        self.seed = seed
+        self.results = results
+        self.output_file_name = output
+        self.height = height
+        self.width = width
 
     def inference(
         self,
         prompt: str,
         stop: Optional[List[str]] = None,
-    ) -> str:
-        parameter_payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "top_p": self.top_p,
-            "top_k": self.top_k,
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            # "stop": self.stop_word,
-            "repetition_penalty": self.repetition_penalty,
-            "logprobs": self.logprobs,
-        }
+        raw: Optional[bool] = False,
+    ) -> Union[str, Dict[str, str]]:
+        if self.task == "text2text":
+            parameter_payload = {
+                "model": self.model,
+                "prompt": prompt,
+                "top_p": self.top_p,
+                "top_k": self.top_k,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
+                # "stop": self.stop_word,
+                "repetition_penalty": self.repetition_penalty,
+                "logprobs": self.logprobs,
+            }
+        elif self.task == "text2img":
+            parameter_payload = {
+                "model": self.model,
+                "prompt": prompt,
+                "n": self.results,
+                "mode": self.task,
+                "steps": self.steps,
+                "seed": self.seed,
+                "height": self.height,
+                "width": self.width,
+            }
+        else:
+            raise ValueError("Invalid task supplied")
 
         # HTTP headers for authorization
         headers = {
@@ -88,50 +116,37 @@ class Inference:
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by inference endpoint: {e}")
 
-        generated_text = response.json()
+        response_json = dict(response.json())
 
-        # TODO Add exception when generated_text has error, See together docs
-        try:
-            text = str(generated_text["output"]["choices"][0]["text"])
-        except Exception as e:
-            raise ValueError(f"Error raised: {e}")
+        if raw:
+            return response_json
 
-        if stop is not None:
-            # TODO remove this and permanently implement api stop_word
-            text = _enforce_stop_tokens(text, stop)
+        if self.task == "text2text":
+            # TODO Add exception when generated_text has error, See together docs
+            try:
+                text = str(response_json["output"]["choices"][0]["text"])
+            except Exception as e:
+                raise ValueError(f"Error raised: {e}")
 
-        return text
+            if stop is not None:
+                # TODO remove this and permanently implement api stop_word
+                text = _enforce_stop_tokens(text, stop)
 
-    def raw_inference(
-        self,
-        prompt: str,
-    ) -> Dict[str, str]:
-        parameter_payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "top_p": self.top_p,
-            "top_k": self.top_k,
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            # "stop": self.stop_word,
-            "repetition_penalty": self.repetition_penalty,
-            "logprobs": self.logprobs,
-        }
+            return_text = text
+        elif self.task == "text2img":
+            try:
+                images = response_json["output"]["choices"]
 
-        # HTTP headers for authorization
-        headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
-            "Content-Type": "application/json",
-        }
+                for i in range(len(images)):
+                    with open(f"{self.output_file_name}-{i}.png", "wb") as f:
+                        f.write(base64.b64decode(images[i]["image_base64"]))
+            except (
+                requests.exceptions.RequestException
+            ) as e:  # This is the correct syntax
+                raise ValueError(f"Unknown error raised: {e}")
 
-        # send request
-        try:
-            response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload
-            )
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            return_text = f"Output images saved to {self.output_file_name}-X.png"
+        else:
+            raise ValueError("Invalid task supplied")
 
-        generated_text = dict(response.json())
-
-        return generated_text
+        return return_text

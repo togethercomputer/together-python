@@ -24,9 +24,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     inf_parser.add_argument(
         "--task",
-        default=None,
+        default="text2text",
         type=str,
-        help="task",
+        help="Task type: text2text, text2img",
+        choices=["text2text", "text2img"],
     )
     inf_parser.add_argument(
         "--max-tokens",
@@ -77,6 +78,45 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         action="store_true",
         help="temperature for the LM",
     )
+    # arguments for text2img models
+    inf_parser.add_argument(
+        "--steps",
+        default=50,
+        type=int,
+        help="Number of steps for text2img models",
+    )
+    inf_parser.add_argument(
+        "--seed",
+        default=42,
+        type=int,
+        help="Seed for text2img models",
+    )
+    inf_parser.add_argument(
+        "--results",
+        "-r",
+        default=1,
+        type=int,
+        help="Number of text2img results",
+    )
+    inf_parser.add_argument(
+        "--output",
+        "-o",
+        default=None,
+        type=str,
+        help="File name for text2img output images '-X.png' will be appended to this name, where X is a number.",
+    )
+    inf_parser.add_argument(
+        "--height",
+        default=512,
+        type=int,
+        help="Height for images in text2img results",
+    )
+    inf_parser.add_argument(
+        "--width",
+        default=512,
+        type=int,
+        help="Width for images in text2img results",
+    )
 
     inf_parser.set_defaults(func=_run_complete)
 
@@ -93,12 +133,15 @@ def _run_complete(args: argparse.Namespace) -> None:
         top_k=args.top_k,
         repetition_penalty=args.repetition_penalty,
         logprobs=args.logprobs,
-        raw=args.raw,
+        steps=args.steps,
+        seed=args.seed,
+        results=args.results,
+        output=args.output,
+        height=args.height,
+        width=args.width,
     )
 
-    if not args.raw:
-        response = inference.inference(prompt=args.prompt, stop=args.stop_words)
-        print(response)
-    else:
-        raw_response = inference.raw_inference(prompt=args.prompt)
-        print(raw_response)
+    response = inference.inference(
+        prompt=args.prompt, stop=args.stop_words, raw=args.raw
+    )
+    print(response)
