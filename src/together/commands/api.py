@@ -46,5 +46,5 @@ def _run_list(args: argparse.Namespace) -> None:
 
 def _run_raw(args: argparse.Namespace) -> None:
     api = API()
-    response = json.dumps(api.get_supply())
+    response = api.get_supply()
     print(json.dumps(response))
