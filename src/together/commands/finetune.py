@@ -66,14 +66,14 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         type=float,
     )
     create_finetune_parser.add_argument(
-        "--warmpup-steps",
+        "--warmup-steps",
         "-ws",
         default=0,
         help="Warmup steps",
         type=int,
     )
     create_finetune_parser.add_argument(
-        "--train-warmpup-steps",
+        "--train-warmup-steps",
         "-tws",
         default=0,
         help="Train warmup steps",
