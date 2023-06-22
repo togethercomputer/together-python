@@ -196,7 +196,7 @@ def _run_create(args: argparse.Namespace) -> None:
         suffix=args.suffix,
     )
 
-    print(response)
+    print(json.dumps(response))
 
 
 def _run_list(args: argparse.Namespace) -> None:
