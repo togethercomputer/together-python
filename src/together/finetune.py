@@ -167,6 +167,99 @@ class Finetune:
 
         return response_json
 
+    def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
+        try:
+            finetune_events = list(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
+
+        return saved_events
+
+    def get_job_status(self, fine_tune_id: str) -> str:
+        try:
+            job_status = str(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["status"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        return job_status
+
+    def is_final_model_available(self, fine_tune_id: str) -> bool:
+        try:
+            finetune_events = list(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        for i in finetune_events:
+            if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
+                if i["checkpoint_path"] != "":
+                    return False
+                else:
+                    return True
+        return False
+
+    def download(self, fine_tune_id: str, output: str, checkpoint_num: int = -1) -> str:
+        try:
+            retrieve_finetune = dict(self.retrieve_finetune(fine_tune_id=fine_tune_id))
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        finetune_events = list(retrieve_finetune["events"])
+
+        saved_events = []
+
+        for i in finetune_events:
+            if i["type"] in ["CHECKPOINT_SAVE", "JOB_ERROR", "JOB_COMPLETE"]:
+                saved_events.append(i)
+
+        event = dict(saved_events[checkpoint_num])
+
+        if event["type"] in ["CHECKPOINT_SAVE", "JOB_ERROR"]:
+            event_path = str(event["checkpoint_path"])
+        else:
+            event_path = str(event["model_path"])
+
+        if event_path == "":
+            raise Exception("Empty path found. Not proceeding with download.")
+
+        if not event_path.startswith("s3"):
+            raise Exception("Invalid download path found")
+
+        relative_path = (
+            retrieve_finetune["model_output_name"].split("/")[0]
+            + "/"
+            + event_path.split("/")[-1]
+        )
+
+        model_file_endpoint = urllib.parse.urljoin(DEFAULT_ENDPOINT, "/api/models/")
+
+        model_file_path = model_file_endpoint + relative_path + ".tar.gz"
+
+        print(model_file_path)
+        headers = {
+            "Authorization": f"Bearer {self.together_api_key}",
+        }
+
+        try:
+            with requests.get(
+                model_file_path, headers=headers, stream=True
+            ) as response:
+                response.raise_for_status()
+                with open(output, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            raise ValueError(f"Error raised by endpoint: {e}")
+
+        return output  # this should be null
+
     # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
     #     model_url = "https://api.together.xyz/api/models"
     #     delete_url = urllib.parse.urljoin(model_url, model)

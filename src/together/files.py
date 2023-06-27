@@ -128,7 +128,7 @@ class Files:
 
         return response_json
 
-    def retrieve_file_content(self, file_id: str) -> requests.Response:
+    def retrieve_file_content(self, file_id: str, output: str) -> str:
         relative_path = posixpath.join(file_id, "content")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -138,8 +138,12 @@ class Files:
 
         # send request
         try:
-            response = requests.get(retrieve_url, headers=headers)
+            with requests.get(retrieve_url, headers=headers, stream=True) as response:
+                response.raise_for_status()
+                with open(output, "wb") as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
-        return response  # this should be null
+        return output  # this should be null

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import json
 import re
 from typing import List
 
@@ -14,6 +15,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
     inf_parser.add_argument(
         "--prompt",
+        "-p",
         default=None,
         type=str,
         help="Prompt to complete",
@@ -21,6 +23,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     inf_parser.add_argument(
         "--model",
+        "-m",
         default=None,
         type=str,
         help="name/path of the model",
@@ -151,7 +154,7 @@ def _run_complete(args: argparse.Namespace) -> None:
     response = inference.inference(prompt=args.prompt, stop=args.stop_words)
 
     if args.raw:
-        print(response)
+        print(json.dumps(response, indent=4))
     else:
         if args.task == "text2text":
             # TODO Add exception when generated_text has error, See together docs
