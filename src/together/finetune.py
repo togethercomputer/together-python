@@ -242,7 +242,8 @@ class Finetune:
 
         model_file_path = model_file_endpoint + relative_path + ".tar.gz"
 
-        print(model_file_path)
+        print(f"Downloading {model_file_path}...")
+
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
