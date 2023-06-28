@@ -27,11 +27,10 @@ def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> No
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     upload_file_parser = parser.add_parser("upload")
     upload_file_parser.add_argument(
-        "--file",
-        "-f",
+        "file",
+        metavar="FILENAME",
         help="File to upload",
         type=str,
-        required=True,
     )
     upload_file_parser.set_defaults(func=_run_upload)
 
@@ -39,11 +38,10 @@ def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     delete_file_parser = parser.add_parser("delete")
     delete_file_parser.add_argument(
-        "--file-id",
-        "-f",
+        "file_id",
+        metavar="FILE-ID",
         help="File ID",
         type=str,
-        required=True,
     )
     delete_file_parser.set_defaults(func=_run_delete)
 
@@ -51,11 +49,10 @@ def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     retrieve_file_parser = parser.add_parser("retrieve")
     retrieve_file_parser.add_argument(
-        "--file-id",
-        "-f",
+        "file_id",
+        metavar="FILE-ID",
         help="File ID",
         type=str,
-        required=True,
     )
     retrieve_file_parser.set_defaults(func=_run_retrieve)
 
@@ -65,18 +62,16 @@ def _add_retrieve_content(
 ) -> None:
     retrieve_file_content_parser = parser.add_parser("retrieve-content")
     retrieve_file_content_parser.add_argument(
-        "--file-id",
-        "-f",
+        "file_id",
+        metavar="FILE-ID",
         help="File ID",
         type=str,
-        required=True,
     )
     retrieve_file_content_parser.add_argument(
-        "--output",
-        "-o",
+        "output",
+        metavar="OUT_FILENAME",
         help="Output filename",
         type=str,
-        required=True,
     )
 
     retrieve_file_content_parser.set_defaults(func=_run_retrieve_content)

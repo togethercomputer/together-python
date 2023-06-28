@@ -14,17 +14,16 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     inf_parser = subparsers.add_parser(COMMAND_NAME)
 
     inf_parser.add_argument(
-        "--prompt",
-        "-p",
+        "prompt",
+        metavar="PROMPT",
         default=None,
         type=str,
         help="Prompt to complete",
-        required=True,
     )
     inf_parser.add_argument(
         "--model",
         "-m",
-        default=None,
+        default="togethercomputer/RedPajama-INCITE-7B-Chat",
         type=str,
         help="name/path of the model",
     )

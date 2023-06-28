@@ -125,12 +125,11 @@ def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> No
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     retrieve_finetune_parser = parser.add_parser("retrieve")
     retrieve_finetune_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     retrieve_finetune_parser.set_defaults(func=_run_retrieve)
 
@@ -139,12 +138,11 @@ def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
     # Cancel Finetune
     cancel_finetune_parser = parser.add_parser("cancel")
     cancel_finetune_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     cancel_finetune_parser.set_defaults(func=_run_cancel)
 
@@ -155,12 +153,11 @@ def _add_list_events(
     # List finetune events
     list_finetune_events_parser = parser.add_parser("list-events")
     list_finetune_events_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     list_finetune_events_parser.set_defaults(func=_run_list_events)
 
@@ -171,19 +168,17 @@ def _add_download(
     # List finetune events
     download_parser = parser.add_parser("download")
     download_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     download_parser.add_argument(
-        "--output",
-        "-o",
+        "output",
+        metavar="OUT_FILENAME",
         help="Output filename",
         type=str,
-        required=True,
     )
     download_parser.add_argument(
         "--checkpoint-num",
@@ -202,12 +197,11 @@ def _add_status(
     # List finetune events
     status_parser = parser.add_parser("status")
     status_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     status_parser.set_defaults(func=_run_status)
 
@@ -218,12 +212,11 @@ def _add_checkpoints(
     # List finetune events
     checkpoint_parser = parser.add_parser("checkpoints")
     checkpoint_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     checkpoint_parser.set_defaults(func=_run_checkpoint)
 
