@@ -50,7 +50,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
     create_finetune_parser.add_argument(
         "--n-epochs",
         "-ne",
-        default=1,
+        default=4,
         help="The number of epochs to train the model for.",
         type=int,
     )
