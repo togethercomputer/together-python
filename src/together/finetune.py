@@ -1,7 +1,7 @@
 import os
 import posixpath
 import urllib.parse
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from tqdm import tqdm
@@ -206,7 +206,19 @@ class Finetune:
                     return True
         return False
 
-    def download(self, fine_tune_id: str, output: str, checkpoint_num: int = -1) -> str:
+    def download(
+        self,
+        fine_tune_id: str,
+        output: Union[str, None] = None,
+        checkpoint_num: int = -1,
+    ) -> str:
+        # default to model_output_path name
+        if output is None:
+            output = (
+                self.retrieve_finetune(fine_tune_id)["model_output_path"].split("/")[-1]
+                + ".tar.gz"
+            )
+
         model_file_path = urllib.parse.urljoin(
             self.endpoint_url,
             f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",

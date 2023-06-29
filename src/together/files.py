@@ -129,7 +129,12 @@ class Files:
 
         return response_json
 
-    def retrieve_file_content(self, file_id: str, output: str) -> str:
+    def retrieve_file_content(
+        self, file_id: str, output: Union[str, None] = None
+    ) -> str:
+        if output is None:
+            output = file_id + ".jsonl"
+
         relative_path = posixpath.join(file_id, "content")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 

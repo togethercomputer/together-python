@@ -68,10 +68,13 @@ def _add_retrieve_content(
         type=str,
     )
     retrieve_file_content_parser.add_argument(
-        "output",
+        "--output",
+        "-o",
+        default=None,
         metavar="OUT_FILENAME",
         help="Output filename",
         type=str,
+        required=False,
     )
 
     retrieve_file_content_parser.set_defaults(func=_run_retrieve_content)

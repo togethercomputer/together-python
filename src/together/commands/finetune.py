@@ -175,10 +175,12 @@ def _add_download(
         type=str,
     )
     download_parser.add_argument(
-        "output",
-        metavar="OUT_FILENAME",
+        "--output",
+        "-o",
+        default=None,
         help="Output filename",
         type=str,
+        required=False,
     )
     download_parser.add_argument(
         "--checkpoint-num",
