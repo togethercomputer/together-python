@@ -17,6 +17,9 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     _add_retrieve(child_parsers)
     _add_cancel(child_parsers)
     _add_list_events(child_parsers)
+    _add_download(child_parsers)
+    _add_status(child_parsers)
+    _add_checkpoints(child_parsers)
     # _add_delete_model(child_parsers)
 
 
@@ -119,12 +122,11 @@ def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> No
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     retrieve_finetune_parser = parser.add_parser("retrieve")
     retrieve_finetune_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     retrieve_finetune_parser.set_defaults(func=_run_retrieve)
 
@@ -133,12 +135,11 @@ def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
     # Cancel Finetune
     cancel_finetune_parser = parser.add_parser("cancel")
     cancel_finetune_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     cancel_finetune_parser.set_defaults(func=_run_cancel)
 
@@ -149,14 +150,74 @@ def _add_list_events(
     # List finetune events
     list_finetune_events_parser = parser.add_parser("list-events")
     list_finetune_events_parser.add_argument(
-        "--fine-tune-id",
-        "-ft",
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
-        required=True,
     )
     list_finetune_events_parser.set_defaults(func=_run_list_events)
+
+
+def _add_download(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    # List finetune events
+    download_parser = parser.add_parser("download")
+    download_parser.add_argument(
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
+        default=None,
+        help="Fine-tuning ID",
+        type=str,
+    )
+    download_parser.add_argument(
+        "--output",
+        "-o",
+        default=None,
+        help="Output filename",
+        type=str,
+        required=False,
+    )
+    download_parser.add_argument(
+        "--checkpoint-num",
+        "-n",
+        default=-1,
+        help="Checkpoint number. Defaults to the latest checkpoint = -1.",
+        type=int,
+        required=False,
+    )
+    download_parser.set_defaults(func=_run_download)
+
+
+def _add_status(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    # List finetune events
+    status_parser = parser.add_parser("status")
+    status_parser.add_argument(
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
+        default=None,
+        help="Fine-tuning ID",
+        type=str,
+    )
+    status_parser.set_defaults(func=_run_status)
+
+
+def _add_checkpoints(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    # List finetune events
+    checkpoint_parser = parser.add_parser("checkpoints")
+    checkpoint_parser.add_argument(
+        "fine_tune_id",
+        metavar="FINETUNE-ID",
+        default=None,
+        help="Fine-tuning ID",
+        type=str,
+    )
+    checkpoint_parser.set_defaults(func=_run_checkpoint)
 
 
 # def _add_delete_model(
@@ -193,31 +254,51 @@ def _run_create(args: argparse.Namespace) -> None:
         suffix=args.suffix,
     )
 
-    print(response)
+    print(json.dumps(response, indent=4))
 
 
 def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune()
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.retrieve_finetune(args.fine_tune_id)
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.cancel_finetune(args.fine_tune_id)
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
 
 
 def _run_list_events(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     response = finetune.list_finetune_events(args.fine_tune_id)
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
+
+
+def _run_download(args: argparse.Namespace) -> None:
+    finetune = Finetune(args.endpoint)
+    print(args.endpoint)
+    response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
+    print(response)
+
+
+def _run_status(args: argparse.Namespace) -> None:
+    finetune = Finetune(args.endpoint)
+    response = finetune.get_job_status(args.fine_tune_id)
+    print(response)
+
+
+def _run_checkpoint(args: argparse.Namespace) -> None:
+    finetune = Finetune(args.endpoint)
+    checkpoints = finetune.get_checkpoints(args.fine_tune_id)
+    print(json.dumps(checkpoints, indent=4))
+    print(f"\n{len(checkpoints)} checkpoints found")
 
 
 # def _run_delete_model(args: argparse.Namespace) -> None:

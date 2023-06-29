@@ -1,9 +1,10 @@
 import os
 import posixpath
 import urllib.parse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import requests
+from tqdm import tqdm
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -166,6 +167,91 @@ class Finetune:
             )
 
         return response_json
+
+    def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
+        try:
+            finetune_events = list(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
+
+        return saved_events
+
+    def get_job_status(self, fine_tune_id: str) -> str:
+        try:
+            job_status = str(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["status"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        return job_status
+
+    def is_final_model_available(self, fine_tune_id: str) -> bool:
+        try:
+            finetune_events = list(
+                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
+            )
+        except Exception as e:
+            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+
+        for i in finetune_events:
+            if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
+                if i["checkpoint_path"] != "":
+                    return False
+                else:
+                    return True
+        return False
+
+    def download(
+        self,
+        fine_tune_id: str,
+        output: Union[str, None] = None,
+        checkpoint_num: int = -1,
+    ) -> str:
+        # default to model_output_path name
+        if output is None:
+            output = (
+                self.retrieve_finetune(fine_tune_id)["model_output_path"].split("/")[-1]
+                + ".tar.gz"
+            )
+
+        model_file_path = urllib.parse.urljoin(
+            self.endpoint_url,
+            f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
+        )
+
+        print(f"Downloading {model_file_path}...")
+
+        headers = {
+            "Authorization": f"Bearer {self.together_api_key}",
+        }
+
+        try:
+            session = requests.Session()
+
+            response = session.get(model_file_path, headers=headers, stream=True)
+            response.raise_for_status()
+
+            total_size_in_bytes = int(response.headers.get("content-length", 0))
+            block_size = 1024 * 1024  # 1 MB
+            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+            with open(output, "wb") as file:
+                for chunk in response.iter_content(block_size):
+                    progress_bar.update(len(chunk))
+                    file.write(chunk)
+            progress_bar.close()
+            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+                raise Warning(
+                    "Caution: Downloaded file size does not match remote file size."
+                )
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            raise ValueError(f"Error raised by endpoint: {e}")
+
+        return output  # this should be null
 
     # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
     #     model_url = "https://api.together.xyz/api/models"

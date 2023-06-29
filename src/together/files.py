@@ -5,6 +5,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Union
 
 import requests
+from tqdm import tqdm
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -128,7 +129,12 @@ class Files:
 
         return response_json
 
-    def retrieve_file_content(self, file_id: str) -> requests.Response:
+    def retrieve_file_content(
+        self, file_id: str, output: Union[str, None] = None
+    ) -> str:
+        if output is None:
+            output = file_id + ".jsonl"
+
         relative_path = posixpath.join(file_id, "content")
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
 
@@ -138,8 +144,28 @@ class Files:
 
         # send request
         try:
-            response = requests.get(retrieve_url, headers=headers)
+            session = requests.Session()
+
+            response = session.get(retrieve_url, headers=headers, stream=True)
+            response.raise_for_status()
+
+            total_size_in_bytes = int(response.headers.get("content-length", 0))
+            block_size = 1024 * 1024  # 1 MB
+            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+
+            with open(output, "wb") as file:
+                for chunk in response.iter_content(block_size):
+                    progress_bar.update(len(chunk))
+                    file.write(chunk)
+
+            progress_bar.close()
+
+            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+                raise Warning(
+                    "Caution: Downloaded file size does not match remote file size."
+                )
+
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
-        return response  # this should be null
+        return output  # this should be null

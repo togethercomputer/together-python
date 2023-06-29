@@ -29,7 +29,10 @@ def main() -> None:
     args = parser.parse_args()
     try:
         args.func(args)
-    except AttributeError:
+    except AttributeError as e:
+        # print error, but ignore if `together` is run.
+        if str(e) != "'Namespace' object has no attribute 'func'":
+            print(f"Error raised: {e}")
         parser.print_help()
 
 

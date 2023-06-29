@@ -1,5 +1,4 @@
 import os
-import urllib.parse
 from typing import Any, Dict, List, Optional, cast
 
 import requests
@@ -73,18 +72,16 @@ class API:
 
     def finetune(self) -> Finetune:
         return Finetune(
-            endpoint_url=str(
-                urllib.parse.urljoin(self.endpoint_url, "/v1/fine-tunes/")
-            ),
+            endpoint_url=self.endpoint_url,
         )
 
     def complete(self, **model_kwargs: Any) -> Inference:
         return Inference(
-            endpoint_url=str(urllib.parse.urljoin(self.endpoint_url, "/api/inference")),
+            endpoint_url=self.endpoint_url,
             **model_kwargs,
         )
 
     def files(self) -> Files:
         return Files(
-            endpoint_url=urllib.parse.urljoin(self.endpoint_url, "/v1/files/"),
+            endpoint_url=self.endpoint_url,
         )

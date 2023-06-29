@@ -17,7 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    list_model_subparser = parser.add_parser("list-models")
+    list_model_subparser = parser.add_parser("list")
     list_model_subparser.add_argument(
         "--all",
         "-a",
@@ -41,10 +41,10 @@ def _run_list(args: argparse.Namespace) -> None:
     else:
         response = api.get_available_models()
 
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
 
 
 def _run_raw(args: argparse.Namespace) -> None:
     api = API()
     response = api.get_supply()
-    print(json.dumps(response))
+    print(json.dumps(response, indent=4))
