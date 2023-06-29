@@ -284,6 +284,7 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 def _run_download(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
+    print(args.endpoint)
     response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
     print(response)
 
@@ -297,7 +298,7 @@ def _run_status(args: argparse.Namespace) -> None:
 def _run_checkpoint(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
     checkpoints = finetune.get_checkpoints(args.fine_tune_id)
-    print(checkpoints)
+    print(json.dumps(checkpoints, indent=4))
     print(f"\n{len(checkpoints)} checkpoints found")
 
 

@@ -4,6 +4,7 @@ import urllib.parse
 from typing import Any, Dict, List, Optional
 
 import requests
+from tqdm import tqdm
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -206,41 +207,10 @@ class Finetune:
         return False
 
     def download(self, fine_tune_id: str, output: str, checkpoint_num: int = -1) -> str:
-        try:
-            retrieve_finetune = dict(self.retrieve_finetune(fine_tune_id=fine_tune_id))
-        except Exception as e:
-            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
-
-        finetune_events = list(retrieve_finetune["events"])
-
-        saved_events = []
-
-        for i in finetune_events:
-            if i["type"] in ["CHECKPOINT_SAVE", "JOB_ERROR", "JOB_COMPLETE"]:
-                saved_events.append(i)
-
-        event = dict(saved_events[checkpoint_num])
-
-        if event["type"] in ["CHECKPOINT_SAVE", "JOB_ERROR"]:
-            event_path = str(event["checkpoint_path"])
-        else:
-            event_path = str(event["model_path"])
-
-        if event_path == "":
-            raise Exception("Empty path found. Not proceeding with download.")
-
-        if not event_path.startswith("s3"):
-            raise Exception("Invalid download path found")
-
-        relative_path = (
-            retrieve_finetune["model_output_name"].split("/")[0]
-            + "/"
-            + event_path.split("/")[-1]
+        model_file_path = urllib.parse.urljoin(
+            self.endpoint_url,
+            f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
         )
-
-        model_file_endpoint = urllib.parse.urljoin(DEFAULT_ENDPOINT, "/api/models/")
-
-        model_file_path = model_file_endpoint + relative_path + ".tar.gz"
 
         print(f"Downloading {model_file_path}...")
 
@@ -249,13 +219,23 @@ class Finetune:
         }
 
         try:
-            with requests.get(
-                model_file_path, headers=headers, stream=True
-            ) as response:
-                response.raise_for_status()
-                with open(output, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
+            session = requests.Session()
+
+            response = session.get(model_file_path, headers=headers, stream=True)
+            response.raise_for_status()
+
+            total_size_in_bytes = int(response.headers.get("content-length", 0))
+            block_size = 1024 * 1024  # 1 MB
+            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+            with open(output, "wb") as file:
+                for chunk in response.iter_content(block_size):
+                    progress_bar.update(len(chunk))
+                    file.write(chunk)
+            progress_bar.close()
+            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+                raise Warning(
+                    "Caution: Downloaded file size does not match remote file size."
+                )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 

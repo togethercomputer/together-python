@@ -5,6 +5,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Union
 
 import requests
+from tqdm import tqdm
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -138,11 +139,27 @@ class Files:
 
         # send request
         try:
-            with requests.get(retrieve_url, headers=headers, stream=True) as response:
-                response.raise_for_status()
-                with open(output, "wb") as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
+            session = requests.Session()
+
+            response = session.get(retrieve_url, headers=headers, stream=True)
+            response.raise_for_status()
+
+            total_size_in_bytes = int(response.headers.get("content-length", 0))
+            block_size = 1024 * 1024  # 1 MB
+            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+
+            with open(output, "wb") as file:
+                for chunk in response.iter_content(block_size):
+                    progress_bar.update(len(chunk))
+                    file.write(chunk)
+
+            progress_bar.close()
+
+            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+                raise Warning(
+                    "Caution: Downloaded file size does not match remote file size."
+                )
+
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             raise ValueError(f"Error raised by endpoint: {e}")
 
