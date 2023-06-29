@@ -33,13 +33,13 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=True,
         type=str,
     )
-    create_finetune_parser.add_argument(
-        "--validation-file",
-        "-v",
-        default=None,
-        help="The ID of an uploaded file that contains validation data.",
-        type=str,
-    )
+    # create_finetune_parser.add_argument(
+    #     "--validation-file",
+    #     "-v",
+    #     default=None,
+    #     help="The ID of an uploaded file that contains validation data.",
+    #     type=str,
+    # )
     create_finetune_parser.add_argument(
         "--model",
         "-m",
@@ -57,53 +57,57 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
     create_finetune_parser.add_argument(
         "--batch-size",
         "-b",
-        default=None,
+        default=32,
         help="The batch size to use for training.",
         type=int,
     )
     create_finetune_parser.add_argument(
-        "--learning-rate-multiplier",
-        "-lrm",
-        default=None,
+        "--learning-rate",
+        "-lr",
+        default=0.00001,
         help="The learning rate multiplier to use for training.",
         type=float,
     )
-    create_finetune_parser.add_argument(
-        "--prompt-loss-weight",
-        "-plw",
-        default=0.01,
-        help="The weight to use for loss on the prompt tokens.",
-        type=float,
-    )
-    create_finetune_parser.add_argument(
-        "--compute-classification-metrics",
-        "-ccm",
-        default=False,
-        action="store_true",
-        help="Calculate classification-specific metrics using the validation set.",
-    )
-    create_finetune_parser.add_argument(
-        "--classification-n-classes",
-        "-cnc",
-        default=None,
-        help="The number of classes in a classification task.",
-        type=int,
-    )
-    create_finetune_parser.add_argument(
-        "--classification-positive-class",
-        "-cpc",
-        default=None,
-        help="The positive class in binary classification.",
-        type=str,
-    )
-    create_finetune_parser.add_argument(
-        "--classification-betas",
-        "-cb",
-        default=None,
-        help="Calculate F-beta scores at the specified beta values.",
-        nargs="+",
-        type=float,
-    )
+    # create_finetune_parser.add_argument(
+    #     "--warmup-steps",
+    #     "-ws",
+    #     default=0,
+    #     help="Warmup steps",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--train-warmup-steps",
+    #     "-tws",
+    #     default=0,
+    #     help="Train warmup steps",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--sequence-length",
+    #     "-sl",
+    #     default=2048,
+    #     help="Max sequence length",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--seed",
+    #     default=42,
+    #     help="Training seed",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--fp32",
+    #     help="Enable FP32 training. Defaults to false (FP16 training).",
+    #     default=False,
+    #     action="store_true",
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--checkpoint-steps",
+    #     "-b",
+    #     default=0,
+    #     help="Number of steps between each checkpoint. Defaults to 0 = checkpoints per epoch.",
+    #     type=int,
+    # )
     create_finetune_parser.add_argument(
         "--suffix",
         "-s",
@@ -244,16 +248,17 @@ def _run_create(args: argparse.Namespace) -> None:
 
     response = finetune.create_finetune(
         training_file=args.training_file,  # training file_id
-        validation_file=args.validation_file,  # validation file_id
+        # validation_file=args.validation_file,  # validation file_id
         model=args.model,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
-        learning_rate_multiplier=args.learning_rate_multiplier,
-        prompt_loss_weight=args.prompt_loss_weight,
-        compute_classification_metrics=args.compute_classification_metrics,
-        classification_n_classes=args.classification_n_classes,
-        classification_positive_class=args.classification_positive_class,
-        classification_betas=args.classification_betas,
+        learning_rate=args.learning_rate,
+        # warmup_steps=args.warmup_steps,
+        # train_warmup_steps=args.train_warmup_steps,
+        # seq_length=args.sequence_length,
+        # seed=args.seed,
+        # fp16=not args.fp32,
+        # checkpoint_steps=args.checkpoint_steps,
         suffix=args.suffix,
     )
 
