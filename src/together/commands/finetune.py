@@ -33,13 +33,13 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=True,
         type=str,
     )
-    create_finetune_parser.add_argument(
-        "--validation-file",
-        "-v",
-        default=None,
-        help="The ID of an uploaded file that contains validation data.",
-        type=str,
-    )
+    # create_finetune_parser.add_argument(
+    #     "--validation-file",
+    #     "-v",
+    #     default=None,
+    #     help="The ID of an uploaded file that contains validation data.",
+    #     type=str,
+    # )
     create_finetune_parser.add_argument(
         "--model",
         "-m",
@@ -68,39 +68,46 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The learning rate multiplier to use for training.",
         type=float,
     )
-    create_finetune_parser.add_argument(
-        "--warmup-steps",
-        "-ws",
-        default=0,
-        help="Warmup steps",
-        type=int,
-    )
-    create_finetune_parser.add_argument(
-        "--train-warmup-steps",
-        "-tws",
-        default=0,
-        help="Train warmup steps",
-        type=int,
-    )
-    create_finetune_parser.add_argument(
-        "--sequence-length",
-        "-sl",
-        default=2048,
-        help="Max sequence length",
-        type=int,
-    )
-    create_finetune_parser.add_argument(
-        "--seed",
-        default=42,
-        help="Training seed",
-        type=int,
-    )
-    create_finetune_parser.add_argument(
-        "--fp32",
-        help="Enable FP32 training. Defaults to false (FP16 training).",
-        default=False,
-        action="store_true",
-    )
+    # create_finetune_parser.add_argument(
+    #     "--warmup-steps",
+    #     "-ws",
+    #     default=0,
+    #     help="Warmup steps",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--train-warmup-steps",
+    #     "-tws",
+    #     default=0,
+    #     help="Train warmup steps",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--sequence-length",
+    #     "-sl",
+    #     default=2048,
+    #     help="Max sequence length",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--seed",
+    #     default=42,
+    #     help="Training seed",
+    #     type=int,
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--fp32",
+    #     help="Enable FP32 training. Defaults to false (FP16 training).",
+    #     default=False,
+    #     action="store_true",
+    # )
+    # create_finetune_parser.add_argument(
+    #     "--checkpoint-steps",
+    #     "-b",
+    #     default=0,
+    #     help="Number of steps between each checkpoint. Defaults to 0 = checkpoints per epoch.",
+    #     type=int,
+    # )
     create_finetune_parser.add_argument(
         "--suffix",
         "-s",
@@ -241,16 +248,17 @@ def _run_create(args: argparse.Namespace) -> None:
 
     response = finetune.create_finetune(
         training_file=args.training_file,  # training file_id
-        validation_file=args.validation_file,  # validation file_id
+        # validation_file=args.validation_file,  # validation file_id
         model=args.model,
         n_epochs=args.n_epochs,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
-        warmup_steps=args.warmup_steps,
-        train_warmup_steps=args.train_warmup_steps,
-        seq_length=args.sequence_length,
-        seed=args.seed,
-        fp16=not args.fp32,
+        # warmup_steps=args.warmup_steps,
+        # train_warmup_steps=args.train_warmup_steps,
+        # seq_length=args.sequence_length,
+        # seed=args.seed,
+        # fp16=not args.fp32,
+        # checkpoint_steps=args.checkpoint_steps,
         suffix=args.suffix,
     )
 

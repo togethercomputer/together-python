@@ -29,30 +29,31 @@ class Finetune:
     def create_finetune(
         self,
         training_file: str,  # training file_id
-        validation_file: Optional[str] = None,  # validation file_id
+        # validation_file: Optional[str] = None,  # validation file_id
         model: Optional[str] = None,
         n_epochs: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
-        warmup_steps: Optional[int] = 0,
-        train_warmup_steps: Optional[int] = 0,
-        seq_length: Optional[int] = 2048,
-        seed: Optional[int] = 42,
-        fp16: Optional[bool] = True,
+        # warmup_steps: Optional[int] = 0,
+        # train_warmup_steps: Optional[int] = 0,
+        # seq_length: Optional[int] = 2048,
+        # seed: Optional[int] = 42,
+        # fp16: Optional[bool] = True,
+        # checkpoint_steps: Optional[int] = None,
         suffix: Optional[str] = None,
     ) -> Dict[Any, Any]:
         parameter_payload = {
             "training_file": training_file,
-            "validation_file": validation_file,
+            # "validation_file": validation_file,
             "model": model,
             "n_epochs": n_epochs,
             "batch_size": batch_size,
             "learning_rate": learning_rate,
-            "warmup_steps": warmup_steps,
-            "train_warmup_steps": train_warmup_steps,
-            "seq_length": seq_length,
-            "seed": seed,
-            "fp16": fp16,
+            # "warmup_steps": warmup_steps,
+            # "train_warmup_steps": train_warmup_steps,
+            # "seq_length": seq_length,
+            # "seed": seed,
+            # "fp16": fp16,
             "suffix": suffix,
         }
 
