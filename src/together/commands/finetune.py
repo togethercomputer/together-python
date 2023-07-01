@@ -291,7 +291,6 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 def _run_download(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint)
-    print(args.endpoint)
     response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
     print(response)
 
