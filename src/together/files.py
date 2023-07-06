@@ -1,8 +1,9 @@
 import json
 import os
 import posixpath
+import sys
 import urllib.parse
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
 import requests
 from tqdm import tqdm
@@ -11,11 +12,24 @@ from tqdm import tqdm
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
 
 
+def exception_handler(exception_type: Any, exception: Any, traceback: Any) -> None:
+    # All your trace are belong to us!
+    # your format
+    # print("%s: %s" % (exception_type.__name__, exception))
+    pass
+
+
+class JSONException(Exception):
+    pass
+
+
 def validate_json(file: str) -> bool:
     with open(file) as f:
         try:
             for line in f:
-                json.loads(line)
+                json_line = json.loads(line)
+                if "text" not in json_line:
+                    raise JSONException("Text column not found")
         except ValueError:
             return False
         return True
@@ -66,15 +80,23 @@ class Files:
         if not validate_json(file=file):
             raise ValueError("Could not load file: invalid .jsonl file detected.")
 
-        # send request
+        sys.excepthook = exception_handler  # send request
         try:
             with open(file, "rb") as f:
                 response = requests.post(
-                    self.endpoint_url, headers=headers, files={"file": f}, data=data
+                    self.endpoint_url,
+                    headers=headers,
+                    files={"file": f},
+                    data=data,
                 )
 
-        except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+        except Exception:
+            print(
+                "ERROR: An exception occurred during file upload, likely due to trying to upload a large file. Please note, that we have a 100MB file upload limit at the moment. Up to 5GB uploads are coming soon, stay tuned!"
+            )
+            sys.exit(0)
+            # print(response.text)
+            # raise ValueError(f"Error raised by inference endpoint: {e}")
 
         try:
             response_json = dict(response.json())
