@@ -87,9 +87,9 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_upload(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.upload_file(args.file)
-    print(json.dumps(response, indent=4))
+    Files(args.endpoint)
+    # response = files.upload_file(args.file)
+    # print(json.dumps(response, indent=4))
 
 
 def _run_delete(args: argparse.Namespace) -> None:

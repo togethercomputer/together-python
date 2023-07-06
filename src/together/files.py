@@ -5,7 +5,6 @@ import urllib.parse
 from typing import Dict, List, Optional, Union
 
 import requests
-import sys
 from tqdm import tqdm
 
 
@@ -60,27 +59,44 @@ class Files:
 
     def upload_file(self, file: str) -> Dict[str, Union[str, int]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-        print(data)
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
         }
 
         if not validate_json(file=file):
             raise ValueError("Could not load file: invalid .jsonl file detected.")
-        # TEMP_URL = "https://47b1b605b8ff0371ec661ebaf3b433c1.r2.cloudflarestorage.com/together-dev//finetune/file-e5731dc6-7e46-4f3a-95c9-4864bd8e19ed?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=257bc5a86d96c8b95a6521e4224f0b18%2F20230705%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20230705T205049Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=9b30c8d69abb9eb959e7b90aa71577af4ff337634f1e7fe5f48d919e701ba889"
+
         session = requests.Session()
-        # send request
-        # try:
-        response1 = session.post(
-                self.endpoint_url, data=data, headers=headers,
-            )
-        print(response1.text)
+
+        init_response = session.post(
+            self.endpoint_url[:-1],
+            data=data,
+            headers=headers,
+        )
+
+        r2_signed_url = init_response.headers["Location"]
+        file_id = init_response.headers["X-Together-File-Id"]
+
         print("Uploading file...")
-        r2_signed_url = response1.headers['Location']
+
         with open(file, "rb") as f:
-            response = session.put(
-                r2_signed_url, files={"file": f}
-            )
+            upload_response = session.put(r2_signed_url, files={"file": f})
+
+        print(f"File uploaded with status code: {upload_response.status_code}")
+
+        preprocess_url = urllib.parse.urljoin(
+            self.endpoint_url, f"{file_id}/preprocess"
+        )
+
+        preprocess_response = session.post(
+            preprocess_url,
+            headers=headers,
+        )
+
+        print(f"File processed. Status code: {preprocess_response.status_code}")
+
+        return {"status": "DONE"}
+
         # headers=headers, data=data
 
         # except (requests.exceptions.RequestException, requests.exceptions.SSLError) as e:
@@ -90,7 +106,6 @@ class Files:
         # try:
         #     response_json = dict(response.json())
         # except Exception:
-        print(response.text)
         #     raise ValueError(
         #         f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
         #     )
@@ -121,6 +136,7 @@ class Files:
 
     def retrieve_file(self, file_id: str) -> Dict[str, Union[str, int]]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
+        print(retrieve_url)
 
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
