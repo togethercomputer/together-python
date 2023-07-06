@@ -4,7 +4,7 @@ import os
 import posixpath
 import sys
 import urllib.parse
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from tqdm import tqdm
@@ -13,11 +13,17 @@ from tqdm import tqdm
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
 
 
+class JSONException(Exception):
+    pass
+
+
 def validate_json(file: str) -> bool:
     with open(file) as f:
         try:
             for line in f:
-                json.loads(line)
+                json_line = json.loads(line)
+                if "text" not in json_line:
+                    raise JSONException("Text column not found")
         except ValueError:
             return False
         return True
@@ -60,7 +66,7 @@ class Files:
         try:
             response = requests.get(self.endpoint_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -144,7 +150,7 @@ class Files:
         try:
             response = requests.delete(delete_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -167,7 +173,7 @@ class Files:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())

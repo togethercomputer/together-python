@@ -69,7 +69,7 @@ class Finetune:
                 self.endpoint_url, headers=headers, json=parameter_payload
             )
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by finetune endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -89,7 +89,7 @@ class Finetune:
         try:
             response = requests.get(self.endpoint_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by finetune endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -111,7 +111,7 @@ class Finetune:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by finetune endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -134,7 +134,7 @@ class Finetune:
         try:
             response = requests.post(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by finetune endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -158,7 +158,7 @@ class Finetune:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by finetune endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -266,7 +266,7 @@ class Finetune:
     #     try:
     #         response = requests.delete(delete_url, headers=headers)
     #     except requests.exceptions.RequestException as e:
-    #         raise ValueError(f"Error raised by inference endpoint: {e}")
+    #         raise ValueError(f"Error raised by finetune endpoint: {e}")
 
     #     try:
     #         response_json = dict(response.json())
