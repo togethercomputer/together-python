@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import posixpath
+import sys
 import urllib.parse
 from typing import Dict, List, Optional, Union
 
@@ -25,6 +27,7 @@ class Files:
     def __init__(
         self,
         endpoint_url: Optional[str] = None,
+        log_level: str = "WARNING",
     ) -> None:
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
@@ -36,6 +39,17 @@ class Files:
             endpoint_url = DEFAULT_ENDPOINT
 
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
+
+        self.logger = logging.getLogger(__name__)
+
+        # Setup logging
+        logging.basicConfig(
+            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+            datefmt="%m/%d/%Y %H:%M:%S",
+            handlers=[logging.StreamHandler(sys.stdout)],
+        )
+
+        self.logger.setLevel(log_level)
 
     def list_files(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
@@ -58,60 +72,68 @@ class Files:
         return response_json
 
     def upload_file(self, file: str) -> Dict[str, Union[str, int]]:
-        data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-        headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+        try:
+            data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
+
+            headers = {
+                "Authorization": f"Bearer {self.together_api_key}",
+            }
+
+            if not validate_json(file=file):
+                raise ValueError("Could not load file: invalid .jsonl file detected.")
+
+            session = requests.Session()
+            init_endpoint = self.endpoint_url[:-1]
+
+            self.logger.debug(
+                f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
+            )
+
+            response = session.post(
+                init_endpoint,
+                data=data,
+                headers=headers,
+                allow_redirects=False,
+            )
+            self.logger.debug(f"Response: {response.text}")
+            r2_signed_url = response.headers["Location"]
+            file_id = response.headers["X-Together-File-Id"]
+
+            self.logger.info(f"R2 Signed URL: {r2_signed_url}")
+            self.logger.info("File-ID")
+
+            self.logger.info("Uploading file...")
+            # print("> Uploading file...")
+
+            with open(file, "rb") as f:
+                response = session.put(r2_signed_url, files={"file": f})
+
+            self.logger.info("> File uploaded.")
+            self.logger.debug(f"status code: {response.status_code}")
+            self.logger.info("> Processing file...")
+            preprocess_url = urllib.parse.urljoin(
+                self.endpoint_url, f"{file_id}/preprocess"
+            )
+
+            response = session.post(
+                preprocess_url,
+                headers=headers,
+            )
+
+            self.logger.info("> File processed")
+            self.logger.debug(f"Status code: {response.status_code}")
+
+        except Exception:
+            self.logger.critical(
+                f"Response error raised.\nResponse status code: {str(response.status_code)}"
+            )
+            sys.exit(1)
+
+        return {
+            "filename": os.path.basename(file),
+            "id": str(file_id),
+            "object": "file",
         }
-
-        if not validate_json(file=file):
-            raise ValueError("Could not load file: invalid .jsonl file detected.")
-
-        session = requests.Session()
-
-        init_response = session.post(
-            self.endpoint_url[:-1],
-            data=data,
-            headers=headers,
-            allow_redirects=False,
-        )
-
-        r2_signed_url = init_response.headers["Location"]
-        file_id = init_response.headers["X-Together-File-Id"]
-
-        print("Uploading file...")
-
-        with open(file, "rb") as f:
-            upload_response = session.put(r2_signed_url, files={"file": f})
-
-        print(f"File uploaded with status code: {upload_response.status_code}")
-
-        preprocess_url = urllib.parse.urljoin(
-            self.endpoint_url, f"{file_id}/preprocess"
-        )
-
-        preprocess_response = session.post(
-            preprocess_url,
-            headers=headers,
-        )
-
-        print(f"File processed. Status code: {preprocess_response.status_code}")
-
-        return {"status": "DONE"}
-
-        # headers=headers, data=data
-
-        # except (requests.exceptions.RequestException, requests.exceptions.SSLError) as e:
-        #     print(f"Error raised by inference endpoint: {e}")
-        #     sys.exit(0)
-
-        # try:
-        #     response_json = dict(response.json())
-        # except Exception:
-        #     raise ValueError(
-        #         f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
-        #     )
-
-        # return response_json
 
     def delete_file(self, file_id: str) -> Dict[str, str]:
         delete_url = urllib.parse.urljoin(self.endpoint_url, file_id)
