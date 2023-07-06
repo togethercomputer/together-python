@@ -124,9 +124,7 @@ class Files:
             self.logger.debug(f"Status code: {response.status_code}")
 
         except Exception:
-            self.logger.critical(
-                f"Response error raised.\nResponse status code: {str(response.status_code)}"
-            )
+            self.logger.critical("Response error raised.")
             sys.exit(1)
 
         return {
