@@ -60,7 +60,7 @@ class Files:
         try:
             response = requests.get(self.endpoint_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -96,7 +96,7 @@ class Files:
             )
             sys.exit(0)
             # print(response.text)
-            # raise ValueError(f"Error raised by inference endpoint: {e}")
+            # raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -118,7 +118,7 @@ class Files:
         try:
             response = requests.delete(delete_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
@@ -140,7 +140,7 @@ class Files:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            raise ValueError(f"Error raised by files endpoint: {e}")
 
         try:
             response_json = dict(response.json())
