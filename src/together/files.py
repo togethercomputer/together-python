@@ -72,6 +72,7 @@ class Files:
             self.endpoint_url[:-1],
             data=data,
             headers=headers,
+            allow_redirects=False,
         )
 
         r2_signed_url = init_response.headers["Location"]
