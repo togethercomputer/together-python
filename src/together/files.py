@@ -16,6 +16,9 @@ DEFAULT_ENDPOINT = "https://api.together.xyz/"
 class JSONException(Exception):
     pass
 
+def exit_1(logger):
+    logger.critical("Exiting with code 1...")
+    sys.exit(1)
 
 def validate_json(file: str) -> bool:
     with open(file) as f:
@@ -23,7 +26,7 @@ def validate_json(file: str) -> bool:
             for line in f:
                 json_line = json.loads(line)
                 if "text" not in json_line:
-                    raise JSONException("Text column not found")
+                    return False
         except ValueError:
             return False
         return True
@@ -35,17 +38,6 @@ class Files:
         endpoint_url: Optional[str] = None,
         log_level: str = "WARNING",
     ) -> None:
-        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
-        if self.together_api_key is None:
-            raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable."
-            )
-
-        if endpoint_url is None:
-            endpoint_url = DEFAULT_ENDPOINT
-
-        self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
-
         self.logger = logging.getLogger(__name__)
 
         # Setup logging
@@ -56,6 +48,16 @@ class Files:
         )
 
         self.logger.setLevel(log_level)
+
+        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
+        if self.together_api_key is None:
+            self.logger.critical("TOGETHER_API_KEY not found. Please set it as an environment variable.")
+            exit_1(self.logger)
+
+        if endpoint_url is None:
+            endpoint_url = DEFAULT_ENDPOINT
+
+        self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
 
     def list_files(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
@@ -86,7 +88,8 @@ class Files:
             }
 
             if not validate_json(file=file):
-                raise ValueError("Could not load file: invalid .jsonl file detected.")
+                self.logger.critical("Invalid JSONL format detected: could not load file.\nExiting with code 1...")
+                exit_1(self.logger)
 
             session = requests.Session()
             init_endpoint = self.endpoint_url[:-1]
@@ -112,7 +115,7 @@ class Files:
             # print("> Uploading file...")
 
             with open(file, "rb") as f:
-                response = session.put(r2_signed_url, files={"file": f})
+                response = requests.put(r2_signed_url, data=f)
 
             self.logger.info("> File uploaded.")
             self.logger.debug(f"status code: {response.status_code}")
@@ -129,9 +132,9 @@ class Files:
             self.logger.info("> File processed")
             self.logger.debug(f"Status code: {response.status_code}")
 
-        except Exception:
-            self.logger.critical("Response error raised.")
-            sys.exit(1)
+        except Exception as e:
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         return {
             "filename": os.path.basename(file),
