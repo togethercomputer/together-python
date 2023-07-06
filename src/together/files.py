@@ -4,6 +4,7 @@ import os
 import posixpath
 import sys
 import urllib.parse
+from logging import Logger
 from typing import Dict, List, Optional, Union
 
 import requests
@@ -16,9 +17,11 @@ DEFAULT_ENDPOINT = "https://api.together.xyz/"
 class JSONException(Exception):
     pass
 
-def exit_1(logger):
+
+def exit_1(logger: Logger) -> None:
     logger.critical("Exiting with code 1...")
     sys.exit(1)
+
 
 def validate_json(file: str) -> bool:
     with open(file) as f:
@@ -51,7 +54,9 @@ class Files:
 
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
-            self.logger.critical("TOGETHER_API_KEY not found. Please set it as an environment variable.")
+            self.logger.critical(
+                "TOGETHER_API_KEY not found. Please set it as an environment variable."
+            )
             exit_1(self.logger)
 
         if endpoint_url is None:
@@ -88,7 +93,9 @@ class Files:
             }
 
             if not validate_json(file=file):
-                self.logger.critical("Invalid JSONL format detected: could not load file.\nExiting with code 1...")
+                self.logger.critical(
+                    "Invalid JSONL format detected: could not load file.\nExiting with code 1..."
+                )
                 exit_1(self.logger)
 
             session = requests.Session()
