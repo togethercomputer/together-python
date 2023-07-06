@@ -32,6 +32,13 @@ def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="File to upload",
         type=str,
     )
+    upload_file_parser.add_argument(
+        "--log-level",
+        default="WARNING",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"],
+        type=str,
+        help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
+    )
     upload_file_parser.set_defaults(func=_run_upload)
 
 
@@ -87,7 +94,7 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_upload(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
+    files = Files(args.endpoint, log_level=args.log_level)
     response = files.upload_file(args.file)
     print(json.dumps(response, indent=4))
 

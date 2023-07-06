@@ -1,22 +1,16 @@
 import json
+import logging
 import os
 import posixpath
 import sys
 import urllib.parse
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import requests
 from tqdm import tqdm
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
-
-
-def exception_handler(exception_type: Any, exception: Any, traceback: Any) -> None:
-    # All your trace are belong to us!
-    # your format
-    # print("%s: %s" % (exception_type.__name__, exception))
-    pass
 
 
 class JSONException(Exception):
@@ -39,6 +33,7 @@ class Files:
     def __init__(
         self,
         endpoint_url: Optional[str] = None,
+        log_level: str = "WARNING",
     ) -> None:
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
@@ -50,6 +45,17 @@ class Files:
             endpoint_url = DEFAULT_ENDPOINT
 
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
+
+        self.logger = logging.getLogger(__name__)
+
+        # Setup logging
+        logging.basicConfig(
+            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+            datefmt="%m/%d/%Y %H:%M:%S",
+            handlers=[logging.StreamHandler(sys.stdout)],
+        )
+
+        self.logger.setLevel(log_level)
 
     def list_files(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
@@ -72,40 +78,66 @@ class Files:
         return response_json
 
     def upload_file(self, file: str) -> Dict[str, Union[str, int]]:
-        data = {"purpose": "fine-tune"}
-        headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
-        }
-
-        if not validate_json(file=file):
-            raise ValueError("Could not load file: invalid .jsonl file detected.")
-
-        sys.excepthook = exception_handler  # send request
         try:
+            data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
+
+            headers = {
+                "Authorization": f"Bearer {self.together_api_key}",
+            }
+
+            if not validate_json(file=file):
+                raise ValueError("Could not load file: invalid .jsonl file detected.")
+
+            session = requests.Session()
+            init_endpoint = self.endpoint_url[:-1]
+
+            self.logger.debug(
+                f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
+            )
+
+            response = session.post(
+                init_endpoint,
+                data=data,
+                headers=headers,
+                allow_redirects=False,
+            )
+            self.logger.debug(f"Response: {response.text}")
+            r2_signed_url = response.headers["Location"]
+            file_id = response.headers["X-Together-File-Id"]
+
+            self.logger.info(f"R2 Signed URL: {r2_signed_url}")
+            self.logger.info("File-ID")
+
+            self.logger.info("Uploading file...")
+            # print("> Uploading file...")
+
             with open(file, "rb") as f:
-                response = requests.post(
-                    self.endpoint_url,
-                    headers=headers,
-                    files={"file": f},
-                    data=data,
-                )
+                response = session.put(r2_signed_url, files={"file": f})
 
-        except Exception:
-            print(
-                "ERROR: An exception occurred during file upload, likely due to trying to upload a large file. Please note, that we have a 100MB file upload limit at the moment. Up to 5GB uploads are coming soon, stay tuned!"
-            )
-            sys.exit(0)
-            # print(response.text)
-            # raise ValueError(f"Error raised by files endpoint: {e}")
-
-        try:
-            response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+            self.logger.info("> File uploaded.")
+            self.logger.debug(f"status code: {response.status_code}")
+            self.logger.info("> Processing file...")
+            preprocess_url = urllib.parse.urljoin(
+                self.endpoint_url, f"{file_id}/preprocess"
             )
 
-        return response_json
+            response = session.post(
+                preprocess_url,
+                headers=headers,
+            )
+
+            self.logger.info("> File processed")
+            self.logger.debug(f"Status code: {response.status_code}")
+
+        except Exception:
+            self.logger.critical("Response error raised.")
+            sys.exit(1)
+
+        return {
+            "filename": os.path.basename(file),
+            "id": str(file_id),
+            "object": "file",
+        }
 
     def delete_file(self, file_id: str) -> Dict[str, str]:
         delete_url = urllib.parse.urljoin(self.endpoint_url, file_id)
@@ -131,6 +163,7 @@ class Files:
 
     def retrieve_file(self, file_id: str) -> Dict[str, Union[str, int]]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
+        print(retrieve_url)
 
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
