@@ -3,7 +3,7 @@ import os
 import posixpath
 import sys
 import urllib.parse
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from tqdm import tqdm
