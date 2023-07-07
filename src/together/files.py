@@ -27,7 +27,7 @@ def validate_file(file: str, logger: Logger) -> bool:
     if not os.path.isfile(file):
         logger.critical("ERROR: File not found")
         return False
-    
+
     file_size = os.stat(file).st_size
 
     if file_size > 4.9 * (2**30):
