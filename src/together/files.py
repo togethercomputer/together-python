@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -133,12 +134,17 @@ class Files:
 
             self.logger.info("Uploading file...")
 
+            file_size = os.stat(file).st_size
             with open(file, "rb") as f:
-                response = requests.put(r2_signed_url, data=f)
+                with tqdm(
+                    total=file_size, unit="B", unit_scale=True, unit_divisor=1024
+                ) as t:
+                    wrapped_file = CallbackIOWrapper(t.update, f, "read")
+                    response = requests.put(r2_signed_url, data=wrapped_file)
 
-            self.logger.info("> File uploaded.")
+            self.logger.info("File uploaded.")
             self.logger.debug(f"status code: {response.status_code}")
-            self.logger.info("> Processing file...")
+            self.logger.info("Processing file...")
             preprocess_url = urllib.parse.urljoin(
                 self.endpoint_url, f"{file_id}/preprocess"
             )
@@ -148,7 +154,7 @@ class Files:
                 headers=headers,
             )
 
-            self.logger.info("> File processed")
+            self.logger.info("File processed")
             self.logger.debug(f"Status code: {response.status_code}")
 
         except Exception as e:

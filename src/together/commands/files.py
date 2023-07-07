@@ -125,5 +125,5 @@ def _run_retrieve(args: argparse.Namespace) -> None:
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
     files = Files(args.endpoint, log_level=args.log)
-    output = files.retrieve_file_content(args.file_id, args.log)
+    output = files.retrieve_file_content(args.file_id, args.output)
     print(output)
