@@ -19,12 +19,22 @@ def main() -> None:
         default=None,
     )
 
+    base_subparser = argparse.ArgumentParser(add_help=False)
+    base_subparser.add_argument(
+        "--log",
+        default="WARNING",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        type=str,
+        help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
+        required=False,
+    )
+
     subparser = parser.add_subparsers(dest="base")
 
-    api.add_parser(subparser)
-    inference.add_parser(subparser)
-    finetune.add_parser(subparser)
-    files.add_parser(subparser)
+    api.add_parser(subparser, parents=[base_subparser])
+    inference.add_parser(subparser, parents=[base_subparser])
+    finetune.add_parser(subparser, parents=[base_subparser])
+    files.add_parser(subparser, parents=[base_subparser])
 
     args = parser.parse_args()
     try:

@@ -1,6 +1,9 @@
+import logging
 import os
 import posixpath
+import sys
 import urllib.parse
+from logging import Logger
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -10,16 +13,33 @@ from tqdm import tqdm
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
 
 
+def exit_1(logger: Logger) -> None:
+    logger.critical("Exiting with code 1...")
+    sys.exit(1)
+
+
 class Finetune:
     def __init__(
         self,
         endpoint_url: Optional[str] = None,
+        log_level: str = "WARNING",
     ) -> None:
+        # Setup logging
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(
+            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+            datefmt="%m/%d/%Y %H:%M:%S",
+            handlers=[logging.StreamHandler(sys.stdout)],
+        )
+
+        self.logger.setLevel(log_level)
+
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
-            raise Exception(
+            self.logger.critical(
                 "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
+            exit_1(self.logger)
 
         if endpoint_url is None:
             endpoint_url = DEFAULT_ENDPOINT
@@ -69,14 +89,16 @@ class Finetune:
                 self.endpoint_url, headers=headers, json=parameter_payload
             )
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by finetune endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -89,14 +111,16 @@ class Finetune:
         try:
             response = requests.get(self.endpoint_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by finetune endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -111,14 +135,16 @@ class Finetune:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by finetune endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -134,14 +160,16 @@ class Finetune:
         try:
             response = requests.post(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by finetune endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -158,14 +186,16 @@ class Finetune:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by finetune endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -175,7 +205,8 @@ class Finetune:
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
             )
         except Exception as e:
-            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
 
@@ -187,7 +218,8 @@ class Finetune:
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["status"]
             )
         except Exception as e:
-            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         return job_status
 
@@ -197,7 +229,8 @@ class Finetune:
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
             )
         except Exception as e:
-            raise ValueError(f"Error: Failed to retrieve fine tune events: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         for i in finetune_events:
             if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
@@ -225,7 +258,7 @@ class Finetune:
             f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
         )
 
-        print(f"Downloading {model_file_path}...")
+        self.logger.info(f"Downloading {model_file_path}...")
 
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
@@ -246,11 +279,12 @@ class Finetune:
                     file.write(chunk)
             progress_bar.close()
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                raise Warning(
+                self.logger.warning(
                     "Caution: Downloaded file size does not match remote file size."
                 )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         return output  # this should be null
 

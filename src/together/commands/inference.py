@@ -9,9 +9,12 @@ from typing import List
 from together.inference import Inference
 
 
-def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+def add_parser(
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+    parents: List[argparse.ArgumentParser],
+) -> None:
     COMMAND_NAME = "complete"
-    inf_parser = subparsers.add_parser(COMMAND_NAME)
+    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
 
     inf_parser.add_argument(
         "prompt",

@@ -23,14 +23,27 @@ def exit_1(logger: Logger) -> None:
     sys.exit(1)
 
 
-def validate_json(file: str) -> bool:
+def validate_file(file: str, logger: Logger) -> bool:
+    if not os.path.isfile(file):
+        logger.critical("ERROR: File not found")
+        return False
+    
+    file_size = os.stat(file).st_size
+
+    if file_size > 4.9 * (2**30):
+        logger.warning("File size > 4.9 GB, file may fail to upload.")
+
     with open(file) as f:
         try:
             for line in f:
                 json_line = json.loads(line)
                 if "text" not in json_line:
+                    logger.critical(
+                        "ERROR: 'text' field not found in one or more lines in JSONL file"
+                    )
                     return False
         except ValueError:
+            logger.critical("ERROR: Could not load JSONL file. Invalid format")
             return False
         return True
 
@@ -41,9 +54,8 @@ class Files:
         endpoint_url: Optional[str] = None,
         log_level: str = "WARNING",
     ) -> None:
-        self.logger = logging.getLogger(__name__)
-
         # Setup logging
+        self.logger = logging.getLogger(__name__)
         logging.basicConfig(
             format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
             datefmt="%m/%d/%Y %H:%M:%S",
@@ -73,14 +85,15 @@ class Files:
         try:
             response = requests.get(self.endpoint_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by files endpoint: {e}")
-
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -92,13 +105,11 @@ class Files:
                 "Authorization": f"Bearer {self.together_api_key}",
             }
 
-            if not validate_json(file=file):
-                self.logger.critical(
-                    "Invalid JSONL format detected: could not load file.\nExiting with code 1..."
-                )
+            if not validate_file(file=file, logger=self.logger):
                 exit_1(self.logger)
 
             session = requests.Session()
+
             init_endpoint = self.endpoint_url[:-1]
 
             self.logger.debug(
@@ -111,7 +122,9 @@ class Files:
                 headers=headers,
                 allow_redirects=False,
             )
+
             self.logger.debug(f"Response: {response.text}")
+
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
 
@@ -119,7 +132,6 @@ class Files:
             self.logger.info("File-ID")
 
             self.logger.info("Uploading file...")
-            # print("> Uploading file...")
 
             with open(file, "rb") as f:
                 response = requests.put(r2_signed_url, data=f)
@@ -160,20 +172,23 @@ class Files:
         try:
             response = requests.delete(delete_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by files endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
     def retrieve_file(self, file_id: str) -> Dict[str, Union[str, int]]:
         retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
-        print(retrieve_url)
+
+        self.logger.info(f"Retrieve URL: {retrieve_url}")
 
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
@@ -183,14 +198,16 @@ class Files:
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by files endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 
@@ -226,11 +243,12 @@ class Files:
             progress_bar.close()
 
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                raise Warning(
+                self.logger.warning(
                     "Caution: Downloaded file size does not match remote file size."
                 )
 
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ValueError(f"Error raised by endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         return output  # this should be null
