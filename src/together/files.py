@@ -124,7 +124,9 @@ class Files:
                 allow_redirects=False,
             )
 
-            self.logger.debug(f"Response: {response.text}")
+            self.logger.debug(f"Response text: {response.text}")
+            self.logger.debug(f"Response header: {response.headers}")
+            self.logger.debug(f"Response status code: {response.status_code}")
 
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
