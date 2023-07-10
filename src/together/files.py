@@ -129,10 +129,14 @@ class Files:
             self.logger.debug(f"Response status code: {response.status_code}")
 
             if response.status_code == 401:
-                self.logger.critical(f"This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue.")
+                self.logger.critical(
+                    "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
+                )
                 exit_1(self.logger)
             elif response.status_code != 302:
-                self.logger.critical(f"Unexpected error raised by endpoint. Response status code: {response.status_code}")
+                self.logger.critical(
+                    f"Unexpected error raised by endpoint. Response status code: {response.status_code}"
+                )
                 exit_1(self.logger)
 
             r2_signed_url = response.headers["Location"]
