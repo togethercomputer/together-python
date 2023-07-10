@@ -129,7 +129,7 @@ def add_parser(
     text2imgargs.add_argument(
         "--output",
         "-o",
-        default=None,
+        default="image",
         type=str,
         help="File name for text2img output images '-X.png' will be appended to this name, where X is a number.",
     )
@@ -182,12 +182,12 @@ def _run_complete(args: argparse.Namespace) -> None:
                 images = response["output"]["choices"]
 
                 for i in range(len(images)):
-                    with open(f"{args.output_file_name}-{i}.png", "wb") as f:
+                    with open(f"{args.output}-{i}.png", "wb") as f:
                         f.write(base64.b64decode(images[i]["image_base64"]))
             except Exception as e:  # This is the correct syntax
                 raise ValueError(f"Unknown error raised: {e}")
 
-            text = f"Output images saved to {args.output_file_name}-X.png"
+            text = f"Output images saved to {args.output}-X.png"
         else:
             raise ValueError("Invalid task supplied")
 
