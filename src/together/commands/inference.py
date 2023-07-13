@@ -22,7 +22,7 @@ def add_parser(
         metavar="PROMPT",
         default=None,
         type=str,
-        help="Prompt to complete",
+        help="A string providing context for the model to complete.",
     )
 
     inf_parser.add_argument(
@@ -30,14 +30,14 @@ def add_parser(
         "-m",
         default="togethercomputer/RedPajama-INCITE-7B-Chat",
         type=str,
-        help="name/path of the model",
+        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
     )
 
     inf_parser.add_argument(
         "--task",
         default="text2text",
         type=str,
-        help="Task type: text2text, text2img",
+        help="Task type: text2text, text2img. Default=text2text",
         choices=["text2text", "text2img"],
     )
 
@@ -47,44 +47,44 @@ def add_parser(
         "--max-tokens",
         default=128,
         type=int,
-        help="the maximum number of tokens to generate",
+        help="Maximum number of tokens to generate. Default=128",
     )
     text2textargs.add_argument(
         "--stop",
         default=["<human>"],
         nargs="+",
         type=str,
-        help="Stop words. Can take in multiple arguments.",
+        help="Strings that will truncate (stop) inference text output. Default='<human>'",
     )
     text2textargs.add_argument(
         "--temperature",
         default=0.7,
         type=float,
-        help="temperature for the LM",
+        help="Determines the degree of randomness in the response. Default=0.7",
     )
     text2textargs.add_argument(
         "--top-p",
         default=0.7,
         type=float,
-        help="top-p for the LM",
+        help="Used to dynamically adjust the number of choices for each predicted token based on the cumulative probabilities. Default=0.7",
     )
     text2textargs.add_argument(
         "--top-k",
         default=50,
         type=int,
-        help="top-k for the LM",
+        help="Used to limit the number of choices for the next predicted word or token. Default=50",
     )
     text2textargs.add_argument(
         "--repetition-penalty",
         default=None,
         type=float,
-        help="repetition penaltyfor the LM",
+        help="Controls the diversity of generated text by reducing the likelihood of repeated sequences. Higher values decrease repetition.",
     )
     text2textargs.add_argument(
         "--logprobs",
         default=None,
         type=int,
-        help="logprobs for the LM",
+        help="Specifies how many top token log probabilities are included in the response for each token generation step.",
     )
     text2textargs.add_argument(
         "--raw",
@@ -99,40 +99,40 @@ def add_parser(
         "--height",
         default=512,
         type=int,
-        help="Height for images in text2img results",
+        help="Pixel height for generated image results",
     )
     text2imgargs.add_argument(
         "--width",
         default=512,
         type=int,
-        help="Width for images in text2img results",
+        help="Pixel width for generated image results",
     )
     # arguments for text2img models
     text2imgargs.add_argument(
         "--steps",
         default=50,
         type=int,
-        help="Number of steps for text2img models",
+        help="Number of steps",
     )
     text2imgargs.add_argument(
         "--seed",
         default=42,
         type=int,
-        help="Seed for text2img models",
+        help="Seed for image generation",
     )
     text2imgargs.add_argument(
         "--results",
         "-r",
         default=1,
         type=int,
-        help="Number of text2img results",
+        help="Number of image results to return",
     )
     text2imgargs.add_argument(
-        "--output",
+        "--output-prefix",
         "-o",
         default="image",
         type=str,
-        help="File name for text2img output images '-X.png' will be appended to this name, where X is a number.",
+        help="Prefix for the file names the output images will be saved to. An image number will be appended to this name. Default=image",
     )
 
     inf_parser.set_defaults(func=_run_complete)

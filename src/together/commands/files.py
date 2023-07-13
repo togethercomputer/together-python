@@ -39,7 +39,7 @@ def _add_upload(
     upload_file_parser.add_argument(
         "file",
         metavar="FILENAME",
-        help="File to upload",
+        help="Local file to upload",
         type=str,
     )
     upload_file_parser.set_defaults(func=_run_upload)
@@ -53,7 +53,7 @@ def _add_delete(
     delete_file_parser.add_argument(
         "file_id",
         metavar="FILE-ID",
-        help="File ID",
+        help="File ID of remote file",
         type=str,
     )
     delete_file_parser.set_defaults(func=_run_delete)
@@ -67,7 +67,7 @@ def _add_retrieve(
     retrieve_file_parser.add_argument(
         "file_id",
         metavar="FILE-ID",
-        help="File ID",
+        help="File ID of remote file",
         type=str,
     )
     retrieve_file_parser.set_defaults(func=_run_retrieve)
@@ -83,7 +83,7 @@ def _add_retrieve_content(
     retrieve_file_content_parser.add_argument(
         "file_id",
         metavar="FILE-ID",
-        help="File ID",
+        help="File ID of remote file",
         type=str,
     )
     retrieve_file_content_parser.add_argument(
@@ -91,7 +91,7 @@ def _add_retrieve_content(
         "-o",
         default=None,
         metavar="OUT_FILENAME",
-        help="Output filename",
+        help="Optional output filename. Defaults to remote filename.",
         type=str,
         required=False,
     )

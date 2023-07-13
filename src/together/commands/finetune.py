@@ -43,7 +43,8 @@ def _add_create(
     create_finetune_parser.add_argument(
         "--training-file",
         "-t",
-        help="The ID of an uploaded file that contains training data.",
+        metavar="FILE-ID",
+        help="File-ID of an uploaded file that contains training data.",
         required=True,
         type=str,
     )
@@ -57,29 +58,33 @@ def _add_create(
     create_finetune_parser.add_argument(
         "--model",
         "-m",
+        metavar="MODEL",
         default=None,
-        help="The name of the base model to fine-tune.",
+        help="The name of the base model to fine-tune. Default='togethercomputer/RedPajama-INCITE-7B-Chat'.",
         type=str,
     )
     create_finetune_parser.add_argument(
         "--n-epochs",
         "-ne",
+        metavar="EPOCHS",
         default=4,
-        help="The number of epochs to train the model for.",
+        help="The number of epochs to train the model for. Default=4",
         type=int,
     )
     create_finetune_parser.add_argument(
         "--batch-size",
         "-b",
+        metavar="BATCH_SIZE",
         default=32,
-        help="The batch size to use for training.",
+        help="The batch size to use for training. Default=32",
         type=int,
     )
     create_finetune_parser.add_argument(
         "--learning-rate",
         "-lr",
+        metavar="LEARNING_RATE",
         default=0.00001,
-        help="The learning rate multiplier to use for training.",
+        help="The learning rate multiplier to use for training. Default=0.00001",
         type=float,
     )
     # create_finetune_parser.add_argument(
@@ -125,6 +130,7 @@ def _add_create(
     create_finetune_parser.add_argument(
         "--suffix",
         "-s",
+        metavar="SUFFIX",
         default=None,
         help="Up to 40 characters that will be added to your fine-tuned model name.",
         type=str,
@@ -206,19 +212,20 @@ def _add_download(
     download_parser.add_argument(
         "--output",
         "-o",
+        metavar="FILENAME",
         default=None,
         help="Output filename",
         type=str,
         required=False,
     )
-    download_parser.add_argument(
-        "--checkpoint-num",
-        "-n",
-        default=-1,
-        help="Checkpoint number. Defaults to the latest checkpoint = -1.",
-        type=int,
-        required=False,
-    )
+    # download_parser.add_argument(
+    #     "--checkpoint-num",
+    #     "-n",
+    #     default=-1,
+    #     help="Checkpoint number. Defaults to the latest checkpoint = -1.",
+    #     type=int,
+    #     required=False,
+    # )
     download_parser.set_defaults(func=_run_download)
 
 
@@ -321,6 +328,7 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 def _run_download(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint, log_level=args.log)
+    args.checkpoint_num = -1 # hardcoded until enabled in remote
     response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
     print(response)
 
