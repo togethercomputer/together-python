@@ -2,9 +2,16 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import List
+from typing import Any, Dict, List
 
 from together.finetune import Finetune
+
+
+def extract_time(json_obj: Dict[str, Any]) -> int:
+    try:
+        return int(json_obj["updated_at"])
+    except KeyError:
+        return 0
 
 
 def add_parser(
@@ -288,6 +295,9 @@ def _run_create(args: argparse.Namespace) -> None:
 def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune(args.endpoint, log_level=args.log)
     response = finetune.list_finetune()
+    for item in response["data"]:
+        item.pop("events", None)
+    response["data"].sort(key=extract_time)
     print(json.dumps(response, indent=4))
 
 
