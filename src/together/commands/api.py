@@ -44,7 +44,7 @@ def _add_raw(
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    api = API()
+    api = API(endpoint_url=args.endpoint, log_level=args.log)
 
     if args.all:
         response = api.get_all_models()
@@ -55,6 +55,6 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_raw(args: argparse.Namespace) -> None:
-    api = API()
+    api = API(endpoint_url=args.endpoint, log_level=args.log)
     response = api.get_supply()
     print(json.dumps(response, indent=4))

@@ -19,8 +19,8 @@ def add_parser(
     _add_create(child_parsers, parents=parents)
     _add_list(child_parsers, parents=parents)
     _add_retrieve(child_parsers, parents=parents)
-    _add_cancel(child_parsers, parents=parents)
     _add_list_events(child_parsers, parents=parents)
+    _add_cancel(child_parsers, parents=parents)
     _add_download(child_parsers, parents=parents)
     _add_status(child_parsers, parents=parents)
     _add_checkpoints(child_parsers, parents=parents)
@@ -264,7 +264,7 @@ def _add_checkpoints(
 
 
 def _run_create(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint)
+    finetune = Finetune(args.endpoint, log_level=args.log)
 
     response = finetune.create_finetune(
         training_file=args.training_file,  # training file_id

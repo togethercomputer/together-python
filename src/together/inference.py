@@ -1,8 +1,10 @@
 import os
 import urllib.parse
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import requests
+
+from together.utils import exit_1, get_logger
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -12,10 +14,11 @@ class Inference:
     def __init__(
         self,
         endpoint_url: Optional[str] = None,
+        log_level: str = "WARNING",
         task: Optional[str] = "text2text",
         model: Optional[str] = None,
         max_tokens: Optional[int] = 128,
-        # stop_word: Optional[str] = None,
+        stop: Optional[str] = None,
         temperature: Optional[float] = 0.7,
         top_p: Optional[float] = 0.7,
         top_k: Optional[int] = 50,
@@ -29,11 +32,15 @@ class Inference:
         height: Optional[int] = 512,
         width: Optional[int] = 512,
     ) -> None:
+        # Setup logger
+        self.logger = get_logger(str(__name__), log_level=log_level)
+
         together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if together_api_key is None:
-            raise Exception(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable"
+            self.logger.critical(
+                "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
+            exit_1(self.logger)
 
         if endpoint_url is None:
             endpoint_url = DEFAULT_ENDPOINT
@@ -41,13 +48,10 @@ class Inference:
         self.together_api_key = together_api_key
         self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/api/inference")
 
-        if self.endpoint_url is None:
-            raise Exception("Error: Invalid endpoint URL provided.")
-
         self.task = task
         self.model = model
         self.max_tokens = max_tokens
-        # self.stop_word = stop_word
+        self.stop = stop
         self.temperature = temperature
         self.top_p = top_p
         self.top_k = top_k
@@ -64,7 +68,6 @@ class Inference:
     def inference(
         self,
         prompt: str,
-        stop: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         if self.task == "text2text":
             parameter_payload = {
@@ -74,7 +77,7 @@ class Inference:
                 "top_k": self.top_k,
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
-                # "stop": self.stop_word,
+                "stop": self.stop,
                 "repetition_penalty": self.repetition_penalty,
                 "logprobs": self.logprobs,
             }
@@ -90,7 +93,10 @@ class Inference:
                 "width": self.width,
             }
         else:
-            raise ValueError("Invalid task supplied")
+            self.logger.critical(
+                f"Invalid task: {self.task}. Pick from either text2text or text2img."
+            )
+            exit_1(self.logger)
 
         # HTTP headers for authorization
         headers = {
@@ -104,13 +110,15 @@ class Inference:
                 self.endpoint_url, headers=headers, json=parameter_payload
             )
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json

@@ -1,8 +1,6 @@
 import json
-import logging
 import os
 import posixpath
-import sys
 import urllib.parse
 from logging import Logger
 from typing import Dict, List, Optional, Union
@@ -11,17 +9,14 @@ import requests
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
+from together.utils import exit_1, get_logger
+
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
 
 
 class JSONException(Exception):
     pass
-
-
-def exit_1(logger: Logger) -> None:
-    logger.critical("Exiting with code 1...")
-    sys.exit(1)
 
 
 def validate_file(file: str, logger: Logger) -> bool:
@@ -55,15 +50,8 @@ class Files:
         endpoint_url: Optional[str] = None,
         log_level: str = "WARNING",
     ) -> None:
-        # Setup logging
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(
-            format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-            datefmt="%m/%d/%Y %H:%M:%S",
-            handlers=[logging.StreamHandler(sys.stdout)],
-        )
-
-        self.logger.setLevel(log_level)
+        # Setup logger
+        self.logger = get_logger(__name__, log_level=log_level)
 
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:

@@ -6,6 +6,7 @@ import requests
 from together.files import Files
 from together.finetune import Finetune
 from together.inference import Inference
+from together.utils import exit_1, get_logger
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -17,12 +18,17 @@ class API:
         self,
         endpoint_url: Optional[str] = None,
         supply_endpoint_url: Optional[str] = None,
+        log_level: str = "WARNING",
     ) -> None:
+        # Setup logger
+        self.logger = get_logger(__name__, log_level=log_level)
+
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
-            raise Exception(
+            self.logger.critical(
                 "TOGETHER_API_KEY not found. Please set it as an environment variable."
             )
+            exit_1(self.logger)
 
         if endpoint_url is None:
             endpoint_url = DEFAULT_ENDPOINT
@@ -43,14 +49,16 @@ class API:
                 },
             )
         except requests.exceptions.RequestException as e:
-            raise ValueError(f"Error raised by inference endpoint: {e}")
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         try:
             response_json = dict(response.json())
-        except Exception:
-            raise ValueError(
-                f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
+            exit_1(self.logger)
 
         return response_json
 

@@ -7,6 +7,7 @@ import re
 from typing import List
 
 from together.inference import Inference
+from together.utils import exit_1, get_logger
 
 
 def add_parser(
@@ -49,11 +50,11 @@ def add_parser(
         help="the maximum number of tokens to generate",
     )
     text2textargs.add_argument(
-        "--stop-words",
-        default=None,
+        "--stop",
+        default=["<human>"],
         nargs="+",
         type=str,
-        help="stop word",
+        help="Stop words. Can take in multiple arguments.",
     )
     text2textargs.add_argument(
         "--temperature",
@@ -143,12 +144,14 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
 
 
 def _run_complete(args: argparse.Namespace) -> None:
+    logger = get_logger(__name__, log_level=args.log)
+
     inference = Inference(
         endpoint_url=args.endpoint,
         task=args.task,
         model=args.model,
         max_tokens=args.max_tokens,
-        # stop_word= args.stop_word,
+        stop=args.stop,
         temperature=args.temperature,
         top_p=args.top_p,
         top_k=args.top_k,
@@ -161,7 +164,7 @@ def _run_complete(args: argparse.Namespace) -> None:
         width=args.width,
     )
 
-    response = inference.inference(prompt=args.prompt, stop=args.stop_words)
+    response = inference.inference(prompt=args.prompt)
 
     if args.raw:
         print(json.dumps(response, indent=4))
@@ -171,11 +174,12 @@ def _run_complete(args: argparse.Namespace) -> None:
             try:
                 text = str(response["output"]["choices"][0]["text"])
             except Exception as e:
-                raise ValueError(f"Error raised: {e}")
+                logger.critical(f"Error raised: {e}")
+                exit_1(logger)
 
-            if args.stop_words is not None:
+            if args.stop is not None:
                 # TODO remove this and permanently implement api stop_word
-                text = _enforce_stop_tokens(text, args.stop_words)
+                text = _enforce_stop_tokens(text, args.stop)
 
         elif args.task == "text2img":
             try:
@@ -185,10 +189,14 @@ def _run_complete(args: argparse.Namespace) -> None:
                     with open(f"{args.output}-{i}.png", "wb") as f:
                         f.write(base64.b64decode(images[i]["image_base64"]))
             except Exception as e:  # This is the correct syntax
-                raise ValueError(f"Unknown error raised: {e}")
+                logger.critical(f"Error raised: {e}")
+                exit_1(logger)
 
             text = f"Output images saved to {args.output}-X.png"
         else:
-            raise ValueError("Invalid task supplied")
+            logger.critical(
+                f"Invalid task: {args.task}. Pick from either text2text or text2img."
+            )
+            exit_1(logger)
 
-        print(text)
+        print(text.strip())
