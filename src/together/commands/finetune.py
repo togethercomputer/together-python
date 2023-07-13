@@ -214,7 +214,7 @@ def _add_download(
         "-o",
         metavar="FILENAME",
         default=None,
-        help="Output filename",
+        help="Output filename. Defaults to remote name.",
         type=str,
         required=False,
     )
