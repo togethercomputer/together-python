@@ -173,9 +173,13 @@ def _run_complete(args: argparse.Namespace) -> None:
             # TODO Add exception when generated_text has error, See together docs
             try:
                 text = str(response["output"]["choices"][0]["text"])
-            except Exception as e:
-                logger.critical(f"Error raised: {e}")
-                exit_1(logger)
+            except Exception:
+                try:
+                    logger.critical(f"Error raised: {response['output']['error']}")
+                    exit_1(logger)
+                except Exception as e:
+                    logger.critical(f"Error raised: {e}")
+                    exit_1(logger)
 
             if args.stop is not None:
                 # TODO remove this and permanently implement api stop_word
