@@ -4,6 +4,7 @@ import argparse
 import base64
 import json
 import re
+import sys
 from typing import List
 
 from together.inference import Inference
@@ -168,9 +169,10 @@ def _run_complete(args: argparse.Namespace) -> None:
 
     if args.raw:
         print(json.dumps(response, indent=4))
-    else:
+        sys.exit()
+
+    if "output" in response.keys():
         if args.task == "text2text":
-            # TODO Add exception when generated_text has error, See together docs
             try:
                 text = str(response["output"]["choices"][0]["text"])
             except Exception:
@@ -181,9 +183,8 @@ def _run_complete(args: argparse.Namespace) -> None:
                     logger.critical(f"Error raised: {e}")
                     exit_1(logger)
 
-            if args.stop is not None:
-                # TODO remove this and permanently implement api stop_word
-                text = _enforce_stop_tokens(text, args.stop)
+            # if args.stop is not None:
+            #    text = _enforce_stop_tokens(text, args.stop)
 
         elif args.task == "text2img":
             try:
@@ -203,4 +204,17 @@ def _run_complete(args: argparse.Namespace) -> None:
             )
             exit_1(logger)
 
-        print(text.strip())
+    elif "error" in response.keys():
+        if response["error"] == "Returned error: no instance":
+            logger.critical(
+                f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
+            )
+            exit_1(logger)
+        else:
+            logger.critical(f"Error raised: {response['error']}")
+
+    else:
+        logger.critical("Unknown response received")
+        exit_1(logger)
+
+    print(text.strip())
