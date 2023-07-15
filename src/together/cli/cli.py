@@ -40,7 +40,10 @@ def main() -> None:
     args = parser.parse_args()
 
     # Setup logging
-    logger = get_logger(__name__, log_level=args.log)
+    try:
+        logger = get_logger(__name__, log_level=args.log)
+    except Exception:
+        logger = get_logger(__name__, log_level="WARNING")
 
     try:
         args.func(args)
@@ -49,6 +52,7 @@ def main() -> None:
         if str(e) != "'Namespace' object has no attribute 'func'":
             logger.critical(f"Error raised: {e}")
             exit_1(logger)
+        parser.print_help()
 
 
 if __name__ == "__main__":

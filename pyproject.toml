@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "together"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Together Computer", email="community@together.xyz" },
 ]
-description = "Coming soon!"
+description = "Python client for Together's Cloud Platform!"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.10"
+requires-python = ">=3.6"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
