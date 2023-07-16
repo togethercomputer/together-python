@@ -45,14 +45,14 @@ def main() -> None:
     except Exception:
         logger = get_logger(__name__, log_level="WARNING")
 
-    try:
-        args.func(args)
-    except AttributeError as e:
-        # print error, but ignore if `together` is run.
-        if str(e) != "'Namespace' object has no attribute 'func'":
-            logger.critical(f"Error raised: {e}")
-            exit_1(logger)
-        parser.print_help()
+    #try:
+    args.func(args)
+    #except AttributeError as e:
+    #    # print error, but ignore if `together` is run.
+    ##    if str(e) != "'Namespace' object has no attribute 'func'":
+    #        logger.critical(f"Error raised: {e}")
+    #        exit_1(logger)
+    #    parser.print_help()
 
 
 if __name__ == "__main__":

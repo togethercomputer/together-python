@@ -6,6 +6,7 @@ import json
 import re
 import sys
 from typing import List
+import sseclient
 
 from together.inference import Inference
 from together.utils import exit_1, get_logger
@@ -40,6 +41,13 @@ def add_parser(
         type=str,
         help="Task type: text2text, text2img. Default=text2text",
         choices=["text2text", "text2img"],
+    )
+
+    inf_parser.add_argument(
+        "--no-stream",
+        default=False,
+        action="store_true",
+        help="Indicates wether to disable streaming",
     )
 
     text2textargs = inf_parser.add_argument_group("Text2Text Arguments")
@@ -143,30 +151,7 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     """Cut off the text as soon as any stop words occur."""
     return re.split("|".join(stop), text)[0]
 
-
-def _run_complete(args: argparse.Namespace) -> None:
-    logger = get_logger(__name__, log_level=args.log)
-
-    inference = Inference(
-        endpoint_url=args.endpoint,
-        task=args.task,
-        model=args.model,
-        max_tokens=args.max_tokens,
-        stop=args.stop,
-        temperature=args.temperature,
-        top_p=args.top_p,
-        top_k=args.top_k,
-        repetition_penalty=args.repetition_penalty,
-        logprobs=args.logprobs,
-        steps=args.steps,
-        seed=args.seed,
-        results=args.results,
-        height=args.height,
-        width=args.width,
-    )
-
-    response = inference.inference(prompt=args.prompt)
-
+def no_streamer(args, response, logger):
     if args.raw:
         print(json.dumps(response, indent=4))
         sys.exit()
@@ -218,3 +203,31 @@ def _run_complete(args: argparse.Namespace) -> None:
         exit_1(logger)
 
     print(text.strip())
+
+def _run_complete(args: argparse.Namespace) -> None:
+    logger = get_logger(__name__, log_level=args.log)
+
+    inference = Inference(
+        endpoint_url=args.endpoint,
+        task=args.task,
+        model=args.model,
+        max_tokens=args.max_tokens,
+        stop=args.stop,
+        temperature=args.temperature,
+        top_p=args.top_p,
+        top_k=args.top_k,
+        repetition_penalty=args.repetition_penalty,
+        logprobs=args.logprobs,
+        steps=args.steps,
+        seed=args.seed,
+        results=args.results,
+        height=args.height,
+        width=args.width,
+        stream=not args.no_stream,
+    )
+
+    has_response, response = inference.inference(prompt=args.prompt)
+
+    if has_response:
+        no_streamer(args, response, logger)
+            
