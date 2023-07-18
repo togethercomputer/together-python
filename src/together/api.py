@@ -1,8 +1,8 @@
 import os
-from typing import Any, Dict, List, Optional, cast
+import urllib.parse
+from typing import Any, List, Optional
 
 import requests
-import urllib.parse
 
 from together.files import Files
 from together.finetune import Finetune
@@ -40,7 +40,7 @@ class API:
         self.endpoint_url = endpoint_url
         self.supply_endpoint_url = supply_endpoint_url
 
-    def get_all_models(self) -> Dict[str, Any]:
+    def get_models(self) -> List[Any]:
         model_url = urllib.parse.urljoin(self.endpoint_url, "models/info?=")
         headers = {
             "Authorization": f"Bearer {self.together_api_key}",
@@ -55,23 +55,14 @@ class API:
             exit_1(self.logger)
 
         try:
-            response_json = list(response.json())
+            response_list = list(response.json())
         except Exception as e:
             self.logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
             exit_1(self.logger)
 
-        return response_json
-
-    def get_available_models(self) -> List[str]:
-        res = self.get_supply()
-        names = res["result"].keys()
-        available_models = [
-            name[:-1] for name in names if res["result"][name]["num_asks"] > 0
-        ]
-
-        return available_models
+        return response_list
 
     def finetune(self) -> Finetune:
         return Finetune(

@@ -35,7 +35,7 @@ def _add_list(
 
 def _run_list(args: argparse.Namespace) -> None:
     api = API(endpoint_url=args.endpoint, log_level=args.log)
-    response = api.get_all_models()
+    response = api.get_models()
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -43,4 +43,3 @@ def _run_list(args: argparse.Namespace) -> None:
         for i in response:
             models.append(i["name"])
         print(json.dumps(models, indent=4))
-
