@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import logging
 import re
 import sys
-from typing import List
-import sseclient
+from typing import Any, Dict, List
 
 from together.inference import Inference
-from together.utils import exit_1, get_logger
+from together.utils.utils import exit_1, get_logger
 
 
 def add_parser(
@@ -151,7 +151,10 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     """Cut off the text as soon as any stop words occur."""
     return re.split("|".join(stop), text)[0]
 
-def no_streamer(args, response, logger):
+
+def no_streamer(
+    args: argparse.Namespace, response: Dict[str, Any], logger: logging.Logger
+) -> None:
     if args.raw:
         print(json.dumps(response, indent=4))
         sys.exit()
@@ -204,6 +207,7 @@ def no_streamer(args, response, logger):
 
     print(text.strip())
 
+
 def _run_complete(args: argparse.Namespace) -> None:
     logger = get_logger(__name__, log_level=args.log)
 
@@ -223,11 +227,10 @@ def _run_complete(args: argparse.Namespace) -> None:
         results=args.results,
         height=args.height,
         width=args.width,
-        stream=not args.no_stream,
     )
 
-    has_response, response = inference.inference(prompt=args.prompt)
-
-    if has_response:
+    if args.no_stream:
+        response = inference.inference(prompt=args.prompt)
         no_streamer(args, response, logger)
-            
+    else:
+        _ = inference.streaming_inference(prompt=args.prompt)

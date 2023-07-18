@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 import requests
 from tqdm import tqdm
 
-from together.utils import exit_1, get_logger
+from together.utils.utils import exit_1, get_logger
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"

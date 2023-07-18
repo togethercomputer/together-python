@@ -1,12 +1,12 @@
+import json
 import os
 import urllib.parse
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import requests
-import sseclient
-import json
+import sseclient  # type: ignore
 
-from together.utils import exit_1, get_logger
+from together.utils.utils import exit_1, get_logger
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
@@ -33,7 +33,6 @@ class Inference:
         results: Optional[int] = 1,
         height: Optional[int] = 512,
         width: Optional[int] = 512,
-        stream: Optional[bool] = True,
     ) -> None:
         # Setup logger
         self.logger = get_logger(str(__name__), log_level=log_level)
@@ -68,12 +67,10 @@ class Inference:
         self.height = height
         self.width = width
 
-        self.stream = stream
-
     def inference(
         self,
         prompt: str,
-    ) -> Union[Dict[str, Any], requests.Response]:
+    ) -> Dict[str, Any]:
         if self.task == "text2text":
             parameter_payload = {
                 "model": self.model,
@@ -85,10 +82,8 @@ class Inference:
                 "stop": self.stop,
                 "repetition_penalty": self.repetition_penalty,
                 "logprobs": self.logprobs,
-                "stream_tokens": self.stream
             }
         elif self.task == "text2img":
-            self.stream = False
             parameter_payload = {
                 "model": self.model,
                 "prompt": prompt,
@@ -114,33 +109,71 @@ class Inference:
         # send request
         try:
             response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload, stream=self.stream
+                self.endpoint_url,
+                headers=headers,
+                json=parameter_payload,
             )
         except requests.exceptions.RequestException as e:
             self.logger.critical(f"Response error raised: {e}")
             exit_1(self.logger)
 
-        if not self.stream:
-            try:
-                response_json = dict(response.json())
-            except Exception as e:
-                self.logger.critical(
-                    f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-                )
-                exit_1(self.logger)
-            return True, response_json
+        try:
+            response_json = dict(response.json())
+        except Exception as e:
+            self.logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
+            )
+            exit_1(self.logger)
+        return response_json
+
+    def streaming_inference(self, prompt: str) -> str:
+        parameter_payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "top_p": self.top_p,
+            "top_k": self.top_k,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+            "stop": self.stop,
+            "repetition_penalty": self.repetition_penalty,
+            "logprobs": self.logprobs,
+            "stream_tokens": True,
+        }
+        # HTTP headers for authorization
+        headers = {
+            "Authorization": f"Bearer {self.together_api_key}",
+            "Content-Type": "application/json",
+        }
+
+        # send request
+        try:
+            response = requests.post(
+                self.endpoint_url,
+                headers=headers,
+                json=parameter_payload,
+                stream=True,
+            )
+        except requests.exceptions.RequestException as e:
+            self.logger.critical(f"Response error raised: {e}")
+            exit_1(self.logger)
 
         if response.status_code == 200:
+            output = ""
             client = sseclient.SSEClient(response)
             for event in client.events():
-                if event.data != '[DONE]':
-                    print(json.loads(event.data)['choices'][0]['text'], end="", flush=True),
+                if event.data != "[DONE]":
+                    text = json.loads(event.data)["choices"][0]["text"]
+                    output += text
+                    print(text, end="", flush=True),
             print("\n")
-            return False, None
         elif response.status_code == 429:
-            return True, {"error": "Returned error: no instance"}
+            self.logger.critical(
+                f"No running instances for {self.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
+            )
+            exit_1(self.logger)
         else:
             self.logger.critical(
-                    f"Unknown error raised: {e}\nResponse status code = {response.status_code}"
-                )
+                f"Unknown error raised.\nResponse status code = {response.status_code}"
+            )
             exit_1(self.logger)
+        return output

@@ -6,7 +6,7 @@ import requests
 from together.files import Files
 from together.finetune import Finetune
 from together.inference import Inference
-from together.utils import exit_1, get_logger
+from together.utils.utils import exit_1, get_logger
 
 
 DEFAULT_ENDPOINT = "https://api.together.xyz/"
