@@ -17,7 +17,6 @@ def add_parser(
     child_parsers = parser.add_subparsers(required=True)
 
     _add_list(child_parsers, parents=parents)
-    _add_raw(child_parsers, parents=parents)
 
 
 def _add_list(
@@ -26,35 +25,22 @@ def _add_list(
 ) -> None:
     list_model_subparser = parser.add_parser("list", parents=parents)
     list_model_subparser.add_argument(
-        "--all",
-        "-a",
-        help="List all models (available and unavailable)",
+        "--raw",
+        help="Raw details of all models",
         default=False,
         action="store_true",
     )
     list_model_subparser.set_defaults(func=_run_list)
 
 
-def _add_raw(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    list_parser = parser.add_parser("raw-supply", parents=parents)
-    list_parser.set_defaults(func=_run_raw)
-
-
 def _run_list(args: argparse.Namespace) -> None:
     api = API(endpoint_url=args.endpoint, log_level=args.log)
-
-    if args.all:
-        response = api.get_all_models()
+    response = api.get_all_models()
+    if args.raw:
+        print(json.dumps(response, indent=4))
     else:
-        response = api.get_available_models()
+        models = []
+        for i in response:
+            models.append(i["name"])
+        print(json.dumps(models, indent=4))
 
-    print(json.dumps(response, indent=4))
-
-
-def _run_raw(args: argparse.Namespace) -> None:
-    api = API(endpoint_url=args.endpoint, log_level=args.log)
-    response = api.get_supply()
-    print(json.dumps(response, indent=4))

@@ -2,6 +2,7 @@ import os
 from typing import Any, Dict, List, Optional, cast
 
 import requests
+import urllib.parse
 
 from together.files import Files
 from together.finetune import Finetune
@@ -39,21 +40,22 @@ class API:
         self.endpoint_url = endpoint_url
         self.supply_endpoint_url = supply_endpoint_url
 
-    def get_supply(self) -> Dict[str, Any]:
+    def get_all_models(self) -> Dict[str, Any]:
+        model_url = urllib.parse.urljoin(self.endpoint_url, "models/info?=")
+        headers = {
+            "Authorization": f"Bearer {self.together_api_key}",
+        }
         try:
             response = requests.get(
-                self.supply_endpoint_url,
-                json={
-                    "method": "together_getDepth",
-                    "id": 1,
-                },
+                model_url,
+                headers=headers,
             )
         except requests.exceptions.RequestException as e:
             self.logger.critical(f"Response error raised: {e}")
             exit_1(self.logger)
 
         try:
-            response_json = dict(response.json())
+            response_json = list(response.json())
         except Exception as e:
             self.logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
@@ -61,13 +63,6 @@ class API:
             exit_1(self.logger)
 
         return response_json
-
-    def get_all_models(self) -> List[str]:
-        models = cast(List[str], self.get_supply()["result"].keys())
-
-        models = [str(sub[:-1]) for sub in models]  # remove the ? after the model names
-
-        return models
 
     def get_available_models(self) -> List[str]:
         res = self.get_supply()
