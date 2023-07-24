@@ -77,18 +77,6 @@ def add_parser(
         type=float,
         help="Controls the diversity of generated text by reducing the likelihood of repeated sequences. Higher values decrease repetition.",
     )
-    text2textargs.add_argument(
-        "--logprobs",
-        default=None,
-        type=int,
-        help="Specifies how many top token log probabilities are included in the response for each token generation step.",
-    )
-    text2textargs.add_argument(
-        "--raw",
-        default=False,
-        action="store_true",
-        help="temperature for the LM",
-    )
 
     inf_parser.set_defaults(func=_run_complete)
 
@@ -144,7 +132,6 @@ def _run_complete(args: argparse.Namespace) -> None:
         top_p=args.top_p,
         top_k=args.top_k,
         repetition_penalty=args.repetition_penalty,
-        logprobs=args.logprobs,
     )
 
     OpenChatKitShell(inference, args).cmdloop()
