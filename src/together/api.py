@@ -23,6 +23,7 @@ class API:
     ) -> None:
         # Setup logger
         self.logger = get_logger(__name__, log_level=log_level)
+        self.log_level = log_level
 
         self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
         if self.together_api_key is None:
@@ -67,15 +68,18 @@ class API:
     def finetune(self) -> Finetune:
         return Finetune(
             endpoint_url=self.endpoint_url,
+            log_level=self.log_level,
         )
 
     def complete(self, **model_kwargs: Any) -> Inference:
         return Inference(
             endpoint_url=self.endpoint_url,
             **model_kwargs,
+            log_level=self.log_level,
         )
 
     def files(self) -> Files:
         return Files(
             endpoint_url=self.endpoint_url,
+            log_level=self.log_level,
         )
