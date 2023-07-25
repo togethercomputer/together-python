@@ -1,7 +1,7 @@
 #! python
 import argparse
 
-from together.commands import api, chat, files, finetune, inference
+from together.commands import api, chat, complete, files, finetune, image
 from together.utils.utils import get_logger
 
 
@@ -33,10 +33,11 @@ def main() -> None:
     subparser = parser.add_subparsers(dest="base")
 
     api.add_parser(subparser, parents=[base_subparser])
-    inference.add_parser(subparser, parents=[base_subparser])
+    chat.add_parser(subparser, parents=[base_subparser])
+    complete.add_parser(subparser, parents=[base_subparser])
+    image.add_parser(subparser, parents=[base_subparser])
     finetune.add_parser(subparser, parents=[base_subparser])
     files.add_parser(subparser, parents=[base_subparser])
-    chat.add_parser(subparser, parents=[base_subparser])
 
     args = parser.parse_args()
 

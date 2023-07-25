@@ -5,7 +5,7 @@ import cmd
 from typing import List
 
 import together.utils.conversation as convo
-from together.inference import Inference
+from together.complete import Complete
 from together.utils.utils import get_logger
 
 
@@ -38,40 +38,38 @@ def add_parser(
         help="The tag the bot's response should have. Defaults to '<bot>'. Examples '### Assistant' or 'response:'",
     )
 
-    text2textargs = inf_parser.add_argument_group("Text2Text Arguments")
-
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--max-tokens",
         default=128,
         type=int,
         help="Maximum number of tokens to generate. Default=128",
     )
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--stop",
         default=["<human>"],
         nargs="+",
         type=str,
-        help="Strings that will truncate (stop) inference text output. Default='<human>'",
+        help="Strings that will truncate (stop) text generation. Default='<human>'",
     )
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--temperature",
         default=0.7,
         type=float,
         help="Determines the degree of randomness in the response. Default=0.7",
     )
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--top-p",
         default=0.7,
         type=float,
         help="Used to dynamically adjust the number of choices for each predicted token based on the cumulative probabilities. Default=0.7",
     )
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--top-k",
         default=50,
         type=int,
         help="Used to limit the number of choices for the next predicted word or token. Default=50",
     )
-    text2textargs.add_argument(
+    inf_parser.add_argument(
         "--repetition-penalty",
         default=None,
         type=float,
@@ -85,9 +83,9 @@ class OpenChatKitShell(cmd.Cmd):
     intro = "Type /quit to exit, /help, or /? to list commands.\n"
     prompt = ">>> "
 
-    def __init__(self, inference: Inference, args: argparse.Namespace) -> None:
+    def __init__(self, infer: Complete, args: argparse.Namespace) -> None:
         super().__init__()
-        self.inference = inference
+        self.infer = infer
         self.args = args
         self.human_id = args.user_id
         self.bot_id = args.bot_id
@@ -104,7 +102,16 @@ class OpenChatKitShell(cmd.Cmd):
 
     def do_say(self, arg: str) -> None:
         self._convo.push_human_turn(arg)
-        output = self.inference.streaming_inference(prompt=self._convo.get_raw_prompt())
+        output = self.infer.create_streaming(
+            prompt=self._convo.get_raw_prompt(),
+            model=self.args.model,
+            max_tokens=self.args.max_tokens,
+            stop=self.args.stop,
+            temperature=self.args.temperature,
+            top_p=self.args.top_p,
+            top_k=self.args.top_k,
+            repetition_penalty=self.args.repetition_penalty,
+        )
         self._convo.push_model_response(output)
 
     def do_raw_prompt(self, arg: str) -> None:
@@ -122,16 +129,9 @@ def _run_complete(args: argparse.Namespace) -> None:
     if args.user_id not in args.stop:
         args.stop.append(args.user_id)
 
-    inference = Inference(
+    infer = Complete(
         endpoint_url=args.endpoint,
-        task="text2text",
-        model=args.model,
-        max_tokens=args.max_tokens,
-        stop=args.stop,
-        temperature=args.temperature,
-        top_p=args.top_p,
-        top_k=args.top_k,
-        repetition_penalty=args.repetition_penalty,
+        log_level=args.log,
     )
 
-    OpenChatKitShell(inference, args).cmdloop()
+    OpenChatKitShell(infer, args).cmdloop()

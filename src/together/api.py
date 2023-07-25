@@ -4,9 +4,9 @@ from typing import Any, List, Optional
 
 import requests
 
+from together.complete import Complete
 from together.files import Files
 from together.finetune import Finetune
-from together.inference import Inference
 from together.utils.utils import exit_1, get_logger
 
 
@@ -71,8 +71,8 @@ class API:
             log_level=self.log_level,
         )
 
-    def complete(self, **model_kwargs: Any) -> Inference:
-        return Inference(
+    def complete(self, **model_kwargs: Any) -> Complete:
+        return Complete(
             endpoint_url=self.endpoint_url,
             **model_kwargs,
             log_level=self.log_level,
