@@ -49,16 +49,20 @@ class Files:
         self,
         endpoint_url: Optional[str] = None,
         log_level: str = "WARNING",
+        api_key: Optional[str] = None,
     ) -> None:
         # Setup logger
         self.logger = get_logger(__name__, log_level=log_level)
 
-        self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
-        if self.together_api_key is None:
-            self.logger.critical(
-                "TOGETHER_API_KEY not found. Please set it as an environment variable."
-            )
-            exit_1(self.logger)
+        if api_key is None:
+            self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
+            if self.together_api_key is None:
+                self.logger.critical(
+                    "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with api_key."
+                )
+                exit_1(self.logger)
+        else:
+            self.together_api_key = api_key
 
         if endpoint_url is None:
             endpoint_url = DEFAULT_ENDPOINT
