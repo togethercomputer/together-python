@@ -1,4 +1,3 @@
-import os
 import posixpath
 import urllib.parse
 from typing import Any, Dict, List, Optional, Union
@@ -6,37 +5,20 @@ from typing import Any, Dict, List, Optional, Union
 import requests
 from tqdm import tqdm
 
-from together.utils.utils import exit_1, get_logger
+import together
+from together.utils.utils import exit_1, get_logger, verify_api_key
 
 
-DEFAULT_ENDPOINT = "https://api.together.xyz/"
+logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 class Finetune:
     def __init__(
         self,
-        endpoint_url: Optional[str] = None,
-        log_level: str = "WARNING",
-        api_key: Optional[str] = None,
     ) -> None:
-        # Setup logger
-        self.logger = get_logger(__name__, log_level=log_level)
+        verify_api_key(logger)
 
-        if api_key is None:
-            self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
-            if self.together_api_key is None:
-                self.logger.critical(
-                    "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with api_key."
-                )
-                exit_1(self.logger)
-        else:
-            self.together_api_key = api_key
-
-        if endpoint_url is None:
-            endpoint_url = DEFAULT_ENDPOINT
-
-        self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/fine-tunes/")
-
+    @classmethod
     def create_finetune(
         self,
         training_file: str,  # training file_id
@@ -70,134 +52,140 @@ class Finetune:
 
         # HTTP headers for authorization
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
         }
 
         # send request
         try:
             response = requests.post(
-                self.endpoint_url, headers=headers, json=parameter_payload
+                together.api_base_finetune, headers=headers, json=parameter_payload
             )
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            exit_1(logger)
 
         return response_json
 
+    @classmethod
     def list_finetune(self) -> Dict[Any, Any]:
+        verify_api_key(logger)
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
         }
 
         # send request
         try:
-            response = requests.get(self.endpoint_url, headers=headers)
+            response = requests.get(together.api_base_finetune, headers=headers)
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            exit_1(logger)
 
         return response_json
 
+    @classmethod
     def retrieve_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
-        retrieve_url = urllib.parse.urljoin(self.endpoint_url, fine_tune_id)
+        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
         }
 
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            exit_1(logger)
 
         return response_json
 
+    @classmethod
     def cancel_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
-        retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
+        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
         }
 
         # send request
         try:
             response = requests.post(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            exit_1(logger)
 
         return response_json
 
+    @classmethod
     def list_finetune_events(self, fine_tune_id: str) -> Dict[Any, Any]:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
-        retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
+        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
         }
 
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            exit_1(logger)
 
         return response_json
 
+    @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
         try:
             finetune_events = list(
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
             )
         except Exception as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
 
@@ -209,8 +197,8 @@ class Finetune:
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["status"]
             )
         except Exception as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         return job_status
 
@@ -220,8 +208,8 @@ class Finetune:
                 self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
             )
         except Exception as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         for i in finetune_events:
             if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
@@ -231,6 +219,7 @@ class Finetune:
                     return True
         return False
 
+    @classmethod
     def download(
         self,
         fine_tune_id: str,
@@ -245,14 +234,14 @@ class Finetune:
             )
 
         model_file_path = urllib.parse.urljoin(
-            self.endpoint_url,
+            together.api_base_finetune,
             f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
         )
 
-        self.logger.info(f"Downloading {model_file_path}...")
+        logger.info(f"Downloading {model_file_path}...")
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
         }
 
         try:
@@ -270,12 +259,12 @@ class Finetune:
                     file.write(chunk)
             progress_bar.close()
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                self.logger.warning(
+                logger.warning(
                     "Caution: Downloaded file size does not match remote file size."
                 )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            exit_1(logger)
 
         return output  # this should be null
 
@@ -284,7 +273,7 @@ class Finetune:
     #     delete_url = urllib.parse.urljoin(model_url, model)
 
     #     headers = {
-    #         "Authorization": f"Bearer {self.together_api_key}",
+    #         "Authorization": f"Bearer {together.api_key}",
     #     }
 
     #     # send request

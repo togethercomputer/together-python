@@ -7,11 +7,9 @@ import re
 import sys
 from typing import Any, Dict, List
 
+import together
 from together.complete import Complete
 from together.utils.utils import exit_1, get_logger
-
-
-DEFAULT_TEXT_MODEL = "togethercomputer/RedPajama-INCITE-7B-Chat"
 
 
 def add_parser(
@@ -32,9 +30,9 @@ def add_parser(
     inf_parser.add_argument(
         "--model",
         "-m",
-        default=DEFAULT_TEXT_MODEL,
+        default=together.default_text_model,
         type=str,
-        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
+        help=f"The name of the model to query. Default={together.default_text_model}",
     )
 
     inf_parser.add_argument(
@@ -141,7 +139,7 @@ def no_streamer(
 def _run_complete(args: argparse.Namespace) -> None:
     logger = get_logger(__name__, log_level=args.log)
 
-    complete = Complete(endpoint_url=args.endpoint, log_level=args.log)
+    complete = Complete()
 
     if args.no_stream:
         response = complete.create(
@@ -157,7 +155,7 @@ def _run_complete(args: argparse.Namespace) -> None:
         )
         no_streamer(args, response, logger)
     else:
-        _ = complete.create_streaming(
+        for text in complete.create_streaming(
             prompt=args.prompt,
             model=args.model,
             max_tokens=args.max_tokens,
@@ -166,4 +164,6 @@ def _run_complete(args: argparse.Namespace) -> None:
             top_p=args.top_p,
             top_k=args.top_k,
             repetition_penalty=args.repetition_penalty,
-        )
+        ):
+            print(text, end="", flush=True)
+        print("\n")

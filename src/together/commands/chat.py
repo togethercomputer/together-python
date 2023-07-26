@@ -4,6 +4,7 @@ import argparse
 import cmd
 from typing import List
 
+import together
 import together.utils.conversation as convo
 from together.complete import Complete
 from together.utils.utils import get_logger
@@ -19,9 +20,9 @@ def add_parser(
     inf_parser.add_argument(
         "--model",
         "-m",
-        default="togethercomputer/RedPajama-INCITE-7B-Chat",
+        default=together.default_text_model,
         type=str,
-        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
+        help=f"The name of the model to query. Default={together.default_text_model}",
     )
     inf_parser.add_argument(
         "--user_id",
@@ -102,7 +103,8 @@ class OpenChatKitShell(cmd.Cmd):
 
     def do_say(self, arg: str) -> None:
         self._convo.push_human_turn(arg)
-        output = self.infer.create_streaming(
+        output = ""
+        for token in self.infer.create_streaming(
             prompt=self._convo.get_raw_prompt(),
             model=self.args.model,
             max_tokens=self.args.max_tokens,
@@ -111,7 +113,10 @@ class OpenChatKitShell(cmd.Cmd):
             top_p=self.args.top_p,
             top_k=self.args.top_k,
             repetition_penalty=self.args.repetition_penalty,
-        )
+        ):
+            print(token, end="", flush=True)
+            output += token
+        print("\n")
         self._convo.push_model_response(output)
 
     def do_raw_prompt(self, arg: str) -> None:
@@ -129,9 +134,6 @@ def _run_complete(args: argparse.Namespace) -> None:
     if args.user_id not in args.stop:
         args.stop.append(args.user_id)
 
-    infer = Complete(
-        endpoint_url=args.endpoint,
-        log_level=args.log,
-    )
+    infer = Complete()
 
     OpenChatKitShell(infer, args).cmdloop()

@@ -278,7 +278,7 @@ def _add_checkpoints(
 
 
 def _run_create(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
 
     response = finetune.create_finetune(
         training_file=args.training_file,  # training file_id
@@ -300,7 +300,7 @@ def _run_create(args: argparse.Namespace) -> None:
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     response = finetune.list_finetune()
     for item in response["data"]:
         item.pop("events", None)
@@ -309,38 +309,38 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     response = finetune.retrieve_finetune(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     response = finetune.cancel_finetune(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_list_events(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     response = finetune.list_finetune_events(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_download(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     args.checkpoint_num = -1  # hardcoded until enabled in remote
     response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
     print(response)
 
 
 def _run_status(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     response = finetune.get_job_status(args.fine_tune_id)
     print(response)
 
 
 def _run_checkpoint(args: argparse.Namespace) -> None:
-    finetune = Finetune(args.endpoint, log_level=args.log)
+    finetune = Finetune()
     checkpoints = finetune.get_checkpoints(args.fine_tune_id)
     print(json.dumps(checkpoints, indent=4))
     print(f"\n{len(checkpoints)} checkpoints found")

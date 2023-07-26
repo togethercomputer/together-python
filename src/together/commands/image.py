@@ -7,11 +7,9 @@ import logging
 import sys
 from typing import Any, Dict, List
 
+import together
 from together.image import Image
 from together.utils.utils import exit_1, get_logger
-
-
-DEFAULT_IMAGE_MODEL = "runwayml/stable-diffusion-v1-5"
 
 
 def add_parser(
@@ -32,9 +30,9 @@ def add_parser(
     inf_parser.add_argument(
         "--model",
         "-m",
-        default=DEFAULT_IMAGE_MODEL,
+        default=together.default_image_model,
         type=str,
-        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
+        help=f"The name of the model to query. Default={together.default_image_model}",
     )
 
     inf_parser.add_argument(
@@ -124,7 +122,7 @@ def _save_image(
 def _run_complete(args: argparse.Namespace) -> None:
     logger = get_logger(__name__, log_level=args.log)
 
-    complete = Image(endpoint_url=args.endpoint, log_level=args.log)
+    complete = Image()
 
     response = complete.create(
         prompt=args.prompt,

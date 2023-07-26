@@ -1,6 +1,7 @@
 #! python
 import argparse
 
+import together
 from together.commands import api, chat, complete, files, finetune, image
 from together.utils.utils import get_logger
 
@@ -23,7 +24,7 @@ def main() -> None:
     base_subparser = argparse.ArgumentParser(add_help=False)
     base_subparser.add_argument(
         "--log",
-        default="WARNING",
+        default=together.log_level,
         choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
         type=str,
         help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
@@ -45,7 +46,9 @@ def main() -> None:
     try:
         get_logger(__name__, log_level=args.log)
     except Exception:
-        get_logger(__name__, log_level="WARNING")
+        get_logger(__name__, log_level=together.log_level)
+
+    together.log_level = args.log
 
     # try:
     args.func(args)
