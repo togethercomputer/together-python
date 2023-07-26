@@ -8,15 +8,14 @@ import sys
 from typing import Any, Dict
 
 import together
-from together import get_logger
-from together.image import Image
+from together import Image, get_logger
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "image"
-    inf_parser = subparsers.add_parser(COMMAND_NAME)
+    subparser = subparsers.add_parser(COMMAND_NAME)
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "prompt",
         metavar="PROMPT",
         default=None,
@@ -24,7 +23,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="A string providing context for the model to complete.",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--model",
         "-m",
         default=together.default_image_model,
@@ -32,52 +31,52 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help=f"The name of the model to query. Default={together.default_image_model}",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--height",
         default=512,
         type=int,
         help="Pixel height for generated image results",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--width",
         default=512,
         type=int,
         help="Pixel width for generated image results",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--steps",
         default=50,
         type=int,
         help="Number of steps",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--seed",
         default=42,
         type=int,
         help="Seed for image generation",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--results",
         "-r",
         default=1,
         type=int,
         help="Number of image results to return",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--output-prefix",
         "-o",
         default="image",
         type=str,
         help="Prefix for the file names the output images will be saved to. An image number will be appended to this name. Default=image",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--raw",
         default=False,
         action="store_true",
         help="Indicates whether to output raw image to CLI. Enabling this option does not save the image to disk.",
     )
 
-    inf_parser.set_defaults(func=_run_complete)
+    subparser.set_defaults(func=_run_complete)
 
 
 def _save_image(

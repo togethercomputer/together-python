@@ -20,7 +20,7 @@ default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
 
 from .utils.utils import get_logger, verify_api_key  # noqa
-from .api import API
+from .models import Models
 from .complete import Complete
 from .error import *
 from .files import Files
@@ -38,4 +38,9 @@ __all__ = [
     "default_image_model",
     "get_logger",
     "verify_api_key",
+    "Models",
+    "Complete",
+    "Files",
+    "Finetune",
+    "Image",
 ]

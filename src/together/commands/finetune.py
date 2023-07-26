@@ -4,7 +4,7 @@ import argparse
 import json
 from typing import Any, Dict
 
-from together.finetune import Finetune
+from together import Finetune
 
 
 def extract_time(json_obj: Dict[str, Any]) -> int:
@@ -33,8 +33,8 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Create_finetune
-    create_finetune_parser = parser.add_parser("create")
-    create_finetune_parser.add_argument(
+    subparser = parser.add_parser("create")
+    subparser.add_argument(
         "--training-file",
         "-t",
         metavar="FILE-ID",
@@ -42,14 +42,14 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=True,
         type=str,
     )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--validation-file",
     #     "-v",
     #     default=None,
     #     help="The ID of an uploaded file that contains validation data.",
     #     type=str,
     # )
-    create_finetune_parser.add_argument(
+    subparser.add_argument(
         "--model",
         "-m",
         metavar="MODEL",
@@ -57,7 +57,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The name of the base model to fine-tune. Default='togethercomputer/RedPajama-INCITE-7B-Chat'.",
         type=str,
     )
-    create_finetune_parser.add_argument(
+    subparser.add_argument(
         "--n-epochs",
         "-ne",
         metavar="EPOCHS",
@@ -65,7 +65,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The number of epochs to train the model for. Default=4",
         type=int,
     )
-    create_finetune_parser.add_argument(
+    subparser.add_argument(
         "--batch-size",
         "-b",
         metavar="BATCH_SIZE",
@@ -73,7 +73,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The batch size to use for training. Default=32",
         type=int,
     )
-    create_finetune_parser.add_argument(
+    subparser.add_argument(
         "--learning-rate",
         "-lr",
         metavar="LEARNING_RATE",
@@ -81,47 +81,47 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The learning rate multiplier to use for training. Default=0.00001",
         type=float,
     )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--warmup-steps",
     #     "-ws",
     #     default=0,
     #     help="Warmup steps",
     #     type=int,
     # )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--train-warmup-steps",
     #     "-tws",
     #     default=0,
     #     help="Train warmup steps",
     #     type=int,
     # )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--sequence-length",
     #     "-sl",
     #     default=2048,
     #     help="Max sequence length",
     #     type=int,
     # )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--seed",
     #     default=42,
     #     help="Training seed",
     #     type=int,
     # )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--fp32",
     #     help="Enable FP32 training. Defaults to false (FP16 training).",
     #     default=False,
     #     action="store_true",
     # )
-    # create_finetune_parser.add_argument(
+    # subparser.add_argument(
     #     "--checkpoint-steps",
     #     "-b",
     #     default=0,
     #     help="Number of steps between each checkpoint. Defaults to 0 = checkpoints per epoch.",
     #     type=int,
     # )
-    create_finetune_parser.add_argument(
+    subparser.add_argument(
         "--suffix",
         "-s",
         metavar="SUFFIX",
@@ -129,7 +129,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="Up to 40 characters that will be added to your fine-tuned model name.",
         type=str,
     )
-    create_finetune_parser.set_defaults(func=_run_create)
+    subparser.set_defaults(func=_run_create)
 
     # End of create_finetune
 

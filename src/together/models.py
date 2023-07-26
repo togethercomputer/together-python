@@ -10,14 +10,14 @@ from together import get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-class API:
+class Models:
     def __init__(
         self,
     ) -> None:
         verify_api_key(logger)
 
     @classmethod
-    def get_models(self) -> List[Any]:
+    def list(self) -> List[Any]:
         model_url = urllib.parse.urljoin(together.api_base, "models/info?=")
         headers = {
             "Authorization": f"Bearer {together.api_key}",

@@ -3,12 +3,12 @@ import argparse
 
 import together
 from together import get_logger
-from together.commands import api, chat, complete, files, finetune, image
+from together.commands import chat, complete, files, finetune, image, models
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="CLI client for Together API",
+        description="Together Python Library",
         prog="together",
     )
 
@@ -32,12 +32,12 @@ def main() -> None:
 
     subparser = parser.add_subparsers(dest="base")
 
-    api.add_parser(subparser)
+    models.add_parser(subparser)
     chat.add_parser(subparser)
     complete.add_parser(subparser)
     image.add_parser(subparser)
-    finetune.add_parser(subparser)
     files.add_parser(subparser)
+    finetune.add_parser(subparser)
 
     args = parser.parse_args()
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from together.files import Files
+from together import Files
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -20,54 +20,54 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    list_parser = parser.add_parser("list")
-    list_parser.set_defaults(func=_run_list)
+    subparser = parser.add_parser("list")
+    subparser.set_defaults(func=_run_list)
 
 
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    upload_file_parser = parser.add_parser("upload")
-    upload_file_parser.add_argument(
+    subparser = parser.add_parser("upload")
+    subparser.add_argument(
         "file",
         metavar="FILENAME",
         help="Local file to upload",
         type=str,
     )
-    upload_file_parser.set_defaults(func=_run_upload)
+    subparser.set_defaults(func=_run_upload)
 
 
 def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    delete_file_parser = parser.add_parser("delete")
-    delete_file_parser.add_argument(
+    subparser = parser.add_parser("delete")
+    subparser.add_argument(
         "file_id",
         metavar="FILE-ID",
         help="File ID of remote file",
         type=str,
     )
-    delete_file_parser.set_defaults(func=_run_delete)
+    subparser.set_defaults(func=_run_delete)
 
 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    retrieve_file_parser = parser.add_parser("retrieve")
-    retrieve_file_parser.add_argument(
+    subparser = parser.add_parser("retrieve")
+    subparser.add_argument(
         "file_id",
         metavar="FILE-ID",
         help="File ID of remote file",
         type=str,
     )
-    retrieve_file_parser.set_defaults(func=_run_retrieve)
+    subparser.set_defaults(func=_run_retrieve)
 
 
 def _add_retrieve_content(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
-    retrieve_file_content_parser = parser.add_parser("retrieve-content")
-    retrieve_file_content_parser.add_argument(
+    subparser = parser.add_parser("retrieve-content")
+    subparser.add_argument(
         "file_id",
         metavar="FILE-ID",
         help="File ID of remote file",
         type=str,
     )
-    retrieve_file_content_parser.add_argument(
+    subparser.add_argument(
         "--output",
         "-o",
         default=None,
@@ -77,7 +77,7 @@ def _add_retrieve_content(
         required=False,
     )
 
-    retrieve_file_content_parser.set_defaults(func=_run_retrieve_content)
+    subparser.set_defaults(func=_run_retrieve_content)
 
 
 def _run_list(args: argparse.Namespace) -> None:

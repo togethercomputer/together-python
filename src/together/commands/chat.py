@@ -5,31 +5,30 @@ import cmd
 
 import together
 import together.utils.conversation as convo
-from together import get_logger
-from together.complete import Complete
+from together import Complete, get_logger
 
 
 def add_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     COMMAND_NAME = "chat"
-    inf_parser = subparsers.add_parser(COMMAND_NAME)
+    subparser = subparsers.add_parser(COMMAND_NAME)
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--model",
         "-m",
         default=together.default_text_model,
         type=str,
         help=f"The name of the model to query. Default={together.default_text_model}",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--user_id",
         "-u",
         default="<human>",
         type=str,
         help="The tag the user's prompt should have. Defaults to '<human>'. Examples '### User' or 'prompt:'",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--bot_id",
         "-b",
         default="<bot>",
@@ -37,45 +36,45 @@ def add_parser(
         help="The tag the bot's response should have. Defaults to '<bot>'. Examples '### Assistant' or 'response:'",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--max-tokens",
         default=128,
         type=int,
         help="Maximum number of tokens to generate. Default=128",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--stop",
         default=["<human>"],
         nargs="+",
         type=str,
         help="Strings that will truncate (stop) text generation. Default='<human>'",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--temperature",
         default=0.7,
         type=float,
         help="Determines the degree of randomness in the response. Default=0.7",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--top-p",
         default=0.7,
         type=float,
         help="Used to dynamically adjust the number of choices for each predicted token based on the cumulative probabilities. Default=0.7",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--top-k",
         default=50,
         type=int,
         help="Used to limit the number of choices for the next predicted word or token. Default=50",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--repetition-penalty",
         default=None,
         type=float,
         help="Controls the diversity of generated text by reducing the likelihood of repeated sequences. Higher values decrease repetition.",
     )
 
-    inf_parser.set_defaults(func=_run_complete)
+    subparser.set_defaults(func=_run_complete)
 
 
 class OpenChatKitShell(cmd.Cmd):
