@@ -48,7 +48,7 @@ class Files:
         verify_api_key(logger)
 
     @classmethod
-    def list_files(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
+    def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
         }
@@ -70,7 +70,7 @@ class Files:
         return response_json
 
     @classmethod
-    def upload_file(self, file: str) -> Dict[str, Union[str, int]]:
+    def upload(self, file: str) -> Dict[str, Union[str, int]]:
         try:
             data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
@@ -153,7 +153,7 @@ class Files:
         }
 
     @classmethod
-    def delete_file(self, file_id: str) -> Dict[str, str]:
+    def delete(self, file_id: str) -> Dict[str, str]:
         delete_url = urllib.parse.urljoin(together.api_base_files, file_id)
 
         headers = {
@@ -178,7 +178,7 @@ class Files:
         return response_json
 
     @classmethod
-    def retrieve_file(self, file_id: str) -> Dict[str, Union[str, int]]:
+    def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
         retrieve_url = urllib.parse.urljoin(together.api_base_files, file_id)
 
         logger.info(f"Retrieve URL: {retrieve_url}")
@@ -205,7 +205,7 @@ class Files:
         return response_json
 
     @classmethod
-    def retrieve_file_content(
+    def retrieve_content(
         self, file_id: str, output: Union[str, None] = None
     ) -> str:
         if output is None:

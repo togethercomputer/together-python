@@ -19,7 +19,7 @@ class Finetune:
         verify_api_key(logger)
 
     @classmethod
-    def create_finetune(
+    def create(
         self,
         training_file: str,  # training file_id
         # validation_file: Optional[str] = None,  # validation file_id
@@ -76,7 +76,7 @@ class Finetune:
         return response_json
 
     @classmethod
-    def list_finetune(self) -> Dict[Any, Any]:
+    def list(self) -> Dict[Any, Any]:
         verify_api_key(logger)
         headers = {
             "Authorization": f"Bearer {together.api_key}",
@@ -100,7 +100,7 @@ class Finetune:
         return response_json
 
     @classmethod
-    def retrieve_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
+    def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
 
         headers = {
@@ -125,7 +125,7 @@ class Finetune:
         return response_json
 
     @classmethod
-    def cancel_finetune(self, fine_tune_id: str) -> Dict[Any, Any]:
+    def cancel(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
@@ -151,7 +151,7 @@ class Finetune:
         return response_json
 
     @classmethod
-    def list_finetune_events(self, fine_tune_id: str) -> Dict[Any, Any]:
+    def list_events(self, fine_tune_id: str) -> Dict[Any, Any]:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
@@ -191,6 +191,7 @@ class Finetune:
 
         return saved_events
 
+    @classmethod
     def get_job_status(self, fine_tune_id: str) -> str:
         try:
             job_status = str(

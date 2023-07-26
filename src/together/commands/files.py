@@ -101,29 +101,29 @@ def _add_retrieve_content(
 
 def _run_list(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.list_files()
+    response = files.list()
     print(json.dumps(response, indent=4))
 
 
 def _run_upload(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.upload_file(args.file)
+    response = files.upload(args.file)
     print(json.dumps(response, indent=4))
 
 
 def _run_delete(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.delete_file(args.file_id)
+    response = files.delete(args.file_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.retrieve_file(args.file_id)
+    response = files.retrieve(args.file_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
     files = Files()
-    output = files.retrieve_file_content(args.file_id, args.output)
+    output = files.retrieve_content(args.file_id, args.output)
     print(output)

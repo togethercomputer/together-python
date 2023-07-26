@@ -280,7 +280,7 @@ def _add_checkpoints(
 def _run_create(args: argparse.Namespace) -> None:
     finetune = Finetune()
 
-    response = finetune.create_finetune(
+    response = finetune.create(
         training_file=args.training_file,  # training file_id
         # validation_file=args.validation_file,  # validation file_id
         model=args.model,
@@ -301,7 +301,7 @@ def _run_create(args: argparse.Namespace) -> None:
 
 def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    response = finetune.list_finetune()
+    response = finetune.list()
     for item in response["data"]:
         item.pop("events", None)
     response["data"].sort(key=extract_time)
@@ -310,19 +310,19 @@ def _run_list(args: argparse.Namespace) -> None:
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    response = finetune.retrieve_finetune(args.fine_tune_id)
+    response = finetune.retrieve(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    response = finetune.cancel_finetune(args.fine_tune_id)
+    response = finetune.cancel(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
 def _run_list_events(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    response = finetune.list_finetune_events(args.fine_tune_id)
+    response = finetune.list(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 
