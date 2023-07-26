@@ -51,6 +51,7 @@ def add_parser(
         default=["<human>"],
         nargs="+",
         type=str,
+        metavar="STOP_WORD",
         help="Strings that will truncate (stop) text generation. Default='<human>'",
     )
     subparser.add_argument(

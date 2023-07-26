@@ -67,6 +67,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         "-o",
         default="image",
         type=str,
+        metavar="PREFIX",
         help="Prefix for the file names the output images will be saved to. An image number will be appended to this name. Default=image",
     )
     subparser.add_argument(

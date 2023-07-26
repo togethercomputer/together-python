@@ -71,7 +71,7 @@ def _add_retrieve_content(
         "--output",
         "-o",
         default=None,
-        metavar="OUT_FILENAME",
+        metavar="OUTPUT_FILE",
         help="Optional output filename. Defaults to remote filename.",
         type=str,
         required=False,

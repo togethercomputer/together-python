@@ -22,18 +22,18 @@ def add_parser(
         help=f"The name of the model to query. Default={together.default_text_model}",
     )
     subparser.add_argument(
-        "--user_id",
-        "-u",
+        "--prompt_id",
+        "-pid",
         default="<human>",
         type=str,
-        help="The tag the user's prompt should have. Defaults to '<human>'. Examples '### User' or 'prompt:'",
+        help="Indicates start of prompt. Defaults to '<human>'. Examples '### User' or '[INST]'",
     )
     subparser.add_argument(
-        "--bot_id",
-        "-b",
+        "--response_id",
+        "-rid",
         default="<bot>",
         type=str,
-        help="The tag the bot's response should have. Defaults to '<bot>'. Examples '### Assistant' or 'response:'",
+        help="Indicates start of response. Defaults to '<bot>'. Examples '### Assistant' or '[/INST]'",
     )
 
     subparser.add_argument(
