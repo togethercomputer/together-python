@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from together.finetune import Finetune
 
@@ -14,32 +14,26 @@ def extract_time(json_obj: Dict[str, Any]) -> int:
         return 0
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "finetune"
     parser = subparsers.add_parser(COMMAND_NAME)
 
     child_parsers = parser.add_subparsers(required=True)
 
-    _add_create(child_parsers, parents=parents)
-    _add_list(child_parsers, parents=parents)
-    _add_retrieve(child_parsers, parents=parents)
-    _add_list_events(child_parsers, parents=parents)
-    _add_cancel(child_parsers, parents=parents)
-    _add_download(child_parsers, parents=parents)
-    _add_status(child_parsers, parents=parents)
-    _add_checkpoints(child_parsers, parents=parents)
+    _add_create(child_parsers)
+    _add_list(child_parsers)
+    _add_retrieve(child_parsers)
+    _add_list_events(child_parsers)
+    _add_cancel(child_parsers)
+    _add_download(child_parsers)
+    _add_status(child_parsers)
+    _add_checkpoints(child_parsers)
     # _add_delete_model(child_parsers)
 
 
-def _add_create(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Create_finetune
-    create_finetune_parser = parser.add_parser("create", parents=parents)
+    create_finetune_parser = parser.add_parser("create")
     create_finetune_parser.add_argument(
         "--training-file",
         "-t",
@@ -140,20 +134,14 @@ def _add_create(
     # End of create_finetune
 
 
-def _add_list(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List_Finetune
-    list_parser = parser.add_parser("list", parents=parents)
+    list_parser = parser.add_parser("list")
     list_parser.set_defaults(func=_run_list)
 
 
-def _add_retrieve(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    retrieve_finetune_parser = parser.add_parser("retrieve", parents=parents)
+def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    retrieve_finetune_parser = parser.add_parser("retrieve")
     retrieve_finetune_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -164,12 +152,9 @@ def _add_retrieve(
     retrieve_finetune_parser.set_defaults(func=_run_retrieve)
 
 
-def _add_cancel(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Cancel Finetune
-    cancel_finetune_parser = parser.add_parser("cancel", parents=parents)
+    cancel_finetune_parser = parser.add_parser("cancel")
     cancel_finetune_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -182,10 +167,9 @@ def _add_cancel(
 
 def _add_list_events(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     # List finetune events
-    list_finetune_events_parser = parser.add_parser("list-events", parents=parents)
+    list_finetune_events_parser = parser.add_parser("list-events")
     list_finetune_events_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -196,12 +180,9 @@ def _add_list_events(
     list_finetune_events_parser.set_defaults(func=_run_list_events)
 
 
-def _add_download(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def _add_download(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List finetune events
-    download_parser = parser.add_parser("download", parents=parents)
+    download_parser = parser.add_parser("download")
     download_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -229,12 +210,9 @@ def _add_download(
     download_parser.set_defaults(func=_run_download)
 
 
-def _add_status(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def _add_status(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List finetune events
-    status_parser = parser.add_parser("status", parents=parents)
+    status_parser = parser.add_parser("status")
     status_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -247,10 +225,9 @@ def _add_status(
 
 def _add_checkpoints(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     # List finetune events
-    checkpoint_parser = parser.add_parser("checkpoints", parents=parents)
+    checkpoint_parser = parser.add_parser("checkpoints")
     checkpoint_parser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
@@ -322,7 +299,7 @@ def _run_cancel(args: argparse.Namespace) -> None:
 
 def _run_list_events(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    response = finetune.list(args.fine_tune_id)
+    response = finetune.list_events(args.fine_tune_id)
     print(json.dumps(response, indent=4))
 
 

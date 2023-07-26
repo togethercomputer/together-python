@@ -10,7 +10,7 @@ from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.utils.utils import exit_1, get_logger, verify_api_key
+from together import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
@@ -58,37 +58,36 @@ class Files:
             response = requests.get(together.api_base_files, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
         try:
             response_json = dict(response.json())
         except Exception as e:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
     @classmethod
     def upload(self, file: str) -> Dict[str, Union[str, int]]:
+        data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
+
+        headers = {
+            "Authorization": f"Bearer {together.api_key}",
+        }
+
+        if not validate_file(file=file, logger=logger):
+            raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+
+        session = requests.Session()
+
+        init_endpoint = together.api_base_files[:-1]
+
+        logger.debug(
+            f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
+        )
         try:
-            data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-
-            headers = {
-                "Authorization": f"Bearer {together.api_key}",
-            }
-
-            if not validate_file(file=file, logger=logger):
-                exit_1(logger)
-
-            session = requests.Session()
-
-            init_endpoint = together.api_base_files[:-1]
-
-            logger.debug(
-                f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
-            )
-
             response = session.post(
                 init_endpoint,
                 data=data,
@@ -104,12 +103,17 @@ class Files:
                 logger.critical(
                     "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
                 )
-                exit_1(logger)
+                raise together.AuthenticationError(
+                    "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
+                )
             elif response.status_code != 302:
                 logger.critical(
                     f"Unexpected error raised by endpoint. Response status code: {response.status_code}"
                 )
-                exit_1(logger)
+                raise together.ResponseError(
+                    "Unexpected error raised by endpoint.",
+                    http_status=response.status_code,
+                )
 
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
@@ -144,7 +148,7 @@ class Files:
 
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         return {
             "filename": os.path.basename(file),
@@ -165,7 +169,7 @@ class Files:
             response = requests.delete(delete_url, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -173,7 +177,7 @@ class Files:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
@@ -192,7 +196,7 @@ class Files:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -200,14 +204,12 @@ class Files:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
     @classmethod
-    def retrieve_content(
-        self, file_id: str, output: Union[str, None] = None
-    ) -> str:
+    def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:
         if output is None:
             output = file_id + ".jsonl"
 
@@ -243,6 +245,6 @@ class Files:
 
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         return output  # this should be null

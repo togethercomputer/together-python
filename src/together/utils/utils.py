@@ -1,5 +1,4 @@
 import logging
-import sys
 from typing import Optional
 
 import together
@@ -49,18 +48,10 @@ def get_logger(
     return logger
 
 
-def exit_1(logger: Optional[logging.Logger] = None) -> None:
-    if logger is None:
-        logger = get_logger(str(__name__), log_level=together.log_level)
-    logger.critical("Exiting with code 1")
-    sys.exit(1)
-
-
 def verify_api_key(logger: Optional[logging.Logger] = None) -> None:
     if logger is None:
         logger = get_logger(str(__name__), log_level=together.log_level)
     if together.api_key is None:
-        logger.critical(
+        raise together.AuthenticationError(
             "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key"
         )
-        exit_1(logger)

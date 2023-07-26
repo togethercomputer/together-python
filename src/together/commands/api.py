@@ -2,28 +2,25 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import List
 
 from together.api import API
 
 
 def add_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     COMMAND_NAME = "api"
     parser = subparsers.add_parser(COMMAND_NAME)
 
     child_parsers = parser.add_subparsers(required=True)
 
-    _add_list(child_parsers, parents=parents)
+    _add_list(child_parsers)
 
 
 def _add_list(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
-    list_model_subparser = parser.add_parser("list", parents=parents)
+    list_model_subparser = parser.add_parser("list")
     list_model_subparser.add_argument(
         "--raw",
         help="Raw details of all models",

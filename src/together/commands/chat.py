@@ -2,20 +2,18 @@ from __future__ import annotations
 
 import argparse
 import cmd
-from typing import List
 
 import together
 import together.utils.conversation as convo
+from together import get_logger
 from together.complete import Complete
-from together.utils.utils import get_logger
 
 
 def add_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     COMMAND_NAME = "chat"
-    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
+    inf_parser = subparsers.add_parser(COMMAND_NAME)
 
     inf_parser.add_argument(
         "--model",
@@ -81,7 +79,7 @@ def add_parser(
 
 
 class OpenChatKitShell(cmd.Cmd):
-    intro = "Type /quit to exit, /help, or /? to list commands.\n"
+    intro = "Type /exit to exit, /help, or /? to list commands.\n"
     prompt = ">>> "
 
     def __init__(self, infer: Complete, args: argparse.Namespace) -> None:

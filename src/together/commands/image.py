@@ -5,19 +5,16 @@ import base64
 import json
 import logging
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import together
+from together import get_logger
 from together.image import Image
-from together.utils.utils import exit_1, get_logger
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "image"
-    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
+    inf_parser = subparsers.add_parser(COMMAND_NAME)
 
     inf_parser.add_argument(
         "prompt",
@@ -99,7 +96,7 @@ def _save_image(
                     f.write(base64.b64decode(images[i]["image_base64"]))
         except Exception as e:  # This is the correct syntax
             logger.critical(f"Error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         out_string = f"Output images saved to {args.output_prefix}-X.png"
 
@@ -108,13 +105,13 @@ def _save_image(
             logger.critical(
                 f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
             )
-            exit_1(logger)
+            raise together.InstanceError(model=args.model)
         else:
             logger.critical(f"Error raised: {response['error']}")
 
     else:
-        logger.critical("Unknown response received")
-        exit_1(logger)
+        logger.critical("Unknown response received.")
+        raise together.ResponseError("Unknown response received.")
 
     print(out_string.strip())
 

@@ -15,9 +15,11 @@ log_level = "WARNING"
 
 from .api import API
 from .complete import Complete
+from .error import *
 from .files import Files
 from .finetune import Finetune
 from .image import Image
+from .utils.utils import get_logger, verify_api_key
 
 
 __all__ = [
@@ -28,4 +30,6 @@ __all__ = [
     "api_base_finetune",
     "default_text_model",
     "default_image_model",
+    "get_logger",
+    "verify_api_key",
 ]

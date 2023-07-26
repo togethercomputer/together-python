@@ -2,8 +2,8 @@
 import argparse
 
 import together
+from together import get_logger
 from together.commands import api, chat, complete, files, finetune, image
-from together.utils.utils import get_logger
 
 
 def main() -> None:
@@ -21,8 +21,7 @@ def main() -> None:
         default=None,
     )
 
-    base_subparser = argparse.ArgumentParser(add_help=False)
-    base_subparser.add_argument(
+    parser.add_argument(
         "--log",
         default=together.log_level,
         choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
@@ -33,14 +32,15 @@ def main() -> None:
 
     subparser = parser.add_subparsers(dest="base")
 
-    api.add_parser(subparser, parents=[base_subparser])
-    chat.add_parser(subparser, parents=[base_subparser])
-    complete.add_parser(subparser, parents=[base_subparser])
-    image.add_parser(subparser, parents=[base_subparser])
-    finetune.add_parser(subparser, parents=[base_subparser])
-    files.add_parser(subparser, parents=[base_subparser])
+    api.add_parser(subparser)
+    chat.add_parser(subparser)
+    complete.add_parser(subparser)
+    image.add_parser(subparser)
+    finetune.add_parser(subparser)
+    files.add_parser(subparser)
 
     args = parser.parse_args()
+    print(args)
 
     # Setup logging
     try:
@@ -50,14 +50,13 @@ def main() -> None:
 
     together.log_level = args.log
 
-    # try:
-    args.func(args)
-    # except AttributeError as e:
-    #    # print error, but ignore if `together` is run.
-    ##    if str(e) != "'Namespace' object has no attribute 'func'":
-    #        logger.critical(f"Error raised: {e}")
-    #        exit_1(logger)
-    #    parser.print_help()
+    try:
+        args.func(args)
+    except AttributeError as e:
+        # print error, but ignore if `together` is run.
+        if str(e) != "'Namespace' object has no attribute 'func'":
+            raise together.AttributeError(e)
+        parser.print_help()
 
 
 if __name__ == "__main__":

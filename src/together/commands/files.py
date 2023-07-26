@@ -2,40 +2,30 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import List
 
 from together.files import Files
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "files"
     parser = subparsers.add_parser(COMMAND_NAME)
 
     child_parsers = parser.add_subparsers(required=True)
 
-    _add_list(child_parsers, parents=parents)
-    _add_upload(child_parsers, parents=parents)
-    _add_delete(child_parsers, parents=parents)
-    _add_retrieve(child_parsers, parents=parents)
-    _add_retrieve_content(child_parsers, parents=parents)
+    _add_list(child_parsers)
+    _add_upload(child_parsers)
+    _add_delete(child_parsers)
+    _add_retrieve(child_parsers)
+    _add_retrieve_content(child_parsers)
 
 
-def _add_list(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    list_parser = parser.add_parser("list", parents=parents)
+def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    list_parser = parser.add_parser("list")
     list_parser.set_defaults(func=_run_list)
 
 
-def _add_upload(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    upload_file_parser = parser.add_parser("upload", parents=parents)
+def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    upload_file_parser = parser.add_parser("upload")
     upload_file_parser.add_argument(
         "file",
         metavar="FILENAME",
@@ -45,11 +35,8 @@ def _add_upload(
     upload_file_parser.set_defaults(func=_run_upload)
 
 
-def _add_delete(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    delete_file_parser = parser.add_parser("delete", parents=parents)
+def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    delete_file_parser = parser.add_parser("delete")
     delete_file_parser.add_argument(
         "file_id",
         metavar="FILE-ID",
@@ -59,11 +46,8 @@ def _add_delete(
     delete_file_parser.set_defaults(func=_run_delete)
 
 
-def _add_retrieve(
-    parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
-    retrieve_file_parser = parser.add_parser("retrieve", parents=parents)
+def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    retrieve_file_parser = parser.add_parser("retrieve")
     retrieve_file_parser.add_argument(
         "file_id",
         metavar="FILE-ID",
@@ -75,11 +59,8 @@ def _add_retrieve(
 
 def _add_retrieve_content(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
-    retrieve_file_content_parser = parser.add_parser(
-        "retrieve-content", parents=parents
-    )
+    retrieve_file_content_parser = parser.add_parser("retrieve-content")
     retrieve_file_content_parser.add_argument(
         "file_id",
         metavar="FILE-ID",

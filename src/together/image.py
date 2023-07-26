@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 import requests
 
 import together
-from together.utils.utils import exit_1, get_logger, verify_api_key
+from together import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
@@ -55,7 +55,7 @@ class Image:
             )
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -63,5 +63,5 @@ class Image:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
         return response_json

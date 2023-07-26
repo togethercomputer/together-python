@@ -8,16 +8,15 @@ import sys
 from typing import Any, Dict, List
 
 import together
+from together import get_logger
 from together.complete import Complete
-from together.utils.utils import exit_1, get_logger
 
 
 def add_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     COMMAND_NAME = "complete"
-    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
+    inf_parser = subparsers.add_parser(COMMAND_NAME)
 
     inf_parser.add_argument(
         "prompt",
@@ -112,10 +111,10 @@ def no_streamer(
         except Exception:
             try:
                 logger.critical(f"Error raised: {response['output']['error']}")
-                exit_1(logger)
+                raise together.ResponseError(response["output"]["error"])
             except Exception as e:
                 logger.critical(f"Error raised: {e}")
-                exit_1(logger)
+                raise together.ResponseError(e)
 
         # if args.stop is not None:
         #    text = _enforce_stop_tokens(text, args.stop)
@@ -125,13 +124,13 @@ def no_streamer(
             logger.critical(
                 f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
             )
-            exit_1(logger)
+            raise together.InstanceError(model=args.model)
         else:
             logger.critical(f"Error raised: {response['error']}")
 
     else:
         logger.critical("Unknown response received")
-        exit_1(logger)
+        raise together.ResponseError("Unknown response received. Please try again.")
 
     print(text.strip())
 

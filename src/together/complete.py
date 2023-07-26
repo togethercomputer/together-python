@@ -5,7 +5,7 @@ import requests
 import sseclient  # type: ignore
 
 import together
-from together.utils.utils import exit_1, get_logger, verify_api_key
+from together import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
@@ -60,7 +60,7 @@ class Complete:
             )
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -68,7 +68,7 @@ class Complete:
             logger.critical(
                 f"Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
         return response_json
 
     @classmethod
@@ -117,7 +117,7 @@ class Complete:
             )
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         if response.status_code == 200:
             output = ""
@@ -129,13 +129,11 @@ class Complete:
                     yield text
         elif response.status_code == 429:
             logger.critical(
-                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
+                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
             )
-            exit_1(logger)
-            return ""
+            raise together.InstanceError()
         else:
             logger.critical(
                 f"Unknown error raised.\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
-            return ""
+            raise together.ResponseError(http_status=response.status_code)

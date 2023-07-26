@@ -6,7 +6,7 @@ import requests
 from tqdm import tqdm
 
 import together
-from together.utils.utils import exit_1, get_logger, verify_api_key
+from together import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
@@ -63,7 +63,7 @@ class Finetune:
             )
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -71,7 +71,7 @@ class Finetune:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
@@ -87,7 +87,7 @@ class Finetune:
             response = requests.get(together.api_base_finetune, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -95,7 +95,7 @@ class Finetune:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
@@ -112,7 +112,7 @@ class Finetune:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -120,7 +120,7 @@ class Finetune:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
@@ -138,7 +138,7 @@ class Finetune:
             response = requests.post(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -146,7 +146,7 @@ class Finetune:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
@@ -165,7 +165,7 @@ class Finetune:
             response = requests.get(retrieve_url, headers=headers)
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
@@ -173,19 +173,17 @@ class Finetune:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
     @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
         try:
-            finetune_events = list(
-                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
-            )
+            finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
 
@@ -194,23 +192,19 @@ class Finetune:
     @classmethod
     def get_job_status(self, fine_tune_id: str) -> str:
         try:
-            job_status = str(
-                self.retrieve_finetune(fine_tune_id=fine_tune_id)["status"]
-            )
+            job_status = str(self.retrieve(fine_tune_id=fine_tune_id)["status"])
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         return job_status
 
     def is_final_model_available(self, fine_tune_id: str) -> bool:
         try:
-            finetune_events = list(
-                self.retrieve_finetune(fine_tune_id=fine_tune_id)["events"]
-            )
+            finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         for i in finetune_events:
             if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
@@ -230,7 +224,7 @@ class Finetune:
         # default to model_output_path name
         if output is None:
             output = (
-                self.retrieve_finetune(fine_tune_id)["model_output_path"].split("/")[-1]
+                self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
                 + ".tar.gz"
             )
 
@@ -265,7 +259,7 @@ class Finetune:
                 )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             logger.critical(f"Response error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         return output  # this should be null
 
