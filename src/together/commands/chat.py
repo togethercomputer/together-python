@@ -2,97 +2,95 @@ from __future__ import annotations
 
 import argparse
 import cmd
-from typing import List
 
+import together
 import together.utils.conversation as convo
-from together.complete import Complete
-from together.utils.utils import get_logger
+from together import Complete, get_logger
 
 
 def add_parser(
     subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
 ) -> None:
     COMMAND_NAME = "chat"
-    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
+    subparser = subparsers.add_parser(COMMAND_NAME)
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--model",
         "-m",
-        default="togethercomputer/RedPajama-INCITE-7B-Chat",
+        default=together.default_text_model,
         type=str,
-        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
+        help=f"The name of the model to query. Default={together.default_text_model}",
     )
-    inf_parser.add_argument(
-        "--user_id",
-        "-u",
+    subparser.add_argument(
+        "--prompt_id",
+        "-pid",
         default="<human>",
         type=str,
-        help="The tag the user's prompt should have. Defaults to '<human>'. Examples '### User' or 'prompt:'",
+        help="Indicates start of prompt. Defaults to '<human>'. Examples '### User' or '[INST]'",
     )
-    inf_parser.add_argument(
-        "--bot_id",
-        "-b",
+    subparser.add_argument(
+        "--response_id",
+        "-rid",
         default="<bot>",
         type=str,
-        help="The tag the bot's response should have. Defaults to '<bot>'. Examples '### Assistant' or 'response:'",
+        help="Indicates start of response. Defaults to '<bot>'. Examples '### Assistant' or '[/INST]'",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--max-tokens",
         default=128,
         type=int,
         help="Maximum number of tokens to generate. Default=128",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--stop",
         default=["<human>"],
         nargs="+",
         type=str,
         help="Strings that will truncate (stop) text generation. Default='<human>'",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--temperature",
         default=0.7,
         type=float,
         help="Determines the degree of randomness in the response. Default=0.7",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--top-p",
         default=0.7,
         type=float,
         help="Used to dynamically adjust the number of choices for each predicted token based on the cumulative probabilities. Default=0.7",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--top-k",
         default=50,
         type=int,
         help="Used to limit the number of choices for the next predicted word or token. Default=50",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--repetition-penalty",
         default=None,
         type=float,
         help="Controls the diversity of generated text by reducing the likelihood of repeated sequences. Higher values decrease repetition.",
     )
 
-    inf_parser.set_defaults(func=_run_complete)
+    subparser.set_defaults(func=_run_complete)
 
 
 class OpenChatKitShell(cmd.Cmd):
-    intro = "Type /quit to exit, /help, or /? to list commands.\n"
+    intro = "Type /quit to quit, /help, or /? to list commands.\n"
     prompt = ">>> "
 
     def __init__(self, infer: Complete, args: argparse.Namespace) -> None:
         super().__init__()
         self.infer = infer
         self.args = args
-        self.human_id = args.user_id
-        self.bot_id = args.bot_id
+        self.prompt_id = args.prompt_id
+        self.response_id = args.response_id
         print(f"Loading {self.args.model}")
 
     def preloop(self) -> None:
-        self._convo = convo.Conversation(self.human_id, self.bot_id)
+        self._convo = convo.Conversation(self.prompt_id, self.response_id)
 
     def precmd(self, line: str) -> str:
         if line.startswith("/"):
@@ -102,7 +100,8 @@ class OpenChatKitShell(cmd.Cmd):
 
     def do_say(self, arg: str) -> None:
         self._convo.push_human_turn(arg)
-        output = self.infer.create_streaming(
+        output = ""
+        for token in self.infer.create_streaming(
             prompt=self._convo.get_raw_prompt(),
             model=self.args.model,
             max_tokens=self.args.max_tokens,
@@ -111,14 +110,17 @@ class OpenChatKitShell(cmd.Cmd):
             top_p=self.args.top_p,
             top_k=self.args.top_k,
             repetition_penalty=self.args.repetition_penalty,
-        )
+        ):
+            print(token, end="", flush=True)
+            output += token
+        print("\n")
         self._convo.push_model_response(output)
 
     def do_raw_prompt(self, arg: str) -> None:
         print(self._convo.get_raw_prompt())
 
     def do_reset(self, arg: str) -> None:
-        self._convo = convo.Conversation(self.human_id, self.bot_id)
+        self._convo = convo.Conversation(self.prompt_id, self.response_id)
 
     def do_quit(self, arg: str) -> bool:
         return True
@@ -126,12 +128,9 @@ class OpenChatKitShell(cmd.Cmd):
 
 def _run_complete(args: argparse.Namespace) -> None:
     get_logger(__name__, log_level=args.log)
-    if args.user_id not in args.stop:
-        args.stop.append(args.user_id)
+    if args.prompt_id not in args.stop:
+        args.stop.append(args.prompt_id)
 
-    infer = Complete(
-        endpoint_url=args.endpoint,
-        log_level=args.log,
-    )
+    infer = Complete()
 
     OpenChatKitShell(infer, args).cmdloop()

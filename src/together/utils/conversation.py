@@ -18,25 +18,25 @@ def clean_response(response: str) -> str:
 
 
 class Conversation:
-    def __init__(self, human_id: str, bot_id: str) -> None:
+    def __init__(self, prompt_id: str, response_id: str) -> None:
         cur_date = time.strftime("%Y-%m-%d")
         cur_time = time.strftime("%H:%M:%S %p %Z")
 
-        self._human_id = human_id
-        self._bot_id = bot_id
+        self._prompt_id = prompt_id
+        self._response_id = response_id
         self._prompt = PRE_PROMPT.format(cur_date, cur_time)
 
     def push_context_turn(self, context: str) -> None:
         # for now, context is represented as a human turn
-        self._prompt += f"{self._human_id}: {context}\n"
+        self._prompt += f"{self._prompt_id}: {context}\n"
 
     def push_human_turn(self, query: str) -> None:
-        self._prompt += f"{self._human_id}: {query}\n"
-        self._prompt += f"{self._bot_id}:"
+        self._prompt += f"{self._prompt_id}: {query}\n"
+        self._prompt += f"{self._response_id}:"
 
     def push_model_response(self, response: str) -> None:
-        # has_finished = self._human_id in response
-        bot_turn = response.split(f"{self._human_id}:")[0]
+        # has_finished = self._prompt_id in response
+        bot_turn = response.split(f"{self._prompt_id}:")[0]
         bot_turn = clean_response(bot_turn)
         # if it is truncated, then append "..." to the end of the response
         # if not has_finished:
@@ -45,8 +45,8 @@ class Conversation:
         self._prompt += f"{bot_turn}\n"
 
     def get_last_turn(self) -> str:
-        human_tag = f"{self._human_id}:"
-        bot_tag = f"{self._bot_id}:"
+        human_tag = f"{self._prompt_id}:"
+        bot_tag = f"{self._response_id}:"
         turns = re.split(f"({human_tag}|{bot_tag})\W?", self._prompt)
         return turns[-1]
 
@@ -54,7 +54,7 @@ class Conversation:
         return self._prompt
 
     @classmethod
-    def from_raw_prompt(cls, human_id: str, bot_id: str, prompt: str):  # type: ignore
-        convo = Conversation(human_id, bot_id)
+    def from_raw_prompt(cls, prompt_id: str, response_id: str, prompt: str):  # type: ignore
+        convo = Conversation(prompt_id, response_id)
         convo._prompt = prompt
         return convo

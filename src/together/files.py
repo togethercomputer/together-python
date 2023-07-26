@@ -3,20 +3,17 @@ import os
 import posixpath
 import urllib.parse
 from logging import Logger
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import requests
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
-from together.utils.utils import exit_1, get_logger
+import together
+from together import get_logger, verify_api_key
 
 
-DEFAULT_ENDPOINT = "https://api.together.xyz/"
-
-
-class JSONException(Exception):
-    pass
+logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 def validate_file(file: str, logger: Logger) -> bool:
@@ -47,68 +44,53 @@ def validate_file(file: str, logger: Logger) -> bool:
 class Files:
     def __init__(
         self,
-        endpoint_url: Optional[str] = None,
-        log_level: str = "WARNING",
-        api_key: Optional[str] = None,
     ) -> None:
-        # Setup logger
-        self.logger = get_logger(__name__, log_level=log_level)
+        verify_api_key(logger)
 
-        if api_key is None:
-            self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
-            if self.together_api_key is None:
-                self.logger.critical(
-                    "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with api_key."
-                )
-                exit_1(self.logger)
-        else:
-            self.together_api_key = api_key
-
-        if endpoint_url is None:
-            endpoint_url = DEFAULT_ENDPOINT
-
-        self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/v1/files/")
-
-    def list_files(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
+    @classmethod
+    def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
         try:
-            response = requests.get(self.endpoint_url, headers=headers)
+            response = requests.get(together.api_base_files, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
-    def upload_file(self, file: str) -> Dict[str, Union[str, int]]:
+    @classmethod
+    def upload(self, file: str) -> Dict[str, Union[str, int]]:
+        data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
+
+        headers = {
+            "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
+        }
+
+        if not validate_file(file=file, logger=logger):
+            raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+
+        session = requests.Session()
+
+        init_endpoint = together.api_base_files[:-1]
+
+        logger.debug(
+            f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
+        )
         try:
-            data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-
-            headers = {
-                "Authorization": f"Bearer {self.together_api_key}",
-            }
-
-            if not validate_file(file=file, logger=self.logger):
-                exit_1(self.logger)
-
-            session = requests.Session()
-
-            init_endpoint = self.endpoint_url[:-1]
-
-            self.logger.debug(
-                f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
-            )
-
             response = session.post(
                 init_endpoint,
                 data=data,
@@ -116,28 +98,33 @@ class Files:
                 allow_redirects=False,
             )
 
-            self.logger.debug(f"Response text: {response.text}")
-            self.logger.debug(f"Response header: {response.headers}")
-            self.logger.debug(f"Response status code: {response.status_code}")
+            logger.debug(f"Response text: {response.text}")
+            logger.debug(f"Response header: {response.headers}")
+            logger.debug(f"Response status code: {response.status_code}")
 
             if response.status_code == 401:
-                self.logger.critical(
+                logger.critical(
                     "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
                 )
-                exit_1(self.logger)
+                raise together.AuthenticationError(
+                    "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
+                )
             elif response.status_code != 302:
-                self.logger.critical(
+                logger.critical(
                     f"Unexpected error raised by endpoint. Response status code: {response.status_code}"
                 )
-                exit_1(self.logger)
+                raise together.ResponseError(
+                    "Unexpected error raised by endpoint.",
+                    http_status=response.status_code,
+                )
 
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
 
-            self.logger.info(f"R2 Signed URL: {r2_signed_url}")
-            self.logger.info("File-ID")
+            logger.info(f"R2 Signed URL: {r2_signed_url}")
+            logger.info("File-ID")
 
-            self.logger.info("Uploading file...")
+            logger.info("Uploading file...")
 
             file_size = os.stat(file).st_size
             with open(file, "rb") as f:
@@ -146,12 +133,13 @@ class Files:
                 ) as t:
                     wrapped_file = CallbackIOWrapper(t.update, f, "read")
                     response = requests.put(r2_signed_url, data=wrapped_file)
+                    response.raise_for_status()
 
-            self.logger.info("File uploaded.")
-            self.logger.debug(f"status code: {response.status_code}")
-            self.logger.info("Processing file...")
+            logger.info("File uploaded.")
+            logger.debug(f"status code: {response.status_code}")
+            logger.info("Processing file...")
             preprocess_url = urllib.parse.urljoin(
-                self.endpoint_url, f"{file_id}/preprocess"
+                together.api_base_files, f"{file_id}/preprocess"
             )
 
             response = session.post(
@@ -159,12 +147,12 @@ class Files:
                 headers=headers,
             )
 
-            self.logger.info("File processed")
-            self.logger.debug(f"Status code: {response.status_code}")
+            logger.info("File processed")
+            logger.debug(f"Status code: {response.status_code}")
 
         except Exception as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
 
         return {
             "filename": os.path.basename(file),
@@ -172,67 +160,73 @@ class Files:
             "object": "file",
         }
 
-    def delete_file(self, file_id: str) -> Dict[str, str]:
-        delete_url = urllib.parse.urljoin(self.endpoint_url, file_id)
+    @classmethod
+    def delete(self, file_id: str) -> Dict[str, str]:
+        delete_url = urllib.parse.urljoin(together.api_base_files, file_id)
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
         try:
             response = requests.delete(delete_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
-    def retrieve_file(self, file_id: str) -> Dict[str, Union[str, int]]:
-        retrieve_url = urllib.parse.urljoin(self.endpoint_url, file_id)
+    @classmethod
+    def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
+        retrieve_url = urllib.parse.urljoin(together.api_base_files, file_id)
 
-        self.logger.info(f"Retrieve URL: {retrieve_url}")
+        logger.info(f"Retrieve URL: {retrieve_url}")
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            raise together.JSONError(e, http_status=response.status_code)
 
         return response_json
 
-    def retrieve_file_content(
-        self, file_id: str, output: Union[str, None] = None
-    ) -> str:
+    @classmethod
+    def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:
         if output is None:
             output = file_id + ".jsonl"
 
         relative_path = posixpath.join(file_id, "content")
-        retrieve_url = urllib.parse.urljoin(self.endpoint_url, relative_path)
+        retrieve_url = urllib.parse.urljoin(together.api_base_files, relative_path)
 
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -254,12 +248,12 @@ class Files:
             progress_bar.close()
 
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                self.logger.warning(
+                logger.warning(
                     "Caution: Downloaded file size does not match remote file size."
                 )
 
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
 
         return output  # this should be null

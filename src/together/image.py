@@ -1,41 +1,21 @@
-import os
-import urllib.parse
 from typing import Any, Dict, Optional
 
 import requests
 
-from together.utils.utils import exit_1, get_logger
+import together
+from together import get_logger, verify_api_key
 
 
-DEFAULT_ENDPOINT = "https://api.together.xyz/"
-DEFAULT_IMAGE_MODEL = "runwayml/stable-diffusion-v1-5"
+logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 class Image:
     def __init__(
         self,
-        endpoint_url: Optional[str] = None,
-        log_level: str = "WARNING",
-        api_key: Optional[str] = None,
     ) -> None:
-        # Setup logger
-        self.logger = get_logger(str(__name__), log_level=log_level)
+        verify_api_key(logger)
 
-        if api_key is None:
-            self.together_api_key = os.environ.get("TOGETHER_API_KEY", None)
-            if self.together_api_key is None:
-                self.logger.critical(
-                    "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with api_key."
-                )
-                exit_1(self.logger)
-        else:
-            self.together_api_key = api_key
-
-        if endpoint_url is None:
-            endpoint_url = DEFAULT_ENDPOINT
-
-        self.endpoint_url = urllib.parse.urljoin(endpoint_url, "/api/inference")
-
+    @classmethod
     def create(
         self,
         prompt: str,
@@ -47,7 +27,7 @@ class Image:
         width: Optional[int] = 256,
     ) -> Dict[str, Any]:
         if model == "":
-            model = DEFAULT_IMAGE_MODEL
+            model = together.default_image_model
 
         parameter_payload = {
             "model": model,
@@ -62,26 +42,28 @@ class Image:
 
         # HTTP headers for authorization
         headers = {
-            "Authorization": f"Bearer {self.together_api_key}",
+            "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": together.user_agent,
         }
 
         # send request
         try:
             response = requests.post(
-                self.endpoint_url,
+                together.api_base_complete,
                 headers=headers,
                 json=parameter_payload,
             )
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            self.logger.critical(f"Response error raised: {e}")
-            exit_1(self.logger)
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
 
         try:
             response_json = dict(response.json())
         except Exception as e:
-            self.logger.critical(
+            logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
-            exit_1(self.logger)
+            raise together.JSONError(e, http_status=response.status_code)
         return response_json

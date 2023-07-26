@@ -5,23 +5,17 @@ import base64
 import json
 import logging
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from together.image import Image
-from together.utils.utils import exit_1, get_logger
-
-
-DEFAULT_IMAGE_MODEL = "runwayml/stable-diffusion-v1-5"
+import together
+from together import Image, get_logger
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-    parents: List[argparse.ArgumentParser],
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "image"
-    inf_parser = subparsers.add_parser(COMMAND_NAME, parents=parents)
+    subparser = subparsers.add_parser(COMMAND_NAME)
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "prompt",
         metavar="PROMPT",
         default=None,
@@ -29,60 +23,61 @@ def add_parser(
         help="A string providing context for the model to complete.",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--model",
         "-m",
-        default=DEFAULT_IMAGE_MODEL,
+        default=together.default_image_model,
         type=str,
-        help="The name of the model to query. Default='togethercomputer/RedPajama-INCITE-7B-Chat'",
+        help=f"The name of the model to query. Default={together.default_image_model}",
     )
 
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--height",
         default=512,
         type=int,
         help="Pixel height for generated image results",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--width",
         default=512,
         type=int,
         help="Pixel width for generated image results",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--steps",
         default=50,
         type=int,
         help="Number of steps",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--seed",
         default=42,
         type=int,
         help="Seed for image generation",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--results",
         "-r",
         default=1,
         type=int,
         help="Number of image results to return",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--output-prefix",
         "-o",
         default="image",
         type=str,
+        metavar="PREFIX",
         help="Prefix for the file names the output images will be saved to. An image number will be appended to this name. Default=image",
     )
-    inf_parser.add_argument(
+    subparser.add_argument(
         "--raw",
         default=False,
         action="store_true",
         help="Indicates whether to output raw image to CLI. Enabling this option does not save the image to disk.",
     )
 
-    inf_parser.set_defaults(func=_run_complete)
+    subparser.set_defaults(func=_run_complete)
 
 
 def _save_image(
@@ -101,7 +96,7 @@ def _save_image(
                     f.write(base64.b64decode(images[i]["image_base64"]))
         except Exception as e:  # This is the correct syntax
             logger.critical(f"Error raised: {e}")
-            exit_1(logger)
+            raise together.ResponseError(e)
 
         out_string = f"Output images saved to {args.output_prefix}-X.png"
 
@@ -110,13 +105,13 @@ def _save_image(
             logger.critical(
                 f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
             )
-            exit_1(logger)
+            raise together.InstanceError(model=args.model)
         else:
             logger.critical(f"Error raised: {response['error']}")
 
     else:
-        logger.critical("Unknown response received")
-        exit_1(logger)
+        logger.critical("Unknown response received.")
+        raise together.ResponseError("Unknown response received.")
 
     print(out_string.strip())
 
@@ -124,7 +119,7 @@ def _save_image(
 def _run_complete(args: argparse.Namespace) -> None:
     logger = get_logger(__name__, log_level=args.log)
 
-    complete = Image(endpoint_url=args.endpoint, log_level=args.log)
+    complete = Image()
 
     response = complete.create(
         prompt=args.prompt,
