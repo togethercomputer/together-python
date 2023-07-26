@@ -44,6 +44,7 @@ class Image:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": together.user_agent,
         }
 
         # send request

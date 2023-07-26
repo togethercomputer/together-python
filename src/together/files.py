@@ -51,6 +51,7 @@ class Files:
     def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -75,6 +76,7 @@ class Files:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         if not validate_file(file=file, logger=logger):
@@ -162,6 +164,7 @@ class Files:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -189,6 +192,7 @@ class Files:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -218,6 +222,7 @@ class Files:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request

@@ -1,6 +1,11 @@
 import os
 import urllib.parse
 
+from .version import VERSION
+
+version = VERSION
+
+user_agent = f"TogetherPythonOfficial/{version}"
 
 api_key = os.environ.get("TOGETHER_API_KEY", None)
 
@@ -13,13 +18,13 @@ default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
 
+from .utils.utils import get_logger, verify_api_key  # noqa
 from .api import API
 from .complete import Complete
 from .error import *
 from .files import Files
 from .finetune import Finetune
 from .image import Image
-from .utils.utils import get_logger, verify_api_key
 
 
 __all__ = [

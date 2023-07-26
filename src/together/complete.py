@@ -49,6 +49,7 @@ class Complete:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -105,6 +106,7 @@ class Complete:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": together.user_agent,
         }
 
         # send request

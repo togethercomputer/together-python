@@ -40,7 +40,6 @@ def main() -> None:
     files.add_parser(subparser)
 
     args = parser.parse_args()
-    print(args)
 
     # Setup logging
     try:

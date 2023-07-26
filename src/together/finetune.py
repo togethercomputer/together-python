@@ -54,6 +54,7 @@ class Finetune:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -80,6 +81,7 @@ class Finetune:
         verify_api_key(logger)
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -105,6 +107,7 @@ class Finetune:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -131,6 +134,7 @@ class Finetune:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -158,6 +162,7 @@ class Finetune:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         # send request
@@ -237,6 +242,7 @@ class Finetune:
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
 
         try:

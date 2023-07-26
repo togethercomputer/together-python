@@ -21,6 +21,7 @@ class API:
         model_url = urllib.parse.urljoin(together.api_base, "models/info?=")
         headers = {
             "Authorization": f"Bearer {together.api_key}",
+            "User-Agent": together.user_agent,
         }
         try:
             response = requests.get(
