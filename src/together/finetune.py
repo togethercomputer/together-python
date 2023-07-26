@@ -62,6 +62,7 @@ class Finetune:
             response = requests.post(
                 together.api_base_finetune, headers=headers, json=parameter_payload
             )
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -87,6 +88,7 @@ class Finetune:
         # send request
         try:
             response = requests.get(together.api_base_finetune, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -113,6 +115,7 @@ class Finetune:
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -140,6 +143,7 @@ class Finetune:
         # send request
         try:
             response = requests.post(retrieve_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -168,6 +172,7 @@ class Finetune:
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -227,18 +232,12 @@ class Finetune:
         checkpoint_num: int = -1,
     ) -> str:
         # default to model_output_path name
-        if output is None:
-            output = (
-                self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
-                + ".tar.gz"
-            )
-
         model_file_path = urllib.parse.urljoin(
             together.api_base_finetune,
             f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
         )
 
-        logger.info(f"Downloading {model_file_path}...")
+        logger.info(f"Downloading weights from {model_file_path}...")
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
@@ -251,9 +250,23 @@ class Finetune:
             response = session.get(model_file_path, headers=headers, stream=True)
             response.raise_for_status()
 
+            if output is None:
+                content_type = str(response.headers.get("content-type"))
+
+                output = self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
+                if "x-tar" in content_type.lower():
+                    output += ".tar.gz"
+                elif "zstd" in content_type.lower():
+                    output += ".tar.zst"
+                else:
+                    raise together.ResponseError(
+                        f"Unknown file type {content_type} found. Aborting download."
+                    )
+
             total_size_in_bytes = int(response.headers.get("content-length", 0))
             block_size = 1024 * 1024  # 1 MB
             progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+            progress_bar.set_description(f"Downloading {output}")
             with open(output, "wb") as file:
                 for chunk in response.iter_content(block_size):
                     progress_bar.update(len(chunk))

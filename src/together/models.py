@@ -28,6 +28,7 @@ class Models:
                 model_url,
                 headers=headers,
             )
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)

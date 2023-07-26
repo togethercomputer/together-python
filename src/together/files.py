@@ -57,6 +57,7 @@ class Files:
         # send request
         try:
             response = requests.get(together.api_base_files, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -132,6 +133,7 @@ class Files:
                 ) as t:
                     wrapped_file = CallbackIOWrapper(t.update, f, "read")
                     response = requests.put(r2_signed_url, data=wrapped_file)
+                    response.raise_for_status()
 
             logger.info("File uploaded.")
             logger.debug(f"status code: {response.status_code}")
@@ -170,6 +172,7 @@ class Files:
         # send request
         try:
             response = requests.delete(delete_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -198,6 +201,7 @@ class Files:
         # send request
         try:
             response = requests.get(retrieve_url, headers=headers)
+            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
