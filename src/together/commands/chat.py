@@ -78,19 +78,19 @@ def add_parser(
 
 
 class OpenChatKitShell(cmd.Cmd):
-    intro = "Type /exit to exit, /help, or /? to list commands.\n"
+    intro = "Type /quit to quit, /help, or /? to list commands.\n"
     prompt = ">>> "
 
     def __init__(self, infer: Complete, args: argparse.Namespace) -> None:
         super().__init__()
         self.infer = infer
         self.args = args
-        self.human_id = args.user_id
-        self.bot_id = args.bot_id
+        self.prompt_id = args.prompt_id
+        self.response_id = args.response_id
         print(f"Loading {self.args.model}")
 
     def preloop(self) -> None:
-        self._convo = convo.Conversation(self.human_id, self.bot_id)
+        self._convo = convo.Conversation(self.prompt_id, self.response_id)
 
     def precmd(self, line: str) -> str:
         if line.startswith("/"):
@@ -120,7 +120,7 @@ class OpenChatKitShell(cmd.Cmd):
         print(self._convo.get_raw_prompt())
 
     def do_reset(self, arg: str) -> None:
-        self._convo = convo.Conversation(self.human_id, self.bot_id)
+        self._convo = convo.Conversation(self.prompt_id, self.response_id)
 
     def do_quit(self, arg: str) -> bool:
         return True
@@ -128,8 +128,8 @@ class OpenChatKitShell(cmd.Cmd):
 
 def _run_complete(args: argparse.Namespace) -> None:
     get_logger(__name__, log_level=args.log)
-    if args.user_id not in args.stop:
-        args.stop.append(args.user_id)
+    if args.prompt_id not in args.stop:
+        args.stop.append(args.prompt_id)
 
     infer = Complete()
 
