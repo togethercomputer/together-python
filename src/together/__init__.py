@@ -3,6 +3,7 @@ import urllib.parse
 
 from .version import VERSION
 
+
 version = VERSION
 
 user_agent = f"TogetherPythonOfficial/{version}"
