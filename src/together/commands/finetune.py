@@ -191,14 +191,14 @@ def _add_download(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -
         type=str,
         required=False,
     )
-    # download_parser.add_argument(
-    #     "--checkpoint-num",
-    #     "-n",
-    #     default=-1,
-    #     help="Checkpoint number. Defaults to the latest checkpoint = -1.",
-    #     type=int,
-    #     required=False,
-    # )
+    download_parser.add_argument(
+        "--checkpoint-step",
+        "-s",
+        default=-1,
+        help="Checkpoint step to download. Defaults to the latest checkpoint = -1.",
+        type=int,
+        required=False,
+    )
     download_parser.set_defaults(func=_run_download)
 
 
@@ -297,8 +297,7 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 def _run_download(args: argparse.Namespace) -> None:
     finetune = Finetune()
-    args.checkpoint_num = -1  # hardcoded until enabled in remote
-    response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_num)
+    response = finetune.download(args.fine_tune_id, args.output, args.checkpoint_step)
     print(response)
 
 

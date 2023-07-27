@@ -54,10 +54,17 @@ class Image:
                 headers=headers,
                 json=parameter_payload,
             )
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
+
+        if response.status_code == 429:
+            logger.critical(
+                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
+            )
+            raise together.InstanceError(model=model)
+
+        response.raise_for_status()
 
         try:
             response_json = dict(response.json())

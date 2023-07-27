@@ -59,13 +59,21 @@ class Complete:
                 headers=headers,
                 json=parameter_payload,
             )
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
+        if response.status_code == 429:
+            logger.critical(
+                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
+            )
+            raise together.InstanceError(model=model)
+
+        response.raise_for_status()
+
         try:
             response_json = dict(response.json())
+
         except Exception as e:
             logger.critical(
                 f"Error raised: {e}\nResponse status code = {response.status_code}"
@@ -118,7 +126,6 @@ class Complete:
                 json=parameter_payload,
                 stream=True,
             )
-            response.raise_for_status()
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
@@ -135,9 +142,10 @@ class Complete:
             logger.critical(
                 f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
             )
-            raise together.InstanceError()
+            raise together.InstanceError(model=model)
         else:
             logger.critical(
                 f"Unknown error raised.\nResponse status code = {response.status_code}"
             )
+            response.raise_for_status()
             raise together.ResponseError(http_status=response.status_code)

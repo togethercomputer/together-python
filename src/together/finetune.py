@@ -229,13 +229,15 @@ class Finetune:
         self,
         fine_tune_id: str,
         output: Union[str, None] = None,
-        checkpoint_num: int = -1,
+        step: int = -1,
     ) -> str:
         # default to model_output_path name
         model_file_path = urllib.parse.urljoin(
             together.api_base_finetune,
             f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
         )
+        if step != -1:
+            model_file_path += f"&checkpoint_step={step}"
 
         logger.info(f"Downloading weights from {model_file_path}...")
 
@@ -254,9 +256,13 @@ class Finetune:
                 content_type = str(response.headers.get("content-type"))
 
                 output = self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
+
+                if step != -1:
+                    output += f"-checkpoint-{step}"
+
                 if "x-tar" in content_type.lower():
                     output += ".tar.gz"
-                elif "zstd" in content_type.lower():
+                elif "zstd" in content_type.lower() or step != -1:
                     output += ".tar.zst"
                 else:
                     raise together.ResponseError(

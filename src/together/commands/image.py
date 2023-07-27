@@ -94,11 +94,10 @@ def _save_image(
             for i in range(len(images)):
                 with open(f"{args.output_prefix}-{i}.png", "wb") as f:
                     f.write(base64.b64decode(images[i]["image_base64"]))
+                print(f"Image saved to {args.output_prefix}-{i}.png")
         except Exception as e:  # This is the correct syntax
             logger.critical(f"Error raised: {e}")
             raise together.ResponseError(e)
-
-        out_string = f"Output images saved to {args.output_prefix}-X.png"
 
     elif "error" in response.keys():
         if response["error"] == "Returned error: no instance":
@@ -112,8 +111,6 @@ def _save_image(
     else:
         logger.critical("Unknown response received.")
         raise together.ResponseError("Unknown response received.")
-
-    print(out_string.strip())
 
 
 def _run_complete(args: argparse.Namespace) -> None:

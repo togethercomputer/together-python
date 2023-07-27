@@ -57,12 +57,12 @@ class InstanceError(TogetherException):
         http_status: Optional[int] = None,
         json_body: Optional[Any] = None,
         headers: Optional[str] = None,
-        model: str = "model",
+        model: Optional[str] = "model",
     ) -> None:
+        message = f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
         super(InstanceError, self).__init__(
             message, http_body, http_status, json_body, headers
         )
-        self.message = f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
 
 
 class FileTypeError(TogetherException):
