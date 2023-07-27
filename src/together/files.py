@@ -127,7 +127,9 @@ class Files:
             logger.info("Uploading file...")
 
             file_size = os.stat(file).st_size
-            progress_bar = tqdm(total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
+            progress_bar = tqdm(
+                total=file_size, unit="B", unit_scale=True, unit_divisor=1024
+            )
             progress_bar.set_description(f"Uploading {file}")
             with open(file, "rb") as f:
                 wrapped_file = CallbackIOWrapper(progress_bar.update, f, "read")
