@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import together
 
@@ -55,3 +55,10 @@ def verify_api_key(logger: Optional[logging.Logger] = None) -> None:
         raise together.AuthenticationError(
             "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key"
         )
+
+
+def extract_time(json_obj: Dict[str, Any]) -> int:
+    try:
+        return int(json_obj["created_at"])
+    except KeyError:
+        return 0

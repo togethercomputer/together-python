@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from together import Files
+from together import Files, extract_time
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -83,6 +83,7 @@ def _add_retrieve_content(
 def _run_list(args: argparse.Namespace) -> None:
     files = Files()
     response = files.list()
+    response["data"].sort(key=extract_time)
     print(json.dumps(response, indent=4))
 
 

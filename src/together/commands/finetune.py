@@ -2,16 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
-from typing import Any, Dict
 
-from together import Finetune
-
-
-def extract_time(json_obj: Dict[str, Any]) -> int:
-    try:
-        return int(json_obj["updated_at"])
-    except KeyError:
-        return 0
+from together import Finetune, extract_time
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
