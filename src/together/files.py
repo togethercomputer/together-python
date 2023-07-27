@@ -127,13 +127,12 @@ class Files:
             logger.info("Uploading file...")
 
             file_size = os.stat(file).st_size
+            progress_bar = tqdm(total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
+            progress_bar.set_description(f"Uploading {file}")
             with open(file, "rb") as f:
-                with tqdm(
-                    total=file_size, unit="B", unit_scale=True, unit_divisor=1024
-                ) as t:
-                    wrapped_file = CallbackIOWrapper(t.update, f, "read")
-                    response = requests.put(r2_signed_url, data=wrapped_file)
-                    response.raise_for_status()
+                wrapped_file = CallbackIOWrapper(progress_bar.update, f, "read")
+                response = requests.put(r2_signed_url, data=wrapped_file)
+                response.raise_for_status()
 
             logger.info("File uploaded.")
             logger.debug(f"status code: {response.status_code}")
@@ -239,6 +238,7 @@ class Files:
             total_size_in_bytes = int(response.headers.get("content-length", 0))
             block_size = 1024 * 1024  # 1 MB
             progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+            progress_bar.set_description(f"Downloading {output}")
 
             with open(output, "wb") as file:
                 for chunk in response.iter_content(block_size):
