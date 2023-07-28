@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 
-from together.files import Files
+from together import Files, extract_time
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -19,93 +20,92 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    list_parser = parser.add_parser("list-files")
-    list_parser.set_defaults(func=_run_list)
+    subparser = parser.add_parser("list")
+    subparser.set_defaults(func=_run_list)
 
 
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    upload_file_parser = parser.add_parser("upload-file")
-    upload_file_parser.add_argument(
-        "--file",
-        "-f",
-        help="File to upload",
+    subparser = parser.add_parser("upload")
+    subparser.add_argument(
+        "file",
+        metavar="FILENAME",
+        help="Local file to upload",
         type=str,
-        required=True,
     )
-    upload_file_parser.set_defaults(func=_run_upload)
+    subparser.set_defaults(func=_run_upload)
 
 
 def _add_delete(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    delete_file_parser = parser.add_parser("delete-file")
-    delete_file_parser.add_argument(
-        "--file-id",
-        "-f",
-        help="File ID",
+    subparser = parser.add_parser("delete")
+    subparser.add_argument(
+        "file_id",
+        metavar="FILE-ID",
+        help="File ID of remote file",
         type=str,
-        required=True,
     )
-    delete_file_parser.set_defaults(func=_run_delete)
+    subparser.set_defaults(func=_run_delete)
 
 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    retrieve_file_parser = parser.add_parser("retrieve-file")
-    retrieve_file_parser.add_argument(
-        "--file-id",
-        "-f",
-        help="File ID",
+    subparser = parser.add_parser("retrieve")
+    subparser.add_argument(
+        "file_id",
+        metavar="FILE-ID",
+        help="File ID of remote file",
         type=str,
-        required=True,
     )
-    retrieve_file_parser.set_defaults(func=_run_retrieve)
+    subparser.set_defaults(func=_run_retrieve)
 
 
 def _add_retrieve_content(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
-    retrieve_file_content_parser = parser.add_parser("retrieve-file-content")
-    retrieve_file_content_parser.add_argument(
-        "--file-id",
-        "-f",
-        help="File ID",
+    subparser = parser.add_parser("retrieve-content")
+    subparser.add_argument(
+        "file_id",
+        metavar="FILE-ID",
+        help="File ID of remote file",
         type=str,
-        required=True,
     )
-    retrieve_file_content_parser.add_argument(
+    subparser.add_argument(
         "--output",
         "-o",
-        help="Output filename",
+        default=None,
+        metavar="OUTPUT_FILE",
+        help="Optional output filename. Defaults to remote filename.",
         type=str,
-        required=True,
+        required=False,
     )
 
-    retrieve_file_content_parser.set_defaults(func=_run_retrieve_content)
+    subparser.set_defaults(func=_run_retrieve_content)
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.list_files()
-    print(response)
+    files = Files()
+    response = files.list()
+    response["data"].sort(key=extract_time)
+    print(json.dumps(response, indent=4))
 
 
 def _run_upload(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.upload_file(args.file)
-    print(response)
+    files = Files()
+    response = files.upload(args.file)
+    print(json.dumps(response, indent=4))
 
 
 def _run_delete(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.delete_file(args.file_id)
-    print(response)
+    files = Files()
+    response = files.delete(args.file_id)
+    print(json.dumps(response, indent=4))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.retrieve_file(args.file_id)
-    print(response)
+    files = Files()
+    response = files.retrieve(args.file_id)
+    print(json.dumps(response, indent=4))
 
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
-    files = Files(args.endpoint)
-    response = files.retrieve_file_content(args.file_id, args.output)
-    print(response)
+    files = Files()
+    output = files.retrieve_content(args.file_id, args.output)
+    print(output)
