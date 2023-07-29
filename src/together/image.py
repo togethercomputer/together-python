@@ -20,7 +20,7 @@ class Image:
         self,
         prompt: str,
         model: Optional[str] = "",
-        steps: Optional[int] = 50,
+        steps: Optional[int] = 20,
         seed: Optional[int] = 42,
         results: Optional[int] = 1,
         height: Optional[int] = 256,

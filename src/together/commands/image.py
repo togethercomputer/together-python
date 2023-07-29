@@ -33,19 +33,19 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
     subparser.add_argument(
         "--height",
-        default=512,
+        default=256,
         type=int,
         help="Pixel height for generated image results",
     )
     subparser.add_argument(
         "--width",
-        default=512,
+        default=256,
         type=int,
         help="Pixel width for generated image results",
     )
     subparser.add_argument(
         "--steps",
-        default=50,
+        default=20,
         type=int,
         help="Number of steps",
     )

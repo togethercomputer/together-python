@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 import requests
 import sseclient  # type: ignore
@@ -23,7 +23,7 @@ class Complete:
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
-        stop: Optional[str] = None,
+        stop: Optional[List[str]] = [],
         temperature: Optional[float] = 0.7,
         top_p: Optional[float] = 0.7,
         top_k: Optional[int] = 50,
