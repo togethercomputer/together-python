@@ -13,6 +13,13 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version="%(prog)s " + together.version,
+    )
+
+    parser.add_argument(
         "--endpoint",
         "-e",
         help="[Optional] Together API Endpoint URL",
