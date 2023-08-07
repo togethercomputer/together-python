@@ -128,7 +128,11 @@ def _run_info(args: argparse.Namespace) -> None:
 def _run_instances(args: argparse.Namespace) -> None:
     models = Models()
     response = models.instances()
-    print(json.dumps(response, indent=4))
+    if args.raw:
+        print(json.dumps(response, indent=4))
+    else:
+        started_instances = [key for key in response.keys() if response[key] is True]
+        print(json.dumps(started_instances, indent=4))
 
 
 def _run_start(args: argparse.Namespace) -> None:
