@@ -136,6 +136,7 @@ def _run_start(args: argparse.Namespace) -> None:
     response = models.start(args.model)
     print(json.dumps(response, indent=4))
 
+
 def _run_stop(args: argparse.Namespace) -> None:
     models = Models()
     response = models.stop(args.model)

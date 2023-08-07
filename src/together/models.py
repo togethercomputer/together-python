@@ -1,5 +1,5 @@
 import urllib.parse
-from typing import Any, List, Dict, Union
+from typing import Any, Dict, List, Union
 
 import requests
 
@@ -45,9 +45,9 @@ class Models:
 
     @classmethod
     def instances(self) -> Union[Dict[str, bool], Any]:
-        headers={
+        headers = {
             "Authorization": f"Bearer {together.api_key}",
-            "accept": 'application/json',
+            "accept": "application/json",
         }
         try:
             response = requests.get(
@@ -70,11 +70,13 @@ class Models:
         return response_dict
 
     @classmethod
-    def start(self, model: str) -> Union[Dict[str, str],Any]:
-        model_url = urllib.parse.urljoin(together.api_base_instances,f"start?model={model}")
-        headers={
+    def start(self, model: str) -> Union[Dict[str, str], Any]:
+        model_url = urllib.parse.urljoin(
+            together.api_base_instances, f"start?model={model}"
+        )
+        headers = {
             "Authorization": f"Bearer {together.api_key}",
-            "accept": 'application/json',
+            "accept": "application/json",
         }
         try:
             response = requests.post(
@@ -97,11 +99,13 @@ class Models:
         return response_dict
 
     @classmethod
-    def stop(self, model: str) -> Union[Dict[str, str],Any]:
-        model_url = urllib.parse.urljoin(together.api_base_instances,f"stop?model={model}")
-        headers={
+    def stop(self, model: str) -> Union[Dict[str, str], Any]:
+        model_url = urllib.parse.urljoin(
+            together.api_base_instances, f"stop?model={model}"
+        )
+        headers = {
             "Authorization": f"Bearer {together.api_key}",
-            "accept": 'application/json',
+            "accept": "application/json",
         }
         try:
             response = requests.post(
@@ -122,4 +126,3 @@ class Models:
             raise together.JSONError(e, http_status=response.status_code)
 
         return response_dict
-
