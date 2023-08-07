@@ -1,5 +1,5 @@
 import urllib.parse
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Union
 
 import requests
 
@@ -44,7 +44,7 @@ class Models:
         return response_list
 
     @classmethod
-    def instances(self) -> Dict[str, bool]:
+    def instances(self) -> Union[Dict[str, bool], Any]:
         headers={
             "Authorization": f"Bearer {together.api_key}",
             "accept": 'application/json',
@@ -70,7 +70,7 @@ class Models:
         return response_dict
 
     @classmethod
-    def start(self, model: str) -> Dict[str, str]:
+    def start(self, model: str) -> Union[Dict[str, str],Any]:
         model_url = urllib.parse.urljoin(together.api_base_instances,f"start?model={model}")
         headers={
             "Authorization": f"Bearer {together.api_key}",
@@ -97,7 +97,7 @@ class Models:
         return response_dict
 
     @classmethod
-    def stop(self, model: str) -> Dict[str, str]:
+    def stop(self, model: str) -> Union[Dict[str, str],Any]:
         model_url = urllib.parse.urljoin(together.api_base_instances,f"stop?model={model}")
         headers={
             "Authorization": f"Bearer {together.api_key}",
