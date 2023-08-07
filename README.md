@@ -42,7 +42,7 @@ models = together.Models.list()
 print(models[0]['name'])
 ```
 
-Let's start an instance of one of the models on the list above. You can also start an instance by clicking play on any model in the [models playground](https://api.together.xyz/playground).
+Let's start an instance of one of the models in the list above. You can also start an instance by clicking play on any model in the [models playground](https://api.together.xyz/playground).
 
 ```python
 together.Models.start("togethercomputer/RedPajama-INCITE-7B-Base")
