@@ -44,7 +44,7 @@ class Models:
         return response_list
 
     @classmethod
-    def instances(self) -> Union[Dict[str, bool], Any]:
+    def instances(self) -> Dict[str, bool]: #Union[Dict[str, bool], Any]:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "accept": "application/json",
@@ -67,10 +67,10 @@ class Models:
             )
             raise together.JSONError(e, http_status=response.status_code)
 
-        return response_dict
+        return dict(response_dict)
 
     @classmethod
-    def start(self, model: str) -> Union[Dict[str, str], Any]:
+    def start(self, model: str) -> Dict[str, str]: #Union[Dict[str, str], Any]:
         model_url = urllib.parse.urljoin(
             together.api_base_instances, f"start?model={model}"
         )
@@ -96,10 +96,10 @@ class Models:
             )
             raise together.JSONError(e, http_status=response.status_code)
 
-        return response_dict
+        return dict(response_dict)
 
     @classmethod
-    def stop(self, model: str) -> Union[Dict[str, str], Any]:
+    def stop(self, model: str) -> Dict[str, str]: #Union[Dict[str, str], Any]:
         model_url = urllib.parse.urljoin(
             together.api_base_instances, f"stop?model={model}"
         )
@@ -125,4 +125,4 @@ class Models:
             )
             raise together.JSONError(e, http_status=response.status_code)
 
-        return response_dict
+        return dict(response_dict)
