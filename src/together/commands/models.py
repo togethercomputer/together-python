@@ -57,6 +57,12 @@ def _add_instances(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     subparser = parser.add_parser("instances")
+    subparser.add_argument(
+        "--raw",
+        help="Raw list of instances",
+        default=False,
+        action="store_true",
+    )
     subparser.set_defaults(func=_run_instances)
 
 
