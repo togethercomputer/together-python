@@ -16,6 +16,9 @@ def add_parser(
 
     _add_list(child_parsers)
     _add_info(child_parsers)
+    _add_instances(child_parsers)
+    _add_start(child_parsers)
+    _add_stop(child_parsers)
 
 
 def _add_list(
@@ -48,6 +51,45 @@ def _add_info(
         action="store_true",
     )
     subparser.set_defaults(func=_run_info)
+
+
+def _add_instances(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    subparser = parser.add_parser("instances")
+    subparser.add_argument(
+        "--raw",
+        help="Raw list of instances",
+        default=False,
+        action="store_true",
+    )
+    subparser.set_defaults(func=_run_instances)
+
+
+def _add_start(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    subparser = parser.add_parser("start")
+    subparser.add_argument(
+        "model",
+        metavar="MODEL",
+        help="Proper Model API string name",
+        type=str,
+    )
+    subparser.set_defaults(func=_run_start)
+
+
+def _add_stop(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    subparser = parser.add_parser("stop")
+    subparser.add_argument(
+        "model",
+        metavar="MODEL",
+        help="Proper Model API string name",
+        type=str,
+    )
+    subparser.set_defaults(func=_run_stop)
 
 
 def _run_list(args: argparse.Namespace) -> None:
@@ -87,3 +129,25 @@ def _run_info(args: argparse.Namespace) -> None:
                 model_info = {key: i[key] for key in visible_keys if key in i}
                 print(json.dumps(model_info, indent=4))
             break
+
+
+def _run_instances(args: argparse.Namespace) -> None:
+    models = Models()
+    response = models.instances()
+    if args.raw:
+        print(json.dumps(response, indent=4))
+    else:
+        started_instances = [key for key in response.keys() if response[key] is True]
+        print(json.dumps(started_instances, indent=4))
+
+
+def _run_start(args: argparse.Namespace) -> None:
+    models = Models()
+    response = models.start(args.model)
+    print(json.dumps(response, indent=4))
+
+
+def _run_stop(args: argparse.Namespace) -> None:
+    models = Models()
+    response = models.stop(args.model)
+    print(json.dumps(response, indent=4))
