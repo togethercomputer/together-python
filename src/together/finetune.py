@@ -34,6 +34,7 @@ class Finetune:
         # fp16: Optional[bool] = True,
         # checkpoint_steps: Optional[int] = None,
         suffix: Optional[str] = None,
+        wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         parameter_payload = {
             "training_file": training_file,
@@ -48,6 +49,7 @@ class Finetune:
             # "seed": seed,
             # "fp16": fp16,
             "suffix": suffix,
+            "wandb_key": wandb_api_key,
         }
 
         # HTTP headers for authorization
