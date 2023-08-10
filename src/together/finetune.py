@@ -37,20 +37,23 @@ class Finetune:
         suffix: Optional[str] = None,
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
-        
         if n_epochs is None or n_epochs < 1:
             logger.fatal("The number of epochs must be specified")
             raise ValueError("n_epochs is required")
-        
+
         # Validate parameters
         if n_checkpoints is None:
             n_checkpoints = 1
         elif n_checkpoints < 1:
             n_checkpoints = 1
-            logger.warning(f"The number of checkpoints must be >= 1, setting to {n_checkpoints}")
+            logger.warning(
+                f"The number of checkpoints must be >= 1, setting to {n_checkpoints}"
+            )
         elif n_checkpoints > n_epochs:
             n_checkpoints = n_epochs
-            logger.warning(f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}")
+            logger.warning(
+                f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
+            )
 
         parameter_payload = {
             "training_file": training_file,
