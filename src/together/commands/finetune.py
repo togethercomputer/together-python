@@ -59,6 +59,14 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         type=int,
     )
     subparser.add_argument(
+        "--n-checkpoints",
+        "-c",
+        metavar="CHECKPOINTS",
+        default=1,
+        help="The number of checkpoints to save during training. Default=1 (a checkpoint is always saved on the last epoch for the trained model).",
+        type=int,
+    )
+    subparser.add_argument(
         "--batch-size",
         "-b",
         metavar="BATCH_SIZE",
@@ -271,6 +279,7 @@ def _run_create(args: argparse.Namespace) -> None:
         # validation_file=args.validation_file,  # validation file_id
         model=args.model,
         n_epochs=args.n_epochs,
+        n_checkpoints=args.n_checkpoints,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         # warmup_steps=args.warmup_steps,
