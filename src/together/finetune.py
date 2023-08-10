@@ -24,7 +24,7 @@ class Finetune:
         training_file: str,  # training file_id
         # validation_file: Optional[str] = None,  # validation file_id
         model: Optional[str] = None,
-        n_epochs: Optional[int] = 1,
+        n_epochs: int = 1,
         n_checkpoints: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
@@ -38,9 +38,9 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         
-        if n_epochs is None:
+        if n_epochs is None or n_epochs < 1:
             logger.fatal("The number of epochs must be specified")
-            raise together.MissingParameterError("n_epochs")
+            raise ValueError("n_epochs is required")
         
         # Validate parameters
         if n_checkpoints is None:
