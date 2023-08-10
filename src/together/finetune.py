@@ -38,6 +38,10 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         
+        if n_epochs is None:
+            logger.fatal("The number of epochs must be specified")
+            raise together.MissingParameterError("n_epochs")
+        
         # Validate parameters
         if n_checkpoints is None:
             n_checkpoints = 1
