@@ -14,6 +14,9 @@ jobs:
       - name: Then install twine
         run: |
           python3 -m pip install --upgrade twine
+      - name: List files in the repository to check you have the .toml file
+        run: |
+          ls ${{ github.workspace }}
       - name: Use build to build the dist archives run
         run: |
           python3 -m build
