@@ -1,0 +1,26 @@
+name: Upload to PyPI
+run-name: ${{ github.actor }} is uploading a new release of together python library client to PyPI 🚀
+on: [push]
+jobs:
+  Upload-Library-to-PyPI:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout
+      - name: To build the dist archives into the dist/ directory, first install build
+        run: |
+          python3 -m pip install --upgrade build
+      - name: Then install twine
+        run: |
+          python3 -m pip install --upgrade twine
+      - name: List files in the repository to check you have the .toml file
+        run: |
+          ls ${{ github.workspace }}
+      - name: Use `python3 -m build` to build the dist archives run
+        run: |
+          python3 -m build
+      - name: You will see the `dist/` folder appear in the main directory of your repository
+      - name: Use `python3 -m twine upload dist/*` to upload the archives to PyPI.
+        run: |
+          python3 -m twine upload dist/*
+          
