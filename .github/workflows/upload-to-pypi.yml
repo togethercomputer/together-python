@@ -21,4 +21,6 @@ jobs:
           python3 -m build
       - name: You will see the `dist/` folder appear in the main directory of your repository
       - name: Use `python3 -m twine upload dist/*` to upload the archives to PyPI.
+        run: |
+          python3 -m twine upload dist/*
           
