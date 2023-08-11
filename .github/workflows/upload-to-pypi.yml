@@ -1,12 +1,11 @@
 name: Upload to PyPI
 
 on:
-  push: 
   workflow_dispatch:
     inputs:
-      tag:
+      PYPI_API_TOKEN:
         required: true
-        description: Tag to release to pypi
+        description: your API token on PyPI
 
 jobs:
   Upload-Library-to-PyPI:
@@ -26,7 +25,9 @@ jobs:
       - name: Use `python3 -m build` to build the dist archives run, You will see the `dist/` folder appear in the main directory of your repository
         run: |
           python3 -m build
-      - name: Use `python3 -m twine upload dist/*` to upload the archives to PyPI.
-        run: |
-          python3 -m twine upload dist/*
+      - name: Publish distribution 📦 to PyPI
+        if: startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ github.event.inputs.PYPI_API_TOKEN }}
           
