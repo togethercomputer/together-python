@@ -5,9 +5,6 @@ jobs:
   Upload-Library-to-PyPI:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: To build the dist archives into the dist/ directory, first install build
         run: |
           python3 -m pip install --upgrade build
@@ -17,10 +14,7 @@ jobs:
       - name: List files in the repository to check you have the .toml file
         run: |
           ls ${{ github.workspace }}
-      - name: Use build to build the dist archives run
-        run: |
-          python3 -m build
-      - run: You will see the `dist/` folder appear in the main directory of your repository
-      - name: Use twice to upload the archives to PyPI.
-        run: |
-          python3 -m twine upload dist/*
+      - name: Use `python3 -m build` to build the dist archives run
+      - name: You will see the `dist/` folder appear in the main directory of your repository
+      - name: Use `python3 -m twine upload dist/*` to upload the archives to PyPI.
+          
