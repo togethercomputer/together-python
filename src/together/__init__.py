@@ -28,6 +28,23 @@ from .files import Files
 from .finetune import Finetune
 from .image import Image
 
+finetune_model_names = [
+ 'togethercomputer/LLaMA-2-7B-32K',
+ 'togethercomputer/llama-2-7b',
+ 'togethercomputer/llama-2-7b-chat',
+ 'togethercomputer/llama-2-13b-chat',
+ 'togethercomputer/llama-2-13b',
+ 'togethercomputer/RedPajama-INCITE-7B-Base',
+ 'togethercomputer/RedPajama-INCITE-7B-Chat',
+ 'togethercomputer/RedPajama-INCITE-7B-Instruct',
+ 'togethercomputer/RedPajama-INCITE-Base-3B-v1',
+ 'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+ 'togethercomputer/RedPajama-INCITE-Instruct-3B-v1',
+ 'togethercomputer/Pythia-Chat-Base-7B',
+]
+
+model_list = Models.list()
+all_model_names = [model_dict['name'] for model_dict in model_list]
 
 __all__ = [
     "api_key",
@@ -46,4 +63,6 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
+    "model_names",
+    "finetune_model_names",
 ]

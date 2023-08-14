@@ -1,6 +1,6 @@
 import json
 from typing import Any, Dict, Iterator, List, Optional
-
+from logging import Logger
 import requests
 import sseclient  # type: ignore
 
@@ -9,6 +9,20 @@ from together import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
+
+def validate_parameter_payload(parameter_payload: dict, logger: Logger) -> bool:
+
+    if parameter_payload['model'] not in together.all_model_names:
+        logger.warning(
+            f"the model name {parameter_payload['model']} may be invalid or misspelled. "
+            "the model argument refers to the official API name string of one of the models. "
+            "See together.Models.list() in python or `together models list` in commandline "
+            "to get an updated list of valid model names"
+        )
+
+    return True
+
+
 
 
 class Complete:
@@ -52,6 +66,9 @@ class Complete:
             "User-Agent": together.user_agent,
         }
 
+        if not validate_parameter_payload(parameter_payload=parameter_payload, logger=logger):
+            raise together.FileTypeError("Invalid API request")
+
         # send request
         try:
             response = requests.post(
@@ -65,7 +82,12 @@ class Complete:
 
         if response.status_code == 429:
             logger.critical(
-                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
+                f"No running instances for {model}. "
+                "You can start an instance by navigating to the Together Playground at api.together.ai "
+                "or by starting one in python using together.Models.start(model_name) "
+                "or `together models start model_name` at the commandline. "
+                "See together.Models.list() in python or `together models list` in commandline "
+                "to get an updated list of valid model_name's"
             )
             raise together.InstanceError(model=model)
 

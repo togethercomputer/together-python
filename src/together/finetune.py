@@ -1,5 +1,6 @@
 import posixpath
 import urllib.parse
+from logging import Logger
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -7,9 +8,29 @@ from tqdm import tqdm
 
 import together
 from together import get_logger, verify_api_key
-
+from together import Files
 
 logger = get_logger(str(__name__), log_level=together.log_level)
+
+def validate_parameter_payload(parameter_payload: dict, logger: Logger) -> bool:
+
+    # check if training_file is the string id of a previously uploaded file
+    uploaded_files = Files.list()
+    file_ids = [f['id'] for f in uploaded_files['data']]
+
+    if parameter_payload["training_file"] not in file_ids:
+        logger.critical(
+            "training_file refers to the id of one of the files uploaded using together.Files.upload(fil ='/path/to/file') in python "
+            "or `together files upload <FILE_PATH>` in the commandline. "
+            "See together.Files.list() in python or `together files list` in the commandline for a list of uploaded files."
+        ) 
+        return False
+
+    # check if model name is one of the models available for finetuning
+    if parameter_payload["model"] not in together.finetune_model_names:
+        logger.warning("the finetune model name must be one of the subset of models available for finetuning https://docs.together.ai/docs/models-fine-tuning")
+
+    return True
 
 
 class Finetune:
@@ -34,7 +55,7 @@ class Finetune:
         # seed: Optional[int] = 42,
         # fp16: Optional[bool] = True,
         # checkpoint_steps: Optional[int] = None,
-        suffix: Optional[str] = None,
+        suffix: Optional[str] = None, # resulting finetuned model name will include the suffix
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
@@ -78,6 +99,9 @@ class Finetune:
             "Content-Type": "application/json",
             "User-Agent": together.user_agent,
         }
+
+        if not validate_parameter_payload(parameter_payload=parameter_payload, logger=logger):
+            raise together.FileTypeError("Invalid API request")
 
         # send request
         try:
