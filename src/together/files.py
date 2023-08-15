@@ -16,31 +16,6 @@ from together import get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-def validate_file(file: str, logger: Logger) -> bool:
-    if not os.path.isfile(file):
-        logger.critical("ERROR: File not found")
-        return False
-
-    file_size = os.stat(file).st_size
-
-    if file_size > 4.9 * (2**30):
-        logger.warning("File size > 4.9 GB, file may fail to upload.")
-
-    with open(file) as f:
-        try:
-            for line in f:
-                json_line = json.loads(line)
-                if "text" not in json_line:
-                    logger.critical(
-                        "ERROR: 'text' field not found in one or more lines in JSONL file"
-                    )
-                    return False
-        except ValueError:
-            logger.critical("ERROR: Could not load JSONL file. Invalid format")
-            return False
-        return True
-
-
 class Files:
     def __init__(
         self,
@@ -72,7 +47,11 @@ class Files:
         return response_json
 
     @classmethod
-    def upload(self, file: str) -> Dict[str, Union[str, int]]:
+    def check(self, file: str) -> Dict[str, Union[str, int]]:
+        return check_json(file)
+
+    @classmethod
+    def upload(self, file: str, do_check: bool = True) -> Dict[str, Union[str, int]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
         headers = {
@@ -80,8 +59,12 @@ class Files:
             "User-Agent": together.user_agent,
         }
 
-        if not validate_file(file=file, logger=logger):
-            raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+        if do_check:
+            report_dict = check_json(file)
+
+            if not report_dict['is_check_passed']:
+                print(report_dict)
+                raise together.FileTypeError("Invalid file supplied. Failed to upload.")
 
         session = requests.Session()
 
@@ -259,3 +242,69 @@ class Files:
             raise together.ResponseError(e)
 
         return output  # this should be null
+
+
+def check_json(file: str, min_samples: int = 4) -> Dict[str, Union[str, int, bool]]:
+
+    report_dict = {'is_check_passed':True,'error_list':[]}
+
+    if not os.path.isfile(file):
+        report_dict['error_list'].append(f"File not found at given file path {file}")
+        report_dict['is_check_passed'] = False
+
+    file_size = os.stat(file).st_size
+
+    if file_size > 4.9 * (2**30):
+        report_dict['error_list'].append(f"File size {round(file_size,2)} is greater than our limit of 4.9 GB")
+        report_dict['is_check_passed'] = False
+
+    with open(file) as f:
+
+        try:
+            for idx, line in enumerate(f):
+
+                json_line = json.loads(line) # each line in jsonlines should be a json
+
+                if not isinstance(json_line,dict):
+                    report_dict['error_list'].append(
+                        "Valid json not found in one or more lines in JSONL file. "
+                        "Example of valid json: {\"text\":\"my sample string\"}. "
+                        "see https://docs.together.ai/docs/fine-tuning. "
+                        f"The first line where this occur is line {idx+1}, where 1 is the first line. "
+                        f"{str(line)}"
+                    )
+                    report_dict['is_check_passed'] = False
+
+                if "text" not in json_line:
+                    report_dict['error_list'].append(
+                        "\"text\" field not found in one or more lines in JSONL file. "
+                        "see https://docs.together.ai/docs/fine-tuning. "
+                        f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
+                        f"{str(line)}"
+                    )
+                    report_dict['is_check_passed'] = False
+                else:
+                    # check to make sure the value of the "text" key is a string
+                    if not isinstance(json_line["text"],str):
+                        report_dict['error_list'].append(
+                            "Wrong key value pair in one or more lines in JSONL file. "
+                            "The \"text\" key is not paired with a string value, ie {\"text\":\"my sample string\"}. "
+                            "see https://docs.together.ai/docs/fine-tuning. "
+                            f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
+                            f"{str(line)}"
+                        )
+                        report_dict['is_check_passed'] = False
+
+            # make sure this is outside the for idx, line in enumerate(f): for loop  
+            if idx+1 < min_samples:
+                report_dict['error_list'].append(
+                    f"The way this file was parsed resulted in only {idx+1} samples. "
+                    f"Our minimum is {min_samples} samples. "
+                )
+                report_dict['is_check_passed'] = False
+
+        except ValueError:
+            report_dict['error_list'].append("Could not load JSONL file. Invalid format")
+            report_dict['is_check_passed'] = False
+
+    return report_dict

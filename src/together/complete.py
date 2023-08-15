@@ -13,10 +13,10 @@ logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 def validate_parameter_payload(parameter_payload: dict, logger: Logger) -> bool:
-    if parameter_payload["model"] not in together.all_model_names:
+    if parameter_payload["model"] not in together.model_info_dict:
         logger.warning(
-            f"the model name {parameter_payload['model']} may be invalid or misspelled. "
-            "the model argument refers to the official API name string of one of the models. "
+            f"The model name {parameter_payload['model']} may be invalid or misspelled. "
+            "The `model` argument to Complete.create refers to a valid string of the model's API name. "
             "See together.Models.list() in python or `together models list` in commandline "
             "to get an updated list of valid model names"
         )
@@ -96,12 +96,12 @@ class Complete:
 
         try:
             response_json = dict(response.json())
-
         except Exception as e:
             logger.critical(
                 f"Error raised: {e}\nResponse status code = {response.status_code}"
             )
             raise together.JSONError(e, http_status=response.status_code)
+
         return response_json
 
     @classmethod

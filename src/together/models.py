@@ -40,7 +40,7 @@ class Models:
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
             raise together.JSONError(e, http_status=response.status_code)
-
+        
         return response_list
 
     @classmethod
