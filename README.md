@@ -35,37 +35,76 @@ import together
 # set your API key
 together.api_key = "xxxxx"
 
-# list available models and descriptons
-models = together.Models.list()
+# see available models
+model_list = together.Models.list()
 
-# print the first model's name
-print(models[0]['name'])
+print(f"{len(model_list)} models available")
+
+# print the first 10 models on the menu
+model_names = [model_dict['name'] for model_dict in model_list]
+model_names[:10]
 ```
+
+We are constantly updating this list, but you should expect to see something like this:
+
+```python
+64 models available
+['EleutherAI/gpt-j-6b',
+ 'EleutherAI/gpt-neox-20b',
+ 'EleutherAI/pythia-12b-v0',
+ 'EleutherAI/pythia-1b-v0',
+ 'EleutherAI/pythia-2.8b-v0',
+ 'EleutherAI/pythia-6.9b',
+ 'HuggingFaceH4/starchat-alpha',
+ 'NousResearch/Nous-Hermes-13b',
+ 'NousResearch/Nous-Hermes-Llama2-13b',
+ 'NumbersStation/nsql-6B']
+```
+
 
 Let's start an instance of one of the models in the list above. You can also start an instance by clicking play on any model in the [models playground](https://api.together.xyz/playground).
 
 ```python
-together.Models.start("togethercomputer/RedPajama-INCITE-7B-Base")
+together.Models.start('togethercomputer/LLaMA-2-7B-32K')
 ```
 
-Once you've started a model instance, you can start querying:
+Once you've started a model instance, you can start querying. Notice the inputs available to you to adjust the output you get and how the text is returned to you in the `choices` list.
 
 ```python
-import together
-
-# set your API key
-together.api_key = "xxxxx"
-
-# list available models and descriptons
-models = together.Models.list()
-
-# print the first model's name
-print(models[0]['name'])
-
-output = together.Complete.create("Space robots", model="togethercomputer/RedPajama-INCITE-7B-Base")
+output = together.Complete.create(
+  prompt = "Isaac Asimov's Three Laws of Robotics are: \n\n1.", 
+  model = "togethercomputer/LLaMA-2-7B-32K", 
+  max_tokens = 70,
+  temperature = 0.6,
+  top_k = 90,
+  top_p = 0.8,
+  repetition_penalty = 1.2,
+  stop = ['</s>']
+)
 
 # print generated text
-print(output['output']['choices'][0]['text'])
+print(output['prompt'][0]+output['output']['choices'][0]['text'])
+```
+
+Since the temperature is > 0.0, you will see some creative variation in the output text, here is one example:
+
+```
+Isaac Asimov's Three Laws of Robotics are: 
+
+1.A robot may not injure a human being or, through inaction, allow a human being to come to harm.
+2. A robot must obey the orders given it by human beings except where such orders would conflict with the First Law.
+3. A robot must protect its own existence as long as such protection does not conflict with the
+```
+
+We are constantly updating the capabilities of these models and our API, but one example just to show the different components of the output you can check:
+
+```python
+# print the entire output to see it's components
+print(output)
+```
+
+```
+{'status': 'finished', 'prompt': ["Isaac Asimov's Three Laws of Robotics are: \n\n1."], 'model': 'togethercomputer/LLaMA-2-7B-32K', 'model_owner': '', 'tags': {}, 'num_returns': 1, 'args': {'model': 'togethercomputer/LLaMA-2-7B-32K', 'prompt': "Isaac Asimov's Three Laws of Robotics are: \n\n1.", 'top_p': 0.8, 'top_k': 90, 'temperature': 0.6, 'max_tokens': 70, 'stop': ['</s>'], 'repetition_penalty': 1.2, 'logprobs': None}, 'subjobs': [], 'output': {'choices': [{'finish_reason': 'length', 'index': 0, 'text': 'A robot may not injure a human being or, through inaction, allow a human being to come to harm.\n2. A robot must obey the orders given it by human beings except where such orders would conflict with the First Law.\n3. A robot must protect its own existence as long as such protection does not conflict with the'}], 'raw_compute_time': 1.9681874650996178, 'result_type': 'language-model-inference'}}
 ```
 
 Check which models have been started or stopped:
@@ -77,7 +116,7 @@ together.Models.instances()
 To stop your model instance:
 
 ```python
-together.Models.stop("togethercomputer/RedPajama-INCITE-7B-Base")
+together.Models.stop("togethercomputer/LLaMA-2-7B-32K")
 ```
 
 ## Chat
