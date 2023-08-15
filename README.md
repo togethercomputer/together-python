@@ -96,7 +96,7 @@ Isaac Asimov's Three Laws of Robotics are:
 3. A robot must protect its own existence as long as such protection does not conflict with the
 ```
 
-We are constantly updating the capabilities of these models and our API, but one example just to show the different components of the output you can check:
+We are constantly updating the capabilities of these models and our API, but here is one example just to show you the different components of the output available to you:
 
 ```python
 # print the entire output to see it's components
