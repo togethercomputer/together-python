@@ -195,6 +195,33 @@ An example checker output for an invalid file with reasons file was invalid:
 {'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
 ```
 
+Get the `id`'s of all the files you have uploaded, you'll need these `id`'s that start with
+`file-960be810-4d....` in order to start your fine-tuning job
+
+```python
+files_list = together.Files.list()
+print(files_list['data'])
+```
+
+```
+[{'filename': 'jokes.jsonl',
+  'bytes': 40805,
+  'created_at': 1691710036,
+  'id': 'file-960be810-4d33-449a-885a-9f69bd8fd0e2',
+  'purpose': 'fine-tune',
+  'object': 'file',
+  'LineCount': 0,
+  'Processed': True},
+ {'filename': 'chatgreet.jsonl',
+  'bytes': 2578,
+  'created_at': 1692042839,
+  'id': 'file-a553e98e-3403-4f08-91a1-fb246fe2714c',
+  'purpose': 'fine-tune',
+  'object': 'file',
+  'LineCount': 0,
+  'Processed': True}]
+```
+
 ## Fine-tuning
 
 Run and manage your fine-tuning jobs, enabling you to tune all model layers, control hyper-parameters, download the weights and checkpoints.
