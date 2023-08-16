@@ -277,7 +277,7 @@ class Files:
 def check_json(
     file: str,
     model: str = None,
-) -> Dict[str, Union[str, int, bool, list, object]]:
+) -> Dict[str, Union[str, int, bool, list, dict]]:
     report_dict = {"is_check_passed": True, "error_list": []}
 
     eos_token = None
