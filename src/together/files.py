@@ -56,7 +56,6 @@ class Files:
         check: bool = True,
         model: str = None,
     ) -> Dict[str, Union[str, int]]:
-
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
         output_dict = {}
@@ -68,7 +67,7 @@ class Files:
 
         if check:
             report_dict = check_json(file, model)
-            output_dict['check'] = report_dict
+            output_dict["check"] = report_dict
             if not report_dict["is_check_passed"]:
                 print(report_dict)
                 raise together.FileTypeError("Invalid file supplied. Failed to upload.")
@@ -144,7 +143,6 @@ class Files:
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
-
 
         output_dict["filename"] = os.path.basename(file)
         output_dict["id"] = str(file_id)
