@@ -185,10 +185,10 @@ print(resp)
 
 The checker will look at the jsonl file to see if:
 
-a. each line of the file is a valid json object
-b. the expected key is that json object (i.e. "text")
-c. the type of each key is the expected type (i.e. str)
-d. minimum number of samples is met
+- each line of the file is a valid json object
+- the expected key is that json object (i.e. "text")
+- the type of each key is the expected type (i.e. str)
+- minimum number of samples is met
 
 An example checker output for an invalid file with reasons file was invalid:
 ```
