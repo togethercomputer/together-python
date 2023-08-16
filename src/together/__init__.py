@@ -19,6 +19,7 @@ api_base_instances = urllib.parse.urljoin(api_base, "instances/")
 default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
+min_samples = 4
 
 from .utils.utils import get_logger, verify_api_key, extract_time  # noqa
 from .models import Models
@@ -125,4 +126,5 @@ __all__ = [
     "Image",
     "model_info_dict",
     "finetune_model_names",
+    "min_samples",
 ]

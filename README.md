@@ -72,13 +72,13 @@ Once you've started a model instance, you can start querying. Notice the inputs 
 
 ```python
 output = together.Complete.create(
-  prompt = "Isaac Asimov's Three Laws of Robotics are: \n\n1.", 
+  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
   model = "togethercomputer/LLaMA-2-7B-32K", 
   max_tokens = 70,
   temperature = 0.6,
   top_k = 90,
   top_p = 0.8,
-  repetition_penalty = 1.2,
+  repetition_penalty = 1.1,
   stop = ['</s>']
 )
 
@@ -91,7 +91,7 @@ Since the temperature is > 0.0, you will see some creative variation in the outp
 ```
 Isaac Asimov's Three Laws of Robotics are: 
 
-1.A robot may not injure a human being or, through inaction, allow a human being to come to harm.
+1. A robot may not injure a human being or, through inaction, allow a human being to come to harm.
 2. A robot must obey the orders given it by human beings except where such orders would conflict with the First Law.
 3. A robot must protect its own existence as long as such protection does not conflict with the
 ```

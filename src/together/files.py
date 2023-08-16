@@ -47,11 +47,16 @@ class Files:
         return response_json
 
     @classmethod
-    def check(self, file: str) -> Dict[str, Union[str, int]]:
-        return check_json(file)
+    def check(self, file: str, model: str = None) -> Dict[str, Union[str, int]]:
+        return check_json(file, model)
 
     @classmethod
-    def upload(self, file: str, do_check: bool = True) -> Dict[str, Union[str, int]]:
+    def upload(
+        self, 
+        file: str, 
+        do_check: bool = True,
+        model: str = None,
+    ) -> Dict[str, Union[str, int]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
         headers = {
@@ -60,7 +65,7 @@ class Files:
         }
 
         if do_check:
-            report_dict = check_json(file)
+            report_dict = check_json(file,model)
 
             if not report_dict['is_check_passed']:
                 print(report_dict)
@@ -244,9 +249,21 @@ class Files:
         return output  # this should be null
 
 
-def check_json(file: str, min_samples: int = 4) -> Dict[str, Union[str, int, bool]]:
+def check_json(
+    file: str, 
+    model: str = None,
+) -> Dict[str, Union[str, int, bool]]:
 
     report_dict = {'is_check_passed':True,'error_list':[]}
+
+    eos_token = None
+    if model is not None and model in together.model_info_dict:
+        if 'eos_token' in together.model_info_dict[model]:
+            eos_token = together.model_info_dict[model]['eos_token']
+            report_dict['model_info'] = {'special_tokens':[f"the end of sentence token for this model is {eos_token}"]}
+            report_dict['model_info']['num_samples_w_eos_token'] = 0
+        else:
+            report_dict['model_info'] = {'special_tokens':['we are not yet checking end of sentence tokens for this model']}
 
     if not os.path.isfile(file):
         report_dict['error_list'].append(f"File not found at given file path {file}")
@@ -295,11 +312,15 @@ def check_json(file: str, min_samples: int = 4) -> Dict[str, Union[str, int, boo
                         )
                         report_dict['is_check_passed'] = False
 
+                    elif eos_token:
+                        if eos_token in json_line["text"]:
+                            report_dict['model_info']['num_samples_w_eos_token'] += 1
+
             # make sure this is outside the for idx, line in enumerate(f): for loop  
-            if idx+1 < min_samples:
+            if idx+1 < together.min_samples:
                 report_dict['error_list'].append(
                     f"The way this file was parsed resulted in only {idx+1} samples. "
-                    f"Our minimum is {min_samples} samples. "
+                    f"Our minimum is {together.min_samples} samples. "
                 )
                 report_dict['is_check_passed'] = False
 
