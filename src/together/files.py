@@ -277,8 +277,8 @@ class Files:
 def check_json(
     file: str,
     model: str = None,
-) -> Dict[str, Union[list, Any]]:
-    report_dict = {"is_check_passed": True, "error_list": []}
+) -> Dict[str, Union[str, int, bool, list, dict]]:
+    report_dict = {"is_check_passed": True}
 
     eos_token = None
     if model is not None and model in together.model_info_dict:
@@ -298,16 +298,18 @@ def check_json(
             }
 
     if not os.path.isfile(file):
-        report_dict["error_list"].append(f"File not found at given file path {file}")
+        report_dict["file_present"] = f"File not found at given file path {file}"
         report_dict["is_check_passed"] = False
+    else:
+        report_dict["file_present"] = "File found"
 
     file_size = os.stat(file).st_size
 
     if file_size > 4.9 * (2**30):
-        report_dict["error_list"].append(
-            f"File size {round(file_size,2)} is greater than our limit of 4.9 GB"
-        )
+        report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
+    else:
+        report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
 
     with open(file) as f:
         try:
@@ -315,7 +317,7 @@ def check_json(
                 json_line = json.loads(line)  # each line in jsonlines should be a json
 
                 if not isinstance(json_line, dict):
-                    report_dict["error_list"].append(
+                    report_dict["line_type"] = (
                         "Valid json not found in one or more lines in JSONL file. "
                         'Example of valid json: {"text":"my sample string"}. '
                         "see https://docs.together.ai/docs/fine-tuning. "
@@ -323,9 +325,9 @@ def check_json(
                         f"{str(line)}"
                     )
                     report_dict["is_check_passed"] = False
-
+                
                 if "text" not in json_line:
-                    report_dict["error_list"].append(
+                    report_dict["text_field"] = (
                         'No "text" field was found in one or more lines in JSONL file. '
                         "see https://docs.together.ai/docs/fine-tuning. "
                         f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
@@ -335,7 +337,7 @@ def check_json(
                 else:
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
-                        report_dict["error_list"].append(
+                        report_dict["key_value"] = (
                             "Wrong key value pair in one or more lines in JSONL file. "
                             'The "text" key is not paired with a string value, ie {"text":"my sample string"}. '
                             "see https://docs.together.ai/docs/fine-tuning. "
@@ -350,7 +352,7 @@ def check_json(
 
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < together.min_samples:
-                report_dict["error_list"].append(
+                report_dict["min_samplest"] = (
                     f"Processing {file} resulted in only {idx+1} samples. "
                     f"Our minimum is {together.min_samples} samples. "
                 )
@@ -359,7 +361,7 @@ def check_json(
                 report_dict["num_samples"] = idx + 1
 
         except ValueError:
-            report_dict["error_list"].append(
+            report_dict["load_json"] = (
                 "Could not load JSONL file. Invalid format"
             )
             report_dict["is_check_passed"] = False
