@@ -53,19 +53,22 @@ class Files:
     def upload(
         self,
         file: str,
-        do_check: bool = True,
+        check: bool = True,
         model: str = None,
     ) -> Dict[str, Union[str, int]]:
+
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
+
+        output_dict = {}
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "User-Agent": together.user_agent,
         }
 
-        if do_check:
+        if check:
             report_dict = check_json(file, model)
-
+            output_dict['check'] = report_dict
             if not report_dict["is_check_passed"]:
                 print(report_dict)
                 raise together.FileTypeError("Invalid file supplied. Failed to upload.")
@@ -142,11 +145,12 @@ class Files:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
-        return {
-            "filename": os.path.basename(file),
-            "id": str(file_id),
-            "object": "file",
-        }
+
+        output_dict["filename"] = os.path.basename(file)
+        output_dict["id"] = str(file_id)
+        output_dict["object"] = "file"
+
+        return output_dict
 
     @classmethod
     def delete(self, file_id: str) -> Dict[str, str]:

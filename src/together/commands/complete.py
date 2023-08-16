@@ -32,14 +32,12 @@ def add_parser(
         type=str,
         help=f"The name of the model to query. Default={together.default_text_model}",
     )
-
     subparser.add_argument(
         "--no-stream",
         default=False,
         action="store_true",
         help="Indicates wether to disable streaming",
     )
-
     subparser.add_argument(
         "--max-tokens",
         default=128,

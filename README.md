@@ -173,7 +173,7 @@ To check of your data contains the correct model specific special tokens (under 
 together.Files.check(file="jokes.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
 ```
 
-The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`. In the below example we attempt to upload a bad file, just to see an example checker output for an invalid file with a list of reasons file was invalid:
+The json checker is applied at the time of file upload unless `check = False` is passed as an argument to `together.Files.upload`. In the below example we attempt to upload a bad file, just to see an example checker output for an invalid file with a list of reasons file was invalid:
 
 ```python
 resp = together.Files.upload(file="/file/path/to/bad.jsonl")
@@ -321,6 +321,9 @@ together files check jokes.jsonl
 
 # upload your jsonl file
 together files upload jokes.jsonl
+
+# upload your jsonl file and disable file checking
+together files upload jokes.jsonl --no-check
 
 # list your uploaded files
 together files list

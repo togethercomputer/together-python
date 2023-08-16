@@ -53,6 +53,21 @@ def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="Local file to upload",
         type=str,
     )
+    subparser.add_argument(
+        "--no-check",
+        default=False,
+        action="store_true",
+        help="Indicates whether to disable checking",
+    )
+    subparser.add_argument(
+        "--model",
+        "-m",
+        default=None,
+        metavar="MODELNAME",
+        help="check data for this model's special tokens",
+        type=str,
+        required=False,
+    )
     subparser.set_defaults(func=_run_upload)
 
 
@@ -97,7 +112,6 @@ def _add_retrieve_content(
         type=str,
         required=False,
     )
-
     subparser.set_defaults(func=_run_retrieve_content)
 
 
@@ -116,7 +130,10 @@ def _run_check(args: argparse.Namespace) -> None:
 
 def _run_upload(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.upload(args.file)
+    if args.no_check:
+        response = files.upload(args.file, False, args.model)
+    else:
+        response = files.upload(args.file, True, args.model)
     print(json.dumps(response, indent=4))
 
 
