@@ -2,7 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union
 
 import requests
 from tqdm import tqdm
@@ -306,7 +306,9 @@ def check_json(
     file_size = os.stat(file).st_size
 
     if file_size > 4.9 * (2**30):
-        report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB is greater than our limit of 4.9 GB"
+        report_dict[
+            "file_size"
+        ] = f"File size {round(file_size / (2**30) ,3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
     else:
         report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
@@ -325,7 +327,7 @@ def check_json(
                         f"{str(line)}"
                     )
                     report_dict["is_check_passed"] = False
-                
+
                 if "text" not in json_line:
                     report_dict["text_field"] = (
                         'No "text" field was found in one or more lines in JSONL file. '
@@ -361,9 +363,7 @@ def check_json(
                 report_dict["num_samples"] = idx + 1
 
         except ValueError:
-            report_dict["load_json"] = (
-                "Could not load JSONL file. Invalid format"
-            )
+            report_dict["load_json"] = "Could not load JSONL file. Invalid format"
             report_dict["is_check_passed"] = False
 
     return report_dict
