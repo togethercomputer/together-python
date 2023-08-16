@@ -347,6 +347,8 @@ def check_json(
                     f"Our minimum is {together.min_samples} samples. "
                 )
                 report_dict['is_check_passed'] = False
+            else:
+                report_dict['num_samples'] = idx+1
 
         except ValueError:
             report_dict['error_list'].append("Could not load JSONL file. Invalid format")

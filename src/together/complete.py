@@ -12,18 +12,6 @@ from together import get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-def validate_parameter_payload(parameter_payload: dict, logger: Logger) -> bool:
-    if parameter_payload["model"] not in together.model_info_dict:
-        logger.warning(
-            f"The model name {parameter_payload['model']} may be invalid or misspelled. "
-            "The `model` argument to Complete.create refers to a valid string of the model's API name. "
-            "See together.Models.list() in python or `together models list` in commandline "
-            "to get an updated list of valid model names"
-        )
-
-    return True
-
-
 class Complete:
     def __init__(
         self,
@@ -64,11 +52,6 @@ class Complete:
             "Content-Type": "application/json",
             "User-Agent": together.user_agent,
         }
-
-        if not validate_parameter_payload(
-            parameter_payload=parameter_payload, logger=logger
-        ):
-            raise together.FileTypeError("Invalid API request")
 
         # send request
         try:

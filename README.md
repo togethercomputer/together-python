@@ -134,53 +134,54 @@ Refer to the [Files docs](https://docs.together.ai/docs/python-files) on the cor
 
 Files uploaded for training, fine-tuning and validation must be in [jsonlines](https://jsonlines.org/) format.
 
-As an example, use the `together.Files.save_jsonl` function to save this python list of dictionaries into a jsonl file locally that has the correct formatting where each line is a json with single "text" field:
+We included an example dataset that comes with `together` to help you get a feel for the data format. Let's look at the first 5 lines of this 100 line dataset:
 
 ```python
-sample_jsonl = [
-{"text": "<human>: Hi!\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
-{"text": "<human>: Hi there!\n<bot>: Hello! How can I assist you today?<|endoftext|>"},
-{"text": "<human>: Hey!\n<bot>: Hi there! How can I help you?<|endoftext|>"},
-{"text": "<human>: Greetings!\n<bot>: Hello! How may I be of assistance?<|endoftext|>"},
-{"text": "<human>: Good day!\n<bot>: Good day to you too! How may I assist you today?<|endoftext|>"},
-{"text": "<human>: Salutations!\n<bot>: Salutations to you as well! How can I help you today?<|endoftext|>"},
-{"text": "<human>: Hiya!\n<bot>: Hiya! How may I assist you?<|endoftext|>"},
-{"text": "<human>: What's up?\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
-{"text": "<human>: Hi\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
-{"text": "<human>: Hi there\n<bot>: Hello! How can I assist you today?<|endoftext|>"},
-{"text": "<human>: Hey\n<bot>: Hi there! How can I help you?<|endoftext|>"},
-{"text": "<human>: Greetings\n<bot>: Hello! How may I be of assistance?<|endoftext|>"},
-{"text": "<human>: Good day\n<bot>: Good day to you too! How may I assist you today?<|endoftext|>"},
-{"text": "<human>: Salutations\n<bot>: Salutations to you as well! How can I help you today?<|endoftext|>"},
-]
-
-together.Files.save_jsonl(sample_jsonl, "sample_jsonl.jsonl")
+together.jokes_list[:5]
 ```
 
-Use `together.Files.check` to check if your jsonl file has the correct format. 
+```
+[{'text': '<human>: Why is this joke funny? Q: What does a computer do when it is tired? A: It crashes!\nRosey: Did your computer ever stop working (freeze) or turn itself off when you wanted to use it? If it did, you can say your computer crashed. Computer crashes are frustrating because you cannot get your work done, and sometimes you lose the work you finished most recently, unless you saved it. Thankfully, they do not happen too often.'},
+ {'text': "<human>: I'm going to give you a joke. After I give you the joke, please explain it: Q: Where can you go to practice math on New Year’s Eve? A: Times Square!\nRosey: To get better at math, people often people often practice addition (+) or subtraction (-) problems; then they work on multiplication (x) and division (÷), and all the way through calculus and beyond. Practicing multiplication is also known as practicing your times tables. You can say what is seven times nine (7 x 9), or you can can say what is seven multiplied by nine. They mean the same thing, times or multiplied by."},
+ {'text': '<human>: Explain this joke: Q: When does it rain money? A: When there is change in the weather!\nRosey: “The rain in Spain falls mainly on the plain,” according to the song from My Fair Lady. In Peru, they just wish it would rain! But nowhere does it rain money. Rain is water that falls from the sky as part of the evaporation/water cycle. When it is sunny outside, and then the weather changes to cloudy or rainy, we say that there is a change in the weather.'},
+ {'text': '<human>: Q: What happens when winter arrives? A: Autumn leaves! Why is this joke funny?\nRosey: In the northern hemisphere winter officially starts on December 21 (winter solstice, astronomical winter), but for many places in the north, it is already cold. Did you know that there is more than one way to mark the start of winter? Meteorologists, people who study the weather, talk about meteorological winter which starts on December 1. When talking about seasons, winter comes after fall; fall is also known as autumn.'},
+ {'text': '<human>: Q: Where do roses sleep? A: In a flower bed! Why is this joke funny?\nRosey: According to many surveys, roses are one of the most popular flowers. Although they have thorns, some people say that they are not that hard to grow.'}]
+```
+
+Use the `together.Files.save_jsonl` function to save this python list of dictionaries into a jsonl file locally that has the correct formatting where each line is a json with single "text" field:
+
+```python
+together.Files.save_jsonl(together.jokes_list, "jokes.jsonl")
+```
+
+Use `together.Files.check` to check if your jsonl file has the correct format. Also take a look at it with the editor of your choice. 
 
 ``python
-resp = together.Files.check(file="sample_jsonl.jsonl")
+resp = together.Files.check(file="jokes.jsonl")
 print(resp)
 ```
 
 If the file format is correct, the `is_check_passed` field will be True and the `error_list` will be empty.
 
 ```
-{'is_check_passed': True, 'error_list': []}
+{'is_check_passed': True, 'error_list': [], 'num_samples': 100}
 ```
 
 To check of your data contains the correct model specific special tokens (under construction):
 
 ```python
-together.Files.check(file="sample_jsonl.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
+together.Files.check(file="jokes.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
 ```
 
-The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`. In the example you attempt to upload a bad file.
+The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`. In the below example we attempt to upload a bad file, just to see an example checker output for an invalid file with a list of reasons file was invalid:
 
 ```python
 resp = together.Files.upload(file="/file/path/to/bad.jsonl")
 print(resp)
+```
+
+```
+{'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
 ```
 
 The checker will look at the jsonl file to see if:
@@ -190,24 +191,19 @@ The checker will look at the jsonl file to see if:
 - the type of each key is the expected type (i.e. str)
 - minimum number of samples is met
 
-An example checker output for an invalid file with a list of reasons file was invalid:
-```
-{'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
-```
-
 Next lets upload a good file
 
 ```python
-together.Files.upload(file="sample_jsonl.jsonl")
+together.Files.upload(file="jokes.jsonl")
 ```
 
 You will get back the file `id` of the file you just uploaded
 
 ```
-{'filename': 'sample_jsonl.jsonl','id': 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815','object': 'file'}
+{'filename': 'jokes.jsonl','id': 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815','object': 'file'}
 ```
 
-You will get back the file `id` of the file you just uploaded, but if you forget it, you can get the `id`'s of all the files you have uploaded using ` together.Files.list()`. You'll need these `id`'s that start with `file-960be810-4d....` in order to start a fine-tuning job
+You will get back the file `id` of the file you just uploaded, but if you forget it, you can get the `id`'s of all the files you have uploaded using `together.Files.list()`. You'll need these `id`'s that start with `file-960be810-4d....` in order to start a fine-tuning job
 
 ```python
 files_list = together.Files.list()
@@ -239,16 +235,49 @@ Run and manage your fine-tuning jobs, enabling you to tune all model layers, con
 
 Refer to the [Fine-tuning docs](https://docs.together.ai/docs/python-fine-tuning) on how to get started.
 
+Now that you have a valid file uploaded to together, you can finetune any of the models listed [here](https://docs.together.ai/docs/models-fine-tuning) or here `together.finetune_model_names` using `together.Finetune.create`
+
 ```python
 resp = together.Finetune.create(
-  training_file = 'file-960be810-4d33-449a-885a-9f69bd8fd0e2',
-  model = 'togethercomputer/LLaMA-2-7B-32K',
-  n_epochs = 1,
+  training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
+  model = 'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+  n_epochs = 3,
   n_checkpoints = 1,
   batch_size = 4,
   learning_rate = 1e-5,
   suffix = 'my-demo-finetune',
-  wandb_api_key = '1a2b3c4d....',
+  wandb_api_key = '1a2b3c4d5e.......',
+)
+
+fine_tune_id = resp['id']
+print(resp)
+```
+
+The response `resp` has alot of information for you that you can retrieve later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing. 
+
+```python
+print(together.Finetune.retrieve(fine_tune_id=fine_tune_id)) # retrieves information on finetune event
+print(together.Finetune.get_job_status(fine_tune_id=fine_tune_id)) # pending, running, completed
+print(together.Finetune.is_final_model_available(fine_tune_id=fine_tune_id)) # True, False
+print(together.Finetune.get_checkpoints(fine_tune_id=fine_tune_id)) # list of checkpoints
+```
+
+The `get_job_status` should change from `pending` to `running` to `completed` as `is_final_model_available` changes from `False` to `True`. Once the final model is available, you should be able to see your new model under `together.Models.list()` with a naming convention that includes your name, the `fine_tune_id`, the date and time, like this: 
+
+`carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09`
+
+Now you can download your model using `together.Finetune.download(fine_tune_id)` or you start using your model for inference (may take a few minutes after finetuning to become available) by first starting your new model instance:
+
+```
+together.Models.start("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09")
+```
+
+then calling it to do completions:
+
+```
+output = together.Complete.create(
+  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
+  model = "carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09", 
 )
 ```
 
