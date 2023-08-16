@@ -8,7 +8,7 @@ To install Together CLI , simply run:
 pip install --upgrade together
 ```
 
-# Usage
+# Activate
 
 > 🚧 You will need to create a free account with [together.ai](https://api.together.xyz/) to obtain a Together API Key.
 
@@ -26,6 +26,8 @@ Or by setting `together.api_key`:
 import together
 together.api_key = "xxxxx"
 ```
+
+# Usage
 
 Once you've provided your API key, you can browse our list of available models:
 
@@ -61,6 +63,11 @@ We are constantly updating this list, but you should expect to see something lik
  'NumbersStation/nsql-6B']
 ```
 
+## Complete
+
+The `complete` command can be used to inference with all the models available in the Together Playground. This is recommended for custom applications and raw queries. It provides all the functions you need to run inference on all the leading open-source models available with the Together API. You can use these functions by interacting with the command line utility from your terminal or for usage in your custom Python applications.
+
+Refer to the [Complete docs](https://docs.together.ai/docs/python-complete) on how you can query these models.
 
 Let's start an instance of one of the models in the list above. You can also start an instance by clicking play on any model in the [models playground](https://api.together.xyz/playground).
 
@@ -119,35 +126,92 @@ To stop your model instance:
 together.Models.stop("togethercomputer/LLaMA-2-7B-32K")
 ```
 
-## Chat
-
-The `chat` command is a CLI-based chat application that can be used for back-and-forth conversations with models in a pre-defined format.
-
-Refer to the [Chat docs](https://docs.together.ai/docs/python-chat) on how to chat with your favorite models.
-
-## Complete
-
-The `complete` command can be used to inference with all the models available in the Together Playground. This is recommended for custom applications and raw queries. It provides all the functions you need to run inference on all the leading open-source models available with the Together API. You can use these functions by interacting with the command line utility from your terminal or for usage in your custom Python applications.
-
-Refer to the [Complete docs](https://docs.together.ai/docs/python-complete) on how you can query these models.
-
-## Image
-
-The `image` command can be used to generate images from the leading open-source image generation models available with the Together API. You can use these functions by interacting with the command line utility from your terminal or for usage in your custom Python applications.
-
-Refer to the [Image docs](https://docs.together.ai/docs/python-image) on how you can generate images.
-
 ## Files
 
 Files are used for uploading training and validation datasets that are used for [fine-tuning](https://docs.together.ai/docs/python-fine-tuning).
 
 Refer to the [Files docs](https://docs.together.ai/docs/python-files) on the correct way to prepare your files and managing them.
 
+Files uploaded for training, fine-tuning and validation must be in [jsonlines](https://jsonlines.org/) format.
+
+As an example, use the `together.Files.save_jsonl` function to save this python list of dictionaries into a jsonl file locally that has the correct formatting where each line is a json with single "text" field:
+
+```python
+sample_jsonl = [
+{"text": "<human>: Hi!\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
+{"text": "<human>: Hi there!\n<bot>: Hello! How can I assist you today?<|endoftext|>"},
+{"text": "<human>: Hey!\n<bot>: Hi there! How can I help you?<|endoftext|>"},
+{"text": "<human>: Greetings!\n<bot>: Hello! How may I be of assistance?<|endoftext|>"},
+{"text": "<human>: Good day!\n<bot>: Good day to you too! How may I assist you today?<|endoftext|>"},
+{"text": "<human>: Salutations!\n<bot>: Salutations to you as well! How can I help you today?<|endoftext|>"},
+{"text": "<human>: Hiya!\n<bot>: Hiya! How may I assist you?<|endoftext|>"},
+{"text": "<human>: What's up?\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
+{"text": "<human>: Hi\n<bot>: Hi! How can I assist you today?<|endoftext|>"},
+{"text": "<human>: Hi there\n<bot>: Hello! How can I assist you today?<|endoftext|>"},
+{"text": "<human>: Hey\n<bot>: Hi there! How can I help you?<|endoftext|>"},
+{"text": "<human>: Greetings\n<bot>: Hello! How may I be of assistance?<|endoftext|>"},
+{"text": "<human>: Good day\n<bot>: Good day to you too! How may I assist you today?<|endoftext|>"},
+{"text": "<human>: Salutations\n<bot>: Salutations to you as well! How can I help you today?<|endoftext|>"},
+]
+
+together.Files.save_jsonl(sample_jsonl, "sample_jsonl.jsonl")
+```
+
+Use `together.Files.check` to check if your jsonl file has the correct format. 
+
+``python
+resp = together.Files.check(file="sample_jsonl.jsonl")
+print(resp)
+```
+
+If the file format is correct, the `is_check_passed` field will be True and the `error_list` will be empty.
+
+```
+{'is_check_passed': True, 'error_list': []}
+```
+
+To check of your data contains the correct model specific special tokens (under construction):
+
+```python
+together.Files.check(file="sample_jsonl.jsonl",model="togethercomputer/RedPajama-INCITE-7B-Chat")
+```
+
+The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`
+
+```python
+resp = together.Files.upload(file="/file/path/to/bad.jsonl")
+print(resp)
+```
+
+The checker will look at the jsonl file to see if:
+
+a. each line of the file is a valid json object
+b. the expected key is that json object (i.e. "text")
+c. the type of each key is the expected type (i.e. str)
+d. minimum number of samples is met
+
+An example checker output for an invalid file with reasons file was invalid:
+```
+{'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
+```
+
 ## Fine-tuning
 
 Run and manage your fine-tuning jobs, enabling you to tune all model layers, control hyper-parameters, download the weights and checkpoints.
 
 Refer to the [Fine-tuning docs](https://docs.together.ai/docs/python-fine-tuning) on how to get started.
+
+## Chat
+
+The `chat` command is a CLI-based chat application that can be used for back-and-forth conversations with models in a pre-defined format.
+
+Refer to the [Chat docs](https://docs.together.ai/docs/python-chat) on how to chat with your favorite models.
+
+## Image
+
+The `image` command can be used to generate images from the leading open-source image generation models available with the Together API. You can use these functions by interacting with the command line utility from your terminal or for usage in your custom Python applications.
+
+Refer to the [Image docs](https://docs.together.ai/docs/python-image) on how you can generate images.
 
 # Command-line interface
 

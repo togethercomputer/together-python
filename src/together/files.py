@@ -248,6 +248,30 @@ class Files:
 
         return output  # this should be null
 
+    @classmethod
+    def save_jsonl(self, data: dict, output_path: str, append:bool = False):
+        """
+        Write list of objects to a JSON lines file.
+        """
+        mode = 'a+' if append else 'w'
+        with open(output_path, mode, encoding='utf-8') as f:
+            for line in data:
+                json_record = json.dumps(line, ensure_ascii=False)
+                f.write(json_record + '\n')
+        print('Wrote {} records to {}'.format(len(data), output_path))
+
+    @classmethod
+    def load_jsonl(self, input_path: str) ->  List[Dict[str,str]]:
+        """
+        Read list of objects from a JSON lines file.
+        """
+        data = []
+        with open(input_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                data.append(json.loads(line.rstrip('\n|\r')))
+        print('Loaded {} records from {}'.format(len(data), input_path))
+        return data
+
 
 def check_json(
     file: str, 
@@ -294,7 +318,7 @@ def check_json(
 
                 if "text" not in json_line:
                     report_dict['error_list'].append(
-                        "\"text\" field not found in one or more lines in JSONL file. "
+                        "No \"text\" field was found in one or more lines in JSONL file. "
                         "see https://docs.together.ai/docs/fine-tuning. "
                         f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
                         f"{str(line)}"
@@ -319,7 +343,7 @@ def check_json(
             # make sure this is outside the for idx, line in enumerate(f): for loop  
             if idx+1 < together.min_samples:
                 report_dict['error_list'].append(
-                    f"The way this file was parsed resulted in only {idx+1} samples. "
+                    f"Processing {file} resulted in only {idx+1} samples. "
                     f"Our minimum is {together.min_samples} samples. "
                 )
                 report_dict['is_check_passed'] = False
