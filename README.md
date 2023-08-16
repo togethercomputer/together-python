@@ -308,13 +308,31 @@ together models list
 together models start togethercomputer/RedPajama-INCITE-7B-Base
 
 # create completion
-together complete "Space robots" -m togethercomputer/RedPajama-INCITE-7B-Base
+together complete "Space robots are" -m togethercomputer/RedPajama-INCITE-7B-Base
 
 # check which models are running
 together models instances
 
 # stop a model
 together models stop togethercomputer/RedPajama-INCITE-7B-Base
+
+# check your jsonl file
+together files check jokes.jsonl
+
+# upload your jsonl file
+together files upload jokes.jsonl
+
+# list your uploaded files
+together files list
+
+# start fine-tuning a model on your jsonl file (use the id of your file given to after upload or from together files list)
+together finetune create -t file-9263d6b7-736f-43fc-8d14-b7f0efae9079 -m togethercomputer/RedPajama-INCITE-Chat-3B-v1
+
+# download your finetuned model (with your fine_tune_id from the id key given during create or from together finetune list)
+together finetune download ft-dd93c727-f35e-41c2-a370-7d55b54128fa 
+
+# inference using your new finetuned model (with new finetuned model name from together models list)
+together complete "Space robots are" -m yourname/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09
 ```
 
 ## Contributing
