@@ -2,7 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Dict, List, Union
+from typing import Optional, Dict, List, Union
 
 import requests
 from tqdm import tqdm
@@ -46,7 +46,7 @@ class Files:
         return response_json
 
     @classmethod
-    def check(self, file: str, model: str = None) -> Dict[str, Union[str, int]]:
+    def check(self, file: str, model: Optional[str] = None) -> Dict[str, Union[str, int]]:
         return check_json(file, model)
 
     @classmethod
@@ -54,7 +54,7 @@ class Files:
         self,
         file: str,
         check: bool = True,
-        model: str = None,
+        model: Optional[str] = None,
     ) -> Dict[str, Union[str, int]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
@@ -276,7 +276,7 @@ class Files:
 
 def check_json(
     file: str,
-    model: str = None,
+    model: Optional[str] = None,
 ) -> Dict[str, Union[str, int, bool, list, dict]]:
     report_dict = {"is_check_passed": True}
 
