@@ -2,7 +2,6 @@ import json
 import os
 import posixpath
 import urllib.parse
-from logging import Logger
 from typing import Dict, List, Union
 
 import requests
@@ -52,8 +51,8 @@ class Files:
 
     @classmethod
     def upload(
-        self, 
-        file: str, 
+        self,
+        file: str,
         do_check: bool = True,
         model: str = None,
     ) -> Dict[str, Union[str, int]]:
@@ -65,9 +64,9 @@ class Files:
         }
 
         if do_check:
-            report_dict = check_json(file,model)
+            report_dict = check_json(file, model)
 
-            if not report_dict['is_check_passed']:
+            if not report_dict["is_check_passed"]:
                 print(report_dict)
                 raise together.FileTypeError("Invalid file supplied. Failed to upload.")
 
@@ -249,109 +248,118 @@ class Files:
         return output  # this should be null
 
     @classmethod
-    def save_jsonl(self, data: dict, output_path: str, append:bool = False):
+    def save_jsonl(self, data: dict, output_path: str, append: bool = False):
         """
         Write list of objects to a JSON lines file.
         """
-        mode = 'a+' if append else 'w'
-        with open(output_path, mode, encoding='utf-8') as f:
+        mode = "a+" if append else "w"
+        with open(output_path, mode, encoding="utf-8") as f:
             for line in data:
                 json_record = json.dumps(line, ensure_ascii=False)
-                f.write(json_record + '\n')
-        print('Wrote {} records to {}'.format(len(data), output_path))
+                f.write(json_record + "\n")
+        print("Wrote {} records to {}".format(len(data), output_path))
 
     @classmethod
-    def load_jsonl(self, input_path: str) ->  List[Dict[str,str]]:
+    def load_jsonl(self, input_path: str) -> List[Dict[str, str]]:
         """
         Read list of objects from a JSON lines file.
         """
         data = []
-        with open(input_path, 'r', encoding='utf-8') as f:
+        with open(input_path, "r", encoding="utf-8") as f:
             for line in f:
-                data.append(json.loads(line.rstrip('\n|\r')))
-        print('Loaded {} records from {}'.format(len(data), input_path))
+                data.append(json.loads(line.rstrip("\n|\r")))
+        print("Loaded {} records from {}".format(len(data), input_path))
         return data
 
 
 def check_json(
-    file: str, 
+    file: str,
     model: str = None,
 ) -> Dict[str, Union[str, int, bool]]:
-
-    report_dict = {'is_check_passed':True,'error_list':[]}
+    report_dict = {"is_check_passed": True, "error_list": []}
 
     eos_token = None
     if model is not None and model in together.model_info_dict:
-        if 'eos_token' in together.model_info_dict[model]:
-            eos_token = together.model_info_dict[model]['eos_token']
-            report_dict['model_info'] = {'special_tokens':[f"the end of sentence token for this model is {eos_token}"]}
-            report_dict['model_info']['num_samples_w_eos_token'] = 0
+        if "eos_token" in together.model_info_dict[model]:
+            eos_token = together.model_info_dict[model]["eos_token"]
+            report_dict["model_info"] = {
+                "special_tokens": [
+                    f"the end of sentence token for this model is {eos_token}"
+                ]
+            }
+            report_dict["model_info"]["num_samples_w_eos_token"] = 0
         else:
-            report_dict['model_info'] = {'special_tokens':['we are not yet checking end of sentence tokens for this model']}
+            report_dict["model_info"] = {
+                "special_tokens": [
+                    "we are not yet checking end of sentence tokens for this model"
+                ]
+            }
 
     if not os.path.isfile(file):
-        report_dict['error_list'].append(f"File not found at given file path {file}")
-        report_dict['is_check_passed'] = False
+        report_dict["error_list"].append(f"File not found at given file path {file}")
+        report_dict["is_check_passed"] = False
 
     file_size = os.stat(file).st_size
 
     if file_size > 4.9 * (2**30):
-        report_dict['error_list'].append(f"File size {round(file_size,2)} is greater than our limit of 4.9 GB")
-        report_dict['is_check_passed'] = False
+        report_dict["error_list"].append(
+            f"File size {round(file_size,2)} is greater than our limit of 4.9 GB"
+        )
+        report_dict["is_check_passed"] = False
 
     with open(file) as f:
-
         try:
             for idx, line in enumerate(f):
+                json_line = json.loads(line)  # each line in jsonlines should be a json
 
-                json_line = json.loads(line) # each line in jsonlines should be a json
-
-                if not isinstance(json_line,dict):
-                    report_dict['error_list'].append(
+                if not isinstance(json_line, dict):
+                    report_dict["error_list"].append(
                         "Valid json not found in one or more lines in JSONL file. "
-                        "Example of valid json: {\"text\":\"my sample string\"}. "
+                        'Example of valid json: {"text":"my sample string"}. '
                         "see https://docs.together.ai/docs/fine-tuning. "
                         f"The first line where this occur is line {idx+1}, where 1 is the first line. "
                         f"{str(line)}"
                     )
-                    report_dict['is_check_passed'] = False
+                    report_dict["is_check_passed"] = False
 
                 if "text" not in json_line:
-                    report_dict['error_list'].append(
-                        "No \"text\" field was found in one or more lines in JSONL file. "
+                    report_dict["error_list"].append(
+                        'No "text" field was found in one or more lines in JSONL file. '
                         "see https://docs.together.ai/docs/fine-tuning. "
                         f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
                         f"{str(line)}"
                     )
-                    report_dict['is_check_passed'] = False
+                    report_dict["is_check_passed"] = False
                 else:
                     # check to make sure the value of the "text" key is a string
-                    if not isinstance(json_line["text"],str):
-                        report_dict['error_list'].append(
+                    if not isinstance(json_line["text"], str):
+                        report_dict["error_list"].append(
                             "Wrong key value pair in one or more lines in JSONL file. "
-                            "The \"text\" key is not paired with a string value, ie {\"text\":\"my sample string\"}. "
+                            'The "text" key is not paired with a string value, ie {"text":"my sample string"}. '
                             "see https://docs.together.ai/docs/fine-tuning. "
                             f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
                             f"{str(line)}"
                         )
-                        report_dict['is_check_passed'] = False
+                        report_dict["is_check_passed"] = False
 
                     elif eos_token:
                         if eos_token in json_line["text"]:
-                            report_dict['model_info']['num_samples_w_eos_token'] += 1
+                            report_dict["model_info"]["num_samples_w_eos_token"] += 1
 
-            # make sure this is outside the for idx, line in enumerate(f): for loop  
-            if idx+1 < together.min_samples:
-                report_dict['error_list'].append(
+            # make sure this is outside the for idx, line in enumerate(f): for loop
+            if idx + 1 < together.min_samples:
+                report_dict["error_list"].append(
                     f"Processing {file} resulted in only {idx+1} samples. "
                     f"Our minimum is {together.min_samples} samples. "
                 )
-                report_dict['is_check_passed'] = False
+                report_dict["is_check_passed"] = False
             else:
-                report_dict['num_samples'] = idx+1
+                report_dict["num_samples"] = idx + 1
 
         except ValueError:
-            report_dict['error_list'].append("Could not load JSONL file. Invalid format")
-            report_dict['is_check_passed'] = False
+            report_dict["error_list"].append(
+                "Could not load JSONL file. Invalid format"
+            )
+            report_dict["is_check_passed"] = False
 
     return report_dict

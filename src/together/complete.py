@@ -1,5 +1,4 @@
 import json
-from logging import Logger
 from typing import Any, Dict, Iterator, List, Optional
 
 import requests

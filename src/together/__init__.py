@@ -2,10 +2,13 @@ import os
 import urllib.parse
 
 from .config import (
-    VERSION, 
-    model_info_dict, finetune_model_names, 
-    min_samples, jokes_list
+    VERSION,
+    finetune_model_names,
+    jokes_list,
+    min_samples,
+    model_info_dict,
 )
+
 
 version = VERSION
 
@@ -51,5 +54,5 @@ __all__ = [
     "model_info_dict",
     "finetune_model_names",
     "min_samples",
-    "jokes_list"
+    "jokes_list",
 ]

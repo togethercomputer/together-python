@@ -24,6 +24,7 @@ def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> No
     subparser = parser.add_parser("list")
     subparser.set_defaults(func=_run_list)
 
+
 def _add_check(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     subparser = parser.add_parser("check")
     subparser.add_argument(
@@ -42,6 +43,7 @@ def _add_check(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> N
         required=False,
     )
     subparser.set_defaults(func=_run_check)
+
 
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     subparser = parser.add_parser("upload")
