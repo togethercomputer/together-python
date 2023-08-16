@@ -173,10 +173,10 @@ If the file format is correct, the `is_check_passed` field will be True and the 
 To check of your data contains the correct model specific special tokens (under construction):
 
 ```python
-together.Files.check(file="sample_jsonl.jsonl",model="togethercomputer/RedPajama-INCITE-7B-Chat")
+together.Files.check(file="sample_jsonl.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
 ```
 
-The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`
+The json checker is applied at the time of file upload unless `do_check = False` is passed as an argument to `together.Files.upload`. In the example you attempt to upload a bad file.
 
 ```python
 resp = together.Files.upload(file="/file/path/to/bad.jsonl")
@@ -190,17 +190,28 @@ The checker will look at the jsonl file to see if:
 - the type of each key is the expected type (i.e. str)
 - minimum number of samples is met
 
-An example checker output for an invalid file with reasons file was invalid:
+An example checker output for an invalid file with a list of reasons file was invalid:
 ```
 {'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
 ```
 
-Get the `id`'s of all the files you have uploaded, you'll need these `id`'s that start with
-`file-960be810-4d....` in order to start your fine-tuning job
+Next lets upload a good file
+
+```python
+together.Files.upload(file="sample_jsonl.jsonl")
+```
+
+You will get back the file `id` of the file you just uploaded
+
+```
+{'filename': 'sample_jsonl.jsonl','id': 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815','object': 'file'}
+```
+
+You will get back the file `id` of the file you just uploaded, but if you forget it, you can get the `id`'s of all the files you have uploaded using ` together.Files.list()`. You'll need these `id`'s that start with `file-960be810-4d....` in order to start a fine-tuning job
 
 ```python
 files_list = together.Files.list()
-print(files_list['data'])
+files_list['data']
 ```
 
 ```
@@ -212,10 +223,10 @@ print(files_list['data'])
   'object': 'file',
   'LineCount': 0,
   'Processed': True},
- {'filename': 'chatgreet.jsonl',
-  'bytes': 2578,
-  'created_at': 1692042839,
-  'id': 'file-a553e98e-3403-4f08-91a1-fb246fe2714c',
+ {'filename': 'sample_jsonl.jsonl',
+  'bytes': 1235,
+  'created_at': 1692190883,
+  'id': 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
   'purpose': 'fine-tune',
   'object': 'file',
   'LineCount': 0,
@@ -227,6 +238,19 @@ print(files_list['data'])
 Run and manage your fine-tuning jobs, enabling you to tune all model layers, control hyper-parameters, download the weights and checkpoints.
 
 Refer to the [Fine-tuning docs](https://docs.together.ai/docs/python-fine-tuning) on how to get started.
+
+```python
+resp = together.Finetune.create(
+  training_file = 'file-960be810-4d33-449a-885a-9f69bd8fd0e2',
+  model = 'togethercomputer/LLaMA-2-7B-32K',
+  n_epochs = 1,
+  n_checkpoints = 1,
+  batch_size = 4,
+  learning_rate = 1e-5,
+  suffix = 'my-demo-finetune',
+  wandb_api_key = '1a2b3c4d....',
+)
+```
 
 ## Chat
 

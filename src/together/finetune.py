@@ -260,7 +260,8 @@ class Finetune:
             raise together.ResponseError(e)
 
         return job_status
-
+        
+    @classmethod
     def is_final_model_available(self, fine_tune_id: str) -> bool:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
