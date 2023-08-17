@@ -191,7 +191,7 @@ The checker will look at the jsonl file to see if:
 - the type of each key is the expected type (i.e. str)
 - minimum number of samples is met
 
-Next lets upload a good file
+In the `resp` we will tell you the first line where the wrong formatting occurs, print this line, and show where to learn how to fix it. Next lets upload a good file:
 
 ```python
 together.Files.upload(file="jokes.jsonl")
