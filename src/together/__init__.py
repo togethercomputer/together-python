@@ -2,7 +2,6 @@ import os
 import urllib.parse
 
 from .config import (
-    VERSION,
     finetune_model_names,
     jokes_list,
     min_samples,
