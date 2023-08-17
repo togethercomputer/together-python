@@ -329,10 +329,10 @@ def check_json(
 
                 if not isinstance(json_line, dict):
                     report_dict["line_type"] = (
-                        "Valid json not found in one or more lines in JSONL file. "
-                        'Example of valid json: {"text":"my sample string"}. '
-                        "see https://docs.together.ai/docs/fine-tuning. "
-                        f"The first line where this occur is line {idx+1}, where 1 is the first line. "
+                        "Valid json not found in one or more lines in JSONL file." 
+                        "Example of valid json: {\"text\":\"my sample string\"}." 
+                        "see https://docs.together.ai/docs/fine-tuning."
+                        f"The first line where this occur is line {idx+1}, where 1 is the first line." 
                         f"{str(line)}"
                     )
                     report_dict["is_check_passed"] = False
@@ -340,23 +340,26 @@ def check_json(
                 if "text" not in json_line:
                     report_dict[
                         "text_field"
-                    ] = f"""No "text" field was found on line {idx+1} of the the input file.
-                        Expected format: `{"text":"my sample string"}`
-                        see https://docs.together.ai/docs/fine-tuning for more information.
-                        {str(line)}
-                        """
+                    ] = (
+                        f"No \"text\" field was found on line {idx+1} of the the input file."
+                        "Expected format: {\"text\":\"my sample string\"}." 
+                        "see https://docs.together.ai/docs/fine-tuning for more information."
+                        f"{str(line)}"
+                    )
                     report_dict["is_check_passed"] = False
                 else:
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
                         report_dict[
                             "key_value"
-                        ] = f"""Unexpected, value type for "text" key on line {idx+1} of the input file.
-                            The value type of the "text" key must be a string.
-                            Expected format: `{"text":"my sample string"}`
-                            See https://docs.together.ai/docs/fine-tuning for more information.
-                            {str(line)}
-                            """
+                        ] = (
+                            f"Unexpected, value type for \"text\" key on line {idx+1} of the input file."
+                            "The value type of the \"text\" key must be a string."
+                            "Expected format: {\"text\":\"my sample string\"}"
+                            "See https://docs.together.ai/docs/fine-tuning for more information."
+                            f"{str(line)}"
+                        )
+
                         report_dict["is_check_passed"] = False
 
                     elif eos_token:
@@ -365,7 +368,7 @@ def check_json(
 
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < together.min_samples:
-                report_dict["min_samplest"] = (
+                report_dict["min_samples"] = (
                     f"Processing {file} resulted in only {idx+1} samples. "
                     f"Our minimum is {together.min_samples} samples. "
                 )
@@ -374,7 +377,14 @@ def check_json(
                 report_dict["num_samples"] = idx + 1
 
         except ValueError:
-            report_dict["load_json"] = "Could not load JSONL file. Invalid format"
+            report_dict["load_json"] = (
+                f"File should be a valid jsonlines (.jsonl) with a json in each line."
+                "Example of valid json: {\"text\":\"my sample string\"}"
+                "Valid json not found in one or more lines in file." 
+                "see https://docs.together.ai/docs/fine-tuning." 
+                f"The first line where this occur is line {idx+1}, where 1 is the first line." 
+                f"{str(line)}"
+            )
             report_dict["is_check_passed"] = False
 
     report_dict["num_samples_w_eos_token"] = num_samples_w_eos_token
