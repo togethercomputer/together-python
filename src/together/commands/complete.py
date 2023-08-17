@@ -36,7 +36,7 @@ def add_parser(
         "--no-stream",
         default=False,
         action="store_true",
-        help="Indicates wether to disable streaming",
+        help="Indicates whether to disable streaming",
     )
     subparser.add_argument(
         "--max-tokens",
