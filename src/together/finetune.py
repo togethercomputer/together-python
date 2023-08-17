@@ -106,7 +106,7 @@ class Finetune:
         }
 
         if not validate_parameter_payload(
-            parameter_payload=parameter_payload, 
+            parameter_payload=parameter_payload,
         ):
             raise together.FileTypeError("Invalid API request")
 

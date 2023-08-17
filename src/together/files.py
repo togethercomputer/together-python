@@ -15,13 +15,13 @@ from together import get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
-NUM_BYTES_IN_GB = 2**30 
+NUM_BYTES_IN_GB = 2**30
 
 # maximum number of GB sized files we support finetuning for
 MAX_FT_GB = 4.9
 
+
 class Files:
-    
     def __init__(
         self,
     ) -> None:
@@ -329,20 +329,18 @@ def check_json(
 
                 if not isinstance(json_line, dict):
                     report_dict["line_type"] = (
-                        "Valid json not found in one or more lines in JSONL file." 
-                        "Example of valid json: {\"text\":\"my sample string\"}." 
+                        "Valid json not found in one or more lines in JSONL file."
+                        'Example of valid json: {"text":"my sample string"}.'
                         "see https://docs.together.ai/docs/fine-tuning."
-                        f"The first line where this occur is line {idx+1}, where 1 is the first line." 
+                        f"The first line where this occur is line {idx+1}, where 1 is the first line."
                         f"{str(line)}"
                     )
                     report_dict["is_check_passed"] = False
 
                 if "text" not in json_line:
-                    report_dict[
-                        "text_field"
-                    ] = (
-                        f"No \"text\" field was found on line {idx+1} of the the input file."
-                        "Expected format: {\"text\":\"my sample string\"}." 
+                    report_dict["text_field"] = (
+                        f'No "text" field was found on line {idx+1} of the the input file.'
+                        'Expected format: {"text":"my sample string"}.'
                         "see https://docs.together.ai/docs/fine-tuning for more information."
                         f"{str(line)}"
                     )
@@ -350,12 +348,10 @@ def check_json(
                 else:
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
-                        report_dict[
-                            "key_value"
-                        ] = (
-                            f"Unexpected, value type for \"text\" key on line {idx+1} of the input file."
-                            "The value type of the \"text\" key must be a string."
-                            "Expected format: {\"text\":\"my sample string\"}"
+                        report_dict["key_value"] = (
+                            f'Unexpected, value type for "text" key on line {idx+1} of the input file.'
+                            'The value type of the "text" key must be a string.'
+                            'Expected format: {"text":"my sample string"}'
                             "See https://docs.together.ai/docs/fine-tuning for more information."
                             f"{str(line)}"
                         )
@@ -379,10 +375,10 @@ def check_json(
         except ValueError:
             report_dict["load_json"] = (
                 f"File should be a valid jsonlines (.jsonl) with a json in each line."
-                "Example of valid json: {\"text\":\"my sample string\"}"
-                "Valid json not found in one or more lines in file." 
-                "see https://docs.together.ai/docs/fine-tuning." 
-                f"The first line where this occur is line {idx+1}, where 1 is the first line." 
+                'Example of valid json: {"text":"my sample string"}'
+                "Valid json not found in one or more lines in file."
+                "see https://docs.together.ai/docs/fine-tuning."
+                f"The first line where this occur is line {idx+1}, where 1 is the first line."
                 f"{str(line)}"
             )
             report_dict["is_check_passed"] = False

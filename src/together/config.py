@@ -17,8 +17,8 @@ finetune_model_names = [
     "togethercomputer/Pythia-Chat-Base-7B",
 ]
 
-# List of models we support and their particular behavior, ie special tokens, 
-# We will add to and update this list 
+# List of models we support and their particular behavior, ie special tokens,
+# We will add to and update this list
 model_info_dict = {
     "EleutherAI/gpt-j-6b": {},
     "EleutherAI/gpt-neox-20b": {},
