@@ -24,7 +24,6 @@ def add_parser(
         type=str,
         help="A string providing context for the model to complete.",
     )
-
     subparser.add_argument(
         "--model",
         "-m",
