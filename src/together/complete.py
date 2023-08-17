@@ -80,12 +80,12 @@ class Complete:
 
         try:
             response_json = dict(response.json())
+
         except Exception as e:
             logger.critical(
                 f"Error raised: {e}\nResponse status code = {response.status_code}"
             )
             raise together.JSONError(e, http_status=response.status_code)
-
         return response_json
 
     @classmethod

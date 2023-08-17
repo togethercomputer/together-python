@@ -9,6 +9,7 @@ from .config import (
     model_info_dict,
 )
 
+from .version import VERSION
 
 version = VERSION
 

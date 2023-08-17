@@ -1,5 +1,3 @@
-VERSION = "0.1.4"
-
 min_samples = 100
 
 finetune_model_names = [
