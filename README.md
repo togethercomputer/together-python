@@ -181,7 +181,7 @@ print(resp)
 ```
 
 ```
-{'is_check_passed': False, 'error_list': ['No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'Processing /data/bad.jsonl resulted in only 3 samples. Our minimum is 4 samples. ']}
+{'is_check_passed': False, 'model_special_tokens': 'we are not yet checking end of sentence tokens for this model', 'file_present': 'File found', 'file_size': 'File size 0.0 GB', 'text_field': 'No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'min_samplest': 'Processing /Users/carsonlam/Projects/data/bad.jsonl resulted in only 3 samples. Our minimum is 100 samples. ', 'num_samples_w_eos_token': 0}
 ```
 
 The checker will look at the jsonl file to see if:
