@@ -21,9 +21,11 @@ def validate_parameter_payload(parameter_payload: Dict[str, Any]) -> bool:
 
     if parameter_payload["training_file"] not in file_ids:
         logger.critical(
-            "training_file refers to the id of one of the files uploaded using together.Files.upload(fil ='/path/to/file') in python "
-            "or `together files upload <FILE_PATH>` in the commandline. "
-            "See together.Files.list() in python or `together files list` in the commandline for a list of uploaded files."
+            """training_file refers to a file identifier of an uploaded training file, not a local file path.
+            A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or
+            `$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')` 
+            Python API or `$ together files upload <FILE_PATH>` CLI.
+            """
         )
         return False
 

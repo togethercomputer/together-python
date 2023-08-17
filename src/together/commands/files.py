@@ -130,10 +130,7 @@ def _run_check(args: argparse.Namespace) -> None:
 
 def _run_upload(args: argparse.Namespace) -> None:
     files = Files()
-    if args.no_check:
-        response = files.upload(args.file, False, args.model)
-    else:
-        response = files.upload(args.file, True, args.model)
+    response = files.upload(file=args.file, check=not args.no_check, model=args.model)
     print(json.dumps(response, indent=4))
 
 

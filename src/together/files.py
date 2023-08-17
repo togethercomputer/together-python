@@ -333,21 +333,23 @@ def check_json(
 
                 if "text" not in json_line:
                     report_dict["text_field"] = (
-                        'No "text" field was found in one or more lines in JSONL file. '
-                        "see https://docs.together.ai/docs/fine-tuning. "
-                        f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
-                        f"{str(line)}"
+                        f"""No "text" field was found on line {idx+1} of the the input file.
+                        Expected format: `{"text":"my sample string"}`
+                        see https://docs.together.ai/docs/fine-tuning for more information.
+                        {str(line)}
+                        """
                     )
                     report_dict["is_check_passed"] = False
                 else:
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
                         report_dict["key_value"] = (
-                            "Wrong key value pair in one or more lines in JSONL file. "
-                            'The "text" key is not paired with a string value, ie {"text":"my sample string"}. '
-                            "see https://docs.together.ai/docs/fine-tuning. "
-                            f"The first line where this occurs is line {idx+1}, where 1 is the first line. "
-                            f"{str(line)}"
+                            f"""Unexpected, value type for "text" key on line {idx+1} of the input file.
+                            The value type of the "text" key must be a string.
+                            Expected format: `{"text":"my sample string"}`
+                            See https://docs.together.ai/docs/fine-tuning for more information.
+                            {str(line)}
+                            """
                         )
                         report_dict["is_check_passed"] = False
 
