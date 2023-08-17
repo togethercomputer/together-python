@@ -111,7 +111,38 @@ print(output)
 ```
 
 ```
-{'status': 'finished', 'prompt': ["Isaac Asimov's Three Laws of Robotics are: \n\n1."], 'model': 'togethercomputer/LLaMA-2-7B-32K', 'model_owner': '', 'tags': {}, 'num_returns': 1, 'args': {'model': 'togethercomputer/LLaMA-2-7B-32K', 'prompt': "Isaac Asimov's Three Laws of Robotics are: \n\n1.", 'top_p': 0.8, 'top_k': 90, 'temperature': 0.6, 'max_tokens': 70, 'stop': ['</s>'], 'repetition_penalty': 1.2, 'logprobs': None}, 'subjobs': [], 'output': {'choices': [{'finish_reason': 'length', 'index': 0, 'text': 'A robot may not injure a human being or, through inaction, allow a human being to come to harm.\n2. A robot must obey the orders given it by human beings except where such orders would conflict with the First Law.\n3. A robot must protect its own existence as long as such protection does not conflict with the'}], 'raw_compute_time': 1.9681874650996178, 'result_type': 'language-model-inference'}}
+{   'args': {   'logprobs': None,
+                'max_tokens': 70,
+                'model': 'togethercomputer/LLaMA-2-7B-32K',
+                'prompt': "Isaac Asimov's Three Laws of Robotics are: \n\n1.",
+                'repetition_penalty': 1.2,
+                'stop': ['</s>'],
+                'temperature': 0.6,
+                'top_k': 90,
+                'top_p': 0.8},
+    'model': 'togethercomputer/LLaMA-2-7B-32K',
+    'model_owner': '',
+    'num_returns': 1,
+    'output': {   'choices': [   {   'finish_reason': 'length',
+                                     'index': 0,
+                                     'text': 'A robot may not injure a human '
+                                             'being or, through inaction, '
+                                             'allow a human being to come to '
+                                             'harm.\n'
+                                             '2. A robot must obey the orders '
+                                             'given it by human beings except '
+                                             'where such orders would conflict '
+                                             'with the First Law.\n'
+                                             '3. A robot must protect its own '
+                                             'existence as long as such '
+                                             'protection does not conflict '
+                                             'with the'}],
+                  'raw_compute_time': 1.9681874650996178,
+                  'result_type': 'language-model-inference'},
+    'prompt': ["Isaac Asimov's Three Laws of Robotics are: \n\n1."],
+    'status': 'finished',
+    'subjobs': [],
+    'tags': {}}
 ```
 
 Check which models have been started or stopped:
@@ -181,7 +212,25 @@ print(resp)
 ```
 
 ```
-{'is_check_passed': False, 'model_special_tokens': 'we are not yet checking end of sentence tokens for this model', 'file_present': 'File found', 'file_size': 'File size 0.0 GB', 'text_field': 'No "text" field was found in one or more lines in JSONL file. see https://docs.together.ai/docs/fine-tuning. The first line where this occurs is line 3, where 1 is the first line. {"ext": {"1":1} ,"extra_key":"stuff"}\n', 'min_samplest': 'Processing /Users/carsonlam/Projects/data/bad.jsonl resulted in only 3 samples. Our minimum is 100 samples. ', 'num_samples_w_eos_token': 0}
+{   'file_present': 'File found',
+    'file_size': 'File size 0.0 GB',
+    'is_check_passed': False,
+    'key_value': 'Unexpected, value type for "text" key on line 6 of the input '
+                 'file.The value type of the "text" key must be a '
+                 'string.Expected format: {"text":"my sample string"}See '
+                 'https://docs.together.ai/docs/fine-tuning for more '
+                 'information.{"text": {"text":"<human>: Salutations!\\n<bot>: '
+                 'Salutations to you as well! How can I help you today?"}}\n',
+    'min_samples': 'Processing /Users/carsonlam/Projects/data/bad.jsonl '
+                   'resulted in only 10 samples. Our minimum is 100 samples. ',
+    'model_special_tokens': 'we are not yet checking end of sentence tokens '
+                            'for this model',
+    'num_samples_w_eos_token': 0,
+    'text_field': 'No "text" field was found on line 7 of the the input '
+                  'file.Expected format: {"text":"my sample string"}.see '
+                  'https://docs.together.ai/docs/fine-tuning for more '
+                  'information.{"ext": "<human>: Hiya!\\n<bot>: Hiya! How may '
+                  'I assist you?"}\n'}
 ```
 
 The checker will look at the jsonl file to see if:
