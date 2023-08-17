@@ -156,7 +156,7 @@ together.Files.save_jsonl(together.jokes_list, "jokes.jsonl")
 
 Use `together.Files.check` to check if your jsonl file has the correct format. Also take a look at it with the editor of your choice. 
 
-``python
+```python
 resp = together.Files.check(file="jokes.jsonl")
 print(resp)
 ```
