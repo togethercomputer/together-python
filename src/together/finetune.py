@@ -14,7 +14,7 @@ logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 def validate_parameter_payload(
-    parameter_payload: Dict[str,Any], 
+    parameter_payload: Dict[str, Any],
     logger: Logger,
 ) -> bool:
     # check if training_file is the string id of a previously uploaded file

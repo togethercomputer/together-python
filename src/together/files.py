@@ -46,9 +46,7 @@ class Files:
         return response_json
 
     @classmethod
-    def check(
-        self, file: str, model: Optional[str] = None
-    ) -> Dict[str, object]:
+    def check(self, file: str, model: Optional[str] = None) -> Dict[str, object]:
         return check_json(file, model)
 
     @classmethod
@@ -256,7 +254,9 @@ class Files:
         return output  # this should be null
 
     @classmethod
-    def save_jsonl(self, data: Dict[str,str], output_path: str, append: bool = False) -> None:
+    def save_jsonl(
+        self, data: Dict[str, str], output_path: str, append: bool = False
+    ) -> None:
         """
         Write list of objects to a JSON lines file.
         """
@@ -284,11 +284,13 @@ def check_json(
     file: str,
     model: Optional[str] = None,
 ) -> Dict[str, object]:
-
-    report_dict = {"is_check_passed": True, "model_special_tokens": "we are not yet checking end of sentence tokens for this model"}
+    report_dict = {
+        "is_check_passed": True,
+        "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
+    }
     num_samples_w_eos_token = 0
 
-    model_info_dict = cast(Dict[str,Any],together.model_info_dict)
+    model_info_dict = cast(Dict[str, Any], together.model_info_dict)
 
     eos_token = None
     if model is not None and model in model_info_dict:
