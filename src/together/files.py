@@ -2,7 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Dict, List, Mapping, Optional, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Union, cast
 
 import requests
 from tqdm import tqdm
@@ -57,7 +57,7 @@ class Files:
         file: str,
         check: bool = True,
         model: Optional[str] = None,
-    ) -> Mapping[str, Union[str, int, Mapping]]:
+    ) -> Mapping[str, Union[str, int, Any]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
         headers = {
@@ -256,7 +256,7 @@ class Files:
         return output  # this should be null
 
     @classmethod
-    def save_jsonl(self, data: dict, output_path: str, append: bool = False) -> None:
+    def save_jsonl(self, data: Dict[str,str], output_path: str, append: bool = False) -> None:
         """
         Write list of objects to a JSON lines file.
         """
@@ -288,7 +288,7 @@ def check_json(
     report_dict = {"is_check_passed": True, "model_special_tokens": "we are not yet checking end of sentence tokens for this model"}
     num_samples_w_eos_token = 0
 
-    model_info_dict = cast(dict,together.model_info_dict)
+    model_info_dict = cast(Dict[str,Any],together.model_info_dict)
 
     eos_token = None
     if model is not None and model in model_info_dict:

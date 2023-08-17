@@ -13,7 +13,10 @@ from together import Files, get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-def validate_parameter_payload(parameter_payload: dict, logger: Logger) -> bool:
+def validate_parameter_payload(
+    parameter_payload: Dict[str,Any], 
+    logger: Logger,
+) -> bool:
     # check if training_file is the string id of a previously uploaded file
     uploaded_files = Files.list()
     file_ids = [f["id"] for f in uploaded_files["data"]]
