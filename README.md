@@ -161,13 +161,13 @@ resp = together.Files.check(file="jokes.jsonl")
 print(resp)
 ```
 
-If the file format is correct, the `is_check_passed` field will be True and the `error_list` will be empty.
+If the file format is correct, the `is_check_passed` field will be True
 
 ```
-{'is_check_passed': True, 'error_list': [], 'num_samples': 100}
+{'is_check_passed': True, 'model_special_tokens': 'we are not yet checking end of sentence tokens for this model', 'file_present': 'File found', 'file_size': 'File size 0.0 GB', 'num_samples': 100, 'num_samples_w_eos_token': 0}
 ```
 
-To check of your data contains the correct model specific special tokens (under construction):
+To check if your data contains `model_special_tokens` (we are still expanding this to include more models and tokens) use:
 
 ```python
 together.Files.check(file="jokes.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
