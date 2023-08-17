@@ -332,25 +332,25 @@ def check_json(
                     report_dict["is_check_passed"] = False
 
                 if "text" not in json_line:
-                    report_dict["text_field"] = (
-                        f"""No "text" field was found on line {idx+1} of the the input file.
+                    report_dict[
+                        "text_field"
+                    ] = f"""No "text" field was found on line {idx+1} of the the input file.
                         Expected format: `{"text":"my sample string"}`
                         see https://docs.together.ai/docs/fine-tuning for more information.
                         {str(line)}
                         """
-                    )
                     report_dict["is_check_passed"] = False
                 else:
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
-                        report_dict["key_value"] = (
-                            f"""Unexpected, value type for "text" key on line {idx+1} of the input file.
+                        report_dict[
+                            "key_value"
+                        ] = f"""Unexpected, value type for "text" key on line {idx+1} of the input file.
                             The value type of the "text" key must be a string.
                             Expected format: `{"text":"my sample string"}`
                             See https://docs.together.ai/docs/fine-tuning for more information.
                             {str(line)}
                             """
-                        )
                         report_dict["is_check_passed"] = False
 
                     elif eos_token:

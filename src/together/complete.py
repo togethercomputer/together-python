@@ -65,12 +65,12 @@ class Complete:
 
         if response.status_code == 429:
             logger.critical(
-                f"""No running instances for {model}. 
+                f"""No running instances for {model}.
                 You can start an instance with one of the following methods:
                   1. navigating to the Together Playground at api.together.ai
                   2. starting one in python using together.Models.start(model_name)
                   3. `$ together models start <MODLE_NAME>` at the command line.
-                See `together.Models.list()` in python or `$ together models list` in command line 
+                See `together.Models.list()` in python or `$ together models list` in command line
                 to get an updated list of valid model names.
                 """
             )

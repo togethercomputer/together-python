@@ -1,6 +1,5 @@
 import posixpath
 import urllib.parse
-from logging import Logger
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -14,7 +13,6 @@ logger = get_logger(str(__name__), log_level=together.log_level)
 
 
 def validate_parameter_payload(parameter_payload: Dict[str, Any]) -> bool:
-    
     # check if training_file is the string id of a previously uploaded file
     uploaded_files = Files.list()
     file_ids = [f["id"] for f in uploaded_files["data"]]
@@ -23,7 +21,7 @@ def validate_parameter_payload(parameter_payload: Dict[str, Any]) -> bool:
         logger.critical(
             """training_file refers to a file identifier of an uploaded training file, not a local file path.
             A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or
-            `$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')` 
+            `$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')`
             Python API or `$ together files upload <FILE_PATH>` CLI.
             """
         )
@@ -108,7 +106,7 @@ class Finetune:
         }
 
         if not validate_parameter_payload(
-            parameter_payload=parameter_payload, logger=logger
+            parameter_payload=parameter_payload, 
         ):
             raise together.FileTypeError("Invalid API request")
 
