@@ -8,7 +8,7 @@ from together.commands import chat, complete, files, finetune, image, models
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Together Python Library",
+        description="Together CLI",
         prog="together",
     )
 
