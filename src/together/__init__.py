@@ -7,8 +7,8 @@ from .config import (
     min_samples,
     model_info_dict,
 )
-
 from .version import VERSION
+
 
 version = VERSION
 
