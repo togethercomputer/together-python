@@ -14,6 +14,11 @@ from together import get_logger, verify_api_key
 
 logger = get_logger(str(__name__), log_level=together.log_level)
 
+# the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
+NUM_BYTES_IN_GB = 2**30 
+
+# maximum number of GB sized files we support finetuning for
+MAX_FT_GB = 4.9
 
 class Files:
     def __init__(
@@ -308,10 +313,10 @@ def check_json(
 
     file_size = os.stat(file).st_size
 
-    if file_size > 4.9 * (2**30):
+    if file_size > MAX_FT_GB * NUM_BYTES_IN_GB:
         report_dict[
             "file_size"
-        ] = f"File size {round(file_size / (2**30) ,3)} GB is greater than our limit of 4.9 GB"
+        ] = f"File size {round(file_size / NUM_BYTES_IN_GB ,3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
     else:
         report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
