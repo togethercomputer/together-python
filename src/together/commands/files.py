@@ -112,6 +112,7 @@ def _add_retrieve_content(
         type=str,
         required=False,
     )
+    
     subparser.set_defaults(func=_run_retrieve_content)
 
 
