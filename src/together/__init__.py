@@ -1,6 +1,12 @@
 import os
 import urllib.parse
 
+from .config import (
+    finetune_model_names,
+    jokes_list,
+    min_samples,
+    model_info_dict,
+)
 from .version import VERSION
 
 
@@ -46,4 +52,8 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
+    "model_info_dict",
+    "finetune_model_names",
+    "min_samples",
+    "jokes_list",
 ]

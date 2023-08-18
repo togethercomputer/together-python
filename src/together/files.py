@@ -2,8 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from logging import Logger
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Mapping, Optional, Union, cast
 
 import requests
 from tqdm import tqdm
@@ -15,30 +14,11 @@ from together import get_logger, verify_api_key
 
 logger = get_logger(str(__name__), log_level=together.log_level)
 
+# the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
+NUM_BYTES_IN_GB = 2**30
 
-def validate_file(file: str, logger: Logger) -> bool:
-    if not os.path.isfile(file):
-        logger.critical("ERROR: File not found")
-        return False
-
-    file_size = os.stat(file).st_size
-
-    if file_size > 4.9 * (2**30):
-        logger.warning("File size > 4.9 GB, file may fail to upload.")
-
-    with open(file) as f:
-        try:
-            for line in f:
-                json_line = json.loads(line)
-                if "text" not in json_line:
-                    logger.critical(
-                        "ERROR: 'text' field not found in one or more lines in JSONL file"
-                    )
-                    return False
-        except ValueError:
-            logger.critical("ERROR: Could not load JSONL file. Invalid format")
-            return False
-        return True
+# maximum number of GB sized files we support finetuning for
+MAX_FT_GB = 4.9
 
 
 class Files:
@@ -72,7 +52,16 @@ class Files:
         return response_json
 
     @classmethod
-    def upload(self, file: str) -> Dict[str, Union[str, int]]:
+    def check(self, file: str, model: Optional[str] = None) -> Dict[str, object]:
+        return check_json(file, model)
+
+    @classmethod
+    def upload(
+        self,
+        file: str,
+        check: bool = True,
+        model: Optional[str] = None,
+    ) -> Mapping[str, Union[str, int, Any]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 
         headers = {
@@ -80,8 +69,13 @@ class Files:
             "User-Agent": together.user_agent,
         }
 
-        if not validate_file(file=file, logger=logger):
-            raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+        if check:
+            report_dict = check_json(file, model)
+            if not report_dict["is_check_passed"]:
+                print(report_dict)
+                raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+        else:
+            report_dict = {}
 
         session = requests.Session()
 
@@ -155,10 +149,15 @@ class Files:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
+        # output_dict["filename"] = os.path.basename(file)
+        # output_dict["id"] = str(file_id)
+        # output_dict["object"] = "file"
+
         return {
             "filename": os.path.basename(file),
             "id": str(file_id),
             "object": "file",
+            "report_dict": report_dict,
         }
 
     @classmethod
@@ -259,3 +258,131 @@ class Files:
             raise together.ResponseError(e)
 
         return output  # this should be null
+
+    @classmethod
+    def save_jsonl(
+        self, data: Dict[str, str], output_path: str, append: bool = False
+    ) -> None:
+        """
+        Write list of objects to a JSON lines file.
+        """
+        mode = "a+" if append else "w"
+        with open(output_path, mode, encoding="utf-8") as f:
+            for line in data:
+                json_record = json.dumps(line, ensure_ascii=False)
+                f.write(json_record + "\n")
+        print("Wrote {} records to {}".format(len(data), output_path))
+
+    @classmethod
+    def load_jsonl(self, input_path: str) -> List[Dict[str, str]]:
+        """
+        Read list of objects from a JSON lines file.
+        """
+        data = []
+        with open(input_path, "r", encoding="utf-8") as f:
+            for line in f:
+                data.append(json.loads(line.rstrip("\n|\r")))
+        print("Loaded {} records from {}".format(len(data), input_path))
+        return data
+
+
+def check_json(
+    file: str,
+    model: Optional[str] = None,
+) -> Dict[str, object]:
+    report_dict = {
+        "is_check_passed": True,
+        "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
+    }
+    num_samples_w_eos_token = 0
+
+    model_info_dict = cast(Dict[str, Any], together.model_info_dict)
+
+    eos_token = None
+    if model is not None and model in model_info_dict:
+        if "eos_token" in model_info_dict[model]:
+            eos_token = model_info_dict[model]["eos_token"]
+            report_dict[
+                "model_special_tokens"
+            ] = f"the end of sentence token for this model is {eos_token}"
+
+    if not os.path.isfile(file):
+        report_dict["file_present"] = f"File not found at given file path {file}"
+        report_dict["is_check_passed"] = False
+    else:
+        report_dict["file_present"] = "File found"
+
+    file_size = os.stat(file).st_size
+
+    if file_size > MAX_FT_GB * NUM_BYTES_IN_GB:
+        report_dict[
+            "file_size"
+        ] = f"File size {round(file_size / NUM_BYTES_IN_GB ,3)} GB is greater than our limit of 4.9 GB"
+        report_dict["is_check_passed"] = False
+    else:
+        report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
+
+    with open(file) as f:
+        try:
+            for idx, line in enumerate(f):
+                json_line = json.loads(line)  # each line in jsonlines should be a json
+
+                if not isinstance(json_line, dict):
+                    report_dict["line_type"] = (
+                        "Valid json not found in one or more lines in JSONL file."
+                        'Example of valid json: {"text":"my sample string"}.'
+                        "see https://docs.together.ai/docs/fine-tuning."
+                        f"The first line where this occur is line {idx+1}, where 1 is the first line."
+                        f"{str(line)}"
+                    )
+                    report_dict["is_check_passed"] = False
+
+                if "text" not in json_line:
+                    report_dict["text_field"] = (
+                        f'No "text" field was found on line {idx+1} of the the input file.'
+                        'Expected format: {"text":"my sample string"}.'
+                        "see https://docs.together.ai/docs/fine-tuning for more information."
+                        f"{str(line)}"
+                    )
+                    report_dict["is_check_passed"] = False
+                else:
+                    # check to make sure the value of the "text" key is a string
+                    if not isinstance(json_line["text"], str):
+                        report_dict["key_value"] = (
+                            f'Unexpected, value type for "text" key on line {idx+1} of the input file.'
+                            'The value type of the "text" key must be a string.'
+                            'Expected format: {"text":"my sample string"}'
+                            "See https://docs.together.ai/docs/fine-tuning for more information."
+                            f"{str(line)}"
+                        )
+
+                        report_dict["is_check_passed"] = False
+
+                    elif eos_token:
+                        if eos_token in json_line["text"]:
+                            num_samples_w_eos_token += 1
+
+            # make sure this is outside the for idx, line in enumerate(f): for loop
+            if idx + 1 < together.min_samples:
+                report_dict["min_samples"] = (
+                    f"Processing {file} resulted in only {idx+1} samples. "
+                    f"Our minimum is {together.min_samples} samples. "
+                )
+                report_dict["is_check_passed"] = False
+            else:
+                report_dict["num_samples"] = idx + 1
+
+        except ValueError:
+            report_dict["load_json"] = (
+                f"File should be a valid jsonlines (.jsonl) with a json in each line."
+                'Example of valid json: {"text":"my sample string"}'
+                "Valid json not found in one or more lines in file."
+                "see https://docs.together.ai/docs/fine-tuning."
+                f"The first line where this occur is line {idx+1}, where 1 is the first line."
+                f"{str(line)}"
+            )
+            report_dict["is_check_passed"] = False
+
+    report_dict["num_samples_w_eos_token"] = num_samples_w_eos_token
+
+    return report_dict

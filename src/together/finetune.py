@@ -6,10 +6,34 @@ import requests
 from tqdm import tqdm
 
 import together
-from together import get_logger, verify_api_key
+from together import Files, get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
+
+
+def validate_parameter_payload(parameter_payload: Dict[str, Any]) -> bool:
+    # check if training_file is the string id of a previously uploaded file
+    uploaded_files = Files.list()
+    file_ids = [f["id"] for f in uploaded_files["data"]]
+
+    if parameter_payload["training_file"] not in file_ids:
+        logger.critical(
+            """training_file refers to a file identifier of an uploaded training file, not a local file path.
+            A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or
+            `$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')`
+            Python API or `$ together files upload <FILE_PATH>` CLI.
+            """
+        )
+        return False
+
+    # check if model name is one of the models available for finetuning
+    if parameter_payload["model"] not in together.finetune_model_names:
+        logger.warning(
+            "the finetune model name must be one of the subset of models available for finetuning https://docs.together.ai/docs/models-fine-tuning"
+        )
+
+    return True
 
 
 class Finetune:
@@ -34,7 +58,9 @@ class Finetune:
         # seed: Optional[int] = 42,
         # fp16: Optional[bool] = True,
         # checkpoint_steps: Optional[int] = None,
-        suffix: Optional[str] = None,
+        suffix: Optional[
+            str
+        ] = None,  # resulting finetuned model name will include the suffix
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
@@ -78,6 +104,11 @@ class Finetune:
             "Content-Type": "application/json",
             "User-Agent": together.user_agent,
         }
+
+        if not validate_parameter_payload(
+            parameter_payload=parameter_payload,
+        ):
+            raise together.FileTypeError("Invalid API request")
 
         # send request
         try:
@@ -231,6 +262,7 @@ class Finetune:
 
         return job_status
 
+    @classmethod
     def is_final_model_available(self, fine_tune_id: str) -> bool:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])

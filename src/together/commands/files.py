@@ -13,6 +13,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     child_parsers = parser.add_subparsers(required=True)
 
     _add_list(child_parsers)
+    _add_check(child_parsers)
     _add_upload(child_parsers)
     _add_delete(child_parsers)
     _add_retrieve(child_parsers)
@@ -24,6 +25,26 @@ def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> No
     subparser.set_defaults(func=_run_list)
 
 
+def _add_check(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    subparser = parser.add_parser("check")
+    subparser.add_argument(
+        "file",
+        metavar="FILENAME",
+        help="Local file to upload",
+        type=str,
+    )
+    subparser.add_argument(
+        "--model",
+        "-m",
+        default=None,
+        metavar="MODELNAME",
+        help="check data for this model's special tokens",
+        type=str,
+        required=False,
+    )
+    subparser.set_defaults(func=_run_check)
+
+
 def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     subparser = parser.add_parser("upload")
     subparser.add_argument(
@@ -31,6 +52,21 @@ def _add_upload(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         metavar="FILENAME",
         help="Local file to upload",
         type=str,
+    )
+    subparser.add_argument(
+        "--no-check",
+        default=False,
+        action="store_true",
+        help="Indicates whether to disable checking",
+    )
+    subparser.add_argument(
+        "--model",
+        "-m",
+        default=None,
+        metavar="MODELNAME",
+        help="check data for this model's special tokens",
+        type=str,
+        required=False,
     )
     subparser.set_defaults(func=_run_upload)
 
@@ -87,9 +123,15 @@ def _run_list(args: argparse.Namespace) -> None:
     print(json.dumps(response, indent=4))
 
 
+def _run_check(args: argparse.Namespace) -> None:
+    files = Files()
+    response = files.check(args.file, args.model)
+    print(json.dumps(response, indent=4))
+
+
 def _run_upload(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.upload(args.file)
+    response = files.upload(file=args.file, check=not args.no_check, model=args.model)
     print(json.dumps(response, indent=4))
 
 
