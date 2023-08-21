@@ -3,12 +3,11 @@
 name: ReadMe GitHub Action 🦉
 
 on:
-  push:
-    branches:
-      # This workflow will run every time you push code to the following branch: `main`
-      # Check out GitHub's docs for more info on configuring this:
-      # https://docs.github.com/actions/using-workflows/events-that-trigger-workflows
-      - main
+  workflow_dispatch:
+    inputs:
+      README_API_KEY:
+        required: true
+        description: your API token on readme.com
 
 jobs:
   rdme-docs:
@@ -20,4 +19,4 @@ jobs:
       - name: Run `docs` command 🚀
         uses: readmeio/rdme@v8
         with:
-          rdme: docs . --key=${{ secrets.README_API_KEY }} --version=0.1
+          rdme: docs . --key=${{ github.event.inputs.README_API_KEY }} --version=0.1
