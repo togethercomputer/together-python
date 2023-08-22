@@ -12,30 +12,6 @@ from together import Files, get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-def validate_parameter_payload(parameter_payload: Dict[str, Any]) -> bool:
-    # check if training_file is the string id of a previously uploaded file
-    uploaded_files = Files.list()
-    file_ids = [f["id"] for f in uploaded_files["data"]]
-
-    if parameter_payload["training_file"] not in file_ids:
-        logger.critical(
-            """training_file refers to a file identifier of an uploaded training file, not a local file path.
-            A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or
-            `$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')`
-            Python API or `$ together files upload <FILE_PATH>` CLI.
-            """
-        )
-        return False
-
-    # check if model name is one of the models available for finetuning
-    if parameter_payload["model"] not in together.finetune_model_names:
-        logger.warning(
-            "the finetune model name must be one of the subset of models available for finetuning https://docs.together.ai/docs/models-fine-tuning"
-        )
-
-    return True
-
-
 class Finetune:
     def __init__(
         self,
@@ -98,19 +74,33 @@ class Finetune:
             "wandb_key": wandb_api_key,
         }
 
+        # check if model name is one of the models available for finetuning
+        if parameter_payload["model"] not in together.finetune_model_names:
+            logger.warning(
+                "The finetune model name must be one of the subset of models available for finetuning. "
+                "Here is a list of those models https://docs.together.ai/docs/models-fine-tuning"
+            )
+
+        # check if training_file is the string id of a previously uploaded file
+        uploaded_files = Files.list()
+        file_ids = [f["id"] for f in uploaded_files["data"]]
+        if parameter_payload["training_file"] not in file_ids:
+            training_file_feedback = (
+                "training_file refers to a file identifier of an uploaded training file, not a local file path. "
+                "A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or "
+                "$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')"
+                "Python API or `$ together files upload <FILE_PATH>` CLI."
+            )
+            logger.critical(training_file_feedback)
+            raise together.FileTypeError(training_file_feedback)
+
+        # Send POST request to SUBMIT FINETUNE JOB
         # HTTP headers for authorization
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "Content-Type": "application/json",
             "User-Agent": together.user_agent,
         }
-
-        if not validate_parameter_payload(
-            parameter_payload=parameter_payload,
-        ):
-            raise together.FileTypeError("Invalid API request")
-
-        # send request
         try:
             response = requests.post(
                 together.api_base_finetune, headers=headers, json=parameter_payload
