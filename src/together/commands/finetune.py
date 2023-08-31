@@ -39,7 +39,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         "-e",
         help="Estimate the price of the fine tune job",
         required=False,
-        action='store_true'
+        action="store_true",
     )
     # subparser.add_argument(
     #     "--validation-file",
