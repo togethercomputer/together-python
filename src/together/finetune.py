@@ -12,7 +12,7 @@ from together import Files, get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 # this will change soon to be data driven and give a clearer estimate
-def model_param_count( name ):
+def model_param_count( name : str ):
     pcount = {
             "togethercomputer/RedPajama-INCITE-7B-Chat": 6857302016, "togethercomputer/RedPajama-INCITE-7B-Base": 6857302016, "togethercomputer/RedPajama-INCITE-7B-Instruct": 6857302016, "togethercomputer/RedPajama-INCITE-Chat-3B-v1": 2775864320, "togethercomputer/RedPajama-INCITE-Base-3B-v1": 2775864320, "togethercomputer/RedPajama-INCITE-Instruct-3B-v1": 2775864320, "togethercomputer/Pythia-Chat-Base-7B": 6857302016, "togethercomputer/llama-2-7b": 6738415616, "togethercomputer/llama-2-7b-chat": 6738415616, "togethercomputer/llama-2-13b": 13015864320, "togethercomputer/llama-2-13b-chat": 13015864320, "togethercomputer/LLaMA-2-7B-32K": 6738415616, "togethercomputer/Llama-2-7B-32K-Instruct": 6738415616, "togethercomputer/CodeLlama-7b": 6738546688, "togethercomputer/CodeLlama-7b-Python": 6738546688, "togethercomputer/CodeLlama-7b-Instruct": 6738546688, "togethercomputer/CodeLlama-13b": 13016028160, "togethercomputer/CodeLlama-13b-Python": 13016028160, "togethercomputer/CodeLlama-13b-Instruct": 13016028160 }
     return pcount[name]
@@ -117,7 +117,7 @@ class Finetune:
                 if file["id"] == parameter_payload["training_file"]:
                     ## This is the file
                     byte_count = file["bytes"]
-                    token_estimate = int(file["bytes"] / 4)
+                    token_estimate = int(int(file["bytes"]) / 4)
                     data = { 
                             "method" : "together_getPrice",
                             "params" : [ model, "FT", { "tokens" : token_estimate, "epochs" : n_epochs, "parameters" : model_param_count( model ) } ], "id" : 1 }
