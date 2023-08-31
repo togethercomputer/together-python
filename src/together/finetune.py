@@ -38,14 +38,7 @@ def model_param_count(name: str) -> int:
     try:
         return pcount[name]
     except Exception:
-        if "3b" in name.casefold():
-            return 3000000000
-        elif "7b" in name.casefold():
-            return 7000000000
-        elif "13b" in name.casefold():
-            return 13000000000
-        return 13000000000
-
+        return 0
 
 class Finetune:
     def __init__(
@@ -131,7 +124,6 @@ class Finetune:
 
         if estimate_price:
             param_size = model_param_count(model)
-            print(param_size)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
                 raise together.FileTypeError(error)
@@ -157,7 +149,7 @@ class Finetune:
                     r = requests.post("https://computer.together.xyz/", json=data)
                     estimate = r.json()["result"]["total"]
                     estimate /= 1000000000
-                    training_file_feedback = f"A rough price estimate for this job is ${estimate:.2f} USD.  The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed.  The actual price might be higher or lower depending on how the data is tokenized.  Our token estimate here is number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes.  We currently have a per job minimum of $5.00 USD."
+                    training_file_feedback = f"A rough price estimate for this job is ${estimate:.2f} USD. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
                     print(training_file_feedback)
                     exit()
 
