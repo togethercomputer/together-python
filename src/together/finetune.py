@@ -11,6 +11,18 @@ from together import Files, get_logger, verify_api_key
 
 logger = get_logger(str(__name__), log_level=together.log_level)
 
+# this will change soon to be data driven and give a clearer estimate
+def model_param_count( name ):
+    pcount = {
+            "togethercomputer/RedPajama-INCITE-7B-Chat": 6857302016, "togethercomputer/RedPajama-INCITE-7B-Base": 6857302016, "togethercomputer/RedPajama-INCITE-7B-Instruct": 6857302016, "togethercomputer/RedPajama-INCITE-Chat-3B-v1": 2775864320, "togethercomputer/RedPajama-INCITE-Base-3B-v1": 2775864320, "togethercomputer/RedPajama-INCITE-Instruct-3B-v1": 2775864320, "togethercomputer/Pythia-Chat-Base-7B": 6857302016, "togethercomputer/llama-2-7b": 6738415616, "togethercomputer/llama-2-7b-chat": 6738415616, "togethercomputer/llama-2-13b": 13015864320, "togethercomputer/llama-2-13b-chat": 13015864320, "togethercomputer/LLaMA-2-7B-32K": 6738415616, "togethercomputer/Llama-2-7B-32K-Instruct": 6738415616, "togethercomputer/CodeLlama-7b": 6738546688, "togethercomputer/CodeLlama-7b-Python": 6738546688, "togethercomputer/CodeLlama-7b-Instruct": 6738546688, "togethercomputer/CodeLlama-13b": 13016028160, "togethercomputer/CodeLlama-13b-Python": 13016028160, "togethercomputer/CodeLlama-13b-Instruct": 13016028160 }
+    return pcount[name]
+    if "3b" in name.casefold():
+        return 3000000000
+    elif "7b" in name.casefold():
+        return 7000000000
+    elif "13b" in name.casefold():
+        return 13000000000
+    return 13000000000
 
 class Finetune:
     def __init__(
@@ -38,6 +50,7 @@ class Finetune:
             str
         ] = None,  # resulting finetuned model name will include the suffix
         wandb_api_key: Optional[str] = None,
+        estimate_price: bool = False,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
             logger.fatal("The number of epochs must be specified")
@@ -93,6 +106,30 @@ class Finetune:
             )
             logger.critical(training_file_feedback)
             raise together.FileTypeError(training_file_feedback)
+
+        if estimate_price:
+            param_size = model_param_count(model)
+            print(param_size)
+            if param_size == 0:
+                error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
+                raise together.FileTypeError(error)
+
+            for file in uploaded_files['data']:
+                if file["id"] == parameter_payload["training_file"]:
+                    ## This is the file
+                    byte_count = file["bytes"]
+                    token_estimate = int(file["bytes"] / 4)
+                    data = { 
+                            "method" : "together_getPrice",
+                            "params" : [ model, "FT", { "tokens" : token_estimate, "epochs" : n_epochs, "parameters" : model_param_count( model ) } ], "id" : 1 }
+                    r = requests.post( "https://computer.together.xyz/", json=data )
+                    estimate = r.json()["result"]["total"]
+                    estimate /= 1000000000
+                    training_file_feedback = (
+                            f"A rough price estimate for this job is ${estimate:.2f} USD.  The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed.  The actual price might be higher or lower depending on how the data is tokenized.  Our token estimate here is number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes.  We currently have a per job minimum of $5.00 USD."
+                    )
+                    print(training_file_feedback)
+                    exit()
 
         # Send POST request to SUBMIT FINETUNE JOB
         # HTTP headers for authorization

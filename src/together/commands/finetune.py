@@ -35,6 +35,13 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=True,
         type=str,
     )
+    subparser.add_argument(
+        "--estimate-price",
+        "-e",
+        help="Estimate the price of the fine tune job",
+        required=False,
+        action='store_true'
+    )
     # subparser.add_argument(
     #     "--validation-file",
     #     "-v",
@@ -290,6 +297,7 @@ def _run_create(args: argparse.Namespace) -> None:
         # checkpoint_steps=args.checkpoint_steps,
         suffix=args.suffix,
         wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
+        estimate_price=args.estimate_price,
     )
 
     print(json.dumps(response, indent=4))
