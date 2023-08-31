@@ -295,7 +295,6 @@ resp = together.Finetune.create(
   batch_size = 4,
   learning_rate = 1e-5,
   suffix = 'my-demo-finetune',
-  wandb_api_key = '1a2b3c4d5e.......',
 )
 
 fine_tune_id = resp['id']
