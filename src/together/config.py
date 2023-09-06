@@ -13,9 +13,7 @@ finetune_model_names = [
     "togethercomputer/RedPajama-INCITE-Chat-3B-v1",
     "togethercomputer/RedPajama-INCITE-Instruct-3B-v1",
     "togethercomputer/Pythia-Chat-Base-7B",
-    "togethercomputer/Llama-2-7B-32K-Instruct"
-
-    "togethercomputer/llama-2-70b",
+    "togethercomputer/Llama-2-7B-32K-Instruct" "togethercomputer/llama-2-70b",
     "togethercomputer/llama-2-70b-chat",
 ]
 
