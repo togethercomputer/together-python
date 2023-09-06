@@ -22,7 +22,7 @@ dependencies = [
     "typer",
     "requests",
     "tqdm",
-    "sseclient-py>=1.7.0",
+    "sseclient-py==1.7.2",
 ]
 
 [project.optional-dependencies]
