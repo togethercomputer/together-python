@@ -69,6 +69,7 @@ class Finetune:
             str
         ] = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
+        wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
             logger.fatal("The number of epochs must be specified")
@@ -102,7 +103,7 @@ class Finetune:
             # "seed": seed,
             # "fp16": fp16,
             "suffix": suffix,
-            # "wandb_key": wandb_api_key,
+            "wandb_key": wandb_api_key,
         }
 
         # check if model name is one of the models available for finetuning
