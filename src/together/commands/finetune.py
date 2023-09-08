@@ -136,21 +136,21 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="Up to 40 characters that will be added to your fine-tuned model name.",
         type=str,
     )
-    # subparser.add_argument(
-    #    "--wandb-api-key",
-    #    "-wb",
-    #    metavar="WANDB_API_KEY",
-    #    default=os.getenv("WANDB_API_KEY"),
-    #    help="Wandb API key to report metrics to wandb.ai. If not set WANDB_API_KEY environment variable is used.",
-    #    type=str,
-    # )
-    # subparser.add_argument(
-    #    "--no-wandb-api-key",
-    #    "-nwb",
-    #    default=False,
-    #    help="Do not report metrics to wandb.ai.",
-    #    action="store_true",
-    # )
+    subparser.add_argument(
+        "--wandb-api-key",
+        "-wb",
+        metavar="WANDB_API_KEY",
+        default=os.getenv("WANDB_API_KEY"),
+        help="Wandb API key to report metrics to wandb.ai. If not set WANDB_API_KEY environment variable is used.",
+        type=str,
+    )
+    subparser.add_argument(
+        "--no-wandb-api-key",
+        "-nwb",
+        default=False,
+        help="Do not report metrics to wandb.ai.",
+        action="store_true",
+    )
 
     subparser.set_defaults(func=_run_create)
 
@@ -296,6 +296,7 @@ def _run_create(args: argparse.Namespace) -> None:
         # checkpoint_steps=args.checkpoint_steps,
         suffix=args.suffix,
         estimate_price=args.estimate_price,
+        wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
     )
 
     print(json.dumps(response, indent=4))
