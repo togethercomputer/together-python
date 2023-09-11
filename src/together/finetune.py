@@ -34,8 +34,8 @@ def model_param_count(name: str) -> int:
         "togethercomputer/CodeLlama-13b": 13016028160,
         "togethercomputer/CodeLlama-13b-Python": 13016028160,
         "togethercomputer/CodeLlama-13b-Instruct": 13016028160,
-        "togethercomputer/llama-2-70b": 68976648192,
-        "togethercomputer/llama-2-70b-chat": 68976648192,
+        # "togethercomputer/llama-2-70b": 68976648192,
+        # "togethercomputer/llama-2-70b-chat": 68976648192,
     }
     try:
         return pcount[name]
