@@ -89,6 +89,10 @@ class Finetune:
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
             )
 
+        # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
+        if n_checkpoints > 1 and model in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]:
+            raise ValueError("Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1")
+
         parameter_payload = {
             "training_file": training_file,
             # "validation_file": validation_file,
