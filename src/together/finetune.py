@@ -89,16 +89,6 @@ class Finetune:
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
             )
 
-        # Set default batch size
-        if batch_size is None:
-            if model in [
-                "togethercomputer/llama-2-70b",
-                "togethercomputer/llama-2-70b-chat",
-            ]:
-                batch_size = 144
-            else:
-                batch_size = 32
-
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
