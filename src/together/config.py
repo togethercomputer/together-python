@@ -14,8 +14,8 @@ finetune_model_names = [
     "togethercomputer/RedPajama-INCITE-Instruct-3B-v1",
     "togethercomputer/Pythia-Chat-Base-7B",
     "togethercomputer/Llama-2-7B-32K-Instruct",
-    # "togethercomputer/llama-2-70b",
-    # "togethercomputer/llama-2-70b-chat",
+    "togethercomputer/llama-2-70b",
+    "togethercomputer/llama-2-70b-chat",
 ]
 
 # List of models we support and their particular behavior, ie special tokens,
@@ -73,8 +73,8 @@ model_info_dict = {
     "togethercomputer/falcon-7b": {},
     "togethercomputer/llama-2-13b-chat": {"bos_token": "<s>", "eos_token": "</s>"},
     "togethercomputer/llama-2-13b": {"bos_token": "<s>", "eos_token": "</s>"},
-    # "togethercomputer/llama-2-70b-chat": {"bos_token": "<s>", "eos_token": "</s>"},
-    # "togethercomputer/llama-2-70b": {"bos_token": "<s>", "eos_token": "</s>"},
+    "togethercomputer/llama-2-70b-chat": {"bos_token": "<s>", "eos_token": "</s>"},
+    "togethercomputer/llama-2-70b": {"bos_token": "<s>", "eos_token": "</s>"},
     "togethercomputer/llama-2-7b-chat": {"bos_token": "<s>", "eos_token": "</s>"},
     "togethercomputer/llama-2-7b": {"bos_token": "<s>", "eos_token": "</s>"},
     "togethercomputer/mpt-30b-chat": {},

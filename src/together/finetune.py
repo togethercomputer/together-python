@@ -34,8 +34,8 @@ def model_param_count(name: str) -> int:
         "togethercomputer/CodeLlama-13b": 13016028160,
         "togethercomputer/CodeLlama-13b-Python": 13016028160,
         "togethercomputer/CodeLlama-13b-Instruct": 13016028160,
-        # "togethercomputer/llama-2-70b": 68976648192,
-        # "togethercomputer/llama-2-70b-chat": 68976648192,
+        "togethercomputer/llama-2-70b": 68976648192,
+        "togethercomputer/llama-2-70b-chat": 68976648192,
     }
     try:
         return pcount[name]
@@ -87,6 +87,24 @@ class Finetune:
             n_checkpoints = n_epochs
             logger.warning(
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
+            )
+
+        if (
+            model
+            in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
+            and batch_size != 144
+        ):
+            raise ValueError(
+                f"Batch size must be 144 for {model} model. Please set batch size to 144"
+            )
+
+        # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
+        if n_checkpoints > 1 and model in [
+            "togethercomputer/llama-2-70b",
+            "togethercomputer/llama-2-70b-chat",
+        ]:
+            raise ValueError(
+                "Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1"
             )
 
         parameter_payload = {
