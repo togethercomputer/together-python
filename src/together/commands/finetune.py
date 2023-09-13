@@ -281,6 +281,17 @@ def _add_checkpoints(
 def _run_create(args: argparse.Namespace) -> None:
     finetune = Finetune()
 
+    # Set default batch size based on model
+    if args.batch_size is None:
+        if args.model in [
+            "togethercomputer/llama-2-70b",
+            "togethercomputer/llama-2-70b-chat",
+        ]:
+            args.batch_size = 144
+        else:
+            args.batch_size = 32
+
+
     response = finetune.create(
         training_file=args.training_file,  # training file_id
         # validation_file=args.validation_file,  # validation file_id
