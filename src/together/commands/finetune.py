@@ -77,7 +77,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         "--batch-size",
         "-b",
         metavar="BATCH_SIZE",
-        default=32,
+        default=None,
         help="The batch size to use for training. Default=32",
         type=int,
     )

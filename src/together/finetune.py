@@ -89,6 +89,16 @@ class Finetune:
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
             )
 
+        # Set default batch size
+        if batch_size is None:
+            if model in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]:
+                batch_size = 144
+            else:
+                batch_size = 32
+
+        if model in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"] and batch_size != 144:
+            raise ValueError(f"Batch size must be 144 for {model} model. Please set batch size to 144")
+
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]:
             raise ValueError("Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1")
