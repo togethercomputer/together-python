@@ -315,7 +315,7 @@ The `get_job_status` should change from `pending` to `running` to `completed` as
 
 `carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09`
 
-Now you can download your model using `together.Finetune.download(fine_tune_id)` or you start using your model for inference (may take a few minutes after finetuning to become available) by first starting your new model instance:
+Now you can download your model using `together.Finetune.download(fine_tune_id)` or start using your model on our inference engine (may take a few minutes after finetuning to become available) by first starting your new model instance:
 
 ```
 together.Models.start("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09")
@@ -328,6 +328,16 @@ output = together.Complete.create(
   prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
   model = "carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09", 
 )
+```
+
+To check whether your model is finished deploying, you can use the `Models.ready` like so:
+
+```
+together.Models.ready("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09")
+```
+
+```
+{'ready': 'model is ready for start, status code:1'}
 ```
 
 ## Chat

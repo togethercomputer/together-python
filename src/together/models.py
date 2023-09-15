@@ -152,9 +152,9 @@ class Models:
                 if model_dict.get("name") == model:
                     depth_num_asks = model_dict["depth"]["num_asks"]
                     if depth_num_asks > 0:
-                        return {"ready":"model is ready for start, status code:"+depth_num_asks}
+                        return {"ready":f"model is ready for start, status code:{depth_num_asks}"}
                     else:
-                        return {"ready":"model is not ready for start, status code:"+depth_num_asks}
+                        return {"ready":f"model is not ready for start, status code:{depth_num_asks}"}
             else:
                 return {"ready":f"No matching model name found for '{model}'."}
         else:
