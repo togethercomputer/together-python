@@ -92,10 +92,10 @@ class Finetune:
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
-            and batch_size != 144
+            and batch_size != 96
         ):
             raise ValueError(
-                f"Batch size must be 144 for {model} model. Please set batch size to 144"
+                f"Batch size must be 96 for {model} model. Please set batch size to 96"
             )
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
