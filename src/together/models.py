@@ -126,3 +126,38 @@ class Models:
             raise together.JSONError(e, http_status=response.status_code)
 
         return dict(response_dict)
+
+    @classmethod
+    def ready(self, model: str) -> Dict[str, str]:
+        ready_url = urllib.parse.urljoin(
+            together.api_base, "models/info"
+        )
+        headers = {
+            "Authorization": f"Bearer {together.api_key}",
+            "accept": "application/json",
+        }
+        try:
+            response = requests.get(
+                ready_url,
+                headers=headers,
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
+        
+        if response.status_code == 200:
+            response_json = response.json()
+            for model_dict in response_json:
+                if model_dict.get("name") == model:
+                    depth_num_asks = model_dict["depth"]["num_asks"]
+                    if depth_num_asks > 0:
+                        return {"ready":"model is ready for start, status code:"+depth_num_asks}
+                    else:
+                        return {"ready":"model is not ready for start, status code:"+depth_num_asks}
+            else:
+                return {"ready":f"No matching model name found for '{model}'."}
+        else:
+            return {"ready":f"Error: {response.status_code}"}
+
+
