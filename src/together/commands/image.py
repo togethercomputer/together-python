@@ -36,7 +36,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         "-np",
         default=None,
         type=str,
-        help=f"Negative prompt",
+        help="Negative prompt",
     )
 
     subparser.add_argument(
@@ -134,7 +134,7 @@ def _run_complete(args: argparse.Namespace) -> None:
         results=args.results,
         height=args.height,
         width=args.width,
-        negative_prompt=args.negative_prompt
+        negative_prompt=args.negative_prompt,
     )
 
     _save_image(args, response, logger)
