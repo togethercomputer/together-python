@@ -97,6 +97,9 @@ class Finetune:
             raise ValueError(
                 f"Batch size must be 144 for {model} model. Please set batch size to 144"
             )
+        
+        if batch_size < 4:
+            raise ValueError(f"Batch size must be >= 4.")
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
