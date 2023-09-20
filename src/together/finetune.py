@@ -97,7 +97,7 @@ class Finetune:
             raise ValueError(
                 f"Batch size must be 144 for {model} model. Please set batch size to 144"
             )
-        
+
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
