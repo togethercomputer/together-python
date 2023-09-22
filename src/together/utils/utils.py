@@ -65,7 +65,7 @@ def extract_time(json_obj: Dict[str, Any]) -> int:
         return 0
 
 
-def parse_timestamp(timestamp):
+def parse_timestamp(timestamp: str) -> datetime:
     formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
     for fmt in formats:
         try:
