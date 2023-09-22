@@ -19,6 +19,7 @@ def add_parser(
     _add_instances(child_parsers)
     _add_start(child_parsers)
     _add_stop(child_parsers)
+    _add_ready(child_parsers)
 
 
 def _add_list(
@@ -92,6 +93,19 @@ def _add_stop(
     subparser.set_defaults(func=_run_stop)
 
 
+def _add_ready(
+    parser: argparse._SubParsersAction[argparse.ArgumentParser],
+) -> None:
+    subparser = parser.add_parser("ready")
+    subparser.add_argument(
+        "model",
+        metavar="MODEL",
+        help="Proper Model API string name",
+        type=str,
+    )
+    subparser.set_defaults(func=_run_ready)
+
+
 def _run_list(args: argparse.Namespace) -> None:
     models = Models()
     response = models.list()
@@ -150,4 +164,10 @@ def _run_start(args: argparse.Namespace) -> None:
 def _run_stop(args: argparse.Namespace) -> None:
     models = Models()
     response = models.stop(args.model)
+    print(json.dumps(response, indent=4))
+
+
+def _run_ready(args: argparse.Namespace) -> None:
+    models = Models()
+    response = models.ready(args.model)
     print(json.dumps(response, indent=4))
