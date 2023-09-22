@@ -126,3 +126,30 @@ class Models:
             raise together.JSONError(e, http_status=response.status_code)
 
         return dict(response_dict)
+
+    @classmethod
+    def ready(self, model: str) -> List[Any]:
+        ready_url = urllib.parse.urljoin(together.api_base, "models/info?name=" + model)
+        headers = {
+            "Authorization": f"Bearer {together.api_key}",
+            "accept": "application/json",
+        }
+        try:
+            response = requests.get(
+                ready_url,
+                headers=headers,
+            )
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logger.critical(f"Response error raised: {e}")
+            raise together.ResponseError(e)
+
+        try:
+            response_list = response.json()
+        except Exception as e:
+            logger.critical(
+                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
+            )
+            raise together.JSONError(e, http_status=response.status_code)
+
+        return list(response_list)

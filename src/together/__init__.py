@@ -11,7 +11,7 @@ from .version import VERSION
 
 
 version = VERSION
-
+# print(version)
 user_agent = f"TogetherPythonOfficial/{version}"
 
 api_key = os.environ.get("TOGETHER_API_KEY", None)
