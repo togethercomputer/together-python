@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime
 
 from together import Finetune, parse_timestamp
 
@@ -318,7 +317,7 @@ def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune()
     response = finetune.list()
     data_list = response["data"]
-    sorted_data = sorted(data_list, key=lambda x: parse_timestamp(x['created_at']))
+    sorted_data = sorted(data_list, key=lambda x: parse_timestamp(x["created_at"]))
     response["data"] = sorted_data
     print(json.dumps(response, indent=4))
 
