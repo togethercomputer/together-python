@@ -1,5 +1,5 @@
 import urllib.parse
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import requests
 
@@ -128,7 +128,7 @@ class Models:
         return dict(response_dict)
 
     @classmethod
-    def ready(self, model: str) -> List:
+    def ready(self, model: str) -> Union[List[Any], None]:
         ready_url = urllib.parse.urljoin(together.api_base, "models/info?name=" + model)
         headers = {
             "Authorization": f"Bearer {together.api_key}",
