@@ -25,6 +25,7 @@ class Image:
         results: Optional[int] = 1,
         height: Optional[int] = 256,
         width: Optional[int] = 256,
+        negative_prompt: Optional[str] = "",
     ) -> Dict[str, Any]:
         if model == "":
             model = together.default_image_model
@@ -38,6 +39,7 @@ class Image:
             "seed": seed,
             "height": height,
             "width": width,
+            "negative_prompt": negative_prompt,
         }
 
         # HTTP headers for authorization
