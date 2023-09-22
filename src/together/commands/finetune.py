@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 
-from together import Finetune, extract_time
+from together import Finetune, parse_timestamp
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -316,9 +316,9 @@ def _run_create(args: argparse.Namespace) -> None:
 def _run_list(args: argparse.Namespace) -> None:
     finetune = Finetune()
     response = finetune.list()
-    for item in response["data"]:
-        item.pop("events", None)
-    response["data"].sort(key=extract_time)
+    data_list = response["data"]
+    sorted_data = sorted(data_list, key=lambda x: parse_timestamp(x["created_at"]))
+    response["data"] = sorted_data
     print(json.dumps(response, indent=4))
 
 
