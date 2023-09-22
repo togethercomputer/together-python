@@ -128,7 +128,7 @@ class Models:
         return dict(response_dict)
 
     @classmethod
-    def ready(self, model: str) -> Union[List[Any], None]:
+    def ready(self, model: str) -> List[Any]:
         ready_url = urllib.parse.urljoin(together.api_base, "models/info?name=" + model)
         headers = {
             "Authorization": f"Bearer {together.api_key}",
@@ -152,4 +152,4 @@ class Models:
             )
             raise together.JSONError(e, http_status=response.status_code)
 
-        return response_list
+        return list(response_list)
