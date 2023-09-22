@@ -26,7 +26,7 @@ default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
 
-from .utils.utils import get_logger, verify_api_key, extract_time  # noqa
+from .utils.utils import get_logger, verify_api_key, extract_time, parse_timestamp  # noqa
 from .models import Models
 from .complete import Complete
 from .error import *
@@ -47,6 +47,7 @@ __all__ = [
     "get_logger",
     "verify_api_key",
     "extract_time",
+    "parse_timestamp",
     "Models",
     "Complete",
     "Files",
