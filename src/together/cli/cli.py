@@ -2,8 +2,8 @@
 import argparse
 
 import together
-from together import get_logger
 from together.commands import chat, complete, files, finetune, image, models
+from together.utils.utils import get_logger
 
 
 def main() -> None:

@@ -8,7 +8,8 @@ import sys
 from typing import Any, Dict
 
 import together
-from together import Image, get_logger
+from together import Image
+from together.utils.utils import get_logger
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:

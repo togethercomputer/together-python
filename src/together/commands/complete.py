@@ -8,7 +8,8 @@ import sys
 from typing import Any, Dict, List
 
 import together
-from together import Complete, get_logger
+from together import Complete
+from together.utils.utils import get_logger
 
 
 def add_parser(

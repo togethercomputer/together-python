@@ -5,7 +5,8 @@ import cmd
 
 import together
 import together.utils.conversation as convo
-from together import Complete, get_logger
+from together import Complete
+from together.utils.utils import get_logger
 
 
 def add_parser(

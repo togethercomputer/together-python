@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 
-from together import Files, extract_time
+from together import Files
+from together.utils.utils import extract_time
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
