@@ -5,7 +5,7 @@ import requests
 import sseclient  # type: ignore
 
 import together
-from together import get_logger, verify_api_key
+from together.utils.utils import get_logger, verify_api_key
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
