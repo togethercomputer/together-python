@@ -13,43 +13,13 @@ from together.utils.utils import get_logger, verify_api_key
 logger = get_logger(str(__name__), log_level=together.log_level)
 
 
-# this will change soon to be data driven and give a clearer estimate
-def model_param_count(name: str) -> int:
-    pcount = {
-        "togethercomputer/RedPajama-INCITE-7B-Chat": 6857302016,
-        "togethercomputer/RedPajama-INCITE-7B-Base": 6857302016,
-        "togethercomputer/RedPajama-INCITE-7B-Instruct": 6857302016,
-        "togethercomputer/RedPajama-INCITE-Chat-3B-v1": 2775864320,
-        "togethercomputer/RedPajama-INCITE-Base-3B-v1": 2775864320,
-        "togethercomputer/RedPajama-INCITE-Instruct-3B-v1": 2775864320,
-        "togethercomputer/Pythia-Chat-Base-7B": 6857302016,
-        "togethercomputer/llama-2-7b": 6738415616,
-        "togethercomputer/llama-2-7b-chat": 6738415616,
-        "togethercomputer/llama-2-13b": 13015864320,
-        "togethercomputer/llama-2-13b-chat": 13015864320,
-        "togethercomputer/LLaMA-2-7B-32K": 6738415616,
-        "togethercomputer/Llama-2-7B-32K-Instruct": 6738415616,
-        "togethercomputer/CodeLlama-7b": 6738546688,
-        "togethercomputer/CodeLlama-7b-Python": 6738546688,
-        "togethercomputer/CodeLlama-7b-Instruct": 6738546688,
-        "togethercomputer/CodeLlama-13b": 13016028160,
-        "togethercomputer/CodeLlama-13b-Python": 13016028160,
-        "togethercomputer/CodeLlama-13b-Instruct": 13016028160,
-        "togethercomputer/llama-2-70b": 68976648192,
-        "togethercomputer/llama-2-70b-chat": 68976648192,
-    }
-    try:
-        return pcount[name]
-    except Exception:
-        return 0
-
-
 class Finetune:
     def __init__(
         self,
     ) -> None:
         verify_api_key(logger)
 
+    # TODO @orangetin: cleanup create validation etc
     @classmethod
     def create(
         self,
@@ -131,8 +101,8 @@ class Finetune:
         }
 
         # check if model name is one of the models available for finetuning
-        if parameter_payload["model"] not in together.finetune_model_names:
-            logger.warning(
+        if not together.Models._is_finetune_model(model):
+            raise ValueError(
                 "The finetune model name must be one of the subset of models available for finetuning. "
                 "Here is a list of those models https://docs.together.ai/docs/models-fine-tuning"
             )
@@ -151,7 +121,7 @@ class Finetune:
             raise together.FileTypeError(training_file_feedback)
 
         if estimate_price:
-            param_size = model_param_count(model)
+            param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
                 raise together.FileTypeError(error)
@@ -169,7 +139,7 @@ class Finetune:
                             {
                                 "tokens": token_estimate,
                                 "epochs": n_epochs,
-                                "parameters": model_param_count(model),
+                                "parameters": together.Models._param_count(model),
                             },
                         ],
                         "id": 1,

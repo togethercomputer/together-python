@@ -44,6 +44,23 @@ class Models:
         return response_list
 
     @classmethod
+    def info(self, model: str, hidden_keys: List[str] = []) -> Dict[str, Any]:
+        """
+        Gets info dictionary for model from model list and filters out hidden_keys
+        """
+        info_dict = next((item for item in self.list() if item["name"] == model), None)
+
+        if info_dict is not None:
+            for key in set(hidden_keys):
+                info_dict.pop(key, None)
+        else:
+            raise ValueError(
+                f"Model {model} does not exist. Use together.Models.list() to list available models."
+            )
+
+        return dict(info_dict)
+
+    @classmethod
     def instances(self) -> Dict[str, bool]:
         headers = {
             "Authorization": f"Bearer {together.api_key}",
@@ -153,3 +170,23 @@ class Models:
             raise together.JSONError(e, http_status=response.status_code)
 
         return list(response_list)
+
+    @classmethod
+    def _is_finetune_model(self, model: str) -> bool:
+        """
+        Return boolean value of whether or not model is supported by the finetuning API
+        """
+        return bool(self.info(model=model).get("finetuning_supported"))
+
+    @classmethod
+    def _param_count(self, model: str) -> int:
+        """
+        Returns model's parameter count. Returns 0 if not found.
+        """
+
+        param_count = self.info(model=model).get("num_parameters")
+
+        if not param_count:
+            param_count = 0
+
+        return param_count

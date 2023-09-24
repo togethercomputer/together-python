@@ -34,15 +34,6 @@ def _add_check(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> N
         help="Local file to upload",
         type=str,
     )
-    subparser.add_argument(
-        "--model",
-        "-m",
-        default=None,
-        metavar="MODELNAME",
-        help="check data for this model's special tokens",
-        type=str,
-        required=False,
-    )
     subparser.set_defaults(func=_run_check)
 
 
@@ -126,7 +117,7 @@ def _run_list(args: argparse.Namespace) -> None:
 
 def _run_check(args: argparse.Namespace) -> None:
     files = Files()
-    response = files.check(args.file, args.model)
+    response = files.check(args.file)
     print(json.dumps(response, indent=4))
 
 

@@ -2,7 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Any, Dict, List, Mapping, Optional, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
 from tqdm import tqdm
@@ -52,8 +52,8 @@ class Files:
         return response_json
 
     @classmethod
-    def check(self, file: str, model: Optional[str] = None) -> Dict[str, object]:
-        return check_json(file, model)
+    def check(self, file: str) -> Dict[str, object]:
+        return check_json(file)
 
     @classmethod
     def upload(
@@ -70,7 +70,7 @@ class Files:
         }
 
         if check:
-            report_dict = check_json(file, model)
+            report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
                 print(report_dict)
                 raise together.FileTypeError("Invalid file supplied. Failed to upload.")
@@ -288,23 +288,11 @@ class Files:
 
 def check_json(
     file: str,
-    model: Optional[str] = None,
 ) -> Dict[str, object]:
     report_dict = {
         "is_check_passed": True,
         "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
     }
-    num_samples_w_eos_token = 0
-
-    model_info_dict = cast(Dict[str, Any], together.model_info_dict)
-
-    eos_token = None
-    if model is not None and model in model_info_dict:
-        if "eos_token" in model_info_dict[model]:
-            eos_token = model_info_dict[model]["eos_token"]
-            report_dict[
-                "model_special_tokens"
-            ] = f"the end of sentence token for this model is {eos_token}"
 
     if not os.path.isfile(file):
         report_dict["file_present"] = f"File not found at given file path {file}"
@@ -358,10 +346,6 @@ def check_json(
 
                         report_dict["is_check_passed"] = False
 
-                    elif eos_token:
-                        if eos_token in json_line["text"]:
-                            num_samples_w_eos_token += 1
-
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < together.min_samples:
                 report_dict["min_samples"] = (
@@ -382,7 +366,5 @@ def check_json(
                 f"{str(line)}"
             )
             report_dict["is_check_passed"] = False
-
-    report_dict["num_samples_w_eos_token"] = num_samples_w_eos_token
 
     return report_dict

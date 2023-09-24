@@ -195,13 +195,13 @@ print(resp)
 If the file format is correct, the `is_check_passed` field will be True
 
 ```
-{'is_check_passed': True, 'model_special_tokens': 'we are not yet checking end of sentence tokens for this model', 'file_present': 'File found', 'file_size': 'File size 0.0 GB', 'num_samples': 100, 'num_samples_w_eos_token': 0}
+{'is_check_passed': True, 'model_special_tokens': 'we are not yet checking end of sentence tokens for this model', 'file_present': 'File found', 'file_size': 'File size 0.0 GB', 'num_samples': 100}
 ```
 
 To check if your data contains `model_special_tokens` (we are still expanding this to include more models and tokens) use:
 
 ```python
-together.Files.check(file="jokes.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
+together.Files.check(file="jokes.jsonl")
 ```
 
 The json checker is applied at the time of file upload unless `check = False` is passed as an argument to `together.Files.upload`. In the below example we attempt to upload a bad file, just to see an example checker output for an invalid file with a list of reasons file was invalid:
@@ -225,7 +225,6 @@ print(resp)
                    'resulted in only 10 samples. Our minimum is 100 samples. ',
     'model_special_tokens': 'we are not yet checking end of sentence tokens '
                             'for this model',
-    'num_samples_w_eos_token': 0,
     'text_field': 'No "text" field was found on line 7 of the the input '
                   'file.Expected format: {"text":"my sample string"}.see '
                   'https://docs.together.ai/docs/fine-tuning for more '
@@ -284,7 +283,7 @@ Run and manage your fine-tuning jobs, enabling you to tune all model layers, con
 
 Refer to the [Fine-tuning docs](https://docs.together.ai/docs/python-fine-tuning) on how to get started.
 
-Now that you have a valid file uploaded to together, you can finetune any of the models listed [here](https://docs.together.ai/docs/models-fine-tuning) or here `together.finetune_model_names` using `together.Finetune.create`
+Now that you have a valid file uploaded to together, you can finetune any of the models listed [here](https://docs.together.ai/docs/models-fine-tuning) using `together.Finetune.create`
 
 ```python
 resp = together.Finetune.create(

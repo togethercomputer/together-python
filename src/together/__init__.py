@@ -2,16 +2,14 @@ import os
 import urllib.parse
 
 from .config import (
-    finetune_model_names,
     jokes_list,
     min_samples,
-    model_info_dict,
 )
 from .version import VERSION
 
 
 version = VERSION
-# print(version)
+
 user_agent = f"TogetherPythonOfficial/{version}"
 
 api_key = os.environ.get("TOGETHER_API_KEY", None)
@@ -48,8 +46,6 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
-    "model_info_dict",
-    "finetune_model_names",
     "min_samples",
     "jokes_list",
 ]
