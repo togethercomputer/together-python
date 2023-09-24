@@ -3,21 +3,19 @@ import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
 import requests
+from loguru import logger
 from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import get_logger, verify_api_key
-
-
-logger = get_logger(str(__name__), log_level=together.log_level)
+from together.utils.utils import verify_api_key
 
 
 class Finetune:
     def __init__(
         self,
     ) -> None:
-        verify_api_key(logger)
+        verify_api_key()
 
     # TODO @orangetin: cleanup create validation etc
     @classmethod
@@ -43,7 +41,7 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
-            logger.fatal("The number of epochs must be specified")
+            logger.critical("The number of epochs must be specified")
             raise ValueError("n_epochs is required")
 
         # Validate parameters
@@ -179,7 +177,7 @@ class Finetune:
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
-        verify_api_key(logger)
+        verify_api_key()
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "User-Agent": together.user_agent,
@@ -340,7 +338,7 @@ class Finetune:
         if step != -1:
             model_file_path += f"&checkpoint_step={step}"
 
-        logger.info(f"Downloading weights from {model_file_path}...")
+        print(f"Downloading weights from {model_file_path}...")
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",

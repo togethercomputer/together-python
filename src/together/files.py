@@ -5,14 +5,13 @@ import urllib.parse
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
+from loguru import logger
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.utils.utils import get_logger, verify_api_key
+from together.utils.utils import verify_api_key
 
-
-logger = get_logger(str(__name__), log_level=together.log_level)
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
 NUM_BYTES_IN_GB = 2**30
@@ -25,7 +24,7 @@ class Files:
     def __init__(
         self,
     ) -> None:
-        verify_api_key(logger)
+        verify_api_key()
 
     @classmethod
     def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
@@ -72,7 +71,7 @@ class Files:
         if check:
             report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
-                print(report_dict)
+                logger.critical(report_dict)
                 raise together.FileTypeError("Invalid file supplied. Failed to upload.")
         else:
             report_dict = {}
@@ -116,7 +115,7 @@ class Files:
             file_id = response.headers["X-Together-File-Id"]
 
             logger.info(f"R2 Signed URL: {r2_signed_url}")
-            logger.info("File-ID")
+            logger.info(f"File-ID: {file_id}")
 
             logger.info("Uploading file...")
 

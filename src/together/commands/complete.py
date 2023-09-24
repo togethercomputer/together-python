@@ -2,18 +2,18 @@ from __future__ import annotations
 
 import argparse
 import json
-import logging
 import re
 import sys
 from typing import Any, Dict, List
 
+from loguru import logger
+
 import together
 from together import Complete
-from together.utils.utils import get_logger
 
 
 def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
+    subparsers: argparse._SubParsersAction[argparse.ArgumentParser]
 ) -> None:
     COMMAND_NAME = "complete"
     subparser = subparsers.add_parser(COMMAND_NAME)
@@ -99,9 +99,7 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     return re.split("|".join(stop), text)[0]
 
 
-def no_streamer(
-    args: argparse.Namespace, response: Dict[str, Any], logger: logging.Logger
-) -> None:
+def no_streamer(args: argparse.Namespace, response: Dict[str, Any]) -> None:
     if args.raw:
         print(json.dumps(response, indent=4))
         sys.exit()
@@ -137,8 +135,6 @@ def no_streamer(
 
 
 def _run_complete(args: argparse.Namespace) -> None:
-    logger = get_logger(__name__, log_level=args.log)
-
     complete = Complete()
 
     if args.no_stream:
@@ -153,7 +149,7 @@ def _run_complete(args: argparse.Namespace) -> None:
             repetition_penalty=args.repetition_penalty,
             logprobs=args.logprobs,
         )
-        no_streamer(args, response, logger)
+        no_streamer(args, response)
     else:
         for text in complete.create_streaming(
             prompt=args.prompt,

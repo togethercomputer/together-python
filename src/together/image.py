@@ -1,19 +1,17 @@
 from typing import Any, Dict, Optional
 
 import requests
+from loguru import logger
 
 import together
-from together.utils.utils import get_logger, verify_api_key
-
-
-logger = get_logger(str(__name__), log_level=together.log_level)
+from together.utils.utils import verify_api_key
 
 
 class Image:
     def __init__(
         self,
     ) -> None:
-        verify_api_key(logger)
+        verify_api_key()
 
     @classmethod
     def create(

@@ -1,11 +1,14 @@
 #! python
 import argparse
 
+import sys
+from loguru import logger
+
 import together
 from together.commands import chat, complete, files, finetune, image, models
-from together.utils.utils import get_logger
 
 
+@logger.catch
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Together CLI",
@@ -29,9 +32,10 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--log",
+        "--verbose",
+        "-v",
         default=together.log_level,
-        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        choices=["CRITICAL", "ERROR", "WARNING", "SUCCESS", "INFO", "DEBUG", "TRACE"],
         type=str,
         help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
         required=False,
@@ -49,12 +53,9 @@ def main() -> None:
     args = parser.parse_args()
 
     # Setup logging
-    try:
-        get_logger(__name__, log_level=args.log)
-    except Exception:
-        get_logger(__name__, log_level=together.log_level)
-
-    together.log_level = args.log
+    together.log_level = args.verbose
+    logger.remove()
+    logger.add(sys.stderr, level=together.log_level)
 
     try:
         args.func(args)

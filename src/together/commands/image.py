@@ -3,13 +3,13 @@ from __future__ import annotations
 import argparse
 import base64
 import json
-import logging
 import sys
 from typing import Any, Dict
 
+from loguru import logger
+
 import together
 from together import Image
-from together.utils.utils import get_logger
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -89,9 +89,7 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     subparser.set_defaults(func=_run_complete)
 
 
-def _save_image(
-    args: argparse.Namespace, response: Dict[str, Any], logger: logging.Logger
-) -> None:
+def _save_image(args: argparse.Namespace, response: Dict[str, Any]) -> None:
     if args.raw:
         print(json.dumps(response, indent=4))
         sys.exit()
@@ -123,8 +121,6 @@ def _save_image(
 
 
 def _run_complete(args: argparse.Namespace) -> None:
-    logger = get_logger(__name__, log_level=args.log)
-
     complete = Image()
 
     response = complete.create(
@@ -138,4 +134,4 @@ def _run_complete(args: argparse.Namespace) -> None:
         negative_prompt=args.negative_prompt,
     )
 
-    _save_image(args, response, logger)
+    _save_image(args, response)
