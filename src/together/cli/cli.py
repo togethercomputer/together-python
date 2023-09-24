@@ -1,7 +1,7 @@
 #! python
 import argparse
-
 import sys
+
 from loguru import logger
 
 import together

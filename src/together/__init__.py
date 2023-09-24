@@ -3,11 +3,15 @@ import sys
 import urllib.parse
 
 from loguru import logger
-log_level = 'WARNING'
+
+
+log_level = "WARNING"
 logger.remove()
 logger.add(sys.stderr, level=log_level)
 
 from .version import VERSION
+
+
 version = VERSION
 
 user_agent = f"TogetherPythonOfficial/{version}"

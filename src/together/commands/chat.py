@@ -8,9 +8,7 @@ import together.utils.conversation as convo
 from together import Complete
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser]
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "chat"
     subparser = subparsers.add_parser(COMMAND_NAME)
 
