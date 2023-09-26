@@ -197,6 +197,12 @@ If the file format is correct, the `is_check_passed` field will be True
  'num_samples': 238}
 ```
 
+To check if your data contains `model_special_tokens` (we are still expanding this to include more models and tokens) use:
+
+```python
+together.Files.check(file="jokes.jsonl",model="togethercomputer/RedPajama-INCITE-Chat-3B-v1")
+```
+
 The json checker is applied at the time of file upload unless `check = False` is passed as an argument to `together.Files.upload`. In the below example we attempt to upload a bad file, just to see an example checker output for an invalid file with a list of reasons file was invalid:
 
 ```python
@@ -339,6 +345,69 @@ together.Models.ready("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-1
 ```
 {'ready': 'model is ready for start, status code:1'}
 ```
+
+### Using a Downloaded Model
+
+The model will download as a `tar.zst` file
+
+```python
+together.Finetune.download(
+    fine_tune_id="ft-eb167402-98ed-4ac5-b6f5-8140c4ba146e",
+    output = "my-model/model.tar.zst"
+)
+```
+
+To uncompress this filetype on Mac you need to install zstd. 
+
+```
+brew install zstd
+cd my-model
+zstd -d model.tar.zst
+tar -xvf model.tar
+cd ..
+```
+
+Within the folder that you uncompress the file, you will find a set of files like this:  
+`ls my-model`
+
+```
+tokenizer_config.json
+special_tokens_map.json
+pytorch_model.bin
+generation_config.json
+tokenizer.json
+config.json
+```
+
+Use the folder path that contains these `.bin` and `.json` files to load your model
+
+```python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+tokenizer = AutoTokenizer.from_pretrained("./my-model")
+
+model = AutoModelForCausalLM.from_pretrained(
+  "./my-model", 
+  trust_remote_code=True, 
+).to(device)
+
+input_context = "Space Robots are"
+input_ids = tokenizer.encode(input_context, return_tensors="pt")
+output = model.generate(input_ids.to(device), max_length=128, temperature=0.7).cpu()
+output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+print(output_text)
+```
+
+```
+Space Robots are a great way to get your kids interested in science. After all, they are the future!
+```
+
+## Colab Tutorial
+
+Follow along in our Colab (Google Colaboratory) Notebook Tutorial [Example Finetuning Project](https://colab.research.google.com/drive/11DwtftycpDSgp3Z1vnV-Cy68zvkGZL4K?usp=sharing).
 
 ## Chat
 
