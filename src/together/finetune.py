@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import get_logger, verify_api_key
+from together.utils.utils import get_logger, verify_api_key, round_to_closest_multiple_of_32
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
@@ -99,15 +99,15 @@ class Finetune:
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
             and batch_size != 144
         ):
-            batch_size = 144
-            logger.warning(
-                f"Batch size must be 144 for {model} model. Setting batch size to 144"
-            )
-            # TODO when Arsh makes the change, replace above with below:
-            # batch_size = round_to_closest_multiple_of_32(batch_size)
+            # batch_size = 144
             # logger.warning(
-            #     "for 70B parameter models, we adjust batch size to a multiple of 32 within [32,256]"
+            #     f"Batch size must be 144 for {model} model. Setting batch size to 144"
             # )
+            # TODO when Arsh makes the change, replace above with below:
+            batch_size = round_to_closest_multiple_of_32(batch_size)
+            logger.warning(
+                "for 70B parameter models, we adjust batch size to a multiple of 32 within [32,256]"
+            )
 
         if batch_size is None:
             batch_size = 32
