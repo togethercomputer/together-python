@@ -75,7 +75,7 @@ def parse_timestamp(timestamp: str) -> datetime:
     raise ValueError("Timestamp does not match any expected format")
 
 
-def round_to_closest_multiple_of_32(batch_size: int) -> int:
+def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:
     if batch_size is None:
         return 32
     batch_size = int(batch_size)
