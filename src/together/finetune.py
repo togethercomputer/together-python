@@ -98,6 +98,16 @@ class Finetune:
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
             )
 
+        if n_checkpoints > 1 and model in [
+            "togethercomputer/llama-2-70b",
+            "togethercomputer/llama-2-70b-chat",
+        ]:
+            # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
+            n_checkpoints = 1
+            logger.warning(
+                "Saving checkpoints during training currently not supported for {model}.  Setting the number of checkpoints to 1"
+            )
+
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
@@ -107,14 +117,10 @@ class Finetune:
                 f"Batch size must be 144 for {model} model. Please set batch size to 144"
             )
 
-        # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
-        if n_checkpoints > 1 and model in [
-            "togethercomputer/llama-2-70b",
-            "togethercomputer/llama-2-70b-chat",
-        ]:
-            raise ValueError(
-                "Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1"
-            )
+        if batch_size is None:
+            batch_size = 32
+        elif batch_size < 4:
+            batch_size = 4
 
         parameter_payload = {
             "training_file": training_file,
