@@ -73,4 +73,3 @@ def parse_timestamp(timestamp: str) -> datetime:
         except ValueError:
             continue
     raise ValueError("Timestamp does not match any expected format")
-
