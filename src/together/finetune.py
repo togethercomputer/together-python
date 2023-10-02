@@ -112,6 +112,7 @@ class Finetune:
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
+            logger.warning("Batch size must be >= 4.")
             batch_size = 4
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
