@@ -153,6 +153,12 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="Do not report metrics to wandb.ai.",
         action="store_true",
     )
+    subparser.add_argument(
+        "--quiet",
+        default=False,
+        action="store_true",
+        help="Indicates whether to disable checking",
+    )
 
     subparser.set_defaults(func=_run_create)
 
@@ -309,6 +315,7 @@ def _run_create(args: argparse.Namespace) -> None:
         suffix=args.suffix,
         estimate_price=args.estimate_price,
         wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
+        confirm_inputs=not args.quiet,
     )
 
     print(json.dumps(response, indent=4))

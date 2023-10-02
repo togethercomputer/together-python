@@ -1,4 +1,5 @@
 import posixpath
+import pprint
 import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
@@ -7,10 +8,16 @@ from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import get_logger, verify_api_key
+from together.utils.utils import (
+    get_logger,
+    round_to_closest_multiple_of_32,
+    verify_api_key,
+)
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
+
+pp = pprint.PrettyPrinter(indent=4)
 
 
 # this will change soon to be data driven and give a clearer estimate
@@ -71,6 +78,7 @@ class Finetune:
         ] = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
         wandb_api_key: Optional[str] = None,
+        confirm_inputs: bool = True,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
             logger.fatal("The number of epochs must be specified")
@@ -98,11 +106,6 @@ class Finetune:
             raise ValueError(
                 f"Batch size must be 144 for {model} model. Please set batch size to 144"
             )
-
-        if batch_size is None:
-            batch_size = 32
-        elif batch_size < 4:
-            raise ValueError("Batch size must be >= 4.")
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
@@ -189,10 +192,22 @@ class Finetune:
             "User-Agent": together.user_agent,
         }
         try:
+            if confirm_inputs:
+                print(
+                    "Note: Some hyperparameters may have been adjusted with their minimum/maximum values for a given model.\n\nJob creation details:"
+                )
+                pp.pprint(parameter_payload)
+                confirm_response = input("\nDo you want to submit the job? [y/N])")
+                if "y" in confirm_response.lower():
+                    pass
+                else:
+                    return {"status": "job not submitted"}
+
             response = requests.post(
                 together.api_base_finetune, headers=headers, json=parameter_payload
             )
             response.raise_for_status()
+
         except requests.exceptions.RequestException as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
