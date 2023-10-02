@@ -76,7 +76,6 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
         confirm_inputs: bool = True,
     ) -> Dict[Any, Any]:
-        
         adjusted_inputs = False
 
         if n_epochs is None or n_epochs < 1:
@@ -198,7 +197,9 @@ class Finetune:
         try:
             if confirm_inputs:
                 if adjusted_inputs:
-                    print("Note: Some hyperparameters have been adjusted with their minimum/maximum values for a given model.")
+                    print(
+                        "Note: Some hyperparameters have been adjusted with their minimum/maximum values for a given model."
+                    )
                 print("Job creation details:")
                 pp.pprint(parameter_payload)
                 confirm_response = input("\nDo you want to submit the job? [y/N]")
