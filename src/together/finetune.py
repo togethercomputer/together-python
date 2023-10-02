@@ -8,7 +8,11 @@ from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import get_logger, verify_api_key, round_to_closest_multiple_of_32
+from together.utils.utils import (
+    get_logger,
+    round_to_closest_multiple_of_32,
+    verify_api_key,
+)
 
 
 logger = get_logger(str(__name__), log_level=together.log_level)
