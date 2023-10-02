@@ -104,7 +104,6 @@ class Finetune:
                 "Saving checkpoints during training currently not supported for {model}.  Setting the number of checkpoints to 1"
             )
 
-
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
