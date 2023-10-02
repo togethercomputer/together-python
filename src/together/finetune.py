@@ -206,7 +206,7 @@ class Finetune:
                     "Note: Some hyperparameters may have been adjusted with their minimum/maximum values for a given model.\n\nJob creation details:"
                 )
                 pp.pprint(parameter_payload)
-                confirm_response = input("\nDo you want to submit the job? [y/N])")
+                confirm_response = input("\nDo you want to submit the job? [y/N]")
                 if "y" in confirm_response.lower():
                     pass
                 else:
