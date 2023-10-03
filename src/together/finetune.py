@@ -3,20 +3,22 @@ import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
 import requests
-from loguru import logger
 from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import verify_api_key
+from together.utils import (
+    create_get_request,
+    create_post_request,
+    get_logger,
+    response_to_dict,
+)
+
+
+logger = get_logger(str(__name__))
 
 
 class Finetune:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key()
-
     # TODO @orangetin: cleanup create validation etc
     @classmethod
     def create(
@@ -150,111 +152,30 @@ class Finetune:
                     exit()
 
         # Send POST request to SUBMIT FINETUNE JOB
-        # HTTP headers for authorization
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
-        try:
-            response = requests.post(
-                together.api_base_finetune, headers=headers, json=parameter_payload
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+        response = create_post_request(
+            together.api_base_finetune, json=parameter_payload
+        )
 
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
-        verify_api_key()
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
         # send request
-        try:
-            response = requests.get(together.api_base_finetune, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(together.api_base_finetune)
+        return response_to_dict(response)
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
-
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def cancel(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
-
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.post(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_post_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def list_events(self, fine_tune_id: str) -> Dict[Any, Any]:
@@ -262,28 +183,8 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:

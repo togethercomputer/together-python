@@ -23,7 +23,6 @@ dependencies = [
     "requests==2.31.0",
     "tqdm==4.66.1",
     "sseclient-py==1.7.2",
-    "loguru==0.7.2",
 ]
 
 [project.optional-dependencies]

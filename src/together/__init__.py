@@ -2,13 +2,6 @@ import os
 import sys
 import urllib.parse
 
-from loguru import logger
-
-
-log_level = "WARNING"
-logger.remove()
-logger.add(sys.stderr, level=log_level)
-
 from .version import VERSION
 
 
@@ -26,6 +19,7 @@ api_base_instances = urllib.parse.urljoin(api_base, "instances/")
 
 default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
+log_level = "WARNING"
 
 min_samples = 100
 

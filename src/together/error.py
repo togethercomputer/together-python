@@ -11,6 +11,7 @@ class TogetherException(Exception):
         http_status: Optional[int] = None,
         json_body: Optional[Any] = None,
         headers: Optional[Union[str, Dict[Any, Any]]] = None,
+        request_id: Optional[str] = "",
     ) -> None:
         super(TogetherException, self).__init__(message)
 
@@ -28,12 +29,14 @@ class TogetherException(Exception):
         self.http_status = http_status
         self.json_body = json_body
         self.headers = headers or {}
+        self.request_id = request_id
 
     def __repr__(self) -> str:
-        return "%s(message=%r, http_status=%r)" % (
+        return "%s(message=%r, http_status=%r, request_id=%r)" % (
             self.__class__.__name__,
             self._message,
             self.http_status,
+            self.request_id,
         )
 
 
@@ -59,7 +62,14 @@ class InstanceError(TogetherException):
         headers: Optional[str] = None,
         model: Optional[str] = "model",
     ) -> None:
-        message = f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
+        message = f"""No running instances for {model}.
+                You can start an instance with one of the following methods:
+                  1. navigating to the Together Playground at api.together.ai
+                  2. starting one in python using together.Models.start(model_name)
+                  3. `$ together models start <MODEL_NAME>` at the command line.
+                See `together.Models.list()` in python or `$ together models list` in command line
+                to get an updated list of valid model names.
+                """
         super(InstanceError, self).__init__(
             message, http_body, http_status, json_body, headers
         )

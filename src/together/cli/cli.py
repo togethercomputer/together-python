@@ -1,14 +1,14 @@
 #! python
 import argparse
-import sys
-
-from loguru import logger
 
 import together
 from together.commands import chat, complete, files, finetune, image, models
+from together.utils import get_logger
 
 
-@logger.catch
+logger = get_logger(str(__name__))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Together CLI",
@@ -54,8 +54,6 @@ def main() -> None:
 
     # Setup logging
     together.log_level = args.verbose
-    logger.remove()
-    logger.add(sys.stderr, level=together.log_level)
 
     try:
         args.func(args)

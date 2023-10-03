@@ -1,43 +1,28 @@
 import urllib.parse
 from typing import Any, Dict, List
 
-import requests
-from loguru import logger
-
 import together
-from together.utils.utils import verify_api_key
+from together.utils import (
+    create_get_request,
+    create_post_request,
+    get_logger,
+    response_to_dict,
+)
+
+
+logger = get_logger(str(__name__))
 
 
 class Models:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key()
-
     @classmethod
     def list(self) -> List[Any]:
         model_url = urllib.parse.urljoin(together.api_base, "models/info?=")
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-        try:
-            response = requests.get(
-                model_url,
-                headers=headers,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+        response = create_get_request(model_url)
 
         try:
             response_list = list(response.json())
         except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
+            raise together.ResponseError(e, http_status=response.status_code)
 
         return response_list
 
@@ -60,114 +45,39 @@ class Models:
 
     @classmethod
     def instances(self) -> Dict[str, bool]:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "accept": "application/json",
-        }
-        try:
-            response = requests.get(
-                together.api_base_instances,
-                headers=headers,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_dict = response.json()
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return dict(response_dict)
+        response = create_get_request(together.api_base_instances)
+        return response_to_dict(response)
 
     @classmethod
     def start(self, model: str) -> Dict[str, str]:
         model_url = urllib.parse.urljoin(
             together.api_base_instances, f"start?model={model}"
         )
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "accept": "application/json",
-        }
-        try:
-            response = requests.post(
-                model_url,
-                headers=headers,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_dict = response.json()
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return dict(response_dict)
+        response = create_post_request(model_url)
+        return response_to_dict(response)
 
     @classmethod
     def stop(self, model: str) -> Dict[str, str]:
         model_url = urllib.parse.urljoin(
             together.api_base_instances, f"stop?model={model}"
         )
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "accept": "application/json",
-        }
-        try:
-            response = requests.post(
-                model_url,
-                headers=headers,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_dict = response.json()
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return dict(response_dict)
+        response = create_post_request(model_url)
+        return response_to_dict(response)
 
     @classmethod
     def ready(self, model: str) -> List[Any]:
         ready_url = urllib.parse.urljoin(together.api_base, "models/info?name=" + model)
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "accept": "application/json",
-        }
-        try:
-            response = requests.get(
-                ready_url,
-                headers=headers,
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+        response = create_get_request(ready_url)
 
         try:
-            response_list = response.json()
+            response_list = list(response.json())
         except Exception as e:
             logger.critical(
                 f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
             )
             raise together.JSONError(e, http_status=response.status_code)
 
-        return list(response_list)
+        return response_list
 
     @classmethod
     def _is_finetune_model(self, model: str) -> bool:

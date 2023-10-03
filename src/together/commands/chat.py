@@ -4,7 +4,7 @@ import argparse
 import cmd
 
 import together
-import together.utils.conversation as convo
+import together.tools.conversation as convo
 from together import Complete
 
 

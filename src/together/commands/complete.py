@@ -3,13 +3,14 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from typing import Any, Dict, List
-
-from loguru import logger
 
 import together
 from together import Complete
+from together.utils import get_logger
+
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -100,36 +101,30 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
 def no_streamer(args: argparse.Namespace, response: Dict[str, Any]) -> None:
     if args.raw:
         print(json.dumps(response, indent=4))
-        sys.exit()
-
-    if "output" in response.keys():
-        try:
-            text = str(response["output"]["choices"][0]["text"])
-        except Exception:
-            try:
-                logger.critical(f"Error raised: {response['output']['error']}")
-                raise together.ResponseError(response["output"]["error"])
-            except Exception as e:
-                logger.critical(f"Error raised: {e}")
-                raise together.ResponseError(e)
-
-        # if args.stop is not None:
-        #    text = _enforce_stop_tokens(text, args.stop)
-
-    elif "error" in response.keys():
-        if response["error"] == "Returned error: no instance":
-            logger.critical(
-                f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
-            )
-            raise together.InstanceError(model=args.model)
-        else:
-            logger.critical(f"Error raised: {response['error']}")
 
     else:
-        logger.critical("Unknown response received")
-        raise together.ResponseError("Unknown response received. Please try again.")
+        if "output" in response.keys():
+            if "choices" in dict(response["output"]).keys():
+                text = str(response["output"]["choices"][0]["text"])
+                print(text.strip())
+            elif "error" in dict(response["output"]).keys():
+                raise together.ResponseError(response["output"]["error"])
+            else:
+                raise together.ResponseError(
+                    f"Unknown error occured. Received unhandled response: {response}"
+                )
 
-    print(text.strip())
+        elif "error" in response.keys():
+            if response["error"] == "Returned error: no instance":
+                message = f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
+                raise together.InstanceError(model=args.model, message=message)
+            else:
+                raise together.ResponseError(
+                    message=f"Error raised: {response['error']}"
+                )
+
+        else:
+            raise together.ResponseError("Unknown response received. Please try again.")
 
 
 def _run_complete(args: argparse.Namespace) -> None:

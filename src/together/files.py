@@ -5,12 +5,15 @@ import urllib.parse
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
-from loguru import logger
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.utils.utils import verify_api_key
+from together.utils import (
+    create_get_request,
+    get_logger,
+    response_to_dict,
+)
 
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
@@ -19,36 +22,16 @@ NUM_BYTES_IN_GB = 2**30
 # maximum number of GB sized files we support finetuning for
 MAX_FT_GB = 4.9
 
+logger = get_logger(str(__name__))
+
 
 class Files:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key()
-
     @classmethod
     def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
         # send request
-        try:
-            response = requests.get(together.api_base_files, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
+        response = create_get_request(together.api_base_files)
 
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def check(self, file: str) -> Dict[str, object]:
@@ -71,8 +54,9 @@ class Files:
         if check:
             report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
-                logger.critical(report_dict)
-                raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+                raise together.FileTypeError(
+                    f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
+                )
         else:
             report_dict = {}
 
@@ -176,15 +160,7 @@ class Files:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
@@ -192,28 +168,9 @@ class Files:
 
         logger.info(f"Retrieve URL: {retrieve_url}")
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
+        response = create_get_request(retrieve_url)
 
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:

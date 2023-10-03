@@ -4,7 +4,7 @@ import argparse
 import json
 
 from together import Files
-from together.utils.utils import extract_time
+from together.utils import extract_time
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:

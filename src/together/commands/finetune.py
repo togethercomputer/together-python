@@ -5,7 +5,7 @@ import json
 import os
 
 from together import Finetune
-from together.utils.utils import parse_timestamp
+from together.utils import parse_timestamp
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:

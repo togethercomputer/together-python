@@ -6,10 +6,12 @@ import json
 import sys
 from typing import Any, Dict
 
-from loguru import logger
-
 import together
 from together import Image
+from together.utils import get_logger
+
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
