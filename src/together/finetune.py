@@ -69,7 +69,6 @@ class Finetune:
             in [
                 "togethercomputer/llama-2-70b",
                 "togethercomputer/llama-2-70b-chat",
-                "togethercomputer/llama-2-7b-chat",
             ]
             # and batch_size != 144
         ):
