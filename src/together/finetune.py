@@ -15,6 +15,7 @@ from together.utils import (
     response_to_dict,
 )
 
+
 pp = pprint.PrettyPrinter(indent=4)
 
 logger = get_logger(str(__name__))
@@ -166,7 +167,7 @@ class Finetune:
             confirm_response = input("\nDo you want to submit the job? [y/N]")
             if "y" not in confirm_response.lower():
                 return {"status": "job not submitted"}
-                
+
         # Send POST request to SUBMIT FINETUNE JOB
         response = create_post_request(
             together.api_base_finetune, json=parameter_payload
