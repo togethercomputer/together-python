@@ -1,4 +1,5 @@
 import posixpath
+import pprint
 import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
@@ -14,6 +15,8 @@ from together.utils import (
     response_to_dict,
 )
 
+
+pp = pprint.PrettyPrinter(indent=4)
 
 logger = get_logger(str(__name__))
 
@@ -41,47 +44,50 @@ class Finetune:
         ] = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
         wandb_api_key: Optional[str] = None,
+        confirm_inputs: bool = True,
     ) -> Dict[Any, Any]:
+        adjusted_inputs = False
+
         if n_epochs is None or n_epochs < 1:
-            logger.critical("The number of epochs must be specified")
-            raise ValueError("n_epochs is required")
+            n_epochs = 1
+            adjusted_inputs = True
 
         # Validate parameters
         if n_checkpoints is None:
             n_checkpoints = 1
         elif n_checkpoints < 1:
             n_checkpoints = 1
-            logger.warning(
-                f"The number of checkpoints must be >= 1, setting to {n_checkpoints}"
-            )
+            adjusted_inputs = True
         elif n_checkpoints > n_epochs:
             n_checkpoints = n_epochs
-            logger.warning(
-                f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
-            )
+            adjusted_inputs = True
 
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
             and batch_size != 144
         ):
-            raise ValueError(
-                f"Batch size must be 144 for {model} model. Please set batch size to 144"
-            )
+            batch_size = 144
+            adjusted_inputs = True
+            # TODO when Arsh makes the change, replace above with below:
+            # batch_size = round_to_closest_multiple_of_32(batch_size)
+            # logger.warning(
+            #     "for 70B parameter models, we adjust batch size to a multiple of 32 within [32,256]"
+            # )
 
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
-            raise ValueError("Batch size must be >= 4.")
+            batch_size = 4
+            adjusted_inputs = True
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
             "togethercomputer/llama-2-70b",
             "togethercomputer/llama-2-70b-chat",
         ]:
-            raise ValueError(
-                "Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1"
-            )
+            n_checkpoints = 1
+            adjusted_inputs = True
 
         parameter_payload = {
             "training_file": training_file,
@@ -150,6 +156,17 @@ class Finetune:
                     training_file_feedback = f"A rough price estimate for this job is ${estimate:.2f} USD. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
                     print(training_file_feedback)
                     exit()
+
+        if confirm_inputs:
+            if adjusted_inputs:
+                print(
+                    "Note: Some hyperparameters have been adjusted with their minimum/maximum values for a given model."
+                )
+            print("Job creation details:")
+            pp.pprint(parameter_payload)
+            confirm_response = input("\nDo you want to submit the job? [y/N]")
+            if "y" not in confirm_response.lower():
+                return {"status": "job not submitted"}
 
         # Send POST request to SUBMIT FINETUNE JOB
         response = create_post_request(

@@ -308,6 +308,25 @@ fine_tune_id = resp['id']
 print(resp)
 ```
 
+Unless you set `confirm_inputs=False` in `together.Finetune.create`, or `--quiet` in the CLI, there will be a confirmation step to make sure you are aware of any defaults or arguments that needed to be reset from their original inputs for this specific finetune job. Type `y` then `Enter` to submit the job, or anything else to abort. 
+
+```
+10-02-2023 11:14:27 - together.finetune - WARNING - Batch size must be 144 for togethercomputer/llama-2-70b-chat model. Setting batch size to 144 (finetune.py:114)
+Note: Some hyperparameters may have been adjusted with their minimum/maximum values for a given model.
+
+Job creation details:
+{   'batch_size': 144,
+    'learning_rate': 1e-05,
+    'model': 'togethercomputer/llama-2-70b-chat',
+    'n_checkpoints': 1,
+    'n_epochs': 4,
+    'suffix': None,
+    'training_file': 'file-33ecca00-17ea-4968-ada2-9f82ef2f4cb8',
+    'wandb_key': 'xxxx'}
+
+Do you want to submit the job? [y/N]
+```
+
 The response `resp` has alot of information for you that you can retrieve later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing. 
 
 ```python
