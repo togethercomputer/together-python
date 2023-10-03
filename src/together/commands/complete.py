@@ -153,7 +153,7 @@ def _run_complete(args: argparse.Namespace) -> None:
             top_p=args.top_p,
             top_k=args.top_k,
             repetition_penalty=args.repetition_penalty,
-            raw=args.raw
+            raw=args.raw,
         ):
             if not args.raw:
                 print(text, end="", flush=True)
