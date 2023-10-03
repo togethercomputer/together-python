@@ -154,3 +154,11 @@ def response_to_dict(response: requests.Response) -> dict[Any, Any]:
         raise together.JSONError(e, http_status=response.status_code)
 
     return response_json
+
+
+def round_to_closest_multiple_of_32(batch_size: int) -> int:
+    if batch_size < 32:
+        return 32
+    elif batch_size > 256:
+        return 256
+    return 32 * ((batch_size + 31) // 32)

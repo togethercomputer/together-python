@@ -67,9 +67,9 @@ class Finetune:
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
-            #and batch_size != 144
+            # and batch_size != 144
         ):
-            #batch_size = 144
+            # batch_size = 144
             batch_size = round_to_closest_multiple_of_32(batch_size)
             adjusted_inputs = True
 
