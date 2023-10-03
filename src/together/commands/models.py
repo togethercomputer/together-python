@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
-from together import Models
+import together
 
 
 def add_parser(
@@ -107,8 +107,7 @@ def _add_ready(
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.list()
+    response = together.Models.list()
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -119,35 +118,29 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_info(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.list()
+    if not args.raw:
+        hidden_keys = [
+            "_id",
+            "modelInstanceConfig",
+            "created_at",
+            "update_at",
+            "pricing",
+            "show_in_playground",
+            "access",
+            "pricing_tier",
+            "hardware_label",
+            "depth",
+        ]
+    else:
+        hidden_keys = []
 
-    # list of keys to display by default from models info dict
-    visible_keys = [
-        "name",
-        "display_name",
-        "display_type",
-        "description",
-        "creator_organization",
-        "hardware_label",
-        "pricing_tier",
-        "config",
-        "base",
-    ]
+    model_info = together.Models.info(args.model, hidden_keys=hidden_keys)
 
-    for i in response:
-        if i["name"] == args.model:
-            if args.raw:
-                print(json.dumps(i, indent=4))
-            else:
-                model_info = {key: i[key] for key in visible_keys if key in i}
-                print(json.dumps(model_info, indent=4))
-            break
+    print(json.dumps(model_info, indent=4))
 
 
 def _run_instances(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.instances()
+    response = together.Models.instances()
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -156,18 +149,15 @@ def _run_instances(args: argparse.Namespace) -> None:
 
 
 def _run_start(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.start(args.model)
+    response = together.Models.start(args.model)
     print(json.dumps(response, indent=4))
 
 
 def _run_stop(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.stop(args.model)
+    response = together.Models.stop(args.model)
     print(json.dumps(response, indent=4))
 
 
 def _run_ready(args: argparse.Namespace) -> None:
-    models = Models()
-    response = models.ready(args.model)
+    response = together.Models.ready(args.model)
     print(json.dumps(response, indent=4))

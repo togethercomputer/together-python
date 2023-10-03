@@ -1,20 +1,13 @@
 from typing import Any, Dict, Optional
 
-import requests
-
 import together
-from together.utils.utils import get_logger, verify_api_key
+from together.utils import create_post_request, get_logger, response_to_dict
 
 
-logger = get_logger(str(__name__), log_level=together.log_level)
+logger = get_logger(str(__name__))
 
 
 class Image:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key(logger)
-
     @classmethod
     def create(
         self,
@@ -42,37 +35,9 @@ class Image:
             "negative_prompt": negative_prompt,
         }
 
-        # HTTP headers for authorization
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
-
         # send request
-        try:
-            response = requests.post(
-                together.api_base_complete,
-                headers=headers,
-                json=parameter_payload,
-            )
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+        response = create_post_request(
+            together.api_base_complete, json=parameter_payload
+        )
 
-        if response.status_code == 429:
-            logger.critical(
-                f"No running instances for {model}. You can start an instance by navigating to the Together Playground at api.together.ai"
-            )
-            raise together.InstanceError(model=model)
-
-        response.raise_for_status()
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-        return response_json
+        return response_to_dict(response)
