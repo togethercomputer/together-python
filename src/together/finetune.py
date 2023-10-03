@@ -63,6 +63,7 @@ class Finetune:
             n_checkpoints = n_epochs
             adjusted_inputs = True
 
+        # batch_size used to be 144 for 70b models
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
