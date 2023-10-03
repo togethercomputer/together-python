@@ -90,7 +90,7 @@ class Complete:
         client = sse_client(response)
         for event in client.events():
             if raw:
-                yield str(event)
+                yield str(event.data)
             elif event.data != "[DONE]":
                 json_response = dict(json.loads(event.data))
                 if "error" in json_response.keys():
