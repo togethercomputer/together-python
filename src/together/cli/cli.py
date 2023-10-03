@@ -3,7 +3,10 @@ import argparse
 
 import together
 from together.commands import chat, complete, files, finetune, image, models
-from together.utils.utils import get_logger
+from together.utils import get_logger
+
+
+logger = get_logger(str(__name__))
 
 
 def main() -> None:
@@ -29,9 +32,10 @@ def main() -> None:
     )
 
     parser.add_argument(
-        "--log",
+        "--verbose",
+        "-v",
         default=together.log_level,
-        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        choices=["CRITICAL", "ERROR", "WARNING", "SUCCESS", "INFO", "DEBUG", "TRACE"],
         type=str,
         help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
         required=False,
@@ -49,12 +53,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Setup logging
-    try:
-        get_logger(__name__, log_level=args.log)
-    except Exception:
-        get_logger(__name__, log_level=together.log_level)
-
-    together.log_level = args.log
+    together.log_level = args.verbose
 
     try:
         args.func(args)

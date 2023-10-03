@@ -4,14 +4,11 @@ import argparse
 import cmd
 
 import together
-import together.utils.conversation as convo
+import together.tools.conversation as convo
 from together import Complete
-from together.utils.utils import get_logger
 
 
-def add_parser(
-    subparsers: argparse._SubParsersAction[argparse.ArgumentParser],
-) -> None:
+def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "chat"
     subparser = subparsers.add_parser(COMMAND_NAME)
 
@@ -128,7 +125,6 @@ class OpenChatKitShell(cmd.Cmd):
 
 
 def _run_complete(args: argparse.Namespace) -> None:
-    get_logger(__name__, log_level=args.log)
     if args.prompt_id not in args.stop:
         args.stop.append(args.prompt_id)
 

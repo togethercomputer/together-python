@@ -2,17 +2,19 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Any, Dict, List, Mapping, Optional, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.utils.utils import get_logger, verify_api_key
+from together.utils import (
+    create_get_request,
+    get_logger,
+    response_to_dict,
+)
 
-
-logger = get_logger(str(__name__), log_level=together.log_level)
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
 NUM_BYTES_IN_GB = 2**30
@@ -20,40 +22,20 @@ NUM_BYTES_IN_GB = 2**30
 # maximum number of GB sized files we support finetuning for
 MAX_FT_GB = 4.9
 
+logger = get_logger(str(__name__))
+
 
 class Files:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key(logger)
-
     @classmethod
     def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
         # send request
-        try:
-            response = requests.get(together.api_base_files, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
+        response = create_get_request(together.api_base_files)
 
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
-    def check(self, file: str, model: Optional[str] = None) -> Dict[str, object]:
-        return check_json(file, model)
+    def check(self, file: str) -> Dict[str, object]:
+        return check_json(file)
 
     @classmethod
     def upload(
@@ -70,10 +52,11 @@ class Files:
         }
 
         if check:
-            report_dict = check_json(file, model)
+            report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
-                print(report_dict)
-                raise together.FileTypeError("Invalid file supplied. Failed to upload.")
+                raise together.FileTypeError(
+                    f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
+                )
         else:
             report_dict = {}
 
@@ -116,7 +99,7 @@ class Files:
             file_id = response.headers["X-Together-File-Id"]
 
             logger.info(f"R2 Signed URL: {r2_signed_url}")
-            logger.info("File-ID")
+            logger.info(f"File-ID: {file_id}")
 
             logger.info("Uploading file...")
 
@@ -177,15 +160,7 @@ class Files:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
@@ -193,28 +168,9 @@ class Files:
 
         logger.info(f"Retrieve URL: {retrieve_url}")
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
+        response = create_get_request(retrieve_url)
 
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:
@@ -288,23 +244,11 @@ class Files:
 
 def check_json(
     file: str,
-    model: Optional[str] = None,
 ) -> Dict[str, object]:
     report_dict = {
         "is_check_passed": True,
         "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
     }
-    num_samples_w_eos_token = 0
-
-    model_info_dict = cast(Dict[str, Any], together.model_info_dict)
-
-    eos_token = None
-    if model is not None and model in model_info_dict:
-        if "eos_token" in model_info_dict[model]:
-            eos_token = model_info_dict[model]["eos_token"]
-            report_dict[
-                "model_special_tokens"
-            ] = f"the end of sentence token for this model is {eos_token}"
 
     if not os.path.isfile(file):
         report_dict["file_present"] = f"File not found at given file path {file}"
@@ -358,10 +302,6 @@ def check_json(
 
                         report_dict["is_check_passed"] = False
 
-                    elif eos_token:
-                        if eos_token in json_line["text"]:
-                            num_samples_w_eos_token += 1
-
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < together.min_samples:
                 report_dict["min_samples"] = (
@@ -382,7 +322,5 @@ def check_json(
                 f"{str(line)}"
             )
             report_dict["is_check_passed"] = False
-
-    report_dict["num_samples_w_eos_token"] = num_samples_w_eos_token
 
     return report_dict

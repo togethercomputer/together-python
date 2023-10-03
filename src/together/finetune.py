@@ -8,55 +8,22 @@ from tqdm import tqdm
 
 import together
 from together import Files
-from together.utils.utils import (
+from together.utils import (
+    create_get_request,
+    create_post_request,
     get_logger,
+    response_to_dict,
     round_to_closest_multiple_of_32,
-    verify_api_key,
 )
 
 
-logger = get_logger(str(__name__), log_level=together.log_level)
-
 pp = pprint.PrettyPrinter(indent=4)
 
-
-# this will change soon to be data driven and give a clearer estimate
-def model_param_count(name: str) -> int:
-    pcount = {
-        "togethercomputer/RedPajama-INCITE-7B-Chat": 6857302016,
-        "togethercomputer/RedPajama-INCITE-7B-Base": 6857302016,
-        "togethercomputer/RedPajama-INCITE-7B-Instruct": 6857302016,
-        "togethercomputer/RedPajama-INCITE-Chat-3B-v1": 2775864320,
-        "togethercomputer/RedPajama-INCITE-Base-3B-v1": 2775864320,
-        "togethercomputer/RedPajama-INCITE-Instruct-3B-v1": 2775864320,
-        "togethercomputer/Pythia-Chat-Base-7B": 6857302016,
-        "togethercomputer/llama-2-7b": 6738415616,
-        "togethercomputer/llama-2-7b-chat": 6738415616,
-        "togethercomputer/llama-2-13b": 13015864320,
-        "togethercomputer/llama-2-13b-chat": 13015864320,
-        "togethercomputer/LLaMA-2-7B-32K": 6738415616,
-        "togethercomputer/Llama-2-7B-32K-Instruct": 6738415616,
-        "togethercomputer/CodeLlama-7b": 6738546688,
-        "togethercomputer/CodeLlama-7b-Python": 6738546688,
-        "togethercomputer/CodeLlama-7b-Instruct": 6738546688,
-        "togethercomputer/CodeLlama-13b": 13016028160,
-        "togethercomputer/CodeLlama-13b-Python": 13016028160,
-        "togethercomputer/CodeLlama-13b-Instruct": 13016028160,
-        "togethercomputer/llama-2-70b": 68976648192,
-        "togethercomputer/llama-2-70b-chat": 68976648192,
-    }
-    try:
-        return pcount[name]
-    except Exception:
-        return 0
+logger = get_logger(str(__name__))
 
 
 class Finetune:
-    def __init__(
-        self,
-    ) -> None:
-        verify_api_key(logger)
-
+    # TODO @orangetin: cleanup create validation etc
     @classmethod
     def create(
         self,
@@ -80,44 +47,36 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
         confirm_inputs: bool = True,
     ) -> Dict[Any, Any]:
+        adjusted_inputs = False
+
         if n_epochs is None or n_epochs < 1:
-            logger.fatal("The number of epochs must be specified")
-            raise ValueError("n_epochs is required")
+            n_epochs = 1
+            adjusted_inputs = True
 
         # Validate parameters
         if n_checkpoints is None:
             n_checkpoints = 1
         elif n_checkpoints < 1:
             n_checkpoints = 1
-            logger.warning(
-                f"The number of checkpoints must be >= 1, setting to {n_checkpoints}"
-            )
+            adjusted_inputs = True
         elif n_checkpoints > n_epochs:
             n_checkpoints = n_epochs
-            logger.warning(
-                f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
-            )
+            adjusted_inputs = True
 
         if (
             model
             in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
-            and batch_size != 144
+            #and batch_size != 144
         ):
-            # batch_size = 144
-            # logger.warning(
-            #     f"Batch size must be 144 for {model} model. Setting batch size to 144"
-            # )
-            # TODO when Arsh makes the change, replace above with below:
+            #batch_size = 144
             batch_size = round_to_closest_multiple_of_32(batch_size)
-            logger.warning(
-                "for 70B parameter models, we adjust batch size to a multiple of 32 within [32,256]"
-            )
+            adjusted_inputs = True
 
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
-            logger.warning("Setting batch_size to 4")
             batch_size = 4
+            adjusted_inputs = True
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
@@ -125,9 +84,7 @@ class Finetune:
             "togethercomputer/llama-2-70b-chat",
         ]:
             n_checkpoints = 1
-            logger.warning(
-                "Saving checkpoints during training currently not supported for {model}.  Setting the number of checkpoints to 1"
-            )
+            adjusted_inputs = True
 
         parameter_payload = {
             "training_file": training_file,
@@ -147,8 +104,8 @@ class Finetune:
         }
 
         # check if model name is one of the models available for finetuning
-        if parameter_payload["model"] not in together.finetune_model_names:
-            logger.warning(
+        if not together.Models._is_finetune_model(model):
+            raise ValueError(
                 "The finetune model name must be one of the subset of models available for finetuning. "
                 "Here is a list of those models https://docs.together.ai/docs/models-fine-tuning"
             )
@@ -167,7 +124,7 @@ class Finetune:
             raise together.FileTypeError(training_file_feedback)
 
         if estimate_price:
-            param_size = model_param_count(model)
+            param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
                 raise together.FileTypeError(error)
@@ -185,7 +142,7 @@ class Finetune:
                             {
                                 "tokens": token_estimate,
                                 "epochs": n_epochs,
-                                "parameters": model_param_count(model),
+                                "parameters": together.Models._param_count(model),
                             },
                         ],
                         "id": 1,
@@ -197,123 +154,42 @@ class Finetune:
                     print(training_file_feedback)
                     exit()
 
-        # Send POST request to SUBMIT FINETUNE JOB
-        # HTTP headers for authorization
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
-        try:
-            if confirm_inputs:
+        if confirm_inputs:
+            if adjusted_inputs:
                 print(
-                    "Note: Some hyperparameters may have been adjusted with their minimum/maximum values for a given model.\n\nJob creation details:"
+                    "Note: Some hyperparameters have been adjusted with their minimum/maximum values for a given model."
                 )
-                pp.pprint(parameter_payload)
-                confirm_response = input("\nDo you want to submit the job? [y/N]")
-                if "y" in confirm_response.lower():
-                    pass
-                else:
-                    return {"status": "job not submitted"}
+            print("Job creation details:")
+            pp.pprint(parameter_payload)
+            confirm_response = input("\nDo you want to submit the job? [y/N]")
+            if "y" not in confirm_response.lower():
+                return {"status": "job not submitted"}
 
-            response = requests.post(
-                together.api_base_finetune, headers=headers, json=parameter_payload
-            )
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+        # Send POST request to SUBMIT FINETUNE JOB
+        response = create_post_request(
+            together.api_base_finetune, json=parameter_payload
+        )
 
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
-        verify_api_key(logger)
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
         # send request
-        try:
-            response = requests.get(together.api_base_finetune, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(together.api_base_finetune)
+        return response_to_dict(response)
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
-
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def cancel(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
-
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.post(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_post_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def list_events(self, fine_tune_id: str) -> Dict[Any, Any]:
@@ -321,28 +197,8 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
-
-        # send request
-        try:
-            response = requests.get(retrieve_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        try:
-            response_json = dict(response.json())
-        except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
-
-        return response_json
+        response = create_get_request(retrieve_url)
+        return response_to_dict(response)
 
     @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
@@ -397,7 +253,7 @@ class Finetune:
         if step != -1:
             model_file_path += f"&checkpoint_step={step}"
 
-        logger.info(f"Downloading weights from {model_file_path}...")
+        print(f"Downloading weights from {model_file_path}...")
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
