@@ -156,7 +156,10 @@ def response_to_dict(response: requests.Response) -> dict[Any, Any]:
     return response_json
 
 
-def round_to_closest_multiple_of_32(batch_size: int) -> int:
+def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:
+    if batch_size is None:
+        return 32
+    batch_size = int(batch_size)
     if batch_size < 32:
         return 32
     elif batch_size > 256:
