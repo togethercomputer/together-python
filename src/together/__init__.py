@@ -1,17 +1,12 @@
 import os
+import sys
 import urllib.parse
 
-from .config import (
-    finetune_model_names,
-    jokes_list,
-    min_samples,
-    model_info_dict,
-)
 from .version import VERSION
 
 
 version = VERSION
-# print(version)
+
 user_agent = f"TogetherPythonOfficial/{version}"
 
 api_key = os.environ.get("TOGETHER_API_KEY", None)
@@ -25,6 +20,8 @@ api_base_instances = urllib.parse.urljoin(api_base, "instances/")
 default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
+
+min_samples = 100
 
 from .complete import Complete
 from .error import *
@@ -48,8 +45,5 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
-    "model_info_dict",
-    "finetune_model_names",
     "min_samples",
-    "jokes_list",
 ]
