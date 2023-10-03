@@ -1,10 +1,6 @@
 import logging
-import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
-
-import requests
-import sseclient  # type: ignore
 
 import together
 
@@ -44,7 +40,7 @@ def get_logger(
 
         logger.setLevel(log_level)
 
-        lg_format = logging.StreamHandler(sys.stderr)
+        lg_format = logging.StreamHandler()
         lg_format.setLevel(logging.DEBUG)
         lg_format.setFormatter(TogetherLogFormatter())
 
@@ -77,83 +73,6 @@ def parse_timestamp(timestamp: str) -> datetime:
         except ValueError:
             continue
     raise ValueError("Timestamp does not match any expected format")
-
-
-def create_post_request(
-    url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-) -> requests.Response:
-    if check_auth:
-        verify_api_key()
-
-    if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
-
-    # send request
-    try:
-        response = requests.post(url, headers=headers, json=json, stream=stream)
-    except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
-
-    if response.status_code == 429:
-        raise together.InstanceError()
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    response.raise_for_status()
-
-    return response
-
-
-def sse_client(response: requests.Response) -> sseclient.SSEClient:
-    return sseclient.SSEClient(response)
-
-
-def create_get_request(
-    url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-) -> requests.Response:
-    if check_auth:
-        verify_api_key()
-
-    if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
-
-    # send request
-    try:
-        response = requests.get(url, headers=headers, json=json, stream=stream)
-    except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
-
-    if response.status_code == 429:
-        raise together.InstanceError()
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    response.raise_for_status()
-
-    return response
-
-
-def response_to_dict(response: requests.Response) -> dict[Any, Any]:
-    try:
-        response_json = dict(response.json())
-    except Exception as e:
-        raise together.JSONError(e, http_status=response.status_code)
-
-    return response_json
 
 
 def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:

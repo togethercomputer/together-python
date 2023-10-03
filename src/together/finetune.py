@@ -13,6 +13,7 @@ from together.utils import (
     create_post_request,
     get_logger,
     response_to_dict,
+    round_to_closest_multiple_of_32,
 )
 
 
@@ -62,18 +63,19 @@ class Finetune:
             n_checkpoints = n_epochs
             adjusted_inputs = True
 
+        # batch_size used to be 144 for 70b models
         if (
             model
-            in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
-            and batch_size != 144
+            in [
+                "togethercomputer/llama-2-70b",
+                "togethercomputer/llama-2-70b-chat",
+                "togethercomputer/llama-2-7b-chat",
+            ]
+            # and batch_size != 144
         ):
-            batch_size = 144
+            # batch_size = 144
+            batch_size = round_to_closest_multiple_of_32(batch_size)
             adjusted_inputs = True
-            # TODO when Arsh makes the change, replace above with below:
-            # batch_size = round_to_closest_multiple_of_32(batch_size)
-            # logger.warning(
-            #     "for 70B parameter models, we adjust batch size to a multiple of 32 within [32,256]"
-            # )
 
         if batch_size is None:
             batch_size = 32
