@@ -66,7 +66,11 @@ class Finetune:
         # batch_size used to be 144 for 70b models
         if (
             model
-            in ["togethercomputer/llama-2-70b", "togethercomputer/llama-2-70b-chat"]
+            in [
+                "togethercomputer/llama-2-70b",
+                "togethercomputer/llama-2-70b-chat",
+                "togethercomputer/llama-2-7b-chat",
+            ]
             # and batch_size != 144
         ):
             # batch_size = 144
