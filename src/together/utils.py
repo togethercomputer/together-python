@@ -7,6 +7,7 @@ import requests
 import sseclient  # type: ignore
 
 import together
+from together.error import TogetherErrorHandler
 
 
 class TogetherLogFormatter(logging.Formatter):
@@ -102,17 +103,12 @@ def create_post_request(
     except requests.exceptions.RequestException as e:
         raise together.ResponseError(e)
 
-    if response.status_code == 429:
-        raise together.InstanceError()
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    response.raise_for_status()
+    error_handler = TogetherErrorHandler()
+    response, handled = error_handler.handle(response)
+    if not handled:
+        response.raise_for_status()
 
     return response
-
-
-def sse_client(response: requests.Response) -> sseclient.SSEClient:
-    return sseclient.SSEClient(response)
 
 
 def create_get_request(
@@ -138,13 +134,16 @@ def create_get_request(
     except requests.exceptions.RequestException as e:
         raise together.ResponseError(e)
 
-    if response.status_code == 429:
-        raise together.InstanceError()
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    response.raise_for_status()
+    error_handler = TogetherErrorHandler()
+    response, handled = error_handler.handle(response)
+    if not handled:
+        response.raise_for_status()
 
     return response
+
+
+def sse_client(response: requests.Response) -> sseclient.SSEClient:
+    return sseclient.SSEClient(response)
 
 
 def response_to_dict(response: requests.Response) -> dict[Any, Any]:

@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict, Iterator, List, Optional
 
 import together
-from together.utils import create_post_request, get_logger, sse_client
+from together.utils import create_post_request, get_logger, response_to_dict, sse_client
 
 
 logger = get_logger(str(__name__))
@@ -11,7 +11,7 @@ logger = get_logger(str(__name__))
 class Complete:
     @classmethod
     def create(
-        self,
+        cls,
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
@@ -42,16 +42,11 @@ class Complete:
             url=together.api_base_complete, json=parameter_payload
         )
 
-        try:
-            response_json = dict(response.json())
-
-        except Exception as e:
-            raise together.JSONError(e, http_status=response.status_code)
-        return response_json
+        return response_to_dict(response)
 
     @classmethod
     def create_streaming(
-        self,
+        cls,
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
@@ -78,7 +73,7 @@ class Complete:
             "max_tokens": max_tokens,
             "stop": stop,
             "repetition_penalty": repetition_penalty,
-            "stream_tokens": True,
+            "stream_tokens": True
         }
 
         # send request
@@ -95,8 +90,8 @@ class Complete:
                 json_response = dict(json.loads(event.data))
                 if "error" in json_response.keys():
                     raise together.ResponseError(
-                        json_response["error"]["error"],
-                        request_id=json_response["error"]["request_id"],
+                        json_response["error"],
+                        request_id=json_response["request_id"],
                     )
                 elif "choices" in json_response.keys():
                     text = json_response["choices"][0]["text"]
@@ -104,5 +99,5 @@ class Complete:
                     yield text
                 else:
                     raise together.ResponseError(
-                        f"Unknown error occured. Received unhandled response: {event.data}"
+                        f"Unknown error occurred. Received unhandled response: {event.data}"
                     )
