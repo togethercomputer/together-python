@@ -43,13 +43,20 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=False,
         action="store_true",
     )
-    # subparser.add_argument(
-    #     "--validation-file",
-    #     "-v",
-    #     default=None,
-    #     help="The ID of an uploaded file that contains validation data.",
-    #     type=str,
-    # )
+    subparser.add_argument(
+        "--validation-file",
+        "-v",
+        default=None,
+        help="The ID of an uploaded file that contains validation data.",
+        type=str,
+    )
+    subparser.add_argument(
+        "--validation-steps",
+        "-b",
+        default=None,
+        help="Number of steps between each model validation.",
+        type=int,
+    )
     subparser.add_argument(
         "--model",
         "-m",
@@ -158,6 +165,14 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         default=False,
         action="store_true",
         help="Indicates whether to disable checking",
+    )
+
+    # Not for external users
+    subparser.add_argument(
+        "--internal",
+        default=None,
+        help="Internal use only",
+        type=str,
     )
 
     subparser.set_defaults(func=_run_create)

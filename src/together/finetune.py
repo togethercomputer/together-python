@@ -28,7 +28,8 @@ class Finetune:
     def create(
         self,
         training_file: str,  # training file_id
-        # validation_file: Optional[str] = None,  # validation file_id
+        validation_file: Optional[str],  # validation file_id
+        validation_steps: Optional[int],
         model: str,
         n_epochs: int = 1,
         n_checkpoints: Optional[int] = 1,
@@ -46,6 +47,7 @@ class Finetune:
         estimate_price: bool = False,
         wandb_api_key: Optional[str] = None,
         confirm_inputs: bool = True,
+        internal: Optional[str] = None,
     ) -> Dict[Any, Any]:
         adjusted_inputs = False
 
@@ -93,7 +95,8 @@ class Finetune:
 
         parameter_payload = {
             "training_file": training_file,
-            # "validation_file": validation_file,
+            "validation_file": validation_file,
+            "validation_steps": validation_steps,
             "model": model,
             "n_epochs": n_epochs,
             "n_checkpoints": n_checkpoints,
@@ -106,6 +109,7 @@ class Finetune:
             # "fp16": fp16,
             "suffix": suffix,
             "wandb_key": wandb_api_key,
+            "internal": internal,
         }
 
         # check if model name is one of the models available for finetuning
@@ -115,9 +119,10 @@ class Finetune:
                 "Here is a list of those models https://docs.together.ai/docs/models-fine-tuning"
             )
 
-        # check if training_file is the string id of a previously uploaded file
         uploaded_files = Files.list()
         file_ids = [f["id"] for f in uploaded_files["data"]]
+
+        # check if training_file is the string id of a previously uploaded file
         if parameter_payload["training_file"] not in file_ids:
             training_file_feedback = (
                 "training_file refers to a file identifier of an uploaded training file, not a local file path. "
@@ -127,6 +132,27 @@ class Finetune:
             )
             logger.critical(training_file_feedback)
             raise together.FileTypeError(training_file_feedback)
+    
+        # check if validation_file is the string id of a previously uploaded file
+        if parameter_payload["validation_file"] is not None:
+            if parameter_payload["validation_file"] not in file_ids:
+                validation_file_feedback = (
+                    "validation_file refers to a file identifier of an uploaded validation file, not a local file path. "
+                    "A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or "
+                    "$ together files list` CLI. A validation file can be uploaded using `together.Files.upload(file ='/path/to/file')"
+                    "Python API or `$ together files upload <FILE_PATH>` CLI."
+                )
+                logger.critical(validation_file_feedback)
+                raise together.FileTypeError(validation_file_feedback)
+
+        # check if validation_steps is an integer and greater than 0 when validation_file is provided
+        if parameter_payload["validation_file"] is not None:
+            if parameter_payload["validation_steps"] is None:
+                parameter_payload["validation_steps"] = 100
+                adjusted_inputs = True
+            elif parameter_payload["validation_steps"] < 1:
+                parameter_payload["validation_steps"] = 100
+                adjusted_inputs = True
 
         if estimate_price:
             param_size = together.Models._param_count(model)
