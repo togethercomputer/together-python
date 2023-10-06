@@ -49,6 +49,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         default=None,
         help="The ID of an uploaded file that contains validation data.",
         type=str,
+        required=False,
     )
     subparser.add_argument(
         "--validation-steps",
@@ -56,6 +57,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         default=None,
         help="Number of steps between each model validation.",
         type=int,
+        required=False,
     )
     subparser.add_argument(
         "--model",
