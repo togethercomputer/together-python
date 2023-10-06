@@ -45,6 +45,7 @@ class Finetune:
         ] = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
         wandb_api_key: Optional[str] = None,
+        wandb_user_name: Optional[str] = "<username>",
         confirm_inputs: bool = True,
     ) -> Dict[Any, Any]:
         adjusted_inputs = False
@@ -174,7 +175,11 @@ class Finetune:
             together.api_base_finetune, json=parameter_payload
         )
 
-        return response_to_dict(response)
+        response_dict = response_to_dict(response)
+
+        response_dict['learning_progress_url'] = f"https://wandb.ai/{wandb_user_name}/together/groups/{response_dict['id']}/workspace?workspace=user-{wandb_user_name}"
+
+        return response_dict
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
