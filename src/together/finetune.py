@@ -177,7 +177,9 @@ class Finetune:
 
         response_dict = response_to_dict(response)
 
-        response_dict['learning_progress_url'] = f"https://wandb.ai/{wandb_user_name}/together/groups/{response_dict['id']}/workspace?workspace=user-{wandb_user_name}"
+        response_dict[
+            "learning_progress_url"
+        ] = f"https://wandb.ai/{wandb_user_name}/together/groups/{response_dict['id']}/workspace?workspace=user-{wandb_user_name}"
 
         return response_dict
 
