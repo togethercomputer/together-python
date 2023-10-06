@@ -52,7 +52,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
     )
     subparser.add_argument(
         "--validation-steps",
-        "-b",
+        "-vs",
         default=None,
         help="Number of steps between each model validation.",
         type=int,
