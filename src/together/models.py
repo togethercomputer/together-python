@@ -38,7 +38,7 @@ class Models:
                 info_dict.pop(key, None)
         else:
             raise ValueError(
-                f"Model {model} does not exist. Use together.Models.list() to list available models."
+                f"Unable to access {model}. Check your TOGETHER_API_KEY and use together.Models.list() to list available models."
             )
 
         return dict(info_dict)

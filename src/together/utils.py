@@ -57,9 +57,12 @@ def verify_api_key(logger: Optional[logging.Logger] = None) -> bool:
     if logger is None:
         logger = get_logger(str(__name__), log_level=together.log_level)
     if together.api_key is None:
-        print(
-            "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key, find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys "
+        msg = (
+            "TOGETHER_API_KEY not found \n"
+            "Please set it as an environment variable or set it as together.api_key \n"
+            "Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"
         )
+        print(msg)
         return False
     else:
         return True
