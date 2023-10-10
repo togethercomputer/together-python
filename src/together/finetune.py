@@ -173,19 +173,24 @@ class Finetune:
         response = create_post_request(
             together.api_base_finetune, json=parameter_payload
         )
-
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
         # send request
         response = create_get_request(together.api_base_finetune)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
         response = create_get_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
@@ -193,6 +198,8 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
         response = create_post_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
@@ -200,8 +207,9 @@ class Finetune:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
-
         response = create_get_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
