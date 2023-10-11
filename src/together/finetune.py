@@ -84,7 +84,6 @@ class Finetune:
             raise ValueError(
                 f"The max batch size for model {model} is {max_batch_size}. Received batch size {batch_size}."
             )
-        
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
