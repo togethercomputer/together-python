@@ -63,24 +63,28 @@ class Finetune:
             n_checkpoints = n_epochs
             adjusted_inputs = True
 
-        # batch_size used to be 144 for 70b models
-        if (
-            model
-            in [
-                "togethercomputer/llama-2-70b",
-                "togethercomputer/llama-2-70b-chat",
-            ]
-            # and batch_size != 144
-        ):
-            # batch_size = 144
-            batch_size = round_to_closest_multiple_of_32(batch_size)
-            adjusted_inputs = True
-
+        # TODO: Replace with mongodb retrieval for max, min, and default batch size
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
             batch_size = 4
             adjusted_inputs = True
+
+        max_batch_size = 128
+        if model.startswith("togethercomputer/llama-2-70b"):
+            max_batch_size = 64
+            batch_size = round_to_closest_multiple_of_32(batch_size)
+            adjusted_inputs = True
+        elif model.startswith("togethercomputer/CodeLlama-7b"):
+            max_batch_size = 16
+        elif model.startswith("togethercomputer/CodeLlama-13b"):
+            max_batch_size = 8
+
+        if batch_size > max_batch_size:
+            raise ValueError(
+                f"The max batch size for model {model} is {max_batch_size}. Received batch size {batch_size}."
+            )
+        
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
         if n_checkpoints > 1 and model in [
