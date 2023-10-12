@@ -1,7 +1,7 @@
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import requests
 import sseclient  # type: ignore
@@ -53,13 +53,19 @@ def get_logger(
     return logger
 
 
-def verify_api_key(logger: Optional[logging.Logger] = None) -> None:
+def verify_api_key(logger: Optional[logging.Logger] = None) -> bool:
     if logger is None:
         logger = get_logger(str(__name__), log_level=together.log_level)
     if together.api_key is None:
-        raise together.AuthenticationError(
-            "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key"
+        msg = (
+            "TOGETHER_API_KEY not found \n"
+            "Please set it as an environment variable or set it as together.api_key \n"
+            "Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"
         )
+        print(msg)
+        return False
+    else:
+        return True
 
 
 def extract_time(json_obj: Dict[str, Any]) -> int:
@@ -81,13 +87,14 @@ def parse_timestamp(timestamp: str) -> datetime:
 
 def create_post_request(
     url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
-) -> requests.Response:
+) -> Union[requests.Response, None]:
     if check_auth:
-        verify_api_key()
+        if not verify_api_key():
+            return None
 
     if not headers:
         headers = {
@@ -117,13 +124,14 @@ def sse_client(response: requests.Response) -> sseclient.SSEClient:
 
 def create_get_request(
     url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
-) -> requests.Response:
+) -> Union[requests.Response, None]:
     if check_auth:
-        verify_api_key()
+        if not verify_api_key():
+            return None
 
     if not headers:
         headers = {
@@ -147,7 +155,7 @@ def create_get_request(
     return response
 
 
-def response_to_dict(response: requests.Response) -> dict[Any, Any]:
+def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     try:
         response_json = dict(response.json())
     except Exception as e:

@@ -64,23 +64,25 @@ class Finetune:
             n_checkpoints = n_epochs
             adjusted_inputs = True
 
-        # batch_size used to be 144 for 70b models
-        if (
-            model
-            in [
-                "togethercomputer/llama-2-70b",
-                "togethercomputer/llama-2-70b-chat",
-            ]
-            # and batch_size != 144
-        ):
-            # batch_size = 144
-            batch_size = round_to_closest_multiple_of_32(batch_size)
-            adjusted_inputs = True
-
+        # TODO: Replace with mongodb retrieval for max, min, and default batch size
         if batch_size is None:
             batch_size = 32
         elif batch_size < 4:
             batch_size = 4
+            adjusted_inputs = True
+
+        max_batch_size = 128
+        if model.startswith("togethercomputer/llama-2-70b"):
+            max_batch_size = 64
+            batch_size = round_to_closest_multiple_of_32(batch_size)
+            adjusted_inputs = True
+        elif model.startswith("togethercomputer/CodeLlama-7b"):
+            max_batch_size = 16
+        elif model.startswith("togethercomputer/CodeLlama-13b"):
+            max_batch_size = 8
+
+        if batch_size > max_batch_size:
+            batch_size = max_batch_size
             adjusted_inputs = True
 
         # TODO: REMOVE THIS CHECK WHEN WE HAVE CHECKPOINTING WORKING FOR 70B models
@@ -174,7 +176,9 @@ class Finetune:
         response = create_post_request(
             together.api_base_finetune, json=parameter_payload
         )
-
+        if not response:
+            return {}
+        
         response_dict = response_to_dict(response)
 
         response_dict[
@@ -182,17 +186,21 @@ class Finetune:
         ] = f"https://wandb.ai/{wandb_user_name}/together/groups/{response_dict['id']}/workspace?workspace=user-{wandb_user_name}"
 
         return response_dict
-
+        
     @classmethod
     def list(self) -> Dict[Any, Any]:
         # send request
         response = create_get_request(together.api_base_finetune)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
         response = create_get_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
@@ -200,6 +208,8 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
         response = create_post_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
@@ -207,8 +217,9 @@ class Finetune:
         # TODO enable stream
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
-
         response = create_get_request(retrieve_url)
+        if not response:
+            return {}
         return response_to_dict(response)
 
     @classmethod
