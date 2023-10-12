@@ -87,8 +87,8 @@ def parse_timestamp(timestamp: str) -> datetime:
 
 def create_post_request(
     url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
 ) -> Union[requests.Response, None]:
@@ -124,8 +124,8 @@ def sse_client(response: requests.Response) -> sseclient.SSEClient:
 
 def create_get_request(
     url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
 ) -> Union[requests.Response, None]:
@@ -155,7 +155,7 @@ def create_get_request(
     return response
 
 
-def response_to_dict(response: requests.Response) -> dict[Any, Any]:
+def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     try:
         response_json = dict(response.json())
     except Exception as e:
