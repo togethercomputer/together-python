@@ -180,7 +180,7 @@ class Finetune:
         return response_to_dict(response)
 
     @classmethod
-    def list(self) -> Dict[Any, Any]:
+    def list(self) -> Dict[str, List[Dict[str, Any]]]:
         # send request
         response = create_get_request(together.api_base_finetune)
         if not response:
@@ -188,7 +188,7 @@ class Finetune:
         return response_to_dict(response)
 
     @classmethod
-    def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
+    def retrieve(self, fine_tune_id: str) -> Dict[str, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
         response = create_get_request(retrieve_url)
         if not response:

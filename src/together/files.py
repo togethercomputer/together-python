@@ -27,7 +27,7 @@ logger = get_logger(str(__name__))
 
 class Files:
     @classmethod
-    def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
+    def list(self) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
         # send request
         response = create_get_request(together.api_base_files)
         if not response:
@@ -132,10 +132,6 @@ class Files:
         except Exception as e:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
-
-        # output_dict["filename"] = os.path.basename(file)
-        # output_dict["id"] = str(file_id)
-        # output_dict["object"] = "file"
 
         return {
             "filename": os.path.basename(file),
