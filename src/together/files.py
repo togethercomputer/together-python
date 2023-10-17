@@ -27,7 +27,7 @@ logger = get_logger(str(__name__))
 
 class Files:
     @classmethod
-    def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
+    def list(self) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
         # send request
         response = create_get_request(together.api_base_files)
         if not response:

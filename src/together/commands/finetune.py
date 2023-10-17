@@ -4,8 +4,10 @@ import argparse
 import json
 import os
 
+from tabulate import tabulate
+
 from together import Finetune
-from together.utils import parse_timestamp
+from together.utils import finetune_price_to_dollars, parse_timestamp
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -43,13 +45,6 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         required=False,
         action="store_true",
     )
-    # subparser.add_argument(
-    #     "--validation-file",
-    #     "-v",
-    #     default=None,
-    #     help="The ID of an uploaded file that contains validation data.",
-    #     type=str,
-    # )
     subparser.add_argument(
         "--model",
         "-m",
@@ -90,46 +85,6 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         help="The learning rate multiplier to use for training. Default=0.00001",
         type=float,
     )
-    # subparser.add_argument(
-    #     "--warmup-steps",
-    #     "-ws",
-    #     default=0,
-    #     help="Warmup steps",
-    #     type=int,
-    # )
-    # subparser.add_argument(
-    #     "--train-warmup-steps",
-    #     "-tws",
-    #     default=0,
-    #     help="Train warmup steps",
-    #     type=int,
-    # )
-    # subparser.add_argument(
-    #     "--sequence-length",
-    #     "-sl",
-    #     default=2048,
-    #     help="Max sequence length",
-    #     type=int,
-    # )
-    # subparser.add_argument(
-    #     "--seed",
-    #     default=42,
-    #     help="Training seed",
-    #     type=int,
-    # )
-    # subparser.add_argument(
-    #     "--fp32",
-    #     help="Enable FP32 training. Defaults to false (FP16 training).",
-    #     default=False,
-    #     action="store_true",
-    # )
-    # subparser.add_argument(
-    #     "--checkpoint-steps",
-    #     "-b",
-    #     default=0,
-    #     help="Number of steps between each checkpoint. Defaults to 0 = checkpoints per epoch.",
-    #     type=int,
-    # )
     subparser.add_argument(
         "--suffix",
         "-s",
@@ -162,53 +117,69 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
 
     subparser.set_defaults(func=_run_create)
 
-    # End of create_finetune
-
 
 def _add_list(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # List_Finetune
-    list_parser = parser.add_parser("list")
-    list_parser.set_defaults(func=_run_list)
+    subparser = parser.add_parser("list")
+    subparser.add_argument(
+        "--raw",
+        help="Raw JSON dump of response",
+        default=False,
+        action="store_true",
+    )
+    subparser.set_defaults(func=_run_list)
 
 
 def _add_retrieve(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
-    retrieve_finetune_parser = parser.add_parser("retrieve")
-    retrieve_finetune_parser.add_argument(
+    subparser = parser.add_parser("retrieve")
+    subparser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
     )
-    retrieve_finetune_parser.set_defaults(func=_run_retrieve)
+    subparser.add_argument(
+        "--raw",
+        help="Raw JSON dump of response",
+        default=False,
+        action="store_true",
+    )
+    subparser.set_defaults(func=_run_retrieve)
 
 
 def _add_cancel(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     # Cancel Finetune
-    cancel_finetune_parser = parser.add_parser("cancel")
-    cancel_finetune_parser.add_argument(
+    subparser = parser.add_parser("cancel")
+    subparser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
     )
-    cancel_finetune_parser.set_defaults(func=_run_cancel)
+    subparser.set_defaults(func=_run_cancel)
 
 
 def _add_list_events(
     parser: argparse._SubParsersAction[argparse.ArgumentParser],
 ) -> None:
     # List finetune events
-    list_finetune_events_parser = parser.add_parser("list-events")
-    list_finetune_events_parser.add_argument(
+    subparser = parser.add_parser("list-events")
+    subparser.add_argument(
         "fine_tune_id",
         metavar="FINETUNE-ID",
         default=None,
         help="Fine-tuning ID",
         type=str,
     )
-    list_finetune_events_parser.set_defaults(func=_run_list_events)
+    subparser.add_argument(
+        "--raw",
+        help="Raw JSON dump of response",
+        default=False,
+        action="store_true",
+    )
+    subparser.set_defaults(func=_run_list_events)
 
 
 def _add_download(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -269,22 +240,6 @@ def _add_checkpoints(
     checkpoint_parser.set_defaults(func=_run_checkpoint)
 
 
-# def _add_delete_model(
-#     parser: argparse._SubParsersAction[argparse.ArgumentParser],
-# ) -> None:
-#     # Delete finetune model
-#     delete_finetune_model_parser = parser.add_parser("delete-model")
-#     delete_finetune_model_parser.add_argument(
-#         "--model",
-#         "-m",
-#         default=None,
-#         help="Model name",
-#         type=str,
-#         required=True,
-#     )
-#     delete_finetune_model_parser.set_defaults(func=_run_delete_model)
-
-
 def _run_create(args: argparse.Namespace) -> None:
     finetune = Finetune()
 
@@ -300,18 +255,11 @@ def _run_create(args: argparse.Namespace) -> None:
 
     response = finetune.create(
         training_file=args.training_file,  # training file_id
-        # validation_file=args.validation_file,  # validation file_id
         model=args.model,
         n_epochs=args.n_epochs,
         n_checkpoints=args.n_checkpoints,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
-        # warmup_steps=args.warmup_steps,
-        # train_warmup_steps=args.train_warmup_steps,
-        # seq_length=args.sequence_length,
-        # seed=args.seed,
-        # fp16=not args.fp32,
-        # checkpoint_steps=args.checkpoint_steps,
         suffix=args.suffix,
         estimate_price=args.estimate_price,
         wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
@@ -323,15 +271,38 @@ def _run_create(args: argparse.Namespace) -> None:
 
 def _run_list(args: argparse.Namespace) -> None:
     response = Finetune.list()
-    data_list = response["data"]
-    sorted_data = sorted(data_list, key=lambda x: parse_timestamp(x["created_at"]))
-    response["data"] = sorted_data
-    print(json.dumps(response, indent=4))
+    response["data"].sort(key=lambda x: parse_timestamp(x["created_at"]))
+    if args.raw:
+        print(json.dumps(response, indent=4))
+    else:
+        display_list = []
+        for i in response["data"]:
+            display_list.append(
+                {
+                    "Fine-tune ID": i.get("id"),
+                    "Model Output Name": i.get("model_output_name"),
+                    "Price": finetune_price_to_dollars(
+                        float(str(i.get("total_price")))
+                    ),  # convert to string for mypy typing
+                    "Created At": i.get("created_at"),
+                }
+            )
+        table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+        print(table)
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
     response = Finetune.retrieve(args.fine_tune_id)
-    print(json.dumps(response, indent=4))
+    if args.raw:
+        print(json.dumps(response, indent=4))
+    else:
+        table_data = [
+            {"Key": key, "Value": value}
+            for key, value in response.items()
+            if key not in ["events", "model_output_path"]
+        ]
+        table = tabulate(table_data, tablefmt="grid")
+        print(table)
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
@@ -341,7 +312,20 @@ def _run_cancel(args: argparse.Namespace) -> None:
 
 def _run_list_events(args: argparse.Namespace) -> None:
     response = Finetune.list_events(args.fine_tune_id)
-    print(json.dumps(response, indent=4))
+    if args.raw:
+        print(json.dumps(response, indent=4))
+    else:
+        display_list = []
+        for i in response["data"]:
+            display_list.append(
+                {
+                    "Message": i.get("message"),
+                    "Type": i.get("type"),
+                    "Hash": i.get("hash"),
+                }
+            )
+        table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+        print(table)
 
 
 def _run_download(args: argparse.Namespace) -> None:

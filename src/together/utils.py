@@ -173,3 +173,19 @@ def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:
     elif batch_size > 256:
         return 256
     return 32 * ((batch_size + 31) // 32)
+
+
+def bytes_to_human_readable(num: float, suffix: Optional[str] = "B") -> str:
+    for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}Yi{suffix}"
+
+
+def finetune_price_to_dollars(price: float) -> float:
+    return price / 1000000000
+
+
+def nanodollars_to_dollars(price: int) -> float:
+    return (price * 4000) / 1000000000

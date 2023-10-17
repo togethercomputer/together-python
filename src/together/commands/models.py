@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 
+from tabulate import tabulate
+
 import together
 
 
@@ -27,8 +29,14 @@ def _add_list(
 ) -> None:
     subparser = parser.add_parser("list")
     subparser.add_argument(
+        "--details",
+        help="List all details",
+        default=False,
+        action="store_true",
+    )
+    subparser.add_argument(
         "--raw",
-        help="Raw details of all models",
+        help="Raw JSON dump of response",
         default=False,
         action="store_true",
     )
@@ -111,10 +119,31 @@ def _run_list(args: argparse.Namespace) -> None:
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
-        model_list = []
-        for i in response:
-            model_list.append(i["name"])
-        print(json.dumps(model_list, indent=4))
+        if not args.details:
+            display_list = []
+            for i in response:
+                display_list.append(
+                    {
+                        "Name": i.get("display_name"),
+                        "Model String": i.get("name"),
+                        "Type": i.get("display_type"),
+                    }
+                )
+        else:
+            display_list = []
+            for i in response:
+                display_list.append(
+                    {
+                        "Name": i.get("display_name"),
+                        "Model String": i.get("name"),
+                        "Type": i.get("display_type"),
+                        "Parameters": i.get("num_parameters"),
+                        "Context": i.get("context_length"),
+                        "Hardware": i.get("hardware_label"),
+                    }
+                )
+        table = tabulate(display_list, headers="keys", tablefmt="grid")
+        print(table)
 
 
 def _run_info(args: argparse.Namespace) -> None:
