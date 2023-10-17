@@ -147,7 +147,11 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_info(args: argparse.Namespace) -> None:
-    if not args.raw:
+    model_info = together.Models.info(args.model)
+
+    if args.raw:
+        print(json.dumps(model_info, indent=4))
+    else:
         hidden_keys = [
             "_id",
             "modelInstanceConfig",
@@ -159,13 +163,16 @@ def _run_info(args: argparse.Namespace) -> None:
             "pricing_tier",
             "hardware_label",
             "depth",
+            "descriptionLink",
         ]
-    else:
-        hidden_keys = []
 
-    model_info = together.Models.info(args.model, hidden_keys=hidden_keys)
-
-    print(json.dumps(model_info, indent=4))
+        table_data = [
+            {"Key": key, "Value": value}
+            for key, value in model_info.items()
+            if key not in hidden_keys
+        ]
+        table = tabulate(table_data, tablefmt="grid")
+        print(table)
 
 
 def _run_instances(args: argparse.Namespace) -> None:

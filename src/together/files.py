@@ -133,10 +133,6 @@ class Files:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
-        # output_dict["filename"] = os.path.basename(file)
-        # output_dict["id"] = str(file_id)
-        # output_dict["object"] = "file"
-
         return {
             "filename": os.path.basename(file),
             "id": str(file_id),

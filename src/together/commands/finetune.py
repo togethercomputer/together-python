@@ -342,9 +342,3 @@ def _run_checkpoint(args: argparse.Namespace) -> None:
     checkpoints = Finetune.get_checkpoints(args.fine_tune_id)
     print(json.dumps(checkpoints, indent=4))
     print(f"\n{len(checkpoints)} checkpoints found")
-
-
-# def _run_delete_model(args: argparse.Namespace) -> None:
-#     finetune = Finetune(args.endpoint)
-#     response = finetune.delete_finetune_model(args.model)
-#     print(json.dumps(response))
