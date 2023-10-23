@@ -151,4 +151,5 @@ def test_checkpoints():
     assert isinstance(response, list)
 
 if __name__ == "__main__":
+    assert together.api_key, "No API key found, please run `export TOGETHER_API_KEY=<API_KEY>`"
     pytest.main([__file__])
