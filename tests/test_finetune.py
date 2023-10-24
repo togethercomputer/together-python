@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 import pytest
 import requests
@@ -40,16 +40,11 @@ def list_models() -> List[Any]:
     return finetunable_models
 
 
-def create_ft(
-    model: str,
-    n_epochs: int,
-    n_checkpoints: int,
-    batch_size: int,
-    learning_rate: float,
-    suffix: str,
+# Download, save, and upload dataset
+def upload_file(
     url: str = "https://huggingface.co/datasets/laion/OIG/resolve/main/unified_joke_explanations.jsonl",
     save_path: str = "unified_joke_explanations.jsonl",
-) -> Tuple[Dict[Any, Any], str]:
+) -> str:
     download_response = requests.get(url)
 
     assert download_response.status_code == 200
@@ -58,13 +53,22 @@ def create_ft(
         file.write(download_response.content)
 
     response = together.Files.upload(save_path)
-
     os.remove(save_path)
 
     assert isinstance(response, dict)
-
     file_id = str(response["id"])
+    return file_id
 
+
+def create_ft(
+    model: str,
+    n_epochs: int,
+    n_checkpoints: int,
+    batch_size: int,
+    learning_rate: float,
+    suffix: str,
+    file_id: str,
+) -> Dict[Any, Any]:
     response = together.Finetune.create(
         training_file=file_id,
         model=model,
@@ -74,13 +78,13 @@ def create_ft(
         learning_rate=learning_rate,
         suffix=suffix,
     )
-
-    return response, file_id
+    return response
 
 
 def test_create() -> None:
-    response, file_id = create_ft(
-        MODEL, N_EPOCHS, N_CHECKPOINTS, BATCH_SIZE, LEARNING_RATE, SUFFIX
+    file_id = upload_file()
+    response = create_ft(
+        MODEL, N_EPOCHS, N_CHECKPOINTS, BATCH_SIZE, LEARNING_RATE, SUFFIX, file_id
     )
 
     assert isinstance(response, dict)
@@ -152,9 +156,9 @@ def test_download() -> None:
 
 def test_cancel() -> None:
     cancelled = False
-
+    file_id = upload_file()
     response, file_id = create_ft(
-        MODEL, N_EPOCHS, N_CHECKPOINTS, BATCH_SIZE, LEARNING_RATE, SUFFIX
+        MODEL, N_EPOCHS, N_CHECKPOINTS, BATCH_SIZE, LEARNING_RATE, SUFFIX, file_id
     )
     ft_id = response["id"]
     response = together.Finetune.cancel(ft_id)
