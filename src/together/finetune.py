@@ -4,7 +4,9 @@ import urllib.parse
 from typing import Any, Dict, List, Optional, Union
 
 import requests
+from requests.adapters import HTTPAdapter
 from tqdm import tqdm
+from urllib3.util import Retry
 
 import together
 from together import Files
@@ -274,9 +276,16 @@ class Finetune:
             "User-Agent": together.user_agent,
         }
 
-        try:
-            session = requests.Session()
+        session = requests.Session()
 
+        retry_strategy = Retry(
+            total=together.MAX_CONNECTION_RETRIES,
+            backoff_factor=together.BACKOFF_FACTOR,
+        )
+        retry_adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("https://", retry_adapter)
+
+        try:
             response = session.get(model_file_path, headers=headers, stream=True)
             response.raise_for_status()
 
@@ -311,8 +320,9 @@ class Finetune:
                     "Caution: Downloaded file size does not match remote file size."
                 )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
+        finally:
+            session.close()
 
         return output  # this should be output file name
 
