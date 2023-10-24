@@ -45,7 +45,7 @@ class Finetune:
         ] = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
         wandb_api_key: Optional[str] = None,
-        confirm_inputs: bool = True,
+        confirm_inputs: bool = False,
     ) -> Dict[Any, Any]:
         adjusted_inputs = False
 
@@ -283,7 +283,7 @@ class Finetune:
             if output is None:
                 content_type = str(response.headers.get("content-type"))
 
-                output = self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
+                output = self.retrieve(fine_tune_id)["model_output_name"].split("/")[-1]
 
                 if step != -1:
                     output += f"-checkpoint-{step}"
@@ -314,7 +314,7 @@ class Finetune:
             logger.critical(f"Response error raised: {e}")
             raise together.ResponseError(e)
 
-        return output  # this should be null
+        return output  # this should be output file name
 
     # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
     #     model_url = "https://api.together.xyz/api/models"
