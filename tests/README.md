@@ -3,6 +3,8 @@
 
 >  🚧 Please have enough space on disk to download your lastest successful fine-tuned model's weights into the `tests` directory of this repo. All downloaded files will be deleted after successful test runs but may not be deleted if tests fail.
 
+>  🚧 Warning: This test will start 2 fine-tune jobs on small datasets from your account. You WILL be charged for the amount of one job on a 7B model. The second job will be cancelled soon after creation so you will likely not be charged for it.
+
 1. Clone the repo locally
 ```bash
 git clone https://github.com/togethercomputer/together.git

@@ -3,9 +3,10 @@ import time
 from typing import Any, Dict, List, Tuple
 
 import pytest
+import requests
 
 import together
-from together.utils import extract_time, parse_timestamp
+from together.utils import parse_timestamp
 
 
 MODEL = "togethercomputer/llama-2-7b"
@@ -47,11 +48,22 @@ def create_ft(
     learning_rate: float,
     suffix: str,
 ) -> Tuple[Dict[Any, Any], str]:
-    # extract file id
-    files: List[Any]
-    files = together.Files.list()["data"]
-    files.sort(key=extract_time)
-    file_id = str(files[-1]["id"])
+    url = "https://huggingface.co/datasets/laion/OIG/resolve/main/unified_joke_explanations.jsonl"
+    save_path = "unified_joke_explanations.jsonl"
+    download_response = requests.get(url)
+
+    assert download_response.status_code == 200
+
+    with open(save_path, "wb") as file:
+        file.write(download_response.content)
+
+    response = together.Files.upload(save_path)
+
+    os.remove(save_path)
+
+    assert isinstance(response, dict)
+
+    file_id = str(response["id"])
 
     response = together.Finetune.create(
         training_file=file_id,
@@ -141,7 +153,7 @@ def test_download() -> None:
 def test_cancel() -> None:
     cancelled = False
 
-    response, _ = create_ft(
+    response, file_id = create_ft(
         MODEL, N_EPOCHS, N_CHECKPOINTS, BATCH_SIZE, LEARNING_RATE, SUFFIX
     )
     ft_id = response["id"]
@@ -157,6 +169,9 @@ def test_cancel() -> None:
         time.sleep(1)
 
     assert cancelled
+
+    # delete file after cancelling
+    together.Files.delete(file_id)
 
 
 def test_checkpoints() -> None:
