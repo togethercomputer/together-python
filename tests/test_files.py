@@ -1,13 +1,14 @@
+import os
+from typing import Any, List
+
+import pytest
 import requests
+
 import together
 from together.utils import extract_time
 
-import os
-from typing import List, Any
 
-import pytest
-
-def test_upload():
+def test_upload() -> None:
     url = "https://huggingface.co/datasets/laion/OIG/resolve/main/unified_joke_explanations.jsonl"
     save_path = "unified_joke_explanations.jsonl"
     download_response = requests.get(url)
@@ -21,39 +22,39 @@ def test_upload():
     response = together.Files.upload(save_path)
 
     assert isinstance(response, dict)
-    assert response['filename'] == os.path.basename(save_path)
-    assert response['object'] == 'file'
+    assert response["filename"] == os.path.basename(save_path)
+    assert response["object"] == "file"
 
     os.remove(save_path)
 
 
-def test_list():
+def test_list() -> None:
     response = together.Files.list()
     assert isinstance(response, dict)
-    assert isinstance(response['data'], list)
+    assert isinstance(response["data"], list)
 
 
-def test_retrieve():
+def test_retrieve() -> None:
     # extract file id
     files: List[Any]
-    files = together.Files.list()['data']
+    files = together.Files.list()["data"]
     files.sort(key=extract_time)
-    file_id = files[-1]['id']
+    file_id = str(files[-1]["id"])
 
     response = together.Files.retrieve(file_id)
     assert isinstance(response, dict)
-    assert isinstance(response['filename'], str)
-    assert isinstance(response['bytes'], int)
-    assert isinstance(response['Processed'], bool)
-    assert response['Processed'] == True
+    assert isinstance(response["filename"], str)
+    assert isinstance(response["bytes"], int)
+    assert isinstance(response["Processed"], bool)
+    assert response["Processed"] is True
 
 
-def test_retrieve_content():
+def test_retrieve_content() -> None:
     # extract file id
     files: List[Any]
-    files = together.Files.list()['data']
+    files = together.Files.list()["data"]
     files.sort(key=extract_time)
-    file_id = files[-1]['id']
+    file_id = str(files[-1]["id"])
 
     file_path = "retrieved_file.jsonl"
 
@@ -64,22 +65,24 @@ def test_retrieve_content():
     os.remove(file_path)
 
 
-def test_delete():
+def test_delete() -> None:
     # extract file id
     files: List[Any]
-    files = together.Files.list()['data']
+    files = together.Files.list()["data"]
     files.sort(key=extract_time)
-    file_id = files[-1]['id']
+    file_id = str(files[-1]["id"])
 
     # delete file
     response = together.Files.delete(file_id)
 
     # tests
     assert isinstance(response, dict)
-    assert response['id'] == file_id
-    assert response['deleted'] == 'true'
+    assert response["id"] == file_id
+    assert response["deleted"] == "true"
 
 
 if __name__ == "__main__":
-    assert together.api_key, "No API key found, please run `export TOGETHER_API_KEY=<API_KEY>`"
+    assert (
+        together.api_key
+    ), "No API key found, please run `export TOGETHER_API_KEY=<API_KEY>`"
     pytest.main([__file__])
