@@ -47,9 +47,9 @@ def create_ft(
     batch_size: int,
     learning_rate: float,
     suffix: str,
+    url: str = "https://huggingface.co/datasets/laion/OIG/resolve/main/unified_joke_explanations.jsonl",
+    save_path: str = "unified_joke_explanations.jsonl",
 ) -> Tuple[Dict[Any, Any], str]:
-    url = "https://huggingface.co/datasets/laion/OIG/resolve/main/unified_joke_explanations.jsonl"
-    save_path = "unified_joke_explanations.jsonl"
     download_response = requests.get(url)
 
     assert download_response.status_code == 200
