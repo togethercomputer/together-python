@@ -281,10 +281,11 @@ def _run_list(args: argparse.Namespace) -> None:
                 {
                     "Fine-tune ID": i.get("id"),
                     "Model Output Name": i.get("model_output_name"),
+                    "Status": i.get("status"),
+                    "Created At": i.get("created_at"),
                     "Price": finetune_price_to_dollars(
                         float(str(i.get("total_price")))
                     ),  # convert to string for mypy typing
-                    "Created At": i.get("created_at"),
                 }
             )
         table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
