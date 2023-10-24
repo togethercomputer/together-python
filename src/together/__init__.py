@@ -21,6 +21,9 @@ default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
 
+MAX_CONNECTION_RETRIES = 2
+BACKOFF_FACTOR = 0.2
+
 min_samples = 100
 
 from .complete import Complete
@@ -45,5 +48,7 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
+    "MAX_CONNECTION_RETRIES",
+    "BACKOFF_FACTOR",
     "min_samples",
 ]

@@ -5,8 +5,10 @@ import urllib.parse
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
+from requests.adapters import HTTPAdapter
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
+from urllib3.util import Retry
 
 import together
 from together.utils import (
@@ -62,6 +64,13 @@ class Files:
             report_dict = {}
 
         session = requests.Session()
+
+        retry_strategy = Retry(
+            total=together.MAX_CONNECTION_RETRIES,
+            backoff_factor=together.BACKOFF_FACTOR,
+        )
+        retry_adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("https://", retry_adapter)
 
         init_endpoint = together.api_base_files[:-1]
 
