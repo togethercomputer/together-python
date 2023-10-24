@@ -39,6 +39,7 @@ jobs:
         source venv/bin/activate
         pip install --upgrade pip
         pip install .[quality]
+        pip install .[tests]
     - name: Check formatting with mypy
       run: |
         source venv/bin/activate
