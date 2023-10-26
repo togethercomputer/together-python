@@ -1,13 +1,12 @@
 [tool.poetry]
 name = "together"
-version = "0.2.5"
+version = "0.2.6"
 authors = [
-  { name="Together Computer", email="community@together.xyz" },
+  "Together AI <support@together.ai>"
 ]
 description = "Python client for Together's Cloud Platform!"
 readme = "README.md"
-license = {file = "LICENSE"}
-requires-python = ">=3.6"
+license = "Apache-2.0"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
