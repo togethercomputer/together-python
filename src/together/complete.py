@@ -41,8 +41,7 @@ class Complete:
         response = create_post_request(
             url=together.api_base_complete, json=parameter_payload
         )
-        if not response:
-            return {}
+
         try:
             response_json = dict(response.json())
 
@@ -86,8 +85,7 @@ class Complete:
         response = create_post_request(
             url=together.api_base_complete, json=parameter_payload, stream=True
         )
-        if not response:
-            return {}
+
         output = ""
         client = sse_client(response)
         for event in client.events():

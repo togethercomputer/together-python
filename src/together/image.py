@@ -39,6 +39,5 @@ class Image:
         response = create_post_request(
             together.api_base_complete, json=parameter_payload
         )
-        if not response:
-            return {}
+
         return response_to_dict(response)

@@ -5,8 +5,12 @@ import json
 
 from tabulate import tabulate
 
+import together
 from together import Files
-from together.utils import bytes_to_human_readable, extract_time
+from together.utils import bytes_to_human_readable, extract_time, get_logger
+
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -123,7 +127,11 @@ def _add_retrieve_content(
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    response = Files.list()
+    try:
+        response = Files.list()
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     response["data"].sort(key=extract_time)
     if args.raw:
         print(json.dumps(response, indent=4))
@@ -146,22 +154,40 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_check(args: argparse.Namespace) -> None:
-    response = Files.check(args.file)
+    try:
+        response = Files.check(args.file)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_upload(args: argparse.Namespace) -> None:
-    response = Files.upload(file=args.file, check=not args.no_check, model=args.model)
+    try:
+        response = Files.upload(
+            file=args.file, check=not args.no_check, model=args.model
+        )
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_delete(args: argparse.Namespace) -> None:
-    response = Files.delete(args.file_id)
+    try:
+        response = Files.delete(args.file_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
-    response = Files.retrieve(args.file_id)
+    try:
+        response = Files.retrieve(args.file_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -171,5 +197,9 @@ def _run_retrieve(args: argparse.Namespace) -> None:
 
 
 def _run_retrieve_content(args: argparse.Namespace) -> None:
-    output = Files.retrieve_content(args.file_id, args.output)
+    try:
+        output = Files.retrieve_content(args.file_id, args.output)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(output)

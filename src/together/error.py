@@ -75,6 +75,10 @@ class InstanceError(TogetherException):
         )
 
 
+class RateLimitError(TogetherException):
+    pass
+
+
 class FileTypeError(TogetherException):
     pass
 

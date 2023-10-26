@@ -30,18 +30,11 @@ class Finetune:
     def create(
         self,
         training_file: str,  # training file_id
-        # validation_file: Optional[str] = None,  # validation file_id
         model: str,
         n_epochs: int = 1,
         n_checkpoints: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
-        # warmup_steps: Optional[int] = 0,
-        # train_warmup_steps: Optional[int] = 0,
-        # seq_length: Optional[int] = 2048,
-        # seed: Optional[int] = 42,
-        # fp16: Optional[bool] = True,
-        # checkpoint_steps: Optional[int] = None,
         suffix: Optional[
             str
         ] = None,  # resulting finetuned model name will include the suffix
@@ -177,24 +170,21 @@ class Finetune:
         response = create_post_request(
             together.api_base_finetune, json=parameter_payload
         )
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
     def list(self) -> Dict[str, List[Dict[str, Any]]]:
         # send request
         response = create_get_request(together.api_base_finetune)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[str, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
         response = create_get_request(retrieve_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -202,8 +192,7 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
         response = create_post_request(retrieve_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -212,8 +201,7 @@ class Finetune:
         relative_path = posixpath.join(fine_tune_id, "events")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
         response = create_get_request(retrieve_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -325,26 +313,3 @@ class Finetune:
             session.close()
 
         return output  # this should be output file name
-
-    # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
-    #     model_url = "https://api.together.xyz/api/models"
-    #     delete_url = urllib.parse.urljoin(model_url, model)
-
-    #     headers = {
-    #         "Authorization": f"Bearer {together.api_key}",
-    #     }
-
-    #     # send request
-    #     try:
-    #         response = requests.delete(delete_url, headers=headers)
-    #     except requests.exceptions.RequestException as e:
-    #         raise ValueError(f"Error raised by finetune endpoint: {e}")
-
-    #     try:
-    #         response_json = dict(response.json())
-    #     except Exception as e:
-    #         raise ValueError(
-    #             f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
-    #         )
-
-    #     return response_json

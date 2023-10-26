@@ -6,6 +6,10 @@ import cmd
 import together
 import together.tools.conversation as convo
 from together import Complete
+from together.utils import get_logger
+
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -99,18 +103,22 @@ class OpenChatKitShell(cmd.Cmd):
     def do_say(self, arg: str) -> None:
         self._convo.push_human_turn(arg)
         output = ""
-        for token in self.infer.create_streaming(
-            prompt=self._convo.get_raw_prompt(),
-            model=self.args.model,
-            max_tokens=self.args.max_tokens,
-            stop=self.args.stop,
-            temperature=self.args.temperature,
-            top_p=self.args.top_p,
-            top_k=self.args.top_k,
-            repetition_penalty=self.args.repetition_penalty,
-        ):
-            print(token, end="", flush=True)
-            output += token
+        try:
+            for token in self.infer.create_streaming(
+                prompt=self._convo.get_raw_prompt(),
+                model=self.args.model,
+                max_tokens=self.args.max_tokens,
+                stop=self.args.stop,
+                temperature=self.args.temperature,
+                top_p=self.args.top_p,
+                top_k=self.args.top_k,
+                repetition_penalty=self.args.repetition_penalty,
+            ):
+                print(token, end="", flush=True)
+                output += token
+        except together.AuthenticationError:
+            logger.critical(together.MISSING_API_KEY_MESSAGE)
+            exit(0)
         print("\n")
         self._convo.push_model_response(output)
 

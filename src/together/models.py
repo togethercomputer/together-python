@@ -18,8 +18,7 @@ class Models:
     def list(self) -> List[Any]:
         model_url = urllib.parse.urljoin(together.api_base, "models/info?=")
         response = create_get_request(model_url)
-        if not response:
-            return []
+
         try:
             response_list = list(response.json())
         except Exception as e:
@@ -46,8 +45,7 @@ class Models:
     @classmethod
     def instances(self) -> Dict[str, bool]:
         response = create_get_request(together.api_base_instances)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -56,8 +54,7 @@ class Models:
             together.api_base_instances, f"start?model={model}"
         )
         response = create_post_request(model_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -66,16 +63,14 @@ class Models:
             together.api_base_instances, f"stop?model={model}"
         )
         response = create_post_request(model_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
     def ready(self, model: str) -> List[Any]:
         ready_url = urllib.parse.urljoin(together.api_base, "models/info?name=" + model)
         response = create_get_request(ready_url)
-        if not response:
-            return []
+
         try:
             response_list = list(response.json())
         except Exception as e:
