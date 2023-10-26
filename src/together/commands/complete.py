@@ -131,33 +131,41 @@ def _run_complete(args: argparse.Namespace) -> None:
     complete = Complete()
 
     if args.no_stream:
-        response = complete.create(
-            prompt=args.prompt,
-            model=args.model,
-            max_tokens=args.max_tokens,
-            stop=args.stop,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            top_k=args.top_k,
-            repetition_penalty=args.repetition_penalty,
-            logprobs=args.logprobs,
-        )
+        try:
+            response = complete.create(
+                prompt=args.prompt,
+                model=args.model,
+                max_tokens=args.max_tokens,
+                stop=args.stop,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
+                logprobs=args.logprobs,
+            )
+        except together.AuthenticationError:
+            logger.critical(together.MISSING_API_KEY_MESSAGE)
+            exit(0)
         no_streamer(args, response)
     else:
-        for text in complete.create_streaming(
-            prompt=args.prompt,
-            model=args.model,
-            max_tokens=args.max_tokens,
-            stop=args.stop,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            top_k=args.top_k,
-            repetition_penalty=args.repetition_penalty,
-            raw=args.raw,
-        ):
-            if not args.raw:
-                print(text, end="", flush=True)
-            else:
-                print(text)
+        try:
+            for text in complete.create_streaming(
+                prompt=args.prompt,
+                model=args.model,
+                max_tokens=args.max_tokens,
+                stop=args.stop,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
+                raw=args.raw,
+            ):
+                if not args.raw:
+                    print(text, end="", flush=True)
+                else:
+                    print(text)
+        except together.AuthenticationError:
+            logger.critical(together.MISSING_API_KEY_MESSAGE)
+            exit(0)
         if not args.raw:
             print("\n")

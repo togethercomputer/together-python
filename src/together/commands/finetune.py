@@ -6,8 +6,11 @@ import os
 
 from tabulate import tabulate
 
+import together
 from together import Finetune
-from together.utils import finetune_price_to_dollars, parse_timestamp
+from together.utils import finetune_price_to_dollars, parse_timestamp, get_logger
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -24,7 +27,6 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     _add_download(child_parsers)
     _add_status(child_parsers)
     _add_checkpoints(child_parsers)
-    # _add_delete_model(child_parsers)
 
 
 def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -252,25 +254,32 @@ def _run_create(args: argparse.Namespace) -> None:
             args.batch_size = 144
         else:
             args.batch_size = 32
-
-    response = finetune.create(
-        training_file=args.training_file,  # training file_id
-        model=args.model,
-        n_epochs=args.n_epochs,
-        n_checkpoints=args.n_checkpoints,
-        batch_size=args.batch_size,
-        learning_rate=args.learning_rate,
-        suffix=args.suffix,
-        estimate_price=args.estimate_price,
-        wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
-        confirm_inputs=not args.quiet,
-    )
+    try:
+        response = finetune.create(
+            training_file=args.training_file,  # training file_id
+            model=args.model,
+            n_epochs=args.n_epochs,
+            n_checkpoints=args.n_checkpoints,
+            batch_size=args.batch_size,
+            learning_rate=args.learning_rate,
+            suffix=args.suffix,
+            estimate_price=args.estimate_price,
+            wandb_api_key=args.wandb_api_key if not args.no_wandb_api_key else None,
+            confirm_inputs=not args.quiet,
+        )
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
 
     print(json.dumps(response, indent=4))
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    response = Finetune.list()
+    try:
+        response = Finetune.list()
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     response["data"].sort(key=lambda x: parse_timestamp(x["created_at"]))
     if args.raw:
         print(json.dumps(response, indent=4))
@@ -293,7 +302,11 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_retrieve(args: argparse.Namespace) -> None:
-    response = Finetune.retrieve(args.fine_tune_id)
+    try:
+        response = Finetune.retrieve(args.fine_tune_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -307,12 +320,20 @@ def _run_retrieve(args: argparse.Namespace) -> None:
 
 
 def _run_cancel(args: argparse.Namespace) -> None:
-    response = Finetune.cancel(args.fine_tune_id)
+    try:
+        response = Finetune.cancel(args.fine_tune_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_list_events(args: argparse.Namespace) -> None:
-    response = Finetune.list_events(args.fine_tune_id)
+    try:
+        response = Finetune.list_events(args.fine_tune_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -330,16 +351,28 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 
 def _run_download(args: argparse.Namespace) -> None:
-    response = Finetune.download(args.fine_tune_id, args.output, args.checkpoint_step)
+    try:
+        response = Finetune.download(args.fine_tune_id, args.output, args.checkpoint_step)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(response)
 
 
 def _run_status(args: argparse.Namespace) -> None:
-    response = Finetune.get_job_status(args.fine_tune_id)
+    try:
+        response = Finetune.get_job_status(args.fine_tune_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(response)
 
 
 def _run_checkpoint(args: argparse.Namespace) -> None:
-    checkpoints = Finetune.get_checkpoints(args.fine_tune_id)
+    try:
+        checkpoints = Finetune.get_checkpoints(args.fine_tune_id)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(checkpoints, indent=4))
     print(f"\n{len(checkpoints)} checkpoints found")

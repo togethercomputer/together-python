@@ -21,6 +21,10 @@ default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
 log_level = "WARNING"
 
+MISSING_API_KEY_MESSAGE = """TOGETHER_API_KEY not found.
+Please set it as an environment variable or set it as together.api_key
+Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"""
+
 MAX_CONNECTION_RETRIES = 2
 BACKOFF_FACTOR = 0.2
 
@@ -49,6 +53,7 @@ __all__ = [
     "Finetune",
     "Image",
     "MAX_CONNECTION_RETRIES",
+    "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",
     "min_samples",
 ]

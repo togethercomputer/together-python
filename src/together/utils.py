@@ -53,20 +53,9 @@ def get_logger(
     return logger
 
 
-def verify_api_key(logger: Optional[logging.Logger] = None) -> bool:
-    if logger is None:
-        logger = get_logger(str(__name__), log_level=together.log_level)
+def verify_api_key() -> None:
     if together.api_key is None:
-        msg = (
-            "TOGETHER_API_KEY not found \n"
-            "Please set it as an environment variable or set it as together.api_key \n"
-            "Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"
-        )
-        print(msg)
-        return False
-    else:
-        return True
-
+        raise together.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
 
 def extract_time(json_obj: Dict[str, Any]) -> int:
     try:
@@ -91,10 +80,9 @@ def create_post_request(
     json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
-) -> Union[requests.Response, None]:
+) -> requests.Response:
     if check_auth:
-        if not verify_api_key():
-            return None
+        verify_api_key()
 
     if not headers:
         headers = {
@@ -110,9 +98,11 @@ def create_post_request(
         raise together.ResponseError(e)
 
     if response.status_code == 429:
-        raise together.InstanceError()
+        raise together.RateLimitError(message="Too many requests received. Please pace your requests.")
     elif response.status_code == 500:
         raise Exception("Invalid API key supplied.")
+    elif response.status_code == 401:
+        raise Exception("API Key not supplied")
     response.raise_for_status()
 
     return response
@@ -128,10 +118,9 @@ def create_get_request(
     json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
-) -> Union[requests.Response, None]:
+) -> requests.Response:
     if check_auth:
-        if not verify_api_key():
-            return None
+        verify_api_key()
 
     if not headers:
         headers = {
@@ -147,9 +136,11 @@ def create_get_request(
         raise together.ResponseError(e)
 
     if response.status_code == 429:
-        raise together.InstanceError()
+        raise together.RateLimitError(message="Too many requests received. Please pace your requests.")
     elif response.status_code == 500:
         raise Exception("Invalid API key supplied.")
+    elif response.status_code == 401:
+        raise Exception("API Key not supplied")
     response.raise_for_status()
 
     return response

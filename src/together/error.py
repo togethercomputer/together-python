@@ -74,6 +74,8 @@ class InstanceError(TogetherException):
             message, http_body, http_status, json_body, headers
         )
 
+class RateLimitError(TogetherException):
+    pass
 
 class FileTypeError(TogetherException):
     pass

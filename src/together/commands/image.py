@@ -124,16 +124,19 @@ def _save_image(args: argparse.Namespace, response: Dict[str, Any]) -> None:
 
 def _run_complete(args: argparse.Namespace) -> None:
     complete = Image()
-
-    response = complete.create(
-        prompt=args.prompt,
-        model=args.model,
-        steps=args.steps,
-        seed=args.seed,
-        results=args.results,
-        height=args.height,
-        width=args.width,
-        negative_prompt=args.negative_prompt,
-    )
+    try:
+        response = complete.create(
+            prompt=args.prompt,
+            model=args.model,
+            steps=args.steps,
+            seed=args.seed,
+            results=args.results,
+            height=args.height,
+            width=args.width,
+            negative_prompt=args.negative_prompt,
+        )
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
 
     _save_image(args, response)

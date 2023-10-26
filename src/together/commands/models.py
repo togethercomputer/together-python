@@ -6,6 +6,9 @@ import json
 from tabulate import tabulate
 
 import together
+from together.utils import get_logger
+
+logger = get_logger(str(__name__))
 
 
 def add_parser(
@@ -115,7 +118,11 @@ def _add_ready(
 
 
 def _run_list(args: argparse.Namespace) -> None:
-    response = together.Models.list()
+    try:
+        response = together.Models.list()
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -147,7 +154,11 @@ def _run_list(args: argparse.Namespace) -> None:
 
 
 def _run_info(args: argparse.Namespace) -> None:
-    model_info = together.Models.info(args.model)
+    try:
+        model_info = together.Models.info(args.model)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
 
     if args.raw:
         print(json.dumps(model_info, indent=4))
@@ -176,7 +187,12 @@ def _run_info(args: argparse.Namespace) -> None:
 
 
 def _run_instances(args: argparse.Namespace) -> None:
-    response = together.Models.instances()
+    try:
+        response = together.Models.instances()
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
+
     if args.raw:
         print(json.dumps(response, indent=4))
     else:
@@ -185,15 +201,27 @@ def _run_instances(args: argparse.Namespace) -> None:
 
 
 def _run_start(args: argparse.Namespace) -> None:
-    response = together.Models.start(args.model)
+    try:
+        response = together.Models.start(args.model)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_stop(args: argparse.Namespace) -> None:
-    response = together.Models.stop(args.model)
+    try:
+        response = together.Models.stop(args.model)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))
 
 
 def _run_ready(args: argparse.Namespace) -> None:
-    response = together.Models.ready(args.model)
+    try:
+        response = together.Models.ready(args.model)
+    except together.AuthenticationError:
+        logger.critical(together.MISSING_API_KEY_MESSAGE)
+        exit(0)
     print(json.dumps(response, indent=4))

@@ -32,8 +32,7 @@ class Files:
     def list(self) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
         # send request
         response = create_get_request(together.api_base_files)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
@@ -173,8 +172,7 @@ class Files:
         retrieve_url = urllib.parse.urljoin(together.api_base_files, file_id)
         logger.info(f"Retrieve URL: {retrieve_url}")
         response = create_get_request(retrieve_url)
-        if not response:
-            return {}
+
         return response_to_dict(response)
 
     @classmethod
