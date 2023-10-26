@@ -1,7 +1,7 @@
 import logging
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import requests
 import sseclient  # type: ignore
@@ -57,6 +57,7 @@ def verify_api_key() -> None:
     if together.api_key is None:
         raise together.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
 
+
 def extract_time(json_obj: Dict[str, Any]) -> int:
     try:
         return int(json_obj["created_at"])
@@ -98,7 +99,9 @@ def create_post_request(
         raise together.ResponseError(e)
 
     if response.status_code == 429:
-        raise together.RateLimitError(message="Too many requests received. Please pace your requests.")
+        raise together.RateLimitError(
+            message="Too many requests received. Please pace your requests."
+        )
     elif response.status_code == 500:
         raise Exception("Invalid API key supplied.")
     elif response.status_code == 401:
@@ -136,7 +139,9 @@ def create_get_request(
         raise together.ResponseError(e)
 
     if response.status_code == 429:
-        raise together.RateLimitError(message="Too many requests received. Please pace your requests.")
+        raise together.RateLimitError(
+            message="Too many requests received. Please pace your requests."
+        )
     elif response.status_code == 500:
         raise Exception("Invalid API key supplied.")
     elif response.status_code == 401:

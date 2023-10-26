@@ -164,7 +164,9 @@ def _run_check(args: argparse.Namespace) -> None:
 
 def _run_upload(args: argparse.Namespace) -> None:
     try:
-        response = Files.upload(file=args.file, check=not args.no_check, model=args.model)
+        response = Files.upload(
+            file=args.file, check=not args.no_check, model=args.model
+        )
     except together.AuthenticationError:
         logger.critical(together.MISSING_API_KEY_MESSAGE)
         exit(0)

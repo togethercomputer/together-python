@@ -8,6 +8,7 @@ from tabulate import tabulate
 import together
 from together.utils import get_logger
 
+
 logger = get_logger(str(__name__))
 
 

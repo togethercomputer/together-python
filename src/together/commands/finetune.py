@@ -8,7 +8,8 @@ from tabulate import tabulate
 
 import together
 from together import Finetune
-from together.utils import finetune_price_to_dollars, parse_timestamp, get_logger
+from together.utils import finetune_price_to_dollars, get_logger, parse_timestamp
+
 
 logger = get_logger(str(__name__))
 
@@ -352,7 +353,9 @@ def _run_list_events(args: argparse.Namespace) -> None:
 
 def _run_download(args: argparse.Namespace) -> None:
     try:
-        response = Finetune.download(args.fine_tune_id, args.output, args.checkpoint_step)
+        response = Finetune.download(
+            args.fine_tune_id, args.output, args.checkpoint_step
+        )
     except together.AuthenticationError:
         logger.critical(together.MISSING_API_KEY_MESSAGE)
         exit(0)

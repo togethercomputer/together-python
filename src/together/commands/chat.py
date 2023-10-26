@@ -8,7 +8,9 @@ import together.tools.conversation as convo
 from together import Complete
 from together.utils import get_logger
 
+
 logger = get_logger(str(__name__))
+
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "chat"
