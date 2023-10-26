@@ -1,8 +1,4 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "together"
 version = "0.2.5"
 authors = [
@@ -18,31 +14,29 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 
-dependencies = [
-    "typer==0.9.0",
-    "requests==2.31.0",
-    "tqdm==4.66.1",
-    "sseclient-py==1.7.2",
-    "tabulate==0.9.0",
-]
+[tool.poetry.dependencies]
+typer = "^0.9.0"
+requests = "^2.31.0"
+tqdm = "^4.66.1"
+sseclient-py = "^1.7.2"
+tabulate = "^0.9.0"
 
-[project.optional-dependencies]
-quality = [
-    "black~=23.1", 
-    "ruff>=0.0.241,<=0.0.259", 
-    "mypy>=1.3.0", 
-    "types-requests>=2.31.0.1", 
-    "types-tqdm>=4.65.0.0", 
-    "types-tabulate==0.9.0.3"
-]
-tests = ["pytest==7.4.2"]
-tokenize = ["transformers>=4.33.2"]
+[tool.poetry.group.quality.dependencies]
+black = "^23.1"
+ruff = "^0.0.241" 
+mypy = "^1.3.0"
+types-requests = "^2.31.0.1"
+types-tqdm = "^4.65.0.0"
+types-tabulate = "^0.9.0.3"
 
-[project.urls]
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.4.2"
+
+[tool.poetry.urls]
 "Homepage" = "https://github.com/togethercomputer/together"
 "Bug Tracker" = "https://github.com/togethercomputer/together/issues"
 
-[project.scripts]
+[tool.poetry.scripts]
 together = "together.cli.cli:main"
 
 [tool.black]
@@ -61,6 +55,6 @@ select = ["C", "E", "F", "I", "W"]
 lines-after-imports = 2
 known-first-party = ["together"]
 
-[mypy]
+[tool.mypy]
 strict = true
 mypy_path = "."
