@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 import requests
-import sseclient  # type: ignore
+import sseclient
 
 import together
 
@@ -112,7 +112,7 @@ def create_post_request(
 
 
 def sse_client(response: requests.Response) -> sseclient.SSEClient:
-    return sseclient.SSEClient(response)
+    return sseclient.SSEClient(response)  # type: ignore
 
 
 def create_get_request(
