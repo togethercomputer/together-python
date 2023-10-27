@@ -1,1 +1,6 @@
-VERSION = "0.2.5"
+import importlib.metadata
+
+
+VERSION = importlib.metadata.version(
+    "together"
+)  # gets version number from pyproject.toml

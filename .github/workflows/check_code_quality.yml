@@ -26,30 +26,33 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Create and start a virtual environment
-      run: |
-        python -m venv venv
-        source venv/bin/activate
+
+    - name: Install poetry
+      run: curl -sSL https://install.python-poetry.org | python3 -
+
+    - name: Set up cache
+      uses: actions/cache@v2.1.6
+      with:
+        path: .venv
+        key: venv-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+
     - name: Install dependencies
       run: |
-        source venv/bin/activate
-        pip install --upgrade pip
-        pip install .[quality]
-        pip install .[tests]
+        poetry config virtualenvs.in-project true
+        poetry install --with quality,tests
+
     - name: Check formatting with mypy
       run: |
-        source venv/bin/activate
-        pip install types-requests
-        mypy --strict .
+        poetry run mypy --strict .
+
     - name: Check style with black
       run: |
-        source venv/bin/activate
-        black --check .
+        poetry run black --check .
+
     - name: Check style with ruff
       run: |
-        source venv/bin/activate
-        ruff .
+        poetry run ruff .
