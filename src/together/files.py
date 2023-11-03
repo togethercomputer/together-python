@@ -2,6 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
+import warnings
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
@@ -9,11 +10,8 @@ from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.utils import (
-    create_get_request,
-    get_logger,
-    response_to_dict,
-)
+from together.error import ResponseError, ValidationError, parse_error
+from together.utils import create_get_request, response_to_dict
 
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
@@ -22,8 +20,6 @@ NUM_BYTES_IN_GB = 2**30
 # maximum number of GB sized files we support finetuning for
 MAX_FT_GB = 4.9
 
-logger = get_logger(str(__name__))
-
 
 class Files:
     @classmethod
@@ -31,7 +27,7 @@ class Files:
         # send request
         response = create_get_request(together.api_base_files)
 
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def check(self, file: str) -> Dict[str, object]:
@@ -54,7 +50,7 @@ class Files:
         if check:
             report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
-                raise together.FileTypeError(
+                raise ValidationError(
                     f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
                 )
         else:
@@ -64,9 +60,6 @@ class Files:
 
         init_endpoint = together.api_base_files[:-1]
 
-        logger.debug(
-            f"Upload file POST request: data={data}, headers={headers}, URL={init_endpoint}, allow_redirects=False"
-        )
         try:
             response = session.post(
                 init_endpoint,
@@ -75,33 +68,11 @@ class Files:
                 allow_redirects=False,
             )
 
-            logger.debug(f"Response text: {response.text}")
-            logger.debug(f"Response header: {response.headers}")
-            logger.debug(f"Response status code: {response.status_code}")
-
-            if response.status_code == 401:
-                logger.critical(
-                    "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
-                )
-                raise together.AuthenticationError(
-                    "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
-                )
-            elif response.status_code != 302:
-                logger.critical(
-                    f"Unexpected error raised by endpoint. Response status code: {response.status_code}"
-                )
-                raise together.ResponseError(
-                    "Unexpected error raised by endpoint.",
-                    http_status=response.status_code,
-                )
+            if response.status_code != 302:
+                raise parse_error(status_code=response.status_code)
 
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
-
-            logger.info(f"R2 Signed URL: {r2_signed_url}")
-            logger.info(f"File-ID: {file_id}")
-
-            logger.info("Uploading file...")
 
             file_size = os.stat(file).st_size
             progress_bar = tqdm(
@@ -113,9 +84,6 @@ class Files:
                 response = requests.put(r2_signed_url, data=wrapped_file)
                 response.raise_for_status()
 
-            logger.info("File uploaded.")
-            logger.debug(f"status code: {response.status_code}")
-            logger.info("Processing file...")
             preprocess_url = urllib.parse.urljoin(
                 together.api_base_files, f"{file_id}/preprocess"
             )
@@ -125,16 +93,8 @@ class Files:
                 headers=headers,
             )
 
-            logger.info("File processed")
-            logger.debug(f"Status code: {response.status_code}")
-
         except Exception as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
-
-        # output_dict["filename"] = os.path.basename(file)
-        # output_dict["id"] = str(file_id)
-        # output_dict["object"] = "file"
+            raise ResponseError(e)
 
         return {
             "filename": os.path.basename(file),
@@ -157,20 +117,19 @@ class Files:
             response = requests.delete(delete_url, headers=headers)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
-        return response_to_dict(response)
+        response_json = response_to_dict(response)
+
+        return response_json
 
     @classmethod
     def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
         retrieve_url = urllib.parse.urljoin(together.api_base_files, file_id)
 
-        logger.info(f"Retrieve URL: {retrieve_url}")
-
         response = create_get_request(retrieve_url)
 
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:
@@ -205,13 +164,12 @@ class Files:
             progress_bar.close()
 
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                logger.warning(
+                warnings.warn(
                     "Caution: Downloaded file size does not match remote file size."
                 )
 
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
         return output  # this should be null
 

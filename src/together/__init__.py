@@ -24,7 +24,6 @@ log_level = "WARNING"
 min_samples = 100
 
 from .complete import Complete
-from .error import *
 from .files import Files
 from .finetune import Finetune
 from .image import Image

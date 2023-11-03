@@ -1,5 +1,4 @@
 import logging
-import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
 
@@ -7,7 +6,7 @@ import requests
 import sseclient  # type: ignore
 
 import together
-from together.error import TogetherErrorHandler
+from together.error import JSONError, ResponseError, UnauthorizedError, parse_error
 
 
 class TogetherLogFormatter(logging.Formatter):
@@ -34,31 +33,9 @@ class TogetherLogFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-# Setup logging
-def get_logger(
-    name: str,
-    logger: Optional[logging.Logger] = None,
-    log_level: str = together.log_level,
-) -> logging.Logger:
-    if logger is None:
-        logger = logging.getLogger(name)
-
-        logger.setLevel(log_level)
-
-        lg_format = logging.StreamHandler(sys.stderr)
-        lg_format.setLevel(logging.DEBUG)
-        lg_format.setFormatter(TogetherLogFormatter())
-
-        logger.addHandler(lg_format)
-
-    return logger
-
-
-def verify_api_key(logger: Optional[logging.Logger] = None) -> None:
-    if logger is None:
-        logger = get_logger(str(__name__), log_level=together.log_level)
+def verify_api_key() -> None:
     if together.api_key is None:
-        raise together.AuthenticationError(
+        raise UnauthorizedError(
             "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key"
         )
 
@@ -80,35 +57,26 @@ def parse_timestamp(timestamp: str) -> datetime:
     raise ValueError("Timestamp does not match any expected format")
 
 
-def create_post_request(
-    url: str,
-    headers: Optional[dict[Any, Any]] = None,
-    json: Optional[dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-) -> requests.Response:
-    if check_auth:
-        verify_api_key()
+def get_headers() -> Dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {together.api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": together.user_agent,
+    }
+    return headers
 
-    if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
 
-    # send request
+def sse_client(response: requests.Response) -> sseclient.SSEClient:
+    return sseclient.SSEClient(response)
+
+
+def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     try:
-        response = requests.post(url, headers=headers, json=json, stream=stream)
-    except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
+        response_json = dict(response.json())
+    except Exception as e:
+        raise JSONError(e, status_code=response.status_code)
 
-    error_handler = TogetherErrorHandler()
-    response, handled = error_handler.handle(response)
-    if not handled:
-        response.raise_for_status()
-
-    return response
+    return response_json
 
 
 def create_get_request(
@@ -117,39 +85,45 @@ def create_get_request(
     json: Optional[dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
-) -> requests.Response:
+) -> Dict[Any, Any]:
     if check_auth:
         verify_api_key()
 
-    if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
+    headers = headers or get_headers()
 
     # send request
     try:
         response = requests.get(url, headers=headers, json=json, stream=stream)
     except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
+        raise ResponseError(e)
 
-    error_handler = TogetherErrorHandler()
-    response, handled = error_handler.handle(response)
-    if not handled:
-        response.raise_for_status()
+    response_json = response_to_dict(response)
+    if response.status_code != 200:
+        raise parse_error(response.status_code, response_json)
 
-    return response
-
-
-def sse_client(response: requests.Response) -> sseclient.SSEClient:
-    return sseclient.SSEClient(response)
+    return response_json
 
 
-def response_to_dict(response: requests.Response) -> dict[Any, Any]:
+def create_post_request(
+    url: str,
+    headers: Optional[dict[Any, Any]] = None,
+    json: Optional[dict[Any, Any]] = None,
+    stream: Optional[bool] = False,
+    check_auth: Optional[bool] = True,
+) -> Dict[Any, Any]:
+    if check_auth:
+        verify_api_key()
+
+    headers = headers or get_headers()
+
+    # send request
     try:
-        response_json = dict(response.json())
-    except Exception as e:
-        raise together.JSONError(e, http_status=response.status_code)
+        response = requests.post(url, headers=headers, json=json, stream=stream)
+    except requests.exceptions.RequestException as e:
+        raise ResponseError(e)
+
+    response_json = response_to_dict(response)
+    if response.status_code != 200:
+        raise parse_error(response.status_code, response_json)
 
     return response_json

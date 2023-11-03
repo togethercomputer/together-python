@@ -1,127 +1,145 @@
-from typing import Any, Dict, Optional, Union
-
-from requests import RequestException, Response
+from typing import Dict, Optional, Union
 
 
 class TogetherError(Exception):
     def __init__(
-        self,
-        message: Optional[
-            Union[Exception, str, RequestException]
-        ] = "Unknown exception raised",
-        http_body: Optional[str] = None,
-        http_status: Optional[int] = None,
-        json_body: Optional[Any] = None,
-        headers: Optional[Union[str, Dict[Any, Any]]] = None,
-        request_id: Optional[str] = None,
-    ) -> None:
-        super(TogetherError, self).__init__(message)
-
-        if http_body and hasattr(http_body, "decode"):
-            try:
-                http_body = http_body.decode("utf-8")
-            except BaseException:
-                http_body = (
-                    "<Could not decode body as utf-8. "
-                    "Please contact us via email at support@together.ai>"
-                )
-
-        self._message = message
-        self._http_body = http_body
-        self._http_status = http_status
-        self._json_body = json_body
-        self._headers = headers or {}
-        self._request_id = request_id
-
-    def __str__(self) -> str:
-        msg = self._message
-        if self._request_id:
-            msg = f"Request {self._request_id}: {self._message}"
-        if self._http_status:
-            msg += f", HTTP status: {self._http_status}"
-        return msg
-
-    def __repr__(self) -> str:
-        return "%s(message=%r, http_status=%r, request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self._http_status,
-            self._request_id,
-        )
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        if status_code:
+            message = f"[{status_code}] {message}"
+        super().__init__(message)
 
 
-class AuthenticationError(TogetherError):
-    pass
+class UnauthorizedError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
 class ResponseError(TogetherError):
-    pass
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
 class JSONError(TogetherError):
-    pass
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
+
+
+class FileTypeError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
 class InstanceError(TogetherError):
     def __init__(
-        self,
-        message: Optional[str] = None,
-        http_body: Optional[str] = None,
-        http_status: Optional[int] = None,
-        json_body: Optional[Any] = None,
-        headers: Optional[str] = None,
-        model: Optional[str] = "model",
-    ) -> None:
-        message = f"""No running instances for {model}. You can start an instance with one of the following methods:
-                  1. navigating to the Together Playground at api.together.ai
-                  2. starting one in python using together.Models.start(model_name)
-                  3. `$ together models start <MODEL_NAME>` at the command line.
-                See `together.Models.list()` in python or `$ together models list` in command line to get an updated list of valid model names.
-                """
-        super(InstanceError, self).__init__(
-            message, http_body, http_status, json_body, headers
-        )
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
-class FileTypeError(TogetherError):
-    pass
+class ValidationError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
 class AttributeError(TogetherError):
-    pass
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
 
-class TogetherErrorHandler:
-    def __init__(self, map_dict: dict[int, Any] = None) -> None:
-        default_dict = {
-            400: {"class": None, "message": None},
-            429: {"class": InstanceError, "message": None},
-            500: {"class": Exception, "message": "Invalid API key supplied."},
-        }
+class BadRequestError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
-        self.map_dict = map_dict or default_dict
-        self.response = None
 
-    def exception(self):
-        pass
+class TimeoutError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
-    def pass_exception(self):
-        return self.response, True
 
-    def handle(self, response: Response):
-        self.response = response
-        if response.status_code in self.map_dict.keys():
-            handler_map = self.map_dict[response.status_code]
-            handler = handler_map["class"]
-            handler_message = handler_map["message"]
+class NotFoundError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
-            if not handler:
-                return self.pass_exception()
 
-            if handler_message:
-                raise handler(handler_message)
-            else:
-                raise handler()
+class RateLimitExceededError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
 
-        else:
-            return self.response, False
+
+class APIKeyError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
+
+
+# Unknown error
+class UnknownError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
+
+
+def parse_error(
+    status_code: int,
+    payload: Optional[Dict[str, str]] = None,
+    message: Optional[str] = None,
+) -> Exception:
+    if payload:
+        # Try to parse a Text Generation Inference error
+        error_message = payload.get("error", "Unknown error")
+        if "error_type" in payload:
+            error_type = payload["error_type"]
+            if error_type == "Timeout":
+                return TimeoutError(error_message, status_code)
+            elif error_type == "validation":
+                return ValidationError(error_message, status_code)
+
+    if message:
+        error_message = message
+    else:
+        error_message = "Unknown error"
+
+    # Try to parse a APIInference error
+    if status_code == 302:
+        return ResponseError(error_message, status_code)
+    if status_code == 400:
+        return BadRequestError(error_message, status_code)
+    if status_code == 401:
+        error_message = "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
+        return UnauthorizedError(error_message, status_code)
+    if status_code == 429:
+        return InstanceError(error_message, status_code)
+    if status_code == 500:
+        return APIKeyError(error_message, status_code)
+    if status_code == 504:
+        return TimeoutError(error_message, status_code)
+    if status_code == 404:
+        return NotFoundError(error_message, status_code)
+    if status_code == 429:
+        return RateLimitExceededError(error_message, status_code)
+
+    # Fallback to an unknown error
+    return UnknownError(error_message, status_code)

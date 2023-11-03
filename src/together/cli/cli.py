@@ -3,10 +3,6 @@ import argparse
 
 import together
 from together.commands import chat, complete, files, finetune, image, models
-from together.utils import get_logger
-
-
-logger = get_logger(str(__name__))
 
 
 def main() -> None:
@@ -60,7 +56,7 @@ def main() -> None:
     except AttributeError as e:
         # print error, but ignore if `together` is run.
         if str(e) != "'Namespace' object has no attribute 'func'":
-            raise together.AttributeError(e)
+            raise AttributeError(e)
         parser.print_help()
 
 

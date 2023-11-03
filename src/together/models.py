@@ -2,15 +2,11 @@ import urllib.parse
 from typing import Any, Dict, List
 
 import together
+from together.error import JSONError
 from together.utils import (
     create_get_request,
     create_post_request,
-    get_logger,
-    response_to_dict,
 )
-
-
-logger = get_logger(str(__name__))
 
 
 class Models:
@@ -20,9 +16,9 @@ class Models:
         response = create_get_request(model_url)
 
         try:
-            response_list = list(response.json())
+            response_list = list(response)
         except Exception as e:
-            raise together.ResponseError(e, http_status=response.status_code)
+            raise JSONError(e)
 
         return response_list
 
@@ -46,7 +42,7 @@ class Models:
     @classmethod
     def instances(self) -> Dict[str, bool]:
         response = create_get_request(together.api_base_instances)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def start(self, model: str) -> Dict[str, str]:
@@ -54,7 +50,7 @@ class Models:
             together.api_base_instances, f"start?model={model}"
         )
         response = create_post_request(model_url)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def stop(self, model: str) -> Dict[str, str]:
@@ -62,7 +58,7 @@ class Models:
             together.api_base_instances, f"stop?model={model}"
         )
         response = create_post_request(model_url)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def ready(self, model: str) -> List[Any]:
@@ -70,12 +66,9 @@ class Models:
         response = create_get_request(ready_url)
 
         try:
-            response_list = list(response.json())
+            response_list = list(response)
         except Exception as e:
-            logger.critical(
-                f"JSON Error raised: {e}\nResponse status code = {response.status_code}"
-            )
-            raise together.JSONError(e, http_status=response.status_code)
+            raise JSONError(e)
 
         return response_list
 

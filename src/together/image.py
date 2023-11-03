@@ -1,10 +1,7 @@
 from typing import Any, Dict, Optional
 
 import together
-from together.utils import create_post_request, get_logger, response_to_dict
-
-
-logger = get_logger(str(__name__))
+from together.utils import create_post_request
 
 
 class Image:
@@ -40,4 +37,4 @@ class Image:
             together.api_base_complete, json=parameter_payload
         )
 
-        return response_to_dict(response)
+        return response

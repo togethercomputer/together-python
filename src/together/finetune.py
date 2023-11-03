@@ -1,5 +1,6 @@
 import posixpath
 import urllib.parse
+import warnings
 from typing import Any, Dict, List, Optional, Union
 
 import requests
@@ -7,15 +8,11 @@ from tqdm import tqdm
 
 import together
 from together import Files
+from together.error import FileTypeError, ResponseError
 from together.utils import (
     create_get_request,
     create_post_request,
-    get_logger,
-    response_to_dict,
 )
-
-
-logger = get_logger(str(__name__))
 
 
 class Finetune:
@@ -43,20 +40,21 @@ class Finetune:
         wandb_api_key: Optional[str] = None,
     ) -> Dict[Any, Any]:
         if n_epochs is None or n_epochs < 1:
-            logger.critical("The number of epochs must be specified")
-            raise ValueError("n_epochs is required")
+            raise ValueError(
+                "The number of epochs must be specified. n_epochs is required."
+            )
 
         # Validate parameters
         if n_checkpoints is None:
             n_checkpoints = 1
         elif n_checkpoints < 1:
             n_checkpoints = 1
-            logger.warning(
+            warnings.warn(
                 f"The number of checkpoints must be >= 1, setting to {n_checkpoints}"
             )
         elif n_checkpoints > n_epochs:
             n_checkpoints = n_epochs
-            logger.warning(
+            warnings.warn(
                 f"The number of checkpoints must be < the number of epochs, setting to {n_checkpoints}"
             )
 
@@ -117,14 +115,13 @@ class Finetune:
                 "$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')"
                 "Python API or `$ together files upload <FILE_PATH>` CLI."
             )
-            logger.critical(training_file_feedback)
-            raise together.FileTypeError(training_file_feedback)
+            raise FileTypeError(training_file_feedback)
 
         if estimate_price:
             param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
-                raise together.FileTypeError(error)
+                raise FileTypeError(error)
 
             for file in uploaded_files["data"]:
                 if file["id"] == parameter_payload["training_file"]:
@@ -156,26 +153,26 @@ class Finetune:
             together.api_base_finetune, json=parameter_payload
         )
 
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
         # send request
         response = create_get_request(together.api_base_finetune)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
         response = create_get_request(retrieve_url)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def cancel(self, fine_tune_id: str) -> Dict[Any, Any]:
         relative_path = posixpath.join(fine_tune_id, "cancel")
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
         response = create_post_request(retrieve_url)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def list_events(self, fine_tune_id: str) -> Dict[Any, Any]:
@@ -184,15 +181,14 @@ class Finetune:
         retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
 
         response = create_get_request(retrieve_url)
-        return response_to_dict(response)
+        return response
 
     @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
         saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
 
@@ -203,8 +199,7 @@ class Finetune:
         try:
             job_status = str(self.retrieve(fine_tune_id=fine_tune_id)["status"])
         except Exception as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
         return job_status
 
@@ -213,8 +208,7 @@ class Finetune:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
         for i in finetune_events:
             if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
@@ -265,7 +259,7 @@ class Finetune:
                 elif "zstd" in content_type.lower() or step != -1:
                     output += ".tar.zst"
                 else:
-                    raise together.ResponseError(
+                    raise ResponseError(
                         f"Unknown file type {content_type} found. Aborting download."
                     )
 
@@ -279,12 +273,11 @@ class Finetune:
                     file.write(chunk)
             progress_bar.close()
             if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                logger.warning(
+                warnings.warn(
                     "Caution: Downloaded file size does not match remote file size."
                 )
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            logger.critical(f"Response error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
         return output  # this should be null
 

@@ -8,10 +8,7 @@ from typing import Any, Dict
 
 import together
 from together import Image
-from together.utils import get_logger
-
-
-logger = get_logger(str(__name__))
+from together.error import ResponseError
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -105,21 +102,13 @@ def _save_image(args: argparse.Namespace, response: Dict[str, Any]) -> None:
                     f.write(base64.b64decode(images[i]["image_base64"]))
                 print(f"Image saved to {args.output_prefix}-{i}.png")
         except Exception as e:  # This is the correct syntax
-            logger.critical(f"Error raised: {e}")
-            raise together.ResponseError(e)
+            raise ResponseError(e)
 
     elif "error" in response.keys():
-        if response["error"] == "Returned error: no instance":
-            logger.critical(
-                f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
-            )
-            raise together.InstanceError(model=args.model)
-        else:
-            logger.critical(f"Error raised: {response['error']}")
+        raise Exception(f"Error raised: {response['error']}")
 
     else:
-        logger.critical("Unknown response received.")
-        raise together.ResponseError("Unknown response received.")
+        raise ResponseError("Unknown response received.")
 
 
 def _run_complete(args: argparse.Namespace) -> None:

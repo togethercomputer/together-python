@@ -3,14 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from typing import Any, Dict, List
+import typing
+from typing import List
 
 import together
 from together import Complete
-from together.utils import get_logger
-
-
-logger = get_logger(str(__name__))
+from together.error import ResponseError
+from together.tools.types import Choice, TogetherResponse
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -79,16 +78,22 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         help="Controls the diversity of generated text by reducing the likelihood of repeated sequences. Higher values decrease repetition.",
     )
     subparser.add_argument(
-        "--logprobs",
+        "--seed",
         default=None,
         type=int,
-        help="Specifies how many top token log probabilities are included in the response for each token generation step.",
+        help="Specifies generation seed",
+    )
+    subparser.add_argument(
+        "--details",
+        default=False,
+        action="store_true",
+        help="Return details with generation",
     )
     subparser.add_argument(
         "--raw",
         default=False,
         action="store_true",
-        help="temperature for the LM",
+        help="Return raw response from API",
     )
     subparser.set_defaults(func=_run_complete)
 
@@ -98,40 +103,25 @@ def _enforce_stop_tokens(text: str, stop: List[str]) -> str:
     return re.split("|".join(stop), text)[0]
 
 
-def no_streamer(args: argparse.Namespace, response: Dict[str, Any]) -> None:
+def no_streamer(args: argparse.Namespace, response: TogetherResponse) -> None:
     if args.raw:
-        print(json.dumps(response, indent=4))
+        print(json.dumps(response.model_dump(), indent=4))
 
     else:
-        if "output" in response.keys():
-            if "choices" in dict(response["output"]).keys():
-                text = str(response["output"]["choices"][0]["text"])
-                print(text.strip())
-            elif "error" in dict(response["output"]).keys():
-                raise together.ResponseError(response["output"]["error"])
-            else:
-                raise together.ResponseError(
-                    f"Unknown error occured. Received unhandled response: {response}"
-                )
-
-        elif "error" in response.keys():
-            if response["error"] == "Returned error: no instance":
-                message = f"No running instances for {args.model}. You can start an instance by navigating to the Together Playground at api.together.xyz"
-                raise together.InstanceError(model=args.model, message=message)
-            else:
-                raise together.ResponseError(
-                    message=f"Error raised: {response['error']}"
-                )
-
+        if response.choices:
+            text = str(response.choices[0].text)
+            print(text.strip())
+        elif response.error:
+            raise ResponseError(response.error)
         else:
-            raise together.ResponseError("Unknown response received. Please try again.")
+            raise ResponseError(
+                f"Unknown error occured. Received unhandled response: {response}"
+            )
 
 
 def _run_complete(args: argparse.Namespace) -> None:
-    complete = Complete()
-
     if args.no_stream:
-        response = complete.create(
+        response = Complete.create(
             prompt=args.prompt,
             model=args.model,
             max_tokens=args.max_tokens,
@@ -140,11 +130,14 @@ def _run_complete(args: argparse.Namespace) -> None:
             top_p=args.top_p,
             top_k=args.top_k,
             repetition_penalty=args.repetition_penalty,
-            logprobs=args.logprobs,
+            details=args.details,
+            seed=args.seed,
+            stream=False,
         )
-        no_streamer(args, response)
+
+        no_streamer(args, typing.cast(TogetherResponse, response))
     else:
-        for text in complete.create_streaming(
+        for token in Complete.create(
             prompt=args.prompt,
             model=args.model,
             max_tokens=args.max_tokens,
@@ -153,11 +146,16 @@ def _run_complete(args: argparse.Namespace) -> None:
             top_p=args.top_p,
             top_k=args.top_k,
             repetition_penalty=args.repetition_penalty,
+            details=args.details,
+            seed=args.seed,
+            stream=True,
             raw=args.raw,
         ):
+            token = typing.cast(TogetherResponse, token)
+            choices = typing.cast(List[Choice], token.choices)
             if not args.raw:
-                print(text, end="", flush=True)
+                print(choices[0].text, end="", flush=True)
             else:
-                print(text)
+                print(token)
         if not args.raw:
             print("\n")
