@@ -10,7 +10,7 @@ class TogetherError(Exception):
         super().__init__(message)
 
 
-class UnauthorizedError(TogetherError):
+class AuthenticationError(TogetherError):
     def __init__(
         self, message: Union[str, Exception], status_code: Optional[int] = None
     ):
@@ -93,6 +93,12 @@ class APIKeyError(TogetherError):
     ):
         super().__init__(message, status_code)
 
+class ConnectionError(TogetherError):
+    def __init__(
+        self, message: Union[str, Exception], status_code: Optional[int] = None
+    ):
+        super().__init__(message, status_code)
+
 
 # Unknown error
 class UnknownError(TogetherError):
@@ -129,7 +135,7 @@ def parse_error(
         return BadRequestError(error_message, status_code)
     if status_code == 401:
         error_message = "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
-        return UnauthorizedError(error_message, status_code)
+        return AuthenticationError(error_message, status_code)
     if status_code == 429:
         return InstanceError(error_message, status_code)
     if status_code == 500:

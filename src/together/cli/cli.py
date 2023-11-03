@@ -27,16 +27,6 @@ def main() -> None:
         default=None,
     )
 
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        default=together.log_level,
-        choices=["CRITICAL", "ERROR", "WARNING", "SUCCESS", "INFO", "DEBUG", "TRACE"],
-        type=str,
-        help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
-        required=False,
-    )
-
     subparser = parser.add_subparsers(dest="base")
 
     models.add_parser(subparser)
@@ -47,9 +37,6 @@ def main() -> None:
     finetune.add_parser(subparser)
 
     args = parser.parse_args()
-
-    # Setup logging
-    together.log_level = args.verbose
 
     try:
         args.func(args)

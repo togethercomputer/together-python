@@ -2,7 +2,7 @@ import urllib.parse
 from typing import Any, Dict, List
 
 import together
-from together.error import JSONError
+from together import error
 from together.utils import (
     create_get_request,
     create_post_request,
@@ -18,7 +18,7 @@ class Models:
         try:
             response_list = list(response)
         except Exception as e:
-            raise JSONError(e)
+            raise error.JSONError(e)
 
         return response_list
 
@@ -68,7 +68,7 @@ class Models:
         try:
             response_list = list(response)
         except Exception as e:
-            raise JSONError(e)
+            raise error.JSONError(e)
 
         return response_list
 

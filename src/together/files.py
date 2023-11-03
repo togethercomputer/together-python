@@ -10,8 +10,9 @@ from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 import together
-from together.error import ResponseError, ValidationError, parse_error
-from together.utils import create_get_request, response_to_dict
+from together import error
+from together.engine import Requestor
+from together.utils import check_status, response_to_dict
 
 
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
@@ -25,9 +26,12 @@ class Files:
     @classmethod
     def list(self) -> Dict[str, List[Dict[str, Union[str, int]]]]:
         # send request
-        response = create_get_request(together.api_base_files)
-
-        return response
+        requestor = Requestor()
+        response = requestor.request(method="get", path=together.api_files_path)
+        response_json = response_to_dict(response)
+        if response.status_code != 200:
+            raise error.parse_error(response.status_code, response_json)
+        return response_json
 
     @classmethod
     def check(self, file: str) -> Dict[str, object]:
@@ -40,61 +44,56 @@ class Files:
         check: bool = True,
         model: Optional[str] = None,
     ) -> Mapping[str, Union[str, int, Any]]:
+        requestor = Requestor()
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
 
         if check:
             report_dict = check_json(file)
             if not report_dict["is_check_passed"]:
-                raise ValidationError(
+                raise error.ValidationError(
                     f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
                 )
         else:
             report_dict = {}
 
-        session = requests.Session()
-
-        init_endpoint = together.api_base_files[:-1]
-
         try:
-            response = session.post(
-                init_endpoint,
+            response = requestor.request(
+                method="post",
+                path=together.api_files_path[:-1],
                 data=data,
-                headers=headers,
                 allow_redirects=False,
+                override_content_type=True,
             )
 
             if response.status_code != 302:
-                raise parse_error(status_code=response.status_code)
+                print(response.text)
+                raise error.parse_error(status_code=response.status_code)
 
+            # Get info from headers and file
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
-
             file_size = os.stat(file).st_size
+
+            # Progress bar
             progress_bar = tqdm(
                 total=file_size, unit="B", unit_scale=True, unit_divisor=1024
             )
             progress_bar.set_description(f"Uploading {file}")
+
             with open(file, "rb") as f:
                 wrapped_file = CallbackIOWrapper(progress_bar.update, f, "read")
-                response = requests.put(r2_signed_url, data=wrapped_file)
+                response = requestor.request(method="put", url=r2_signed_url, data=wrapped_file, override_content_type=True, disable_headers=True)
                 response.raise_for_status()
 
-            preprocess_url = urllib.parse.urljoin(
-                together.api_base_files, f"{file_id}/preprocess"
-            )
+            preprocess_url = together.api_files_path + f"{file_id}/preprocess"
 
-            response = session.post(
-                preprocess_url,
-                headers=headers,
+            response = requestor.request(
+                method="post",
+                path=preprocess_url,
             )
 
         except Exception as e:
-            raise ResponseError(e)
+            raise error.ResponseError(e)
 
         return {
             "filename": os.path.basename(file),
@@ -105,31 +104,27 @@ class Files:
 
     @classmethod
     def delete(self, file_id: str) -> Dict[str, str]:
-        delete_url = urllib.parse.urljoin(together.api_base_files, file_id)
+        delete_url = together.api_files_path + file_id
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
+        requestor = Requestor()
 
-        # send request
-        try:
-            response = requests.delete(delete_url, headers=headers)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            raise ResponseError(e)
-
+        response = requestor.request(method="delete", path=delete_url)
         response_json = response_to_dict(response)
+        check_status(response=response)
 
         return response_json
 
     @classmethod
     def retrieve(self, file_id: str) -> Dict[str, Union[str, int]]:
-        retrieve_url = urllib.parse.urljoin(together.api_base_files, file_id)
+        retrieve_url = together.api_files_path + file_id
 
-        response = create_get_request(retrieve_url)
+        requestor = Requestor()
+        response = requestor.request(method="get", path=retrieve_url)
 
-        return response
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+
+        return response_json
 
     @classmethod
     def retrieve_content(self, file_id: str, output: Union[str, None] = None) -> str:
@@ -137,41 +132,30 @@ class Files:
             output = file_id + ".jsonl"
 
         relative_path = posixpath.join(file_id, "content")
-        retrieve_url = urllib.parse.urljoin(together.api_base_files, relative_path)
+        retrieve_url = together.api_files_path + relative_path
 
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "User-Agent": together.user_agent,
-        }
+        requestor = Requestor()
+        response = requestor.request(method="get", path=retrieve_url, stream=True)
+        response.raise_for_status()
 
-        # send request
-        try:
-            session = requests.Session()
+        total_size_in_bytes = int(response.headers.get("content-length", 0))
+        block_size = 1024 * 1024  # 1 MB
+        progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+        progress_bar.set_description(f"Downloading {output}")
 
-            response = session.get(retrieve_url, headers=headers, stream=True)
-            response.raise_for_status()
+        with open(output, "wb") as file:
+            for chunk in response.iter_content(block_size):
+                progress_bar.update(len(chunk))
+                file.write(chunk)
 
-            total_size_in_bytes = int(response.headers.get("content-length", 0))
-            block_size = 1024 * 1024  # 1 MB
-            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
-            progress_bar.set_description(f"Downloading {output}")
+        progress_bar.close()
 
-            with open(output, "wb") as file:
-                for chunk in response.iter_content(block_size):
-                    progress_bar.update(len(chunk))
-                    file.write(chunk)
+        if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+            warnings.warn(
+                f"Caution: Downloaded file size ({progress_bar.n}) does not match remote file size ({total_size_in_bytes})."
+            )
 
-            progress_bar.close()
-
-            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                warnings.warn(
-                    "Caution: Downloaded file size does not match remote file size."
-                )
-
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ResponseError(e)
-
-        return output  # this should be null
+        return output
 
     @classmethod
     def save_jsonl(

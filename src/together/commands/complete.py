@@ -8,7 +8,7 @@ from typing import List
 
 import together
 from together import Complete
-from together.error import ResponseError
+from together import error
 from together.tools.types import Choice, TogetherResponse
 
 
@@ -112,9 +112,9 @@ def no_streamer(args: argparse.Namespace, response: TogetherResponse) -> None:
             text = str(response.choices[0].text)
             print(text.strip())
         elif response.error:
-            raise ResponseError(response.error)
+            raise error.ResponseError(response.error)
         else:
-            raise ResponseError(
+            raise error.ResponseError(
                 f"Unknown error occured. Received unhandled response: {response}"
             )
 

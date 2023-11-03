@@ -2,12 +2,12 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+import os
 import requests
 import sseclient  # type: ignore
 
 import together
-from together.error import JSONError, ResponseError, UnauthorizedError, parse_error
-
+from together import error
 
 class TogetherLogFormatter(logging.Formatter):
     grey = "\x1b[38;20m"
@@ -35,10 +35,19 @@ class TogetherLogFormatter(logging.Formatter):
 
 def verify_api_key() -> None:
     if together.api_key is None:
-        raise UnauthorizedError(
+        raise error.AuthenticationError(
             "TOGETHER_API_KEY not found. Please set it as an environment variable or set it with together.api_key"
         )
 
+def default_api_key() -> str:
+    if together.api_key is not None:
+        return together.api_key
+    elif os.environ.get("TOGETHER_API_KEY", None):
+        return os.environ.get("TOGETHER_API_KEY", None)
+    else:
+        raise error.AuthenticationError(
+            "Together API Key not provided. Please set it as an environment variable like `TOGETHER_API_KEY=<API-KEY>` or set it with together.api_key. See https://api.together.xyz/settings/api-keys for more information on your API keys."
+        )
 
 def extract_time(json_obj: Dict[str, Any]) -> int:
     try:
@@ -70,11 +79,16 @@ def sse_client(response: requests.Response) -> sseclient.SSEClient:
     return sseclient.SSEClient(response)
 
 
+def check_status(response: requests.Response, response_json: Dict[Any, Any]) -> None:
+    if response.status_code != 200:
+        raise error.parse_error(response.status_code, response_json)
+
+
 def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     try:
         response_json = dict(response.json())
     except Exception as e:
-        raise JSONError(e, status_code=response.status_code)
+        raise error.JSONError(e, status_code=response.status_code)
 
     return response_json
 
@@ -95,11 +109,11 @@ def create_get_request(
     try:
         response = requests.get(url, headers=headers, json=json, stream=stream)
     except requests.exceptions.RequestException as e:
-        raise ResponseError(e)
+        raise error.ResponseError(e)
 
     response_json = response_to_dict(response)
     if response.status_code != 200:
-        raise parse_error(response.status_code, response_json)
+        raise error.parse_error(response.status_code, response_json)
 
     return response_json
 
@@ -120,10 +134,10 @@ def create_post_request(
     try:
         response = requests.post(url, headers=headers, json=json, stream=stream)
     except requests.exceptions.RequestException as e:
-        raise ResponseError(e)
+        raise error.ResponseError(e)
 
     response_json = response_to_dict(response)
     if response.status_code != 200:
-        raise parse_error(response.status_code, response_json)
+        raise error.parse_error(response.status_code, response_json)
 
     return response_json

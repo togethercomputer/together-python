@@ -1,4 +1,4 @@
-import posixpath
+import os
 import urllib.parse
 import warnings
 from typing import Any, Dict, List, Optional, Union
@@ -8,10 +8,13 @@ from tqdm import tqdm
 
 import together
 from together import Files
-from together.error import FileTypeError, ResponseError
+from together import error
+from together.engine import Requestor
 from together.utils import (
     create_get_request,
     create_post_request,
+    response_to_dict,
+    check_status
 )
 
 
@@ -21,18 +24,11 @@ class Finetune:
     def create(
         self,
         training_file: str,  # training file_id
-        # validation_file: Optional[str] = None,  # validation file_id
         model: str,
         n_epochs: int = 1,
         n_checkpoints: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
-        # warmup_steps: Optional[int] = 0,
-        # train_warmup_steps: Optional[int] = 0,
-        # seq_length: Optional[int] = 2048,
-        # seed: Optional[int] = 42,
-        # fp16: Optional[bool] = True,
-        # checkpoint_steps: Optional[int] = None,
         suffix: Optional[
             str
         ] = None,  # resulting finetuned model name will include the suffix
@@ -78,22 +74,16 @@ class Finetune:
             "togethercomputer/llama-2-70b-chat",
         ]:
             raise ValueError(
-                "Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1"
+                f"Saving checkpoints during training currently not supported for {model}.  Please set the number of checkpoints to 1"
             )
 
         parameter_payload = {
             "training_file": training_file,
-            # "validation_file": validation_file,
             "model": model,
             "n_epochs": n_epochs,
             "n_checkpoints": n_checkpoints,
             "batch_size": batch_size,
             "learning_rate": learning_rate,
-            # "warmup_steps": warmup_steps,
-            # "train_warmup_steps": train_warmup_steps,
-            # "seq_length": seq_length,
-            # "seed": seed,
-            # "fp16": fp16,
             "suffix": suffix,
             "wandb_key": wandb_api_key,
         }
@@ -115,13 +105,13 @@ class Finetune:
                 "$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')"
                 "Python API or `$ together files upload <FILE_PATH>` CLI."
             )
-            raise FileTypeError(training_file_feedback)
+            raise error.FileTypeError(training_file_feedback)
 
         if estimate_price:
             param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
-                raise FileTypeError(error)
+                raise error.FileTypeError(error)
 
             for file in uploaded_files["data"]:
                 if file["id"] == parameter_payload["training_file"]:
@@ -149,46 +139,62 @@ class Finetune:
                     exit()
 
         # Send POST request to SUBMIT FINETUNE JOB
-        response = create_post_request(
-            together.api_base_finetune, json=parameter_payload
-        )
-
-        return response
+        requestor = Requestor()
+        response = requestor.request(method="post", path=together.api_finetune_path, json_data=parameter_payload)
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+        return response_json
 
     @classmethod
     def list(self) -> Dict[Any, Any]:
         # send request
-        response = create_get_request(together.api_base_finetune)
-        return response
+        requestor = Requestor()
+        response = requestor.request(method="get", path=together.api_finetune_path)
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+        return response_json
 
     @classmethod
     def retrieve(self, fine_tune_id: str) -> Dict[Any, Any]:
-        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, fine_tune_id)
-        response = create_get_request(retrieve_url)
-        return response
+        path = together.api_finetune_path + fine_tune_id
+
+        requestor = Requestor()
+        response = requestor.request(method="get", path=path)
+
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+
+        return response_json
 
     @classmethod
     def cancel(self, fine_tune_id: str) -> Dict[Any, Any]:
-        relative_path = posixpath.join(fine_tune_id, "cancel")
-        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
-        response = create_post_request(retrieve_url)
-        return response
+        path = together.api_base_finetune + fine_tune_id + "/" + "cancel"
+        requestor = Requestor()
+        response = requestor.request(method="post", path=path)
+
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+
+        return response_json
 
     @classmethod
     def list_events(self, fine_tune_id: str) -> Dict[Any, Any]:
-        # TODO enable stream
-        relative_path = posixpath.join(fine_tune_id, "events")
-        retrieve_url = urllib.parse.urljoin(together.api_base_finetune, relative_path)
+        path = together.api_base_finetune + fine_tune_id + "/" + "events"
 
-        response = create_get_request(retrieve_url)
-        return response
+        requestor = Requestor()
+        response = requestor.request(method="get", path=path)
+
+        response_json = response_to_dict(response)
+        check_status(response=response, response_json=response_json)
+
+        return response_json
 
     @classmethod
     def get_checkpoints(self, fine_tune_id: str) -> List[Dict[str, Any]]:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
-            raise ResponseError(e)
+            raise error.ResponseError(e)
 
         saved_events = [i for i in finetune_events if i["type"] in ["CHECKPOINT_SAVE"]]
 
@@ -199,7 +205,7 @@ class Finetune:
         try:
             job_status = str(self.retrieve(fine_tune_id=fine_tune_id)["status"])
         except Exception as e:
-            raise ResponseError(e)
+            raise error.ResponseError(e)
 
         return job_status
 
@@ -208,7 +214,7 @@ class Finetune:
         try:
             finetune_events = list(self.retrieve(fine_tune_id=fine_tune_id)["events"])
         except Exception as e:
-            raise ResponseError(e)
+            raise error.ResponseError(e)
 
         for i in finetune_events:
             if i["type"] in ["JOB_COMPLETE", "JOB_ERROR"]:
@@ -226,80 +232,54 @@ class Finetune:
         step: int = -1,
     ) -> str:
         # default to model_output_path name
-        model_file_path = urllib.parse.urljoin(
-            together.api_base_finetune,
-            f"/api/finetune/downloadfinetunefile?ft_id={fine_tune_id}",
-        )
+        model_file_path = f"{together.api_finetune_path}api/finetune/downloadfinetunefile?ft_id={fine_tune_id}"
         if step != -1:
             model_file_path += f"&checkpoint_step={step}"
 
-        print(f"Downloading weights from {model_file_path}...")
+        print(f"Downloading weights from {urllib.parse.urljoin(together.api_base, model_file_path)}...")
 
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "User-Agent": together.user_agent,
         }
 
-        try:
-            session = requests.Session()
+        requestor = Requestor()
 
-            response = session.get(model_file_path, headers=headers, stream=True)
-            response.raise_for_status()
+        response = requestor.request(method="get", path=model_file_path, headers=headers, stream=True)
 
-            if output is None:
-                content_type = str(response.headers.get("content-type"))
+        # generate output file name
+        if output is None:
+            content_type = str(response.headers.get("content-type"))
 
-                output = self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
+            output = self.retrieve(fine_tune_id)["model_output_path"].split("/")[-1]
 
-                if step != -1:
-                    output += f"-checkpoint-{step}"
+            if step != -1:
+                output += f"-checkpoint-{step}"
 
-                if "x-tar" in content_type.lower():
-                    output += ".tar.gz"
-                elif "zstd" in content_type.lower() or step != -1:
-                    output += ".tar.zst"
-                else:
-                    raise ResponseError(
-                        f"Unknown file type {content_type} found. Aborting download."
-                    )
-
-            total_size_in_bytes = int(response.headers.get("content-length", 0))
-            block_size = 1024 * 1024  # 1 MB
-            progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
-            progress_bar.set_description(f"Downloading {output}")
-            with open(output, "wb") as file:
-                for chunk in response.iter_content(block_size):
-                    progress_bar.update(len(chunk))
-                    file.write(chunk)
-            progress_bar.close()
-            if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-                warnings.warn(
-                    "Caution: Downloaded file size does not match remote file size."
+            if "x-tar" in content_type.lower():
+                output += ".tar.gz"
+            elif "zstd" in content_type.lower() or step != -1:
+                output += ".tar.zst"
+            else:
+                raise error.ResponseError(
+                    f"Unknown file type {content_type} found. Aborting download."
                 )
-        except requests.exceptions.RequestException as e:  # This is the correct syntax
-            raise ResponseError(e)
 
-        return output  # this should be null
+        # progress bar set up
+        total_size_in_bytes = int(response.headers.get("content-length", 0))
+        block_size = 1024 * 1024  # 1 MB
+        progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+        progress_bar.set_description(f"Downloading {output}")
 
-    # def delete_finetune_model(self, model: str) -> Dict[Any, Any]:
-    #     model_url = "https://api.together.xyz/api/models"
-    #     delete_url = urllib.parse.urljoin(model_url, model)
+        with open(output, "wb") as file:
+            for chunk in response.iter_content(block_size):
+                progress_bar.update(len(chunk))
+                file.write(chunk)
+        progress_bar.close()
 
-    #     headers = {
-    #         "Authorization": f"Bearer {together.api_key}",
-    #     }
+        if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
+            warnings.warn(
+                f"Caution: Downloaded file size ({progress_bar.n}) does not match remote file size {total_size_in_bytes}."
+            )
 
-    #     # send request
-    #     try:
-    #         response = requests.delete(delete_url, headers=headers)
-    #     except requests.exceptions.RequestException as e:
-    #         raise ValueError(f"Error raised by finetune endpoint: {e}")
-
-    #     try:
-    #         response_json = dict(response.json())
-    #     except Exception as e:
-    #         raise ValueError(
-    #             f"JSON Error raised. \nResponse status code: {str(response.status_code)}"
-    #         )
-
-    #     return response_json
+        return output

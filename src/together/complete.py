@@ -7,7 +7,7 @@ from aiohttp import ClientSession, ClientTimeout
 from pydantic import ValidationError
 
 import together
-from together.error import ResponseError, parse_error
+from together import error
 from together.tools.types import (
     Parameters,
     TogetherResponse,
@@ -59,7 +59,7 @@ class Complete:
                 err_payload = resp.json()
             except Exception:
                 err_payload = None
-            raise parse_error(resp.status_code, err_payload)
+            raise error.parse_error(resp.status_code, err_payload)
 
         def streamer() -> Iterator[TogetherResponse]:
             # Parse ServerSentEvents
@@ -81,11 +81,11 @@ class Complete:
                             response = TogetherResponse(**json_payload)
                         except ValidationError:
                             # If we failed to parse the payload, then it is an error payload
-                            raise parse_error(resp.status_code, json_payload)
+                            raise error.parse_error(resp.status_code, json_payload)
 
                         # check if key `error` exists and parse the error
                         if response.error:
-                            raise parse_error(resp.status_code, json_payload)
+                            raise error.parse_error(resp.status_code, json_payload)
                         yield response
 
         if stream:
@@ -94,7 +94,7 @@ class Complete:
             payload = dict(resp.json())
             response = TogetherResponse(**payload)
             if response.error:
-                raise parse_error(resp.status_code, payload)
+                raise error.parse_error(resp.status_code, payload)
             return response
 
     @classmethod
@@ -148,14 +148,14 @@ class Complete:
 
                 json_response = dict(json.loads(payload))
                 if "error" in json_response.keys():
-                    raise ResponseError(
+                    raise error.ResponseError(
                         json_response["error"]["error"],
                     )
                 elif "choices" in json_response.keys():
                     text = json_response["choices"][0]["text"]
                     yield text
                 else:
-                    raise ResponseError(
+                    raise error.ResponseError(
                         f"Unknown error occured. Received unhandled response: {payload}"
                     )
 
@@ -204,7 +204,7 @@ class AsyncClient:
                 payload = await resp.json()
 
                 if resp.status != 200:
-                    raise parse_error(resp.status, payload)
+                    raise error.parse_error(resp.status, payload)
                 
                 async def streamer():
                     # Parse ServerSentEvents
@@ -228,7 +228,7 @@ class AsyncClient:
                                     response = TogetherResponse(**json_payload)
                                 except ValidationError:
                                     # If we failed to parse the payload, then it is an error payload
-                                    raise parse_error(resp.status, json_payload)
+                                    raise error.parse_error(resp.status, json_payload)
                                 yield response
                 if stream:
                     return await streamer()
@@ -236,5 +236,5 @@ class AsyncClient:
                     payload = dict(resp.json())
                     response = TogetherResponse(**payload)
                     if response.error:
-                        raise parse_error(resp.status_code, payload)
+                        raise error.parse_error(resp.status_code, payload)
                     return await response

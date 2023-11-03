@@ -8,7 +8,7 @@ from typing import Any, Dict
 
 import together
 from together import Image
-from together.error import ResponseError
+from together import error
 
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -102,13 +102,13 @@ def _save_image(args: argparse.Namespace, response: Dict[str, Any]) -> None:
                     f.write(base64.b64decode(images[i]["image_base64"]))
                 print(f"Image saved to {args.output_prefix}-{i}.png")
         except Exception as e:  # This is the correct syntax
-            raise ResponseError(e)
+            raise error.ResponseError(e)
 
     elif "error" in response.keys():
         raise Exception(f"Error raised: {response['error']}")
 
     else:
-        raise ResponseError("Unknown response received.")
+        raise error.ResponseError("Unknown response received.")
 
 
 def _run_complete(args: argparse.Namespace) -> None:
