@@ -327,7 +327,34 @@ Job creation details:
 Do you want to submit the job? [y/N]
 ```
 
-The response `resp` has alot of information for you that you can retrieve later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing. 
+Here is an example of only part of the `resp` response to highlight some of the useful information about your finetune job.
+
+```
+{   'Suffix': 'my-demo-finetune',
+    'batch_size': 4,
+    'created_at': '2023-11-07T19:04:30.579Z',
+    'enable_checkpoints': False,
+    'epochs_completed': 0,
+    'events': [   {   'checkpoint_path': '',
+                      'created_at': '2023-11-07T19:04:30.579Z',
+                      'hash': '',
+                      'level': '',
+                      'message': 'Fine tune request created',
+                      'model_path': '',
+                      'object': 'fine-tune-event',
+                      'param_count': 0,
+                      'token_count': 0,
+                      'training_offset': 0,
+                      'type': 'JOB_PENDING',
+                      'wandb_url': ''}],
+    'id': 'ft-494cbd75-3057-44b4-8186-045c14be8d03',
+    'learning_rate': 1e-05,
+    'model': 'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+    'model_output_name': 'carson/RedPajama-INCITE-Chat-3B-v1-my-demo-finetune-2023-11-07-19-04-30',
+    'wandb_url': '...'}
+```
+
+The response `resp` has alot of information for you that you can retrieve again later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing. 
 
 ```python
 print(together.Finetune.retrieve(fine_tune_id=fine_tune_id)) # retrieves information on finetune event
@@ -336,14 +363,16 @@ print(together.Finetune.is_final_model_available(fine_tune_id=fine_tune_id)) # T
 print(together.Finetune.get_checkpoints(fine_tune_id=fine_tune_id)) # list of checkpoints
 ```
 
-The `get_job_status` should change from `pending` to `running` to `completed` as `is_final_model_available` changes from `False` to `True`. Once the final model is available, you should be able to see your new model under `together.Models.list()` with a naming convention that includes your name, the `fine_tune_id`, the date and time, like this: 
+The `get_job_status` should change from `pending` to `running` to `completed` as `is_final_model_available` changes from `False` to `True`. Once in the `running` state, you can retrieve the `wandb_url` and visit this page to monitor the learning progress of this finetune job. 
 
-`carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09`
+Under `model_output_name` you will find the unique name that will be given to the new finetuned model whose creation is underway. This name includes your username, the base model name, your suffix and the datetime the job was created. In addition to using the API to track the status as shown above, you can use `model_output_name` to find helpful features related to the new model within the Jobs section of your account on our webpage.
+
+Once the final model is available, you should be able to see your new model under `together.Models.list()` under `model_output_name`.
 
 Now you can download your model using `together.Finetune.download(fine_tune_id)` or start using your model on our inference engine (may take a few minutes after finetuning to become available) by first starting your new model instance:
 
 ```
-together.Models.start("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09")
+together.Models.start(model_output_name)
 ```
 
 then calling it to do completions:
@@ -351,14 +380,14 @@ then calling it to do completions:
 ```
 output = together.Complete.create(
   prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
-  model = "carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09", 
+  model = model_output_name, 
 )
 ```
 
 To check whether your model is finished deploying, you can use the `Models.ready` like so:
 
 ```
-together.Models.ready("carlton/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09")
+together.Models.ready(model_output_name)
 ```
 
 ```
