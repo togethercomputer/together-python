@@ -16,9 +16,11 @@ api_base_complete = urllib.parse.urljoin(api_base, "/api/inference")
 api_base_files = urllib.parse.urljoin(api_base, "/v1/files/")
 api_base_finetune = urllib.parse.urljoin(api_base, "/v1/fine-tunes/")
 api_base_instances = urllib.parse.urljoin(api_base, "instances/")
+api_base_embeddings = urllib.parse.urljoin(api_base, "api/v1/embeddings")
 
 default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
+default_embedding_model = "togethercomputer/m2-bert-80M-32k-retrieval"
 log_level = "WARNING"
 
 MISSING_API_KEY_MESSAGE = """TOGETHER_API_KEY not found.
@@ -36,6 +38,7 @@ from .files import Files
 from .finetune import Finetune
 from .image import Image
 from .models import Models
+from .embeddings import Embeddings
 
 
 __all__ = [
@@ -45,13 +48,16 @@ __all__ = [
     "api_base_files",
     "api_base_finetune",
     "api_base_instances",
+    "api_base_embeddings",
     "default_text_model",
     "default_image_model",
+    "default_embedding_model",
     "Models",
     "Complete",
     "Files",
     "Finetune",
     "Image",
+    "Embeddings",
     "MAX_CONNECTION_RETRIES",
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",
