@@ -1,8 +1,7 @@
-import json
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Optional
 
 import together
-from together.utils import create_post_request, get_logger, sse_client
+from together.utils import create_post_request, get_logger
 
 
 logger = get_logger(str(__name__))
@@ -15,7 +14,6 @@ class Embeddings:
         input: str,
         model: Optional[str] = "",
     ) -> Dict[str, Any]:
-
         if model == "":
             model = together.default_embedding_model
 

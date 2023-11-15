@@ -33,12 +33,12 @@ BACKOFF_FACTOR = 0.2
 min_samples = 100
 
 from .complete import Complete
+from .embeddings import Embeddings
 from .error import *
 from .files import Files
 from .finetune import Finetune
 from .image import Image
 from .models import Models
-from .embeddings import Embeddings
 
 
 __all__ = [
