@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
-from typing import Any, Dict, List
 
 import together
 from together import Embeddings
@@ -11,6 +9,7 @@ from together.utils import get_logger
 
 
 logger = get_logger(str(__name__))
+
 
 def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     COMMAND_NAME = "embeddings"
@@ -33,8 +32,8 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     subparser.set_defaults(func=_run_complete)
 
+
 def _run_complete(args: argparse.Namespace) -> None:
-    
     embeddings = Embeddings()
 
     try:

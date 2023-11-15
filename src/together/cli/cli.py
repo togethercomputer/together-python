@@ -2,7 +2,7 @@
 import argparse
 
 import together
-from together.commands import chat, complete, files, finetune, image, models, embeddings
+from together.commands import chat, complete, embeddings, files, finetune, image, models
 from together.utils import get_logger
 
 
