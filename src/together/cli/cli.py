@@ -2,7 +2,7 @@
 import argparse
 
 import together
-from together.commands import chat, complete, files, finetune, image, models
+from together.commands import chat, complete, embeddings, files, finetune, image, models
 from together.utils import get_logger
 
 
@@ -49,6 +49,7 @@ def main() -> None:
     image.add_parser(subparser)
     files.add_parser(subparser)
     finetune.add_parser(subparser)
+    embeddings.add_parser(subparser)
 
     args = parser.parse_args()
 
