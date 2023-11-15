@@ -458,7 +458,7 @@ Space Robots are a great way to get your kids interested in science. After all, 
 Embeddings are vector representations of sequences. You can use these vectors for measuring the overall similarity between texts. Embeddings are useful for tasks such as search and retrieval. 
 
 ```python
-resp = together.Embeddings.create("embed this sentence into a single vector", model="togethercomputer/m2-bert-80M-32k")
+resp = together.Embeddings.create("embed this sentence into a single vector", model="togethercomputer/bert-base-uncased")
 
 print(resp['data'][0]['embedding']) # [0.06659205, 0.07896972, 0.007910785 ........]
 ```
@@ -524,7 +524,7 @@ together finetune download ft-dd93c727-f35e-41c2-a370-7d55b54128fa
 together complete "Space robots are" -m yourname/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09
 
 # create an embedding from your input sequence
-together embeddings "embed this sentence into a single vector" -m togethercomputer/m2-bert-80M-32k-retrieval
+together embeddings "embed this sentence into a single vector" -m togethercomputer/bert-base-uncased
 ```
 
 ## Contributing

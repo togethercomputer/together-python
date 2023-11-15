@@ -20,7 +20,7 @@ api_base_embeddings = urllib.parse.urljoin(api_base, "api/v1/embeddings")
 
 default_text_model = "togethercomputer/RedPajama-INCITE-7B-Chat"
 default_image_model = "runwayml/stable-diffusion-v1-5"
-default_embedding_model = "togethercomputer/m2-bert-80M-32k-retrieval"
+default_embedding_model = "togethercomputer/bert-base-uncased"
 log_level = "WARNING"
 
 MISSING_API_KEY_MESSAGE = """TOGETHER_API_KEY not found.
