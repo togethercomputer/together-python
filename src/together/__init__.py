@@ -32,7 +32,7 @@ BACKOFF_FACTOR = 0.2
 
 min_samples = 100
 
-from .complete import Complete
+from .complete import Complete, Completion
 from .embeddings import Embeddings
 from .error import *
 from .files import Files
@@ -54,6 +54,7 @@ __all__ = [
     "default_embedding_model",
     "Models",
     "Complete",
+    "Completion",
     "Files",
     "Finetune",
     "Image",

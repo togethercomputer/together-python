@@ -81,13 +81,14 @@ def create_post_request(
     json: Optional[Dict[Any, Any]] = None,
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
+    api_key: Optional[str] = None,
 ) -> requests.Response:
-    if check_auth:
+    if check_auth and api_key is None:
         verify_api_key()
 
     if not headers:
         headers = {
-            "Authorization": f"Bearer {together.api_key}",
+            "Authorization": f"Bearer {api_key or together.api_key}",
             "Content-Type": "application/json",
             "User-Agent": together.user_agent,
         }

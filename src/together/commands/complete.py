@@ -146,6 +146,7 @@ def _run_complete(args: argparse.Namespace) -> None:
         except together.AuthenticationError:
             logger.critical(together.MISSING_API_KEY_MESSAGE)
             exit(0)
+        assert isinstance(response, dict)
         no_streamer(args, response)
     else:
         try:

@@ -114,6 +114,7 @@ class OpenChatKitShell(cmd.Cmd):
                 top_k=self.args.top_k,
                 repetition_penalty=self.args.repetition_penalty,
             ):
+                assert isinstance(token, str)
                 print(token, end="", flush=True)
                 output += token
         except together.AuthenticationError:
