@@ -22,6 +22,8 @@ FT_STATUSES = [
     "pending",
     "queued",
     "running",
+    "compressing",
+    "uploading",
     "cancel_requested",
     "cancelled",
     "error",
