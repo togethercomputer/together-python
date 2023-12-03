@@ -36,7 +36,7 @@ class embeddings:
 
             response = cls._process_input(parameter_payload)
 
-            return Output([DataItem(response["data"][0])])
+            return Output([DataItem(response["data"][0]["embedding"])])
 
         elif isinstance(input, list):
             # If input is a list, process each string concurrently
@@ -44,7 +44,7 @@ class embeddings:
                 parameter_payloads = [{"input": item, "model": model} for item in input]
                 results = list(executor.map(cls._process_input, parameter_payloads))
 
-            return Output([DataItem(item["data"][0]) for item in results])
+            return Output([DataItem(item["data"][0]["embedding"]) for item in results])
 
     @classmethod
     def _process_input(cls, parameter_payload: Dict[str, Any]) -> Dict[str, Any]:
