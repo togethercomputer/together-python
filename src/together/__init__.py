@@ -33,7 +33,7 @@ BACKOFF_FACTOR = 0.2
 min_samples = 100
 
 from .complete import Complete, Completion
-from .embeddings import Embeddings
+from .embeddings import embeddings
 from .error import *
 from .files import Files
 from .finetune import Finetune
@@ -58,7 +58,7 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
-    "Embeddings",
+    "embeddings",
     "MAX_CONNECTION_RETRIES",
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",

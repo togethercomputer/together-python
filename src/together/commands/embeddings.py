@@ -4,7 +4,7 @@ import argparse
 import json
 
 import together
-from together import Embeddings
+from together import embeddings
 from together.utils import get_logger
 
 
@@ -34,10 +34,10 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
 
 
 def _run_complete(args: argparse.Namespace) -> None:
-    embeddings = Embeddings()
+    embeddings_ = embeddings()
 
     try:
-        response = embeddings.create(
+        response = embeddings_.create(
             input=args.input,
             model=args.model,
         )
