@@ -24,6 +24,7 @@ class Complete:
         logprobs: Optional[int] = None,
         api_key: Optional[str] = None,
         cast: bool = False,
+        safety_model: Optional[str] = None,
     ) -> Union[Dict[str, Any], TogetherResponse]:
         if model == "":
             model = together.default_text_model
@@ -38,6 +39,7 @@ class Complete:
             "stop": stop,
             "repetition_penalty": repetition_penalty,
             "logprobs": logprobs,
+            "safety_model": safety_model,
         }
 
         # send request
@@ -70,6 +72,7 @@ class Complete:
         raw: Optional[bool] = False,
         api_key: Optional[str] = None,
         cast: Optional[bool] = False,
+        safety_model: Optional[str] = None,
     ) -> Union[Iterator[str], Iterator[TogetherResponse]]:
         """
         Prints streaming responses and returns the completed text.
@@ -88,6 +91,7 @@ class Complete:
             "stop": stop,
             "repetition_penalty": repetition_penalty,
             "stream_tokens": True,
+            "safety_model": safety_model,
         }
 
         # send request
