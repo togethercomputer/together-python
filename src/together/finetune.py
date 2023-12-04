@@ -44,6 +44,20 @@ class Finetune:
     ) -> Dict[Any, Any]:
         adjusted_inputs = False
 
+        if wandb_api_key:
+            # Validate API key length
+            # Account for On-prem API keys having prefixes
+            wandb_prefix, wandb_suffix = (
+                wandb_api_key.split("-", 1)
+                if "-" in wandb_api_key
+                else ("", wandb_api_key)
+            )
+            if len(wandb_suffix) != 40:
+                raise ValueError(
+                    f"Provided WandB API key must be 40 characters long, yours was {len(suffix)}. "
+                    + "Double check the provided key or the WANDB_API_KEY environment variable."
+                )
+
         if n_epochs is None or n_epochs < 1:
             n_epochs = 1
             adjusted_inputs = True
