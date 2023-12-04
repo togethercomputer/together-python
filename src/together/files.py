@@ -250,7 +250,6 @@ def check_json(
 ) -> Dict[str, object]:
     report_dict = {
         "is_check_passed": True,
-        "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
     }
 
     if not os.path.isfile(file):

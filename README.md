@@ -453,16 +453,6 @@ print(output_text)
 Space Robots are a great way to get your kids interested in science. After all, they are the future!
 ```
 
-## Embeddings API
-
-Embeddings are vector representations of sequences. You can use these vectors for measuring the overall similarity between texts. Embeddings are useful for tasks such as search and retrieval. 
-
-```python
-resp = together.Embeddings.create("embed this sentence into a single vector", model="togethercomputer/bert-base-uncased")
-
-print(resp['data'][0]['embedding']) # [0.06659205, 0.07896972, 0.007910785 ........]
-```
-
 ## Colab Tutorial
 
 Follow along in our Colab (Google Colaboratory) Notebook Tutorial [Example Finetuning Project](https://colab.research.google.com/drive/11DwtftycpDSgp3Z1vnV-Cy68zvkGZL4K?usp=sharing).
