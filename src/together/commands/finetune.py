@@ -294,7 +294,7 @@ def _run_list(args: argparse.Namespace) -> None:
                     "Status": i.get("status"),
                     "Created At": i.get("created_at"),
                     "Price": finetune_price_to_dollars(
-                        float(str(i.get("total_price")))
+                        float(str(i.get("price")))
                     ),  # convert to string for mypy typing
                 }
             )
