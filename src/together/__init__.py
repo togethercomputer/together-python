@@ -42,7 +42,7 @@ from .image import Image
 from .models import Models
 
 
-class TogetherAI:
+class Together:
     complete: Type[Complete]
     completion: Type[Completion]
     embeddings: Type[Embeddings]
@@ -85,4 +85,5 @@ __all__ = [
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",
     "min_samples",
+    "Together",
 ]

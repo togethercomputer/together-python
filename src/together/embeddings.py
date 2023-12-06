@@ -13,7 +13,7 @@ class DataItem:
         self.embedding = embedding
 
 
-class Output:
+class EmbeddingsOutput:
     def __init__(self, data: List[DataItem]):
         self.data = data
 
@@ -24,7 +24,7 @@ class Embeddings:
         cls,
         input: Union[str, List[str]],
         model: Optional[str] = "",
-    ) -> Output:
+    ) -> EmbeddingsOutput:
         if model == "":
             model = together.default_embedding_model
 
@@ -36,7 +36,7 @@ class Embeddings:
 
             response = cls._process_input(parameter_payload)
 
-            return Output([DataItem(response["data"][0]["embedding"])])
+            return EmbeddingsOutput([DataItem(response["data"][0]["embedding"])])
 
         elif isinstance(input, list):
             # If input is a list, process each string concurrently
@@ -44,7 +44,9 @@ class Embeddings:
                 parameter_payloads = [{"input": item, "model": model} for item in input]
                 results = list(executor.map(cls._process_input, parameter_payloads))
 
-            return Output([DataItem(item["data"][0]["embedding"]) for item in results])
+            return EmbeddingsOutput(
+                [DataItem(item["data"][0]["embedding"]) for item in results]
+            )
 
     @classmethod
     def _process_input(cls, parameter_payload: Dict[str, Any]) -> Dict[str, Any]:
