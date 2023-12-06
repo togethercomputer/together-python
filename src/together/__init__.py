@@ -62,7 +62,7 @@ class TogetherAI:
         self.image = Image
         self.models = Models
 
-
+        
 __all__ = [
     "api_key",
     "api_base",
