@@ -18,7 +18,7 @@ class Output:
         self.data = data
 
 
-class embeddings:
+class Embeddings:
     @classmethod
     def create(
         cls,

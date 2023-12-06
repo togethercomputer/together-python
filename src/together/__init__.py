@@ -1,6 +1,7 @@
 import os
 import sys
 import urllib.parse
+from typing import Type
 
 from .version import VERSION
 
@@ -33,12 +34,33 @@ BACKOFF_FACTOR = 0.2
 min_samples = 100
 
 from .complete import Complete, Completion
-from .embeddings import embeddings
+from .embeddings import Embeddings
 from .error import *
 from .files import Files
 from .finetune import Finetune
 from .image import Image
 from .models import Models
+
+
+class TogetherAI:
+    complete: Type[Complete]
+    completion: Type[Completion]
+    embeddings: Type[Embeddings]
+    files: Type[Files]
+    finetune: Type[Finetune]
+    image: Type[Image]
+    models: Type[Models]
+
+    def __init__(
+        self,
+    ) -> None:
+        self.complete = Complete
+        self.completion = Completion
+        self.embeddings = Embeddings
+        self.files = Files
+        self.finetune = Finetune
+        self.image = Image
+        self.models = Models
 
 
 __all__ = [
@@ -58,7 +80,7 @@ __all__ = [
     "Files",
     "Finetune",
     "Image",
-    "embeddings",
+    "Embeddings",
     "MAX_CONNECTION_RETRIES",
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",
