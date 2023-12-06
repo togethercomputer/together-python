@@ -90,6 +90,13 @@ def add_parser(subparsers: argparse._SubParsersAction[argparse.ArgumentParser]) 
         action="store_true",
         help="temperature for the LM",
     )
+    subparser.add_argument(
+        "--safety-model",
+        "-sm",
+        default=None,
+        type=str,
+        help="The name of the safety model to use for moderation.",
+    )
     subparser.set_defaults(func=_run_complete)
 
 
@@ -142,6 +149,7 @@ def _run_complete(args: argparse.Namespace) -> None:
                 top_k=args.top_k,
                 repetition_penalty=args.repetition_penalty,
                 logprobs=args.logprobs,
+                safety_model=args.safety_model,
             )
         except together.AuthenticationError:
             logger.critical(together.MISSING_API_KEY_MESSAGE)
@@ -159,6 +167,7 @@ def _run_complete(args: argparse.Namespace) -> None:
                 top_p=args.top_p,
                 top_k=args.top_k,
                 repetition_penalty=args.repetition_penalty,
+                safety_model=args.safety_model,
                 raw=args.raw,
             ):
                 if not args.raw:

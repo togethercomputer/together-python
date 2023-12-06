@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "together"
-version = "0.2.8"
+version = "0.2.9"
 authors = [
   "Together AI <support@together.ai>"
 ]

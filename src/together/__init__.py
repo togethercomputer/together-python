@@ -1,6 +1,7 @@
 import os
 import sys
 import urllib.parse
+from typing import Type
 
 from .version import VERSION
 
@@ -41,6 +42,27 @@ from .image import Image
 from .models import Models
 
 
+class Together:
+    complete: Type[Complete]
+    completion: Type[Completion]
+    embeddings: Type[Embeddings]
+    files: Type[Files]
+    finetune: Type[Finetune]
+    image: Type[Image]
+    models: Type[Models]
+
+    def __init__(
+        self,
+    ) -> None:
+        self.complete = Complete
+        self.completion = Completion
+        self.embeddings = Embeddings
+        self.files = Files
+        self.finetune = Finetune
+        self.image = Image
+        self.models = Models
+
+
 __all__ = [
     "api_key",
     "api_base",
@@ -63,4 +85,5 @@ __all__ = [
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",
     "min_samples",
+    "Together",
 ]
