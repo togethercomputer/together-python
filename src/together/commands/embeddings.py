@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 
 import together
 from together import Embeddings
@@ -42,7 +41,7 @@ def _run_complete(args: argparse.Namespace) -> None:
             model=args.model,
         )
 
-        print(json.dumps(response, indent=4))
+        print([e.embedding for e in response.data])
     except together.AuthenticationError:
         logger.critical(together.MISSING_API_KEY_MESSAGE)
         exit(0)
