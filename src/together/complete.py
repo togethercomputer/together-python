@@ -46,7 +46,7 @@ class Complete:
         response = create_post_request(
             url=together.api_base_complete, json=parameter_payload, api_key=api_key
         )
-
+        raise ValueError(f"This is a custom error message. {response.status_code}") # new
         try:
             response_json = dict(response.json())
 
