@@ -46,7 +46,7 @@ class Complete:
         response = create_post_request(
             url=together.api_base_complete, json=parameter_payload, api_key=api_key
         )
-        
+
         try:
             response_json = dict(response.json())
 
