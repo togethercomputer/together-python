@@ -75,6 +75,18 @@ def parse_timestamp(timestamp: str) -> datetime:
     raise ValueError("Timestamp does not match any expected format")
 
 
+def response_status_exception(response: requests.Response) -> None:
+    if response.status_code == 429:
+        raise together.RateLimitError(
+            message="Too many requests received. Please pace your requests."
+        )
+    elif response.status_code == 500:
+        raise Exception("server encountered an unexpected condition")
+    elif response.status_code == 401:
+        raise Exception("invalid authentication credentials")
+    response.raise_for_status()
+
+
 def create_post_request(
     url: str,
     headers: Optional[Dict[Any, Any]] = None,
@@ -99,15 +111,7 @@ def create_post_request(
     except requests.exceptions.RequestException as e:
         raise together.ResponseError(e)
 
-    if response.status_code == 429:
-        raise together.RateLimitError(
-            message="Too many requests received. Please pace your requests."
-        )
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    elif response.status_code == 401:
-        raise Exception("API Key not supplied")
-    response.raise_for_status()
+    response_status_exception(response)
 
     return response
 
@@ -139,15 +143,7 @@ def create_get_request(
     except requests.exceptions.RequestException as e:
         raise together.ResponseError(e)
 
-    if response.status_code == 429:
-        raise together.RateLimitError(
-            message="Too many requests received. Please pace your requests."
-        )
-    elif response.status_code == 500:
-        raise Exception("Invalid API key supplied.")
-    elif response.status_code == 401:
-        raise Exception("API Key not supplied")
-    response.raise_for_status()
+    response_status_exception(response)
 
     return response
 
