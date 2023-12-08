@@ -75,7 +75,7 @@ def parse_timestamp(timestamp: str) -> datetime:
     raise ValueError("Timestamp does not match any expected format")
 
 
-def response_status_exception(response):
+def response_status_exception(response: requests.Response) -> None:
     if response.status_code == 429:
         raise together.RateLimitError(
             message="Too many requests received. Please pace your requests."
@@ -142,7 +142,7 @@ def create_get_request(
         response = requests.get(url, headers=headers, json=json, stream=stream)
     except requests.exceptions.RequestException as e:
         raise together.ResponseError(e)
-    
+
     response_status_exception(response)
 
     return response
