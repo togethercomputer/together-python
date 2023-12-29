@@ -60,6 +60,9 @@ class Files:
                     f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
                 )
         else:
+            logger.warning(
+                "Caution: File type check is disabled. Together.ai will not be able to detect errors in your file."
+            )
             report_dict = {}
 
         session = requests.Session()
