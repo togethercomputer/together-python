@@ -61,7 +61,7 @@ class Files:
                 )
         else:
             logger.warning(
-                "Caution: File type check is disabled. Together.ai will not be able to detect errors in your file."
+                "Caution: File check is disabled. Together.ai will not be able to detect errors in your file."
             )
             report_dict = {}
 
