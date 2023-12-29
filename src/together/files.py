@@ -60,6 +60,9 @@ class Files:
                     f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
                 )
         else:
+            logger.warning(
+                "Caution: File check is disabled. Together.ai will not be able to detect errors in your file."
+            )
             report_dict = {}
 
         session = requests.Session()
@@ -266,10 +269,15 @@ def check_json(
             "file_size"
         ] = f"File size {round(file_size / NUM_BYTES_IN_GB ,3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
+    elif file_size == 0:
+        report_dict["file_size"] = "File is empty"
+        report_dict["is_check_passed"] = False
     else:
         report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
 
     with open(file) as f:
+        # idx must be instantiated so decode errors (e.g. file is a tar) or empty files are caught
+        idx = -1
         try:
             for idx, line in enumerate(f):
                 json_line = json.loads(line)  # each line in jsonlines should be a json
@@ -316,14 +324,20 @@ def check_json(
                 report_dict["num_samples"] = idx + 1
 
         except ValueError:
-            report_dict["load_json"] = (
-                f"File should be a valid jsonlines (.jsonl) with a json in each line."
-                'Example of valid json: {"text":"my sample string"}'
-                "Valid json not found in one or more lines in file."
-                "see https://docs.together.ai/docs/fine-tuning."
-                f"The first line where this occur is line {idx+1}, where 1 is the first line."
-                f"{str(line)}"
-            )
+            if idx < 0:
+                report_dict["load_json"] = (
+                    "Unable to decode file. "
+                    "File may be empty or in an unsupported format."
+                )
+            else:
+                report_dict["load_json"] = (
+                    f"File should be a valid jsonlines (.jsonl) with a json in each line."
+                    'Example of valid json: {"text":"my sample string"}'
+                    "Valid json not found in one or more lines in file."
+                    "see https://docs.together.ai/docs/fine-tuning."
+                    f"The first line where this occur is line {idx+1}, where 1 is the first line."
+                    f"{str(line)}"
+                )
             report_dict["is_check_passed"] = False
 
     return report_dict
