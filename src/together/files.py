@@ -266,6 +266,9 @@ def check_json(
             "file_size"
         ] = f"File size {round(file_size / NUM_BYTES_IN_GB ,3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
+    elif file_size == 0:
+        report_dict["file_size"] = f"File is empty"
+        report_dict["is_check_passed"] = False
     else:
         report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
 
