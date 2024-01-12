@@ -86,6 +86,13 @@ def response_status_exception(response: requests.Response) -> None:
         raise Exception("invalid authentication credentials")
     response.raise_for_status()
 
+def get_headers() -> Dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {together.api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": together.user_agent,
+    }
+    return headers
 
 def create_post_request(
     url: str,
@@ -95,15 +102,12 @@ def create_post_request(
     check_auth: Optional[bool] = True,
     api_key: Optional[str] = None,
 ) -> requests.Response:
+
     if check_auth and api_key is None:
         verify_api_key()
 
     if not headers:
-        headers = {
-            "Authorization": f"Bearer {api_key or together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
+        headers = get_headers()
 
     # send request
     try:
@@ -127,15 +131,12 @@ def create_get_request(
     stream: Optional[bool] = False,
     check_auth: Optional[bool] = True,
 ) -> requests.Response:
+
     if check_auth:
         verify_api_key()
 
     if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
+        headers = get_headers()
 
     # send request
     try:
