@@ -1,13 +1,12 @@
 import json
 from typing import Any, Dict, Iterator, List, Optional, Union
 
-import requests
 from aiohttp import ClientSession, ClientTimeout
 
 import together
 from together.types import TogetherResponse
-from together.utils import create_post_request, get_logger, sse_client
-from together.utils import get_headers
+from together.utils import create_post_request, get_headers, get_logger, sse_client
+
 
 logger = get_logger(str(__name__))
 
@@ -15,19 +14,19 @@ logger = get_logger(str(__name__))
 class Complete:
     @classmethod
     def create(
-            cls,
-            prompt: str,
-            model: Optional[str] = "",
-            max_tokens: Optional[int] = 128,
-            stop: Optional[List[str]] = [],
-            temperature: Optional[float] = 0.7,
-            top_p: Optional[float] = 0.7,
-            top_k: Optional[int] = 50,
-            repetition_penalty: Optional[float] = None,
-            logprobs: Optional[int] = None,
-            api_key: Optional[str] = None,
-            cast: bool = False,
-            safety_model: Optional[str] = None,
+        cls,
+        prompt: str,
+        model: Optional[str] = "",
+        max_tokens: Optional[int] = 128,
+        stop: Optional[List[str]] = [],
+        temperature: Optional[float] = 0.7,
+        top_p: Optional[float] = 0.7,
+        top_k: Optional[int] = 50,
+        repetition_penalty: Optional[float] = None,
+        logprobs: Optional[int] = None,
+        api_key: Optional[str] = None,
+        cast: bool = False,
+        safety_model: Optional[str] = None,
     ) -> Union[Dict[str, Any], TogetherResponse]:
         if model == "":
             model = together.default_text_model
@@ -63,19 +62,19 @@ class Complete:
 
     @classmethod
     def create_streaming(
-            cls,
-            prompt: str,
-            model: Optional[str] = "",
-            max_tokens: Optional[int] = 128,
-            stop: Optional[List[str]] = None,
-            temperature: Optional[float] = 0.7,
-            top_p: Optional[float] = 0.7,
-            top_k: Optional[int] = 50,
-            repetition_penalty: Optional[float] = None,
-            raw: Optional[bool] = False,
-            api_key: Optional[str] = None,
-            cast: Optional[bool] = False,
-            safety_model: Optional[str] = None,
+        cls,
+        prompt: str,
+        model: Optional[str] = "",
+        max_tokens: Optional[int] = 128,
+        stop: Optional[List[str]] = None,
+        temperature: Optional[float] = 0.7,
+        top_p: Optional[float] = 0.7,
+        top_k: Optional[int] = 50,
+        repetition_penalty: Optional[float] = None,
+        raw: Optional[bool] = False,
+        api_key: Optional[str] = None,
+        cast: Optional[bool] = False,
+        safety_model: Optional[str] = None,
     ) -> Union[Iterator[str], Iterator[TogetherResponse]]:
         """
         Prints streaming responses and returns the completed text.
@@ -133,18 +132,18 @@ class Complete:
 class Completion:
     @classmethod
     def create(
-            cls,
-            prompt: str,
-            model: Optional[str] = "",
-            max_tokens: Optional[int] = 128,
-            stop: Optional[List[str]] = [],
-            temperature: Optional[float] = 0.7,
-            top_p: Optional[float] = 0.7,
-            top_k: Optional[int] = 50,
-            repetition_penalty: Optional[float] = None,
-            logprobs: Optional[int] = None,
-            api_key: Optional[str] = None,
-            stream: bool = False,
+        cls,
+        prompt: str,
+        model: Optional[str] = "",
+        max_tokens: Optional[int] = 128,
+        stop: Optional[List[str]] = [],
+        temperature: Optional[float] = 0.7,
+        top_p: Optional[float] = 0.7,
+        top_k: Optional[int] = 50,
+        repetition_penalty: Optional[float] = None,
+        logprobs: Optional[int] = None,
+        api_key: Optional[str] = None,
+        stream: bool = False,
     ) -> Union[
         TogetherResponse, Iterator[TogetherResponse], Iterator[str], Dict[str, Any]
     ]:
@@ -194,15 +193,14 @@ class AsyncComplete:
         safety_model: Optional[str] = None,
         stream: Optional[bool] = False,
         timeout: Optional[int] = 10,
-    ) -> Union[
-         requests.Response, TogetherResponse, Iterator[TogetherResponse], Iterator[str], Dict[str, Any]
-    ]:
-
+    ) -> Any:
         if model == "":
             model = together.default_text_model
 
         headers = get_headers()
 
+        # Provide a default value for timeout if it is None
+        timeout = timeout or 10
         client_timeout = ClientTimeout(timeout * 60)
 
         parameter_payload = {
@@ -223,7 +221,7 @@ class AsyncComplete:
                 together.api_base_complete, json=parameter_payload
             ) as resp:
 
-                async def streamer():
+                async def streamer() -> Any:
                     # Parse ServerSentEvents
                     async for byte_payload in resp.content:
                         # Skip line
@@ -235,7 +233,9 @@ class AsyncComplete:
                         # Event data
                         if payload.startswith("data:"):
                             # Decode payload
-                            json_payload = json.loads(payload.lstrip("data:").rstrip("/n"))
+                            json_payload = json.loads(
+                                payload.lstrip("data:").rstrip("/n")
+                            )
 
                             if raw:
                                 yield json_payload
@@ -244,12 +244,10 @@ class AsyncComplete:
                                 response = TogetherResponse(**json_payload)
 
                                 yield response
+
                 if stream:
                     return await streamer()
                 else:
                     payload = await resp.json()
                     response = TogetherResponse(**payload)
                     return response
-
-
-
