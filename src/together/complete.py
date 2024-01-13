@@ -1,9 +1,11 @@
 import json
 from typing import Any, Dict, Iterator, List, Optional, Union
 
+from aiohttp import ClientSession, ClientTimeout
+
 import together
 from together.types import TogetherResponse
-from together.utils import create_post_request, get_logger, sse_client
+from together.utils import create_post_request, get_headers, get_logger, sse_client
 
 
 logger = get_logger(str(__name__))
@@ -12,7 +14,7 @@ logger = get_logger(str(__name__))
 class Complete:
     @classmethod
     def create(
-        self,
+        cls,
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
@@ -60,7 +62,7 @@ class Complete:
 
     @classmethod
     def create_streaming(
-        self,
+        cls,
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
@@ -130,7 +132,7 @@ class Complete:
 class Completion:
     @classmethod
     def create(
-        self,
+        cls,
         prompt: str,
         model: Optional[str] = "",
         max_tokens: Optional[int] = 128,
@@ -172,3 +174,80 @@ class Completion:
                 api_key=api_key,
                 cast=True,
             )
+
+
+class AsyncComplete:
+    @classmethod
+    async def create(
+        cls,
+        prompt: str,
+        model: Optional[str],
+        max_tokens: int = 20,
+        repetition_penalty: Optional[float] = None,
+        stop: Optional[List[str]] = None,
+        temperature: Optional[float] = None,
+        top_k: Optional[int] = None,
+        top_p: Optional[float] = None,
+        raw: Optional[bool] = False,
+        logprobs: Optional[int] = None,
+        safety_model: Optional[str] = None,
+        stream: Optional[bool] = False,
+        timeout: Optional[int] = 10,
+    ) -> Any:
+        if model == "":
+            model = together.default_text_model
+
+        headers = get_headers()
+
+        # Provide a default value for timeout if it is None
+        timeout = timeout or 10
+        client_timeout = ClientTimeout(timeout * 60)
+
+        parameter_payload = {
+            "model": model,
+            "prompt": prompt,
+            "top_p": top_p,
+            "top_k": top_k,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stop": stop,
+            "repetition_penalty": repetition_penalty,
+            "logprobs": logprobs,
+            "safety_model": safety_model,
+        }
+
+        async with ClientSession(headers=headers, timeout=client_timeout) as session:
+            async with session.post(
+                together.api_base_complete, json=parameter_payload
+            ) as resp:
+
+                async def streamer() -> Any:
+                    # Parse ServerSentEvents
+                    async for byte_payload in resp.content:
+                        # Skip line
+                        if byte_payload == b"\n":
+                            continue
+
+                        payload = byte_payload.decode("utf-8")
+
+                        # Event data
+                        if payload.startswith("data:"):
+                            # Decode payload
+                            json_payload = json.loads(
+                                payload.lstrip("data:").rstrip("/n")
+                            )
+
+                            if raw:
+                                yield json_payload
+                            else:
+                                # Parse payload
+                                response = TogetherResponse(**json_payload)
+
+                                yield response
+
+                if stream:
+                    return await streamer()
+                else:
+                    payload = await resp.json()
+                    response = TogetherResponse(**payload)
+                    return response

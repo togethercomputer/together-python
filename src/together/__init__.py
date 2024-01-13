@@ -33,7 +33,7 @@ BACKOFF_FACTOR = 0.2
 
 min_samples = 100
 
-from .complete import Complete, Completion
+from .complete import AsyncComplete, Complete, Completion
 from .embeddings import Embeddings
 from .error import *
 from .files import Files
@@ -77,6 +77,7 @@ __all__ = [
     "Models",
     "Complete",
     "Completion",
+    "AsyncComplete",
     "Files",
     "Finetune",
     "Image",

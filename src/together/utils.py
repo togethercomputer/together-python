@@ -87,6 +87,15 @@ def response_status_exception(response: requests.Response) -> None:
     response.raise_for_status()
 
 
+def get_headers() -> Dict[str, str]:
+    headers = {
+        "Authorization": f"Bearer {together.api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": together.user_agent,
+    }
+    return headers
+
+
 def create_post_request(
     url: str,
     headers: Optional[Dict[Any, Any]] = None,
@@ -99,11 +108,7 @@ def create_post_request(
         verify_api_key()
 
     if not headers:
-        headers = {
-            "Authorization": f"Bearer {api_key or together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
+        headers = get_headers()
 
     # send request
     try:
@@ -131,11 +136,7 @@ def create_get_request(
         verify_api_key()
 
     if not headers:
-        headers = {
-            "Authorization": f"Bearer {together.api_key}",
-            "Content-Type": "application/json",
-            "User-Agent": together.user_agent,
-        }
+        headers = get_headers()
 
     # send request
     try:
