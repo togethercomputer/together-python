@@ -259,6 +259,7 @@ def check_json(
     if not os.path.isfile(file):
         report_dict["file_present"] = f"File not found at given file path {file}"
         report_dict["is_check_passed"] = False
+        return report_dict
     else:
         report_dict["file_present"] = "File found"
 
@@ -272,8 +273,21 @@ def check_json(
     elif file_size == 0:
         report_dict["file_size"] = "File is empty"
         report_dict["is_check_passed"] = False
+        return report_dict
     else:
         report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
+
+    # Check that the file is UTF-8 encoded. If not report where the error occurs.
+    try:
+        with open(file, encoding="utf-8") as f:
+            f.read()
+    except UnicodeDecodeError as e:
+        report_dict["utf8"] = (
+            f"File is not UTF-8 encoded. Error raised: {e}."
+            f"See https://docs.together.ai/docs/fine-tuning for more information."
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
 
     with open(file) as f:
         # idx must be instantiated so decode errors (e.g. file is a tar) or empty files are caught
