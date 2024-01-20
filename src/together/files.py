@@ -16,7 +16,6 @@ from together.utils import (
     get_logger,
     response_to_dict,
     verify_api_key,
-    response_status_exception,
 )
 
 
@@ -93,7 +92,6 @@ class Files:
             logger.debug(f"Response header: {response.headers}")
             logger.debug(f"Response status code: {response.status_code}")
 
-            
             if response.status_code == 401:
                 logger.critical(
                     "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
@@ -116,7 +114,7 @@ class Files:
                     "Unexpected error raised by endpoint.",
                     http_status=response.status_code,
                 )
-    
+
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
 
