@@ -15,6 +15,8 @@ from together.utils import (
     create_get_request,
     get_logger,
     response_to_dict,
+    verify_api_key,
+    response_status_exception,
 )
 
 
@@ -47,7 +49,7 @@ class Files:
         model: Optional[str] = None,
     ) -> Mapping[str, Union[str, int, Any]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
-
+        verify_api_key()
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "User-Agent": together.user_agent,
@@ -91,12 +93,20 @@ class Files:
             logger.debug(f"Response header: {response.headers}")
             logger.debug(f"Response status code: {response.status_code}")
 
+            
             if response.status_code == 401:
                 logger.critical(
                     "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
                 )
                 raise together.AuthenticationError(
                     "This job would exceed your free trial credits. Please upgrade to a paid account through Settings -> Billing on api.together.ai to continue."
+                )
+            elif response.status_code == 403:
+                error_text = "Inadequate permissions. Please verify your API key."
+                logger.critical(error_text)
+                raise together.AuthenticationError(
+                    error_text,
+                    http_status=response.status_code,
                 )
             elif response.status_code != 302:
                 logger.critical(
@@ -106,7 +116,7 @@ class Files:
                     "Unexpected error raised by endpoint.",
                     http_status=response.status_code,
                 )
-
+    
             r2_signed_url = response.headers["Location"]
             file_id = response.headers["X-Together-File-Id"]
 
@@ -154,7 +164,7 @@ class Files:
     @classmethod
     def delete(self, file_id: str) -> Dict[str, str]:
         delete_url = urllib.parse.urljoin(together.api_base_files, file_id)
-
+        verify_api_key()
         headers = {
             "Authorization": f"Bearer {together.api_key}",
             "User-Agent": together.user_agent,
