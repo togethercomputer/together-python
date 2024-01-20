@@ -279,7 +279,7 @@ def check_json(
 
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
-        with open(file, encoding="utf-8") as f:
+        with open(file, "r", encoding="utf-8") as f:
             f.read()
     except UnicodeDecodeError as e:
         report_dict["utf8"] = (
