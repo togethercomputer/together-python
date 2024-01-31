@@ -1,10 +1,13 @@
 import os
-import sys
 import urllib.parse
-from typing import Type
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, Callable, Optional, Type, Union
+import typing as _t
+from typing_extensions import override
 
 from .version import VERSION
 
+from .together_response import TogetherResponse
 
 version = VERSION
 
@@ -12,7 +15,7 @@ user_agent = f"TogetherPythonOfficial/{version}"
 
 api_key = os.environ.get("TOGETHER_API_KEY", None)
 
-api_base = "https://api.together.xyz/"
+api_base = "https://api.together.xyz/v1"
 api_base_complete = urllib.parse.urljoin(api_base, "/api/inference")
 api_base_files = urllib.parse.urljoin(api_base, "/v1/files/")
 api_base_finetune = urllib.parse.urljoin(api_base, "/v1/fine-tunes/")
@@ -31,39 +34,123 @@ Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"""
 MAX_CONNECTION_RETRIES = 2
 BACKOFF_FACTOR = 0.2
 
+log = None  # Set to either 'debug' or 'info', controls console logging
+
 min_samples = 100
 
-from .complete import AsyncComplete, Complete, Completion
-from .embeddings import Embeddings
-from .error import *
-from .files import Files
-from .finetune import Finetune
-from .image import Image
-from .models import Models
+requestssession: Optional[
+    Union["requests.Session", Callable[[], "requests.Session"]]
+] = None
 
 
-class Together:
-    complete: Type[Complete]
-    completion: Type[Completion]
-    embeddings: Type[Embeddings]
-    files: Type[Files]
-    finetune: Type[Finetune]
-    image: Type[Image]
-    models: Type[Models]
+if TYPE_CHECKING:
+    import requests
+    from aiohttp import ClientSession
 
-    def __init__(
-        self,
-    ) -> None:
-        self.complete = Complete
-        self.completion = Completion
-        self.embeddings = Embeddings
-        self.files = Files
-        self.finetune = Finetune
-        self.image = Image
-        self.models = Models
+aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
+    "aiohttp-session", default=None
+)
+#
+# from together.resources.completions import Complete, Completion
+# from .embeddings import Embeddings
+# from .error import *
+# from .files import Files
+# from .finetune import Finetune
+# from .image import Image
+# from .models import Models
+from ._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
+from ._client import Together
 
+import httpx as _httpx
+
+api_key: str | None = None
+
+organization: str | None = None
+
+base_url: str | _httpx.URL | None = None
+
+timeout: float | None = TIMEOUT_SECS
+
+max_retries: int = MAX_CONNECTION_RETRIES
+
+default_headers: _t.Mapping[str, str] | None = None
+
+default_query: _t.Mapping[str, object] | None = None
+
+
+class _ModuleClient(Together):
+    # Note: we have to use type: ignores here as overriding class members
+    # with properties is technically unsafe but it is fine for our use case
+
+    @property  # type: ignore
+    @override
+    def api_key(self) -> str | None:
+        return api_key
+
+    @api_key.setter  # type: ignore
+    def api_key(self, value: str | None) -> None:  # type: ignore
+        global api_key
+
+        api_key = value
+
+    @property  # type: ignore
+    @override
+    def organization(self) -> str | None:
+        return organization
+
+    @organization.setter  # type: ignore
+    def organization(self, value: str | None) -> None:  # type: ignore
+        global organization
+
+        organization = value
+
+    @property
+    @override
+    def base_url(self) -> str:
+        if base_url is not None:
+            return base_url
+
+        return super().base_url
+
+    @base_url.setter
+    def base_url(self, url: _httpx.URL | str) -> None:
+        super().base_url = url  # type: ignore[misc]
+
+    @property  # type: ignore
+    @override
+    def timeout(self) -> float  | None:
+        return timeout
+
+    @timeout.setter  # type: ignore
+    def timeout(self, value: float | None) -> None:  # type: ignore
+        global timeout
+
+        timeout = value
+
+    @property  # type: ignore
+    @override
+    def max_retries(self) -> int:
+        return max_retries
+
+    @max_retries.setter  # type: ignore
+    def max_retries(self, value: int) -> None:  # type: ignore
+        global max_retries
+
+        max_retries = value
+
+    @property  # type: ignore
+    @override
+    def _custom_headers(self) -> _t.Mapping[str, str] | None:
+        return default_headers
+
+    @_custom_headers.setter  # type: ignore
+    def _custom_headers(self, value: _t.Mapping[str, str] | None) -> None:  # type: ignore
+        global default_headers
+
+        default_headers = value
 
 __all__ = [
+    "aiosession",
     "api_key",
     "api_base",
     "api_base_complete",
@@ -74,14 +161,15 @@ __all__ = [
     "default_text_model",
     "default_image_model",
     "default_embedding_model",
-    "Models",
-    "Complete",
-    "Completion",
-    "AsyncComplete",
-    "Files",
-    "Finetune",
-    "Image",
-    "Embeddings",
+    # "Models",
+    # "Complete",
+    # "Completion",
+    # "AsyncComplete",
+    # "Files",
+    # "Finetune",
+    # "Image",
+    # "Embeddings",
+    "version",
     "MAX_CONNECTION_RETRIES",
     "MISSING_API_KEY_MESSAGE",
     "BACKOFF_FACTOR",

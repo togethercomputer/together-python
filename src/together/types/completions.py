@@ -31,10 +31,8 @@ class Token(BaseModel):
 class FinishReason(str, Enum):
     # number of generated tokens == `max_new_tokens`
     Length = "length"
-    # the model generated its end of sequence token
-    EndOfSequenceToken = "eos_token"
     # the model generated a text included in `stop_sequences`
-    StopSequence = "stop_sequence"
+    StopSequence = "stop"
 
 
 # Additional sequences when using the `best_of` parameter
@@ -92,20 +90,24 @@ class StreamDetails(BaseModel):
     seed: Optional[int]
 
 
+class Usage(BaseModel):
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
 # `generate_stream` return value
-class TogetherResponse(BaseModel):
-    choices: Optional[List[Choice]] = None
+class CompletionsResponse(BaseModel):
     id: Optional[str] = None
-    token: Optional[Token] = None
-    error: Optional[str] = None
-    error_type: Optional[str] = None
+    choices: Optional[List[Choice]] = None
     generated_text: Optional[str] = None
     # Generation details
     # Only available when the generation is finished
     details: Optional[StreamDetails] = None
+    usage: Optional[Usage] = None
 
     def __init__(self, **kwargs: Optional[Dict[str, Any]]) -> None:
+        # legacy endpoint casting
         if kwargs.get("output"):
             kwargs["choices"] = typing.cast(Dict[str, Any], kwargs["output"])["choices"]
-            kwargs["details"] = kwargs.get("details")
         super().__init__(**kwargs)

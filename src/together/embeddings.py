@@ -2,17 +2,18 @@ import concurrent.futures
 from typing import Any, Dict, List, Optional, Union
 
 import together
-from together.utils import create_post_request, get_logger
+from together.utils import create_post_request
+
+from dataclasses import dataclass
 
 
-logger = get_logger(str(__name__))
-
-
+@dataclass
 class DataItem:
     def __init__(self, embedding: List[float]):
         self.embedding = embedding
 
 
+@dataclass
 class EmbeddingsOutput:
     def __init__(self, data: List[DataItem]):
         self.data = data

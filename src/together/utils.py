@@ -1,4 +1,8 @@
+import json
 import logging
+import os
+import platform
+import re
 import sys
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -8,49 +12,9 @@ import sseclient
 
 import together
 
+logger = logging.getLogger("together")
 
-class TogetherLogFormatter(logging.Formatter):
-    grey = "\x1b[38;20m"
-    yellow = "\x1b[33;20m"
-    red = "\x1b[31;20m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    log_format = (
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    )
-
-    FORMATS = {
-        logging.DEBUG: grey + log_format + reset,
-        logging.INFO: grey + log_format + reset,
-        logging.WARNING: yellow + log_format + reset,
-        logging.ERROR: red + log_format + reset,
-        logging.CRITICAL: bold_red + log_format + reset,
-    }
-
-    def format(self, record: logging.LogRecord) -> str:
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt, datefmt="%m-%d-%Y %H:%M:%S")
-        return formatter.format(record)
-
-
-# Setup logging
-def get_logger(
-    name: str,
-    logger: Optional[logging.Logger] = None,
-    log_level: str = together.log_level,
-) -> logging.Logger:
-    if logger is None:
-        logger = logging.getLogger(name)
-
-        logger.setLevel(log_level)
-
-        lg_format = logging.StreamHandler(sys.stderr)
-        lg_format.setLevel(logging.DEBUG)
-        lg_format.setFormatter(TogetherLogFormatter())
-
-        logger.addHandler(lg_format)
-
-    return logger
+TOGETHER_LOG = os.environ.get("TOGETHER_LOG")
 
 
 def verify_api_key() -> None:
@@ -87,22 +51,55 @@ def response_status_exception(response: requests.Response) -> None:
     response.raise_for_status()
 
 
-def get_headers() -> Dict[str, str]:
-    headers = {
-        "Authorization": f"Bearer {together.api_key}",
-        "Content-Type": "application/json",
-        "User-Agent": together.user_agent,
+def format_app_info(info):
+    str = info["name"]
+    if info["version"]:
+        str += "/%s" % (info["version"],)
+    if info["url"]:
+        str += " (%s)" % (info["url"],)
+    return str
+
+
+def get_headers(
+        method: str,
+        api_key: str,
+        extra
+) -> Dict[str, str]:
+    user_agent = "Together/v1 PythonBindings/%s" % (together.VERSION,)
+
+    uname_without_node = " ".join(
+        v for k, v in platform.uname()._asdict().items() if k != "node"
+    )
+    ua = {
+        "bindings_version": together.VERSION,
+        "httplib": "requests",
+        "lang": "python",
+        "lang_version": platform.python_version(),
+        "platform": platform.platform(),
+        "publisher": "openai",
+        "uname": uname_without_node,
     }
+
+    headers = {
+        "X-TogetherAI-Client-User-Agent": json.dumps(ua),
+        "Authorization": f"Bearer {api_key or together.api_key}",
+        "User-Agent": user_agent,
+    }
+
+    if _console_log_level():
+        headers["OpenAI-Debug"] = _console_log_level()
+    headers.update(extra)
+
     return headers
 
 
 def create_post_request(
-    url: str,
-    headers: Optional[Dict[Any, Any]] = None,
-    json: Optional[Dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-    api_key: Optional[str] = None,
+        url: str,
+        headers: Optional[Dict[Any, Any]] = None,
+        json: Optional[Dict[Any, Any]] = None,
+        stream: Optional[bool] = False,
+        check_auth: Optional[bool] = True,
+        api_key: Optional[str] = None,
 ) -> requests.Response:
     if check_auth and api_key is None:
         verify_api_key()
@@ -126,11 +123,11 @@ def sse_client(response: requests.Response) -> sseclient.SSEClient:
 
 
 def create_get_request(
-    url: str,
-    headers: Optional[Dict[Any, Any]] = None,
-    json: Optional[Dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
+        url: str,
+        headers: Optional[Dict[Any, Any]] = None,
+        json: Optional[Dict[Any, Any]] = None,
+        stream: Optional[bool] = False,
+        check_auth: Optional[bool] = True,
 ) -> requests.Response:
     if check_auth:
         verify_api_key()
@@ -183,3 +180,61 @@ def finetune_price_to_dollars(price: float) -> float:
 
 def nanodollars_to_dollars(price: int) -> float:
     return (price * 4000) / 1000000000
+
+
+def default_api_key(api_key: Optional[str] = None) -> str:
+    if api_key:
+        return api_key
+    if together.api_key:
+        return together.api_key
+    if os.environ.get("TOGETHER_API_KEY"):
+        return os.environ.get("TOGETHER_API_KEY")
+
+    raise together.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
+
+
+def _console_log_level():
+    if together.log in ["debug", "info"]:
+        return together.log
+    elif TOGETHER_LOG in ["debug", "info"]:
+        return TOGETHER_LOG
+    else:
+        return None
+
+
+def logfmt(props):
+    def fmt(key, val):
+        # Handle case where val is a bytes or bytesarray
+        if hasattr(val, "decode"):
+            val = val.decode("utf-8")
+        # Check if val is already a string to avoid re-encoding into ascii.
+        if not isinstance(val, str):
+            val = str(val)
+        if re.search(r"\s", val):
+            val = repr(val)
+        # key should already be a string
+        if re.search(r"\s", key):
+            key = repr(key)
+        return "{key}={val}".format(key=key, val=val)
+
+    return " ".join([fmt(key, val) for key, val in sorted(props.items())])
+
+
+def log_debug(message, **params):
+    msg = logfmt(dict(message=message, **params))
+    if _console_log_level() == "debug":
+        print(msg, file=sys.stderr)
+    logger.debug(msg)
+
+
+def log_info(message, **params):
+    msg = logfmt(dict(message=message, **params))
+    if _console_log_level() in ["debug", "info"]:
+        print(msg, file=sys.stderr)
+    logger.info(msg)
+
+
+def log_warn(message, **params):
+    msg = logfmt(dict(message=message, **params))
+    print(msg, file=sys.stderr)
+    logger.warn(msg)
