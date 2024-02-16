@@ -93,7 +93,9 @@ class Finetune:
             raise ValueError("Eval steps must be a non-negative integer")
         if not validation_file and eval_steps > 0:
             raise ValueError("Eval steps must be 0 if validation_file is not provided")
-        
+        if validation_file and not wandb_api_key:
+            raise ValueError("Wandb API key is required if validation_file is provided")
+
         parameter_payload = {
             "training_file": training_file,
             # "validation_file": validation_file,
@@ -144,6 +146,9 @@ class Finetune:
             raise together.FileTypeError(validation_file_feedback)
         
         if estimate_price:
+            if parameter_payload["validation_file"]:
+                logger.warning("Price estimates do not include validation files")
+
             param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
@@ -160,13 +165,14 @@ class Finetune:
                         "FT",
                         {
                             "tokens": token_estimate,
-                            "epochs": n_epochs,
-                            "parameters": param_size,
+                            "epochs": int(n_epochs),
+                            "parameters": int(param_size),
                         },
                     ],
                     "id": 1,
                 }
                 r = requests.post("https://computer.together.xyz/", json=data)
+                print(r.json())
                 price_estimate = r.json()["result"]["total"]
                 price_estimate /= 1000000000
                 return byte_count, token_estimate, price_estimate
@@ -176,11 +182,8 @@ class Finetune:
                     byte_count, token_estimate, price_estimate = get_price_estimate(file, n_epochs, param_size)
                     training_file_feedback = f"A rough price estimate for this job's training is ${price_estimate:.2f} USD, not including validation data. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
                     print(training_file_feedback)
-                elif file["id"] == parameter_payload["validation_file"]:
-                    byte_count, token_estimate, price_estimate = get_price_estimate(file, 1, param_size)
-                    validation_file_feedback = f"A rough price estimate for this job's validation is ${price_estimate:.2f} USD per evaulation loop. Please note the number of evaulation loops is not available until training starts. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
-                    print(validation_file_feedback)
-                exit()
+                    exit()
+                # TODO: Add validation file estimate
 
         if confirm_inputs:
             if adjusted_inputs:
