@@ -154,33 +154,28 @@ class Finetune:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
                 raise together.FileTypeError(error)
 
-            def get_price_estimate(file, n_epochs, param_size):
-                ## This is the file
-                byte_count = file["bytes"]
-                token_estimate = int(int(byte_count) / 4)
-                data = {
-                    "method": "together_getPrice",
-                    "params": [
-                        model,
-                        "FT",
-                        {
-                            "tokens": token_estimate,
-                            "epochs": int(n_epochs),
-                            "parameters": int(param_size),
-                        },
-                    ],
-                    "id": 1,
-                }
-                r = requests.post("https://computer.together.xyz/", json=data)
-                print(r.json())
-                price_estimate = r.json()["result"]["total"]
-                price_estimate /= 1000000000
-                return byte_count, token_estimate, price_estimate
-            
             for file in uploaded_files["data"]:
                 if file["id"] == parameter_payload["training_file"]:
-                    byte_count, token_estimate, price_estimate = get_price_estimate(file, n_epochs, param_size)
-                    training_file_feedback = f"A rough price estimate for this job's training is ${price_estimate:.2f} USD, not including validation data. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
+                    ## This is the file
+                    byte_count = file["bytes"]
+                    token_estimate = int(int(file["bytes"]) / 4)
+                    data = {
+                        "method": "together_getPrice",
+                        "params": [
+                            model,
+                            "FT",
+                            {
+                                "tokens": token_estimate,
+                                "epochs": n_epochs,
+                                "parameters": together.Models._param_count(model),
+                            },
+                        ],
+                        "id": 1,
+                    }
+                    r = requests.post("https://computer.together.xyz/", json=data)
+                    estimate = r.json()["result"]["total"]
+                    estimate /= 1000000000
+                    training_file_feedback = f"A rough price estimate for this job is ${estimate:.2f} USD, not including validation data. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
                     print(training_file_feedback)
                     exit()
                 # TODO: Add validation file estimate
