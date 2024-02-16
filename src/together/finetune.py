@@ -88,7 +88,7 @@ class Finetune:
         ]:
             n_checkpoints = 1
             adjusted_inputs = True
-        
+
         if eval_steps < 0:
             raise ValueError("Eval steps must be a non-negative integer")
         if not validation_file and eval_steps > 0:
@@ -134,8 +134,11 @@ class Finetune:
             )
             logger.critical(training_file_feedback)
             raise together.FileTypeError(training_file_feedback)
-        
-        if parameter_payload["validation_file"] and parameter_payload["validation_file"] not in file_ids:
+
+        if (
+            parameter_payload["validation_file"]
+            and parameter_payload["validation_file"] not in file_ids
+        ):
             validation_file_feedback = (
                 "validation_file refers to a file identifier of an uploaded training file, not a local file path. "
                 "A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or "
@@ -144,7 +147,7 @@ class Finetune:
             )
             logger.critical(validation_file_feedback)
             raise together.FileTypeError(validation_file_feedback)
-        
+
         if estimate_price:
             if parameter_payload["validation_file"]:
                 logger.warning("Price estimates do not include validation files")
