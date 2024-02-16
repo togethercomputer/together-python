@@ -42,6 +42,15 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         type=str,
     )
     subparser.add_argument(
+        "--validation-file",
+        "-v",
+        metavar="VALID-FILE-ID",
+        default="",
+        help="File-ID of an uploaded file that contains validation data. Requires WandB API key to be set.",
+        required=False,
+        type=str,
+    )
+    subparser.add_argument(
         "--estimate-price",
         "-e",
         help="Estimate the price of the fine tune job",
@@ -62,6 +71,14 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         metavar="EPOCHS",
         default=4,
         help="The number of epochs to train the model for. Default=4",
+        type=int,
+    )
+    subparser.add_argument(
+        "--eval-steps",
+        "-es",
+        metavar="EVAL_STEPS",
+        default=0,
+        help="The number of between running evaulation. Default=0 for every epoch.",
         type=int,
     )
     subparser.add_argument(
@@ -260,6 +277,8 @@ def _run_create(args: argparse.Namespace) -> None:
             training_file=args.training_file,  # training file_id
             model=args.model,
             n_epochs=args.n_epochs,
+            validation_file=args.validation_file,
+            eval_steps=args.eval_steps,
             n_checkpoints=args.n_checkpoints,
             batch_size=args.batch_size,
             learning_rate=args.learning_rate,

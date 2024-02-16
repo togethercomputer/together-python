@@ -32,6 +32,8 @@ class Finetune:
         training_file: str,  # training file_id
         model: str,
         n_epochs: int = 1,
+        validation_file: Optional[str] = "",  # validation file_id
+        eval_steps: Optional[int] = 0,
         n_checkpoints: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
@@ -86,7 +88,12 @@ class Finetune:
         ]:
             n_checkpoints = 1
             adjusted_inputs = True
-
+        
+        if eval_steps < 0:
+            raise ValueError("Eval steps must be a non-negative integer")
+        if not validation_file and eval_steps > 0:
+            raise ValueError("Eval steps must be 0 if validation_file is not provided")
+        
         parameter_payload = {
             "training_file": training_file,
             # "validation_file": validation_file,
@@ -102,6 +109,8 @@ class Finetune:
             # "fp16": fp16,
             "suffix": suffix,
             "wandb_key": wandb_api_key,
+            "validation_file": validation_file,
+            "eval_steps": eval_steps,
         }
 
         # check if model name is one of the models available for finetuning
@@ -123,37 +132,55 @@ class Finetune:
             )
             logger.critical(training_file_feedback)
             raise together.FileTypeError(training_file_feedback)
-
+        
+        if parameter_payload["validation_file"] and parameter_payload["validation_file"] not in file_ids:
+            validation_file_feedback = (
+                "validation_file refers to a file identifier of an uploaded training file, not a local file path. "
+                "A list of uploaded files and file identifiers can be retrieved with `together.Files.list()` Python API or "
+                "$ together files list` CLI. A training file can be uploaded using `together.Files.upload(file ='/path/to/file')"
+                "Python API or `$ together files upload <FILE_PATH>` CLI."
+            )
+            logger.critical(validation_file_feedback)
+            raise together.FileTypeError(validation_file_feedback)
+        
         if estimate_price:
             param_size = together.Models._param_count(model)
             if param_size == 0:
                 error = f"Unknown model {model}.  Cannot estimate price.  Please check the name of the model"
                 raise together.FileTypeError(error)
 
+            def get_price_estimate(file, n_epochs, param_size):
+                ## This is the file
+                byte_count = file["bytes"]
+                token_estimate = int(int(byte_count) / 4)
+                data = {
+                    "method": "together_getPrice",
+                    "params": [
+                        model,
+                        "FT",
+                        {
+                            "tokens": token_estimate,
+                            "epochs": n_epochs,
+                            "parameters": param_size,
+                        },
+                    ],
+                    "id": 1,
+                }
+                r = requests.post("https://computer.together.xyz/", json=data)
+                price_estimate = r.json()["result"]["total"]
+                price_estimate /= 1000000000
+                return byte_count, token_estimate, price_estimate
+            
             for file in uploaded_files["data"]:
                 if file["id"] == parameter_payload["training_file"]:
-                    ## This is the file
-                    byte_count = file["bytes"]
-                    token_estimate = int(int(file["bytes"]) / 4)
-                    data = {
-                        "method": "together_getPrice",
-                        "params": [
-                            model,
-                            "FT",
-                            {
-                                "tokens": token_estimate,
-                                "epochs": n_epochs,
-                                "parameters": together.Models._param_count(model),
-                            },
-                        ],
-                        "id": 1,
-                    }
-                    r = requests.post("https://computer.together.xyz/", json=data)
-                    estimate = r.json()["result"]["total"]
-                    estimate /= 1000000000
-                    training_file_feedback = f"A rough price estimate for this job is ${estimate:.2f} USD. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
+                    byte_count, token_estimate, price_estimate = get_price_estimate(file, n_epochs, param_size)
+                    training_file_feedback = f"A rough price estimate for this job's training is ${price_estimate:.2f} USD, not including validation data. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
                     print(training_file_feedback)
-                    exit()
+                elif file["id"] == parameter_payload["validation_file"]:
+                    byte_count, token_estimate, price_estimate = get_price_estimate(file, 1, param_size)
+                    validation_file_feedback = f"A rough price estimate for this job's validation is ${price_estimate:.2f} USD per evaulation loop. Please note the number of evaulation loops is not available until training starts. The estimated number of tokens is {token_estimate} tokens. Accurate pricing is not available until full tokenization has been performed. The actual price might be higher or lower depending on how the data is tokenized. Our token estimate is based on the number of bytes in the training file, {byte_count} bytes, divided by an average token length of 4 bytes. We currently have a per job minimum of $5.00 USD."
+                    print(validation_file_feedback)
+                exit()
 
         if confirm_inputs:
             if adjusted_inputs:
