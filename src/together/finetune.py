@@ -32,8 +32,8 @@ class Finetune:
         training_file: str,  # training file_id
         model: str,
         n_epochs: int = 1,
-        validation_file: Optional[str] = "",  # validation file_id
-        eval_steps: Optional[int] = 0,
+        validation_file: str = "",  # validation file_id
+        eval_steps: int = 0,
         n_checkpoints: Optional[int] = 1,
         batch_size: Optional[int] = 32,
         learning_rate: Optional[float] = 0.00001,
