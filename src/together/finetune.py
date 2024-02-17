@@ -93,6 +93,10 @@ class Finetune:
             raise ValueError("Eval steps must be a non-negative integer")
         if not validation_file and eval_steps > 0:
             raise ValueError("Eval steps must be 0 if validation_file is not provided")
+        if eval_steps == 0 and validation_file:
+            logger.warning(
+                "Validation file provided with eval steps set to 0. Validation will be performed at the end of each epoch."
+            )
         if validation_file and not wandb_api_key:
             raise ValueError("Wandb API key is required if validation_file is provided")
 
