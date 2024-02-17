@@ -78,7 +78,7 @@ def _add_create(parser: argparse._SubParsersAction[argparse.ArgumentParser]) -> 
         "-es",
         metavar="EVAL_STEPS",
         default=0,
-        help="The number of between running evaulation. Default=0 for every epoch.",
+        help="If this value is > 0, evaluation on your validation set will be run every eval-steps. If it is 0, it runs the evaluation at the end of every epoch.",
         required=False,
         type=int,
     )

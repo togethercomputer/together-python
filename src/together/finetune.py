@@ -91,7 +91,7 @@ class Finetune:
 
         if eval_steps < 0:
             raise ValueError("Eval steps must be a non-negative integer")
-        if not validation_file and eval_steps > 0:
+        if eval_steps > 0 and not validation_file:
             raise ValueError("Eval steps must be 0 if validation_file is not provided")
         if eval_steps == 0 and validation_file:
             logger.warning(
@@ -102,7 +102,7 @@ class Finetune:
 
         parameter_payload = {
             "training_file": training_file,
-            # "validation_file": validation_file,
+            "validation_file": validation_file,
             "model": model,
             "n_epochs": n_epochs,
             "n_checkpoints": n_checkpoints,
@@ -115,7 +115,6 @@ class Finetune:
             # "fp16": fp16,
             "suffix": suffix,
             "wandb_key": wandb_api_key,
-            "validation_file": validation_file,
             "eval_steps": eval_steps,
         }
 
