@@ -1,10 +1,9 @@
 import concurrent.futures
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import together
 from together.utils import create_post_request
-
-from dataclasses import dataclass
 
 
 @dataclass

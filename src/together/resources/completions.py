@@ -1,12 +1,9 @@
-from typing import Any, Iterator, List, Optional, Union, Mapping
+from typing import Any, Iterator, List, Mapping, Optional, Union
 
 import together
-from together.together_response import TogetherResponse
 from together.abstract import api_requestor
-from together.utils import default_api_key
-
-from pydantic import BaseModel
-from together.types import CompletionRequest, CompletionResponse, CompletionChunk
+from together.together_response import TogetherResponse
+from together.types import CompletionChunk, CompletionRequest, CompletionResponse
 
 
 class Completions:

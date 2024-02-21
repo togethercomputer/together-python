@@ -1,13 +1,14 @@
 import os
+import typing as _t
 import urllib.parse
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, Callable, Optional, Type, Union
-import typing as _t
+
 from typing_extensions import override
 
+from together.together_response import TogetherResponse
 from together.version import VERSION
 
-from together.together_response import TogetherResponse
 
 version = VERSION
 
@@ -51,10 +52,11 @@ aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
     "aiohttp-session", default=None
 )
 
-from together._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
-from together._client import Together
-
 import httpx as _httpx
+
+from together._client import Together
+from together._constants import MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+
 
 api_key: str | None = None
 

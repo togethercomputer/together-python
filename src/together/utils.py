@@ -12,6 +12,7 @@ import sseclient
 
 import together
 
+
 logger = logging.getLogger("together")
 
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")

@@ -1,8 +1,7 @@
 from enum import Enum
-from pydantic import BaseModel
-
 from typing import List
-from typing_extensions import TypedDict
+
+from pydantic import BaseModel
 
 
 # Generation finish reason

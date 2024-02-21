@@ -1,15 +1,14 @@
-from typing import Any, Dict, List, Optional
-from typing_extensions import TypedDict
+from typing import List
 
 from pydantic import BaseModel
 
 from together.types.common import (
-    LogprobsPart,
-    FinishReason,
-    PromptPart,
-    ObjectType,
-    UsageData,
     DeltaContent,
+    FinishReason,
+    LogprobsPart,
+    ObjectType,
+    PromptPart,
+    UsageData,
 )
 
 

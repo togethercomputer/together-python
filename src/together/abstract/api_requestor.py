@@ -5,21 +5,22 @@ import threading
 import time
 from json import JSONDecodeError
 from typing import (
+    Any,
     AsyncContextManager,
     AsyncGenerator,
     Dict,
+    Generator,
     Iterator,
     Optional,
     Tuple,
     Union,
     overload,
-    Any,
-    Generator,
 )
 from urllib.parse import urlencode, urlsplit, urlunsplit
 
 import aiohttp
 import requests
+
 
 if sys.version_info >= (3, 8):
     from typing import Literal
@@ -28,13 +29,13 @@ else:
 
 import together
 from together import error, utils
+from together._constants import (
+    MAX_CONNECTION_RETRIES,
+    MAX_SESSION_LIFETIME_SECS,
+    TIMEOUT_SECS,
+)
 from together.together_response import TogetherResponse
 
-from together._constants import (
-    TIMEOUT_SECS,
-    MAX_SESSION_LIFETIME_SECS,
-    MAX_CONNECTION_RETRIES,
-)
 
 # Has one attribute per thread, 'session'.
 _thread_context = threading.local()

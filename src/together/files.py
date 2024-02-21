@@ -2,7 +2,7 @@ import json
 import os
 import posixpath
 import urllib.parse
-from typing import Any, Dict, List, Mapping, Optional, Union
+from typing import Any, Dict, List, Mapping, Union
 
 import requests
 from requests.adapters import HTTPAdapter

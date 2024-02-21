@@ -1,10 +1,9 @@
-from together import resources
-from together.error import TogetherException
-from together.version import VERSION
-from together._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
-
 import os
-from typing import Union, Optional, Dict, Mapping
+from typing import Mapping, Union
+
+from together import resources
+from together._constants import MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+from together.error import TogetherException
 
 
 class Together:
@@ -49,7 +48,7 @@ class Together:
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
         if base_url is None:
-            base_url = f"https://api.together.xyz/v1"
+            base_url = "https://api.together.xyz/v1"
 
         self.base_url = base_url
 
@@ -113,7 +112,7 @@ class AsyncTogether:
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
         if base_url is None:
-            base_url = f"https://api.together.xyz/v1"
+            base_url = "https://api.together.xyz/v1"
 
         self.base_url = base_url
 
