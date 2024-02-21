@@ -1,1 +1,1 @@
-from .api_requestor import APIRequestor
+from together.abstract.api_requestor import APIRequestor

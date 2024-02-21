@@ -60,11 +60,7 @@ def format_app_info(info):
     return str
 
 
-def get_headers(
-        method: str,
-        api_key: str,
-        extra
-) -> Dict[str, str]:
+def get_headers(method: str, api_key: str, extra) -> Dict[str, str]:
     user_agent = "Together/v1 PythonBindings/%s" % (together.VERSION,)
 
     uname_without_node = " ".join(
@@ -94,12 +90,12 @@ def get_headers(
 
 
 def create_post_request(
-        url: str,
-        headers: Optional[Dict[Any, Any]] = None,
-        json: Optional[Dict[Any, Any]] = None,
-        stream: Optional[bool] = False,
-        check_auth: Optional[bool] = True,
-        api_key: Optional[str] = None,
+    url: str,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
+    stream: Optional[bool] = False,
+    check_auth: Optional[bool] = True,
+    api_key: Optional[str] = None,
 ) -> requests.Response:
     if check_auth and api_key is None:
         verify_api_key()
@@ -123,11 +119,11 @@ def sse_client(response: requests.Response) -> sseclient.SSEClient:
 
 
 def create_get_request(
-        url: str,
-        headers: Optional[Dict[Any, Any]] = None,
-        json: Optional[Dict[Any, Any]] = None,
-        stream: Optional[bool] = False,
-        check_auth: Optional[bool] = True,
+    url: str,
+    headers: Optional[Dict[Any, Any]] = None,
+    json: Optional[Dict[Any, Any]] = None,
+    stream: Optional[bool] = False,
+    check_auth: Optional[bool] = True,
 ) -> requests.Response:
     if check_auth:
         verify_api_key()

@@ -5,14 +5,14 @@ from requests import RequestException
 
 class TogetherException(Exception):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            http_body: Optional[str] = None,
-            http_status: Optional[int] = None,
-            response: Optional[Union[str, httpx.Response]] = None,
-            json_body: Optional[Any] = None,
-            headers: Optional[Union[str, Dict[Any, Any]]] = None,
-            request_id: Optional[str] = "",
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        http_body: Optional[str] = None,
+        http_status: Optional[int] = None,
+        response: Optional[Union[str, httpx.Response]] = None,
+        json_body: Optional[Any] = None,
+        headers: Optional[Union[str, Dict[Any, Any]]] = None,
+        request_id: Optional[str] = "",
     ) -> None:
         super(TogetherException, self).__init__(message)
 
@@ -44,37 +44,33 @@ class TogetherException(Exception):
 
 class AuthenticationError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class ResponseError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class JSONError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class InstanceError(TogetherException):
-    def __init__(
-            self,
-            model: Optional[str] = "model",
-            **kwargs: Any
-    ) -> None:
+    def __init__(self, model: Optional[str] = "model", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.message = f"""No running instances for {model}.
                 You can start an instance with one of the following methods:
@@ -85,74 +81,75 @@ class InstanceError(TogetherException):
                 to get an updated list of valid model names.
                 """
 
+
 class RateLimitError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class FileTypeError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class AttributeError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class Timeout(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class APIConnectionError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class InvalidRequestError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            params: Optional[Dict[str, Any]] = None,
-
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        params: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
+
 class APIError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class ServiceUnavailableError(TogetherException):
     def __init__(
-            self,
-            message: Optional[Union[Exception, str, RequestException]] = "",
-            **kwargs: Any
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)

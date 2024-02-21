@@ -1,1 +1,5 @@
-from .completions import CompletionsResponse
+from together.types.completions import (
+    CompletionRequest,
+    CompletionResponse,
+    CompletionChunk,
+)

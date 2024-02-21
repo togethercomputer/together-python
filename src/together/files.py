@@ -44,7 +44,6 @@ class Files:
         self,
         file: str,
         check: bool = True,
-        model: Optional[str] = None,
     ) -> Mapping[str, Union[str, int, Any]]:
         data = {"purpose": "fine-tune", "file_name": os.path.basename(file)}
 

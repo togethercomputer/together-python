@@ -1,113 +1,62 @@
-import typing
-from enum import Enum
 from typing import Any, Dict, List, Optional
+from typing_extensions import TypedDict
 
 from pydantic import BaseModel
 
-
-# Decoder input tokens
-class InputToken(BaseModel):
-    # Token ID from the model tokenizer
-    id: int
-    # Token text
-    text: str
-    # Logprob
-    # Optional since the logprob of the first token cannot be computed
-    logprob: Optional[float]
+from together.types.common import (
+    LogprobsPart,
+    FinishReason,
+    PromptPart,
+    ObjectType,
+    UsageData,
+    DeltaContent,
+)
 
 
-# Generated tokens
-class Token(BaseModel):
-    # Token ID
-    id: int
-    # Logprob
-    logprob: Optional[float]
-    # Is the token a special token
-    # Can be used to ignore tokens when concatenating
-    special: bool
+class CompletionRequest(BaseModel):
+    prompt: str
+    model: str
+    max_tokens: int | None = 512
+    stop: List[str] | None = None
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
+    repetition_penalty: float | None = None
+    stream: bool = False
+    logprobs: int | None = None
+    echo: bool | None = None
+    n: int | None = None
+    safety_model: str | None = None
 
 
-# Generation finish reason
-class FinishReason(str, Enum):
-    # number of generated tokens == `max_new_tokens`
-    Length = "length"
-    # the model generated a text included in `stop_sequences`
-    StopSequence = "stop"
-
-
-# Additional sequences when using the `best_of` parameter
-class BestOfSequence(BaseModel):
-    # Generated text
-    generated_text: str
-    # Generation finish reason
+class CompletionChoicesData(BaseModel):
+    index: int
+    logprobs: LogprobsPart | None = None
     finish_reason: FinishReason
-    # Number of generated tokens
-    generated_tokens: int
-    # Sampling seed if sampling was activated
-    seed: Optional[int]
-    # Decoder input tokens, empty if decoder_input_details is False
-    prefill: List[InputToken]
-    # Generated tokens
-    tokens: List[Token]
-
-
-# `generate` details
-class Details(BaseModel):
-    # Generation finish reason
-    finish_reason: FinishReason
-    # Number of generated tokens
-    generated_tokens: int
-    # Sampling seed if sampling was activated
-    seed: Optional[int]
-    # Decoder input tokens, empty if decoder_input_details is False
-    prefill: List[InputToken]
-    # Generated tokens
-    tokens: List[Token]
-    # Additional sequences when using the `best_of` parameter
-    best_of_sequences: Optional[List[BestOfSequence]]
-
-
-# `generate` return value
-class Response(BaseModel):
-    # Generated text
-    generated_text: str
-    # Generation details
-    details: Details
-
-
-class Choice(BaseModel):
-    # Generated text
     text: str
-    finish_reason: Optional[FinishReason] = None
-    logprobs: Optional[List[float]] = None
 
 
-# `generate_stream` details
-class StreamDetails(BaseModel):
-    # Number of generated tokens
-    generated_tokens: int
-    # Sampling seed if sampling was activated
-    seed: Optional[int]
+class CompletionChoicesChunk(BaseModel):
+    index: int
+    logprobs: float | None = None
+    finish_reason: FinishReason | None = None
+    delta: DeltaContent | None = None
 
 
-class Usage(BaseModel):
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
+class CompletionResponse(BaseModel):
+    id: str | None = None
+    created: int | None = None
+    model: str | None = None
+    object: ObjectType | None = None
+    choices: List[CompletionChoicesData] | None = None
+    prompt: List[PromptPart] | None = None
+    usage: UsageData | None = None
 
 
-# `generate_stream` return value
-class CompletionsResponse(BaseModel):
-    id: Optional[str] = None
-    choices: Optional[List[Choice]] = None
-    generated_text: Optional[str] = None
-    # Generation details
-    # Only available when the generation is finished
-    details: Optional[StreamDetails] = None
-    usage: Optional[Usage] = None
-
-    def __init__(self, **kwargs: Optional[Dict[str, Any]]) -> None:
-        # legacy endpoint casting
-        if kwargs.get("output"):
-            kwargs["choices"] = typing.cast(Dict[str, Any], kwargs["output"])["choices"]
-        super().__init__(**kwargs)
+class CompletionChunk(BaseModel):
+    id: str | None = None
+    object: ObjectType | None = None
+    created: int | None = None
+    choices: List[CompletionChoicesChunk] | None = None
+    model: str | None = None
+    usage: UsageData | None = None

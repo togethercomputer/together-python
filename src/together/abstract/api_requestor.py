@@ -12,7 +12,9 @@ from typing import (
     Optional,
     Tuple,
     Union,
-    overload, Any, Generator,
+    overload,
+    Any,
+    Generator,
 )
 from urllib.parse import urlencode, urlsplit, urlunsplit
 
@@ -28,7 +30,11 @@ import together
 from together import error, utils
 from together.together_response import TogetherResponse
 
-from .._constants import TIMEOUT_SECS, MAX_SESSION_LIFETIME_SECS, MAX_CONNECTION_RETRIES
+from together._constants import (
+    TIMEOUT_SECS,
+    MAX_SESSION_LIFETIME_SECS,
+    MAX_CONNECTION_RETRIES,
+)
 
 # Has one attribute per thread, 'session'.
 _thread_context = threading.local()
@@ -43,7 +49,7 @@ def _build_api_url(url: str, query: str) -> str:
     return str(urlunsplit((scheme, netloc, path, query, fragment)))
 
 
-def _make_session() -> requests.Session:
+def _make_session(max_retries: int | None = None) -> requests.Session:
     if together.requestssession:
         if isinstance(together.requestssession, requests.Session):
             return together.requestssession
@@ -51,7 +57,9 @@ def _make_session() -> requests.Session:
     s = requests.Session()
     s.mount(
         "https://",
-        requests.adapters.HTTPAdapter(max_retries=MAX_CONNECTION_RETRIES),
+        requests.adapters.HTTPAdapter(
+            max_retries=max_retries or MAX_CONNECTION_RETRIES
+        ),
     )
     return s
 
@@ -60,9 +68,9 @@ def parse_stream_helper(line: bytes) -> Optional[str]:
     if line and line.startswith(b"data:"):
         if line.startswith(b"data: "):
             # SSE event may be valid when it contains whitespace
-            line = line[len(b"data: "):]
+            line = line[len(b"data: ") :]
         else:
-            line = line[len(b"data:"):]
+            line = line[len(b"data:") :]
         if line.strip() == b"[DONE]":
             # return here will cause GeneratorExit exception in urllib3
             # and it will close http connection with TCP Reset
@@ -88,12 +96,14 @@ async def parse_stream_async(rbody: aiohttp.StreamReader):
 
 class APIRequestor:
     def __init__(
-            self,
-            key=None,
-            api_base=None,
+        self,
+        key=None,
+        api_base=None,
+        max_retries: int | None = None,
     ):
         self.api_base = api_base or together.api_base
         self.api_key = key or utils.default_api_key()
+        self.max_retries = max_retries or MAX_CONNECTION_RETRIES
 
     @classmethod
     def format_app_info(cls, info):
@@ -106,66 +116,66 @@ class APIRequestor:
 
     @overload
     def request(
-            self,
-            method,
-            url,
-            params,
-            headers,
-            files,
-            stream: Literal[True],
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params,
+        headers,
+        files,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
 
     @overload
     def request(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            *,
-            stream: Literal[True],
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
 
     @overload
     def request(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            stream: Literal[False] = ...,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
     @overload
     def request(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            stream: bool = ...,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str]:
         pass
 
     def request(
-            self,
-            method,
-            url,
-            params=None,
-            headers=None,
-            files=None,
-            stream: bool = False,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        self,
+        method,
+        url,
+        params=None,
+        headers=None,
+        files=None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
     ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str]:
         result = self.request_raw(
             method.lower(),
@@ -181,67 +191,71 @@ class APIRequestor:
 
     @overload
     async def arequest(
-            self,
-            method,
-            url,
-            params,
-            headers,
-            files,
-            stream: Literal[True],
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params,
+        headers,
+        files,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
         pass
 
     @overload
     async def arequest(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            *,
-            stream: Literal[True],
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
         pass
 
     @overload
     async def arequest(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            stream: Literal[False] = ...,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
     @overload
     async def arequest(
-            self,
-            method,
-            url,
-            params=...,
-            headers=...,
-            files=...,
-            stream: bool = ...,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
-    ) -> Tuple[Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str]:
+        self,
+        method,
+        url,
+        params=...,
+        headers=...,
+        files=...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -> Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
         pass
 
     async def arequest(
-            self,
-            method,
-            url,
-            params=None,
-            headers=None,
-            files=None,
-            stream: bool = False,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> Tuple[Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str]:
+        self,
+        method,
+        url,
+        params=None,
+        headers=None,
+        files=None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -> Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
         ctx = AioHTTPSession()
         session = await ctx.__aenter__()
         result = None
@@ -285,7 +299,7 @@ class APIRequestor:
     @classmethod
     def handle_error_response(cls, rbody, rcode, resp, rheaders, stream_error=False):
         try:
-            error_data = resp["error"]
+            error_data = resp.get("error")
         except (KeyError, TypeError):
             raise error.APIError(
                 "Invalid response object from API: %r (HTTP response code "
@@ -307,49 +321,51 @@ class APIRequestor:
         # Rate limits were previously coded as 400's with code 'rate_limit'
         if rcode == 429:
             return error.RateLimitError(
-                error_data.get("error"),
+                error_data,
                 http_body=rbody,
                 http_status=rcode,
                 response=resp,
-                headers=rheaders
+                headers=rheaders,
             )
         elif rcode in [400, 404, 415]:
             return error.InvalidRequestError(
-                error_data.get("error"),
+                error_data,
                 http_body=rbody,
                 http_status=rcode,
                 response=resp,
-                headers=rheaders
+                headers=rheaders,
             )
         elif rcode == 401:
             return error.AuthenticationError(
-                error_data.get("error"),
+                error_data,
                 http_body=rbody,
                 http_status=rcode,
                 response=resp,
-                headers=rheaders
+                headers=rheaders,
             )
 
         elif stream_error:
             parts = [error_data.get("error"), "(Error occurred while streaming.)"]
             message = " ".join([p for p in parts if p is not None])
-            return error.APIError(message,
-                                  http_body=rbody,
-                                  http_status=rcode,
-                                  response=resp,
-                                  headers=rheaders)
+            return error.APIError(
+                message,
+                http_body=rbody,
+                http_status=rcode,
+                response=resp,
+                headers=rheaders,
+            )
         else:
             return error.APIError(
                 f"{error_data.get('error')} {rbody} {rcode} {resp} {rheaders}",
                 http_body=rbody,
                 http_status=rcode,
                 response=resp,
-                headers=rheaders
+                headers=rheaders,
             )
 
     @classmethod
     def _validate_headers(
-            cls, supplied_headers: Optional[Dict[str, str]]
+        cls, supplied_headers: Optional[Dict[str, str]]
     ) -> Dict[str, str]:
         headers: Dict[str, str] = {}
         if supplied_headers is None:
@@ -371,12 +387,12 @@ class APIRequestor:
         return headers
 
     def _prepare_request_raw(
-            self,
-            url,
-            supplied_headers,
-            method,
-            params,
-            files,
+        self,
+        url,
+        supplied_headers,
+        method,
+        params,
+        files,
     ) -> Tuple[str, Dict[str, str], Optional[bytes]]:
         abs_url = "%s%s" % (self.api_base, url)
         headers = self._validate_headers(supplied_headers)
@@ -409,15 +425,15 @@ class APIRequestor:
         return abs_url, headers, data
 
     def request_raw(
-            self,
-            method,
-            url,
-            *,
-            params=None,
-            supplied_headers: Optional[Dict[str, str]] = None,
-            files=None,
-            stream: bool = False,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        self,
+        method,
+        url,
+        *,
+        params=None,
+        supplied_headers: Optional[Dict[str, str]] = None,
+        files=None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
     ) -> requests.Response:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -426,14 +442,14 @@ class APIRequestor:
         print(abs_url, headers, data)
 
         if not hasattr(_thread_context, "session"):
-            _thread_context.session = _make_session()
+            _thread_context.session = _make_session(self.max_retries)
             _thread_context.session_create_time = time.time()
         elif (
-                time.time() - getattr(_thread_context, "session_create_time", 0)
-                >= MAX_SESSION_LIFETIME_SECS
+            time.time() - getattr(_thread_context, "session_create_time", 0)
+            >= MAX_SESSION_LIFETIME_SECS
         ):
             _thread_context.session.close()
-            _thread_context.session = _make_session()
+            _thread_context.session = _make_session(self.max_retries)
             _thread_context.session_create_time = time.time()
         try:
             result = _thread_context.session.request(
@@ -467,15 +483,15 @@ class APIRequestor:
         return result
 
     async def arequest_raw(
-            self,
-            method,
-            url,
-            session,
-            *,
-            params=None,
-            supplied_headers: Optional[Dict[str, str]] = None,
-            files=None,
-            request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        self,
+        method,
+        url,
+        session,
+        *,
+        params=None,
+        supplied_headers: Optional[Dict[str, str]] = None,
+        files=None,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
     ) -> aiohttp.ClientResponse:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -526,7 +542,7 @@ class APIRequestor:
             raise error.APIConnectionError("Error communicating with Together") from e
 
     def _interpret_response(
-            self, result: requests.Response, stream: bool
+        self, result: requests.Response, stream: bool
     ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
@@ -548,8 +564,10 @@ class APIRequestor:
             )
 
     async def _interpret_async_response(
-            self, result: aiohttp.ClientResponse, stream: bool
-    ) -> tuple[Generator[TogetherResponse, Any, None], bool] | tuple[TogetherResponse, bool]:
+        self, result: aiohttp.ClientResponse, stream: bool
+    ) -> tuple[Generator[TogetherResponse, Any, None], bool] | tuple[
+        TogetherResponse, bool
+    ]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (
@@ -576,7 +594,7 @@ class APIRequestor:
             )
 
     def _interpret_response_line(
-            self, rbody: str, rcode: int, rheaders, stream: bool
+        self, rbody: str, rcode: int, rheaders, stream: bool
     ) -> TogetherResponse:
         # HTTP 204 response code does not have any content in the body.
         if rcode == 204:
@@ -590,7 +608,7 @@ class APIRequestor:
                 headers=rheaders,
             )
         try:
-            if 'text/plain' in rheaders.get('Content-Type', ''):
+            if "text/plain" in rheaders.get("Content-Type", ""):
                 data = rbody
             else:
                 data = json.loads(rbody)
@@ -599,7 +617,7 @@ class APIRequestor:
                 f"HTTP code {rcode} from API ({rbody})",
                 http_body=rbody,
                 http_status=rcode,
-                headers=rheaders
+                headers=rheaders,
             ) from e
         resp = TogetherResponse(data, rheaders)
         # In the future, we might add a "status" parameter to errors

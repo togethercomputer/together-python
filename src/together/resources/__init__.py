@@ -1,1 +1,1 @@
-from .completions import Completions, AsyncCompletions
+from together.resources.completions import Completions, AsyncCompletions

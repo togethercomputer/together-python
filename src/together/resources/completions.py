@@ -1,71 +1,98 @@
-from typing import Any, Iterator, List, Optional, Union
+from typing import Any, Iterator, List, Optional, Union, Mapping
 
 import together
 from together.together_response import TogetherResponse
 from together.abstract import api_requestor
 from together.utils import default_api_key
 
-from ..types import CompletionsResponse
+from pydantic import BaseModel
+from together.types import CompletionRequest, CompletionResponse, CompletionChunk
 
 
 class Completions:
-    @classmethod
+    def __init__(
+        self,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout: float | None = None,
+        max_retries: int | None = None,
+        default_headers: Mapping[str, str] | None = None,
+    ) -> None:
+        self.api_key = api_key
+        self.base_url = base_url
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.default_headers = default_headers
+
     def create(
-            cls,
-            prompt: str,
-            model: str,
-            max_tokens: Optional[int] = 512,
-            stop: Optional[List[str]] = [],
-            temperature: Optional[float] = 0.7,
-            top_p: Optional[float] = 0.7,
-            top_k: Optional[int] = 50,
-            repetition_penalty: Optional[float] = None,
-            safety_model: Optional[str] = None,
-            stream: bool = False,
-            api_key: Optional[str] = None,
-            api_base: Optional[str] = None,
-    ) -> Union[CompletionsResponse, Iterator[CompletionsResponse]]:
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int | None = 512,
+        stop: List[str] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        top_k: int | None = None,
+        repetition_penalty: float | None = None,
+        stream: bool = False,
+        logprobs: int | None = None,
+        echo: bool | None = None,
+        n: int | None = None,
+        safety_model: str | None = None,
+        api_key: str | None = None,
+        api_base: str | None = None,
+    ) -> Union[CompletionResponse, Iterator[CompletionChunk]]:
+        print(self.base_url)
         requestor = api_requestor.APIRequestor(
-            key=api_key,
-            api_base=api_base
+            key=api_key or self.api_key,
+            api_base=api_base or self.base_url,
+            max_retries=self.max_retries,
         )
 
-        parameter_payload = {
-            "model": model,
-            "prompt": prompt,
-            "top_p": top_p,
-            "top_k": top_k,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stop": stop,
-            "repetition_penalty": repetition_penalty,
-            "safety_model": safety_model,
-            "stream": stream
-        }
+        parameter_payload = CompletionRequest(
+            model=model,
+            prompt=prompt,
+            top_p=top_p,
+            top_k=top_k,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop,
+            repetition_penalty=repetition_penalty,
+            stream=stream,
+            logprobs=logprobs,
+            echo=echo,
+            n=n,
+            safety_model=safety_model,
+        ).model_dump()
 
-        response, got_stream, api_key = requestor.request(
+        print(parameter_payload)
+
+        response, _, api_key = requestor.request(
             method="POST",
             url="/completions",
             params=parameter_payload,
-            stream=stream
+            stream=stream,
+            headers=self.default_headers,
+            request_timeout=self.timeout,
         )
 
         if stream:
             # must be an iterator
-            assert not isinstance(response, TogetherResponse)
-            return (
-                CompletionsResponse(**line.data) for line in response
-            )
+            assert not isinstance(response, CompletionResponse)
+            return (CompletionChunk(**line.data) for line in response)
 
-        print(response.data)
-        return CompletionsResponse(**response.data)
+        return CompletionResponse(**response.data)
 
     @classmethod
     def create_streaming(cls, prompt: str, model: str, *args, **kwargs):
         import warnings
-        warnings.warn("The 'create_streaming' method is deprecated, "
-                      "use 'create' instead", DeprecationWarning, 2)
-        kwargs['stream'] = True
+
+        warnings.warn(
+            "The 'create_streaming' method is deprecated, " "use 'create' instead",
+            DeprecationWarning,
+            2,
+        )
+        kwargs["stream"] = True
         return cls.create(prompt, model, *args, **kwargs)
 
 
@@ -86,10 +113,7 @@ class AsyncCompletions:
         api_key: Optional[str] = None,
         api_base: Optional[str] = None,
     ) -> Any:
-        requestor = api_requestor.APIRequestor(
-            key=api_key,
-            api_base=api_base
-        )
+        requestor = api_requestor.APIRequestor(key=api_key, api_base=api_base)
 
         parameter_payload = {
             "model": model,
@@ -107,14 +131,12 @@ class AsyncCompletions:
             method="POST",
             url=together.api_base_complete,
             params=parameter_payload,
-            stream=stream
+            stream=stream,
         )
 
         if stream:
             # must be an iterator
             assert not isinstance(response, TogetherResponse)
-            return (
-                line for line in response
-            )
+            return (line for line in response)
 
         return response

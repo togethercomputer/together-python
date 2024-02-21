@@ -1,7 +1,7 @@
-from . import resources
-from .error import TogetherException
-from .version import VERSION
-from ._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
+from together import resources
+from together.error import TogetherException
+from together.version import VERSION
+from together._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
 
 import os
 from typing import Union, Optional, Dict, Mapping
@@ -53,7 +53,15 @@ class Together:
 
         self.base_url = base_url
 
-        self.completions = resources.Completions()
+        kwargs = {
+            "api_key": api_key,
+            "base_url": base_url,
+            "timeout": timeout,
+            "max_retries": max_retries,
+            "default_headers": default_headers,
+        }
+
+        self.completions = resources.Completions(**kwargs)
         # self.chat = resources.Chat(self)
         # self.embeddings = resources.Embeddings(self)
         # self.files = resources.Files(self)
@@ -117,6 +125,7 @@ class AsyncTogether:
         # self.audio = resources.AsyncAudio(self)
         # self.models = resources.AsyncModels(self)
         # self.fine_tuning = resources.AsyncFineTuning(self)
+
 
 Client = Together
 AsyncClient = AsyncTogether

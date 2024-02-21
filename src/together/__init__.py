@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Callable, Optional, Type, Union
 import typing as _t
 from typing_extensions import override
 
-from .version import VERSION
+from together.version import VERSION
 
-from .together_response import TogetherResponse
+from together.together_response import TogetherResponse
 
 version = VERSION
 
@@ -50,16 +50,9 @@ if TYPE_CHECKING:
 aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
     "aiohttp-session", default=None
 )
-#
-# from together.resources.completions import Complete, Completion
-# from .embeddings import Embeddings
-# from .error import *
-# from .files import Files
-# from .finetune import Finetune
-# from .image import Image
-# from .models import Models
-from ._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
-from ._client import Together
+
+from together._constants import TIMEOUT_SECS, MAX_CONNECTION_RETRIES
+from together._client import Together
 
 import httpx as _httpx
 
@@ -118,7 +111,7 @@ class _ModuleClient(Together):
 
     @property  # type: ignore
     @override
-    def timeout(self) -> float  | None:
+    def timeout(self) -> float | None:
         return timeout
 
     @timeout.setter  # type: ignore
@@ -148,6 +141,7 @@ class _ModuleClient(Together):
         global default_headers
 
         default_headers = value
+
 
 __all__ = [
     "aiosession",
