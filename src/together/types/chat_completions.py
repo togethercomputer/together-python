@@ -1,7 +1,6 @@
 from typing import Any, Dict, List
 
 from pydantic import BaseModel
-from typing_extensions import TypedDict
 
 from together.types.common import (
     DeltaContent,
@@ -13,32 +12,32 @@ from together.types.common import (
 )
 
 
-class ChatCompletionMessage(TypedDict):
+class ChatCompletionMessage(BaseModel):
     role: str
     content: str
 
 
-class ResponseFormat(TypedDict):
+class ResponseFormat(BaseModel):
     type: str
-    schema: Dict[str, Any]
+    schema: Dict[str, Any] | None = None  # type: ignore
 
 
-class FunctionTool(TypedDict):
+class FunctionTool(BaseModel):
     description: str | None = None
     name: str
     parameters: Dict[str, Any] | None = None
 
 
-class FunctionToolChoice(TypedDict):
+class FunctionToolChoice(BaseModel):
     name: str
 
 
-class Tools(TypedDict):
+class Tools(BaseModel):
     type: str
     function: FunctionTool
 
 
-class ToolChoice(TypedDict):
+class ToolChoice(BaseModel):
     type: str
     function: FunctionToolChoice
 
@@ -46,7 +45,7 @@ class ToolChoice(TypedDict):
 class ChatCompletionRequest(BaseModel):
     messages: List[ChatCompletionMessage]
     model: str
-    max_tokens: str | None = 512
+    max_tokens: int | None = 512
     stop: List[str] | None = None
     temperature: float | None = None
     top_p: float | None = None
@@ -66,7 +65,7 @@ class ChatCompletionChoicesData(BaseModel):
     index: int | None = None
     logprobs: LogprobsPart | None = None
     finish_reason: FinishReason | None = None
-    message: ChatCompletionMessage = None | None
+    message: ChatCompletionMessage | None = None
 
 
 class ChatCompletionResponse(BaseModel):
@@ -77,9 +76,6 @@ class ChatCompletionResponse(BaseModel):
     choices: List[ChatCompletionChoicesData] | None = None
     prompt: List[PromptPart] | List[None] | None = None
     usage: UsageData | None = None
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
 
 class ChatCompletionChunk(BaseModel):

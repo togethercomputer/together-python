@@ -30,11 +30,13 @@ else:
 import together
 from together import error, utils
 from together._constants import (
+    BASE_URL,
     MAX_CONNECTION_RETRIES,
     MAX_SESSION_LIFETIME_SECS,
     TIMEOUT_SECS,
 )
 from together.together_response import TogetherResponse
+from together.types import TogetherClient
 
 
 # Has one attribute per thread, 'session'.
@@ -88,7 +90,7 @@ def parse_stream(rbody: Iterator[bytes]) -> Iterator[str]:
             yield _line
 
 
-async def parse_stream_async(rbody: aiohttp.StreamReader):
+async def parse_stream_async(rbody: aiohttp.StreamReader) -> AsyncGenerator[str, Any]:
     async for line in rbody:
         _line = parse_stream_helper(line)
         if _line is not None:
@@ -96,18 +98,13 @@ async def parse_stream_async(rbody: aiohttp.StreamReader):
 
 
 class APIRequestor:
-    def __init__(
-        self,
-        key=None,
-        api_base=None,
-        max_retries: int | None = None,
-    ):
-        self.api_base = api_base or together.api_base
-        self.api_key = key or utils.default_api_key()
-        self.max_retries = max_retries or MAX_CONNECTION_RETRIES
+    def __init__(self, config: TogetherClient):
+        self.api_base = config.base_url or BASE_URL
+        self.api_key = config.api_key or utils.default_api_key()
+        self.max_retries = config.max_retries or MAX_CONNECTION_RETRIES
 
     @classmethod
-    def format_app_info(cls, info):
+    def format_app_info(cls, info: Dict[str, str]) -> str:
         fmt_str = info["name"]
         if info["version"]:
             fmt_str += "/%s" % (info["version"],)
@@ -118,11 +115,11 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method,
-        url,
-        params,
-        headers,
-        files,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
@@ -131,11 +128,11 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         *,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
@@ -145,11 +142,11 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         stream: Literal[False] = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
@@ -158,11 +155,11 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         stream: bool = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str]:
@@ -170,14 +167,14 @@ class APIRequestor:
 
     def request(
         self,
-        method,
-        url,
-        params=None,
-        headers=None,
-        files=None,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
         stream: bool = False,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str]:
+    ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str | None]:
         result = self.request_raw(
             method.lower(),
             url,
@@ -193,11 +190,11 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method,
-        url,
-        params,
-        headers,
-        files,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
@@ -206,11 +203,11 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         *,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
@@ -220,11 +217,11 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         stream: Literal[False] = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
@@ -233,11 +230,11 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method,
-        url,
-        params=...,
-        headers=...,
-        files=...,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
         stream: bool = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
     ) -> Tuple[
@@ -247,11 +244,11 @@ class APIRequestor:
 
     async def arequest(
         self,
-        method,
-        url,
-        params=None,
-        headers=None,
-        files=None,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
         stream: bool = False,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
     ) -> Tuple[
@@ -279,7 +276,7 @@ class APIRequestor:
             raise
         if got_stream:
 
-            async def wrap_resp():
+            async def wrap_resp() -> AsyncGenerator[TogetherResponse, None]:
                 assert isinstance(resp, AsyncGenerator)
                 try:
                     async for r in resp:
@@ -290,17 +287,24 @@ class APIRequestor:
                     result.release()
                     await ctx.__aexit__(None, None, None)
 
-            return wrap_resp(), got_stream, self.api_key
+            return wrap_resp(), got_stream, self.api_key  # type: ignore
         else:
             # Close the request before exiting session context.
             result.release()
             await ctx.__aexit__(None, None, None)
-            return resp, got_stream, self.api_key
+            return resp, got_stream, self.api_key  # type: ignore
 
     @classmethod
-    def handle_error_response(cls, rbody, rcode, resp, rheaders, stream_error=False):
+    def handle_error_response(
+        cls,
+        rbody: str,
+        rcode: int,
+        resp: Dict[str, Dict[str, Any]],
+        rheaders: Dict[str, Any],
+        stream_error: bool = False,
+    ) -> Exception | None:
         try:
-            error_data = resp.get("error")
+            error_data: Dict[str, Any] = resp["error"]
         except (KeyError, TypeError):
             raise error.APIError(
                 "Invalid response object from API: %r (HTTP response code "
@@ -631,12 +635,12 @@ class APIRequestor:
         return resp
 
 
-class AioHTTPSession(AsyncContextManager):
-    def __init__(self):
-        self._session = None
-        self._should_close_session = False
+class AioHTTPSession(AsyncContextManager[aiohttp.ClientSession]):
+    def __init__(self) -> None:
+        self._session: aiohttp.ClientSession | None = None
+        self._should_close_session: bool = False
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> aiohttp.ClientSession:
         self._session = together.aiosession.get()
         if self._session is None:
             self._session = await aiohttp.ClientSession().__aenter__()
@@ -644,7 +648,7 @@ class AioHTTPSession(AsyncContextManager):
 
         return self._session
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
         if self._session is None:
             raise RuntimeError("Session is not initialized")
 

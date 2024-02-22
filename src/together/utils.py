@@ -5,22 +5,22 @@ import platform
 import re
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
+
+
+if TYPE_CHECKING:
+    from _typeshed import SupportsKeysAndGetItem
 
 import requests
 import sseclient
 
 import together
+from together import error
 
 
 logger = logging.getLogger("together")
 
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")
-
-
-def verify_api_key() -> None:
-    if together.api_key is None:
-        raise together.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
 
 
 def extract_time(json_obj: Dict[str, Any]) -> int:
@@ -42,7 +42,7 @@ def parse_timestamp(timestamp: str) -> datetime:
 
 def response_status_exception(response: requests.Response) -> None:
     if response.status_code == 429:
-        raise together.RateLimitError(
+        raise error.RateLimitError(
             message="Too many requests received. Please pace your requests."
         )
     elif response.status_code == 500:
@@ -52,102 +52,58 @@ def response_status_exception(response: requests.Response) -> None:
     response.raise_for_status()
 
 
-def format_app_info(info):
-    str = info["name"]
+def format_app_info(info: Dict[str, Any]) -> str:
+    resp = str(info["name"])
     if info["version"]:
-        str += "/%s" % (info["version"],)
+        resp += "/%s" % (info["version"],)
     if info["url"]:
-        str += " (%s)" % (info["url"],)
-    return str
+        resp += " (%s)" % (info["url"],)
+    return resp
 
 
-def get_headers(method: str, api_key: str, extra) -> Dict[str, str]:
-    user_agent = "Together/v1 PythonBindings/%s" % (together.VERSION,)
+def get_headers(
+    method: str | None = None,
+    api_key: str | None = None,
+    extra: "SupportsKeysAndGetItem[str, Any] | None" = None,
+) -> Dict[str, str]:
+    user_agent = "Together/v1 PythonBindings/%s" % (together.version,)
 
     uname_without_node = " ".join(
         v for k, v in platform.uname()._asdict().items() if k != "node"
     )
     ua = {
-        "bindings_version": together.VERSION,
+        "bindings_version": together.version,
         "httplib": "requests",
         "lang": "python",
         "lang_version": platform.python_version(),
         "platform": platform.platform(),
-        "publisher": "openai",
+        "publisher": "together",
         "uname": uname_without_node,
     }
 
-    headers = {
-        "X-TogetherAI-Client-User-Agent": json.dumps(ua),
-        "Authorization": f"Bearer {api_key or together.api_key}",
+    headers: Dict[str, Any] = {
+        "X-Together-Client-User-Agent": json.dumps(ua),
+        "Authorization": f"Bearer {default_api_key(api_key)}",
         "User-Agent": user_agent,
     }
 
     if _console_log_level():
-        headers["OpenAI-Debug"] = _console_log_level()
-    headers.update(extra)
+        headers["Together-Debug"] = _console_log_level()
+    if extra:
+        headers.update(extra)
 
     return headers
-
-
-def create_post_request(
-    url: str,
-    headers: Optional[Dict[Any, Any]] = None,
-    json: Optional[Dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-    api_key: Optional[str] = None,
-) -> requests.Response:
-    if check_auth and api_key is None:
-        verify_api_key()
-
-    if not headers:
-        headers = get_headers()
-
-    # send request
-    try:
-        response = requests.post(url, headers=headers, json=json, stream=stream)
-    except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
-
-    response_status_exception(response)
-
-    return response
 
 
 def sse_client(response: requests.Response) -> sseclient.SSEClient:
     return sseclient.SSEClient(response)  # type: ignore
 
 
-def create_get_request(
-    url: str,
-    headers: Optional[Dict[Any, Any]] = None,
-    json: Optional[Dict[Any, Any]] = None,
-    stream: Optional[bool] = False,
-    check_auth: Optional[bool] = True,
-) -> requests.Response:
-    if check_auth:
-        verify_api_key()
-
-    if not headers:
-        headers = get_headers()
-
-    # send request
-    try:
-        response = requests.get(url, headers=headers, json=json, stream=stream)
-    except requests.exceptions.RequestException as e:
-        raise together.ResponseError(e)
-
-    response_status_exception(response)
-
-    return response
-
-
 def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     try:
         response_json = dict(response.json())
     except Exception as e:
-        raise together.JSONError(e, http_status=response.status_code)
+        raise error.JSONError(e, http_status=response.status_code)
 
     return response_json
 
@@ -179,18 +135,16 @@ def nanodollars_to_dollars(price: int) -> float:
     return (price * 4000) / 1000000000
 
 
-def default_api_key(api_key: Optional[str] = None) -> str:
+def default_api_key(api_key: Optional[str] = None) -> str | None:
     if api_key:
         return api_key
-    if together.api_key:
-        return together.api_key
     if os.environ.get("TOGETHER_API_KEY"):
         return os.environ.get("TOGETHER_API_KEY")
 
-    raise together.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
+    raise error.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
 
 
-def _console_log_level():
+def _console_log_level() -> str | None:
     if together.log in ["debug", "info"]:
         return together.log
     elif TOGETHER_LOG in ["debug", "info"]:
@@ -199,8 +153,8 @@ def _console_log_level():
         return None
 
 
-def logfmt(props):
-    def fmt(key, val):
+def logfmt(props: Dict[str, Any]) -> str:
+    def fmt(key: str, val: Any) -> str:
         # Handle case where val is a bytes or bytesarray
         if hasattr(val, "decode"):
             val = val.decode("utf-8")
@@ -217,21 +171,21 @@ def logfmt(props):
     return " ".join([fmt(key, val) for key, val in sorted(props.items())])
 
 
-def log_debug(message, **params):
+def log_debug(message: str, **params: Dict[str, Any]) -> None:
     msg = logfmt(dict(message=message, **params))
     if _console_log_level() == "debug":
         print(msg, file=sys.stderr)
     logger.debug(msg)
 
 
-def log_info(message, **params):
+def log_info(message: str, **params: Dict[str, Any]) -> None:
     msg = logfmt(dict(message=message, **params))
     if _console_log_level() in ["debug", "info"]:
         print(msg, file=sys.stderr)
     logger.info(msg)
 
 
-def log_warn(message, **params):
+def log_warn(message: str, **params: Dict[str, Any]) -> None:
     msg = logfmt(dict(message=message, **params))
     print(msg, file=sys.stderr)
     logger.warn(msg)

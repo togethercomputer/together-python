@@ -1,9 +1,10 @@
 import os
-from typing import Mapping, Union
+from typing import Dict, Union
 
 from together import resources
-from together._constants import MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+from together._constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
 from together.error import TogetherException
+from together.types import TogetherClient
 
 
 class Together:
@@ -17,8 +18,7 @@ class Together:
     # fine_tuning: resources.FineTuning
 
     # client options
-    api_key: str
-    base_url: str
+    config: TogetherClient
 
     def __init__(
         self,
@@ -27,8 +27,8 @@ class Together:
         base_url: str | None = None,
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
-        _strict_response_validation: bool = False,
+        default_headers: Dict[str, str] | None = None,
+        _strict_response_validation: bool = False,  # TODO: use this
     ) -> None:
         """Construct a new synchronous together client instance.
 
@@ -43,24 +43,21 @@ class Together:
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
-        self.api_key = api_key
 
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
         if base_url is None:
-            base_url = "https://api.together.xyz/v1"
+            base_url = BASE_URL
 
-        self.base_url = base_url
+        self.config = TogetherClient(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            default_headers=default_headers,
+        )
 
-        kwargs = {
-            "api_key": api_key,
-            "base_url": base_url,
-            "timeout": timeout,
-            "max_retries": max_retries,
-            "default_headers": default_headers,
-        }
-
-        self.completions = resources.Completions(**kwargs)
+        self.completions = resources.Completions(self.config)
         # self.chat = resources.Chat(self)
         # self.embeddings = resources.Embeddings(self)
         # self.files = resources.Files(self)
@@ -81,8 +78,7 @@ class AsyncTogether:
     # fine_tuning: resources.AsyncFineTuning
 
     # client options
-    api_key: str
-    base_url: str
+    config: TogetherClient
 
     def __init__(
         self,
@@ -91,7 +87,7 @@ class AsyncTogether:
         base_url: str | None = None,
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
-        default_headers: Mapping[str, str] | None = None,
+        default_headers: Dict[str, str] | None = None,
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new async together client instance.
@@ -107,16 +103,21 @@ class AsyncTogether:
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
-        self.api_key = api_key
 
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
         if base_url is None:
-            base_url = "https://api.together.xyz/v1"
+            base_url = BASE_URL
 
-        self.base_url = base_url
+        self.config = TogetherClient(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            default_headers=default_headers,
+        )
 
-        self.completions = resources.AsyncCompletions()
+        self.completions = resources.AsyncCompletions(self.config)
         # self.chat = resources.AsyncChat(self)
         # self.embeddings = resources.AsyncEmbeddings(self)
         # self.files = resources.AsyncFiles(self)
