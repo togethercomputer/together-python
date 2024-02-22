@@ -1,6 +1,5 @@
 from typing import Any, Dict, Optional, Union
 
-import httpx
 from requests import RequestException
 
 
@@ -10,7 +9,7 @@ class TogetherException(Exception):
         message: Optional[Union[Exception, str, RequestException]] = "",
         http_body: Optional[str] = None,
         http_status: Optional[int] = None,
-        response: Optional[Union[str, httpx.Response]] = None,
+        response: Optional[Union[str]] = None,
         json_body: Optional[Any] = None,
         headers: Optional[Union[str, Dict[Any, Any]]] = None,
         request_id: Optional[str] = "",
