@@ -1,11 +1,11 @@
-from typing import Any, Iterator, List
+from typing import Any, Iterator, List, Dict
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
 from together.types import (
-    CompletionChunk,
-    CompletionRequest,
-    CompletionResponse,
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
     TogetherClient,
 )
 
@@ -16,9 +16,9 @@ class ChatCompletions:
 
     def create(
         self,
-        prompt: str,
+        messages: List[Dict[str, str]],
         model: str,
-        max_tokens: int | None = 512,
+        max_tokens: int | None = None,
         stop: List[str] | None = None,
         temperature: float | None = None,
         top_p: float | None = None,
@@ -29,14 +29,17 @@ class ChatCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
-    ) -> CompletionResponse | Iterator[CompletionChunk]:
+        response_format: Dict[str, Any] | None = None,
+        tools: Dict[str, str | Dict[str, Any]] | None = None,
+        tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
+    ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
         requestor = api_requestor.APIRequestor(
             config=self._client,
         )
 
-        parameter_payload = CompletionRequest(
+        parameter_payload = ChatCompletionRequest(
             model=model,
-            prompt=prompt,
+            messages=messages,
             top_p=top_p,
             top_k=top_k,
             temperature=temperature,
@@ -48,11 +51,14 @@ class ChatCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            response_format=response_format,
+            tools=tools,
+            tool_choice=tool_choice,
         ).model_dump()
 
         response, _, _ = requestor.request(
             method="POST",
-            url="/completions",
+            url="/chat/completions",
             params=parameter_payload,
             stream=stream,
             headers=self._client.default_headers,
@@ -62,9 +68,10 @@ class ChatCompletions:
         if stream:
             # must be an iterator
             assert not isinstance(response, TogetherResponse)
-            return (CompletionChunk(**line.data) for line in response)
+            return (ChatCompletionChunk(**line.data) for line in response)
         assert isinstance(response, TogetherResponse)
-        return CompletionResponse(**response.data)
+        print(response.data)
+        return ChatCompletionResponse(**response.data)
 
 
 class AsyncCompletions:
@@ -73,7 +80,7 @@ class AsyncCompletions:
 
     async def create(
         self,
-        prompt: str,
+        messages: List[Dict[str, str]],
         model: str,
         max_tokens: int | None = 512,
         stop: List[str] | None = None,
@@ -86,14 +93,17 @@ class AsyncCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
+        response_format: Dict[str, Any] | None = None,
+        tools: Dict[str, str | Dict[str, Any]] | None = None,
+        tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
     ) -> Any:
         requestor = api_requestor.APIRequestor(
             config=self._client,
         )
 
-        parameter_payload = CompletionRequest(
+        parameter_payload = ChatCompletionRequest(
             model=model,
-            prompt=prompt,
+            messages=messages,
             top_p=top_p,
             top_k=top_k,
             temperature=temperature,
@@ -105,6 +115,9 @@ class AsyncCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            response_format=response_format,
+            tools=tools,
+            tool_choice=tool_choice,
         ).model_dump()
 
         response, _, _ = requestor.request(
@@ -119,6 +132,6 @@ class AsyncCompletions:
         if stream:
             # must be an iterator
             assert not isinstance(response, TogetherResponse)
-            return (CompletionChunk(**line.data) for line in response)
+            return (ChatCompletionChunk(**line.data) for line in response)
         assert isinstance(response, TogetherResponse)
-        return CompletionResponse(**response.data)
+        return ChatCompletionResponse(**response.data)

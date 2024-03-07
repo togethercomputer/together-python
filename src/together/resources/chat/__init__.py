@@ -5,6 +5,7 @@ from together.types import (
 
 from functools import cached_property
 
+
 class Chat:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
@@ -12,4 +13,3 @@ class Chat:
     @cached_property
     def completions(self) -> ChatCompletions:
         return ChatCompletions(self._client)
-    

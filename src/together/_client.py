@@ -58,7 +58,7 @@ class Together:
         )
 
         self.completions = resources.Completions(self.config)
-        self.chat = resources.Chat(self.completions)
+        self.chat = resources.Chat(self.config)
         # self.embeddings = resources.Embeddings(self)
         # self.files = resources.Files(self)
         # self.images = resources.Images(self)

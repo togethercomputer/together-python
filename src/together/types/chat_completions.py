@@ -1,6 +1,8 @@
 from typing import Any, Dict, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from enum import Enum
 
 from together.types.common import (
     DeltaContent,
@@ -11,15 +13,24 @@ from together.types.common import (
     UsageData,
 )
 
+class FunctionCall(BaseModel):
+    name: str | None = None
+    arguments: str | None = None
+
+class ToolCalls(BaseModel):
+    id: str | None = None
+    type: str | None = None
+    function: FunctionCall | None = None
 
 class ChatCompletionMessage(BaseModel):
     role: str
-    content: str
+    content: str | None = None
+    tool_calls: List[ToolCalls] | None = None
 
 
 class ResponseFormat(BaseModel):
     type: str
-    schema: Dict[str, Any] | None = None  # type: ignore
+    schema_: Dict[str, Any] = Field(None, alias="schema")
 
 
 class FunctionTool(BaseModel):
@@ -41,6 +52,8 @@ class ToolChoice(BaseModel):
     type: str
     function: FunctionToolChoice
 
+class ToolChoiceEnum(str, Enum):
+    Auto = "auto"
 
 class ChatCompletionRequest(BaseModel):
     messages: List[ChatCompletionMessage]
@@ -57,8 +70,8 @@ class ChatCompletionRequest(BaseModel):
     n: int | None = None
     safety_model: str | None = None
     response_format: ResponseFormat | None = None
-    tools: Tools | None = None
-    tool_choice: ToolChoice | None = None
+    tools: List[Tools] | None = None
+    tool_choice: ToolChoice | ToolChoiceEnum | None = None
 
 
 class ChatCompletionChoicesData(BaseModel):

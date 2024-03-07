@@ -444,8 +444,6 @@ class APIRequestor:
             url, supplied_headers, method, params, files
         )
 
-        print(abs_url, headers, data)
-
         if not hasattr(_thread_context, "session"):
             _thread_context.session = _make_session(self.max_retries)
             _thread_context.session_create_time = time.time()
