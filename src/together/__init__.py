@@ -39,10 +39,4 @@ aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
 from together._client import Together, AsyncTogether
 
 
-__all__ = [
-    "aiosession",
-    "version",
-    "min_samples",
-    "Together",
-    "AsyncTogether"
-]
+__all__ = ["aiosession", "version", "min_samples", "Together", "AsyncTogether"]

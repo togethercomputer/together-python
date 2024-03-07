@@ -12,8 +12,8 @@ class Chat:
 
     @cached_property
     def completions(self) -> ChatCompletions:
-        return ChatCompletions(self._client)\
-        
+        return ChatCompletions(self._client)
+
 
 class AsyncChat:
     def __init__(self, client: TogetherClient) -> None:
@@ -21,5 +21,4 @@ class AsyncChat:
 
     @cached_property
     def completions(self) -> AsyncChatCompletions:
-        return AsyncChatCompletions(self._client)\
-        
+        return AsyncChatCompletions(self._client)

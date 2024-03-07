@@ -10,7 +10,7 @@ from together.types import TogetherClient
 class Together:
     completions: resources.Completions
     chat: resources.Chat
-    # embeddings: resources.Embeddings
+    embeddings: resources.Embeddings
     # files: resources.Files
     # images: resources.Images
     # audio: resources.Audio
@@ -59,7 +59,7 @@ class Together:
 
         self.completions = resources.Completions(self.client)
         self.chat = resources.Chat(self.client)
-        # self.embeddings = resources.Embeddings(self)
+        self.embeddings = resources.Embeddings(self.client)
         # self.files = resources.Files(self)
         # self.images = resources.Images(self)
         # self.audio = resources.Audio(self)
@@ -70,7 +70,7 @@ class Together:
 class AsyncTogether:
     completions: resources.AsyncCompletions
     chat: resources.AsyncChat
-    # embeddings: resources.AsyncEmbeddings
+    embeddings: resources.AsyncEmbeddings
     # files: resources.AsyncFiles
     # images: resources.AsyncImages
     # audio: resources.AsyncAudio
@@ -119,7 +119,7 @@ class AsyncTogether:
 
         self.completions = resources.AsyncCompletions(self.client)
         self.chat = resources.AsyncChat(self.client)
-        # self.embeddings = resources.AsyncEmbeddings(self)
+        self.embeddings = resources.AsyncEmbeddings(self.client)
         # self.files = resources.AsyncFiles(self)
         # self.images = resources.AsyncImages(self)
         # self.audio = resources.AsyncAudio(self)

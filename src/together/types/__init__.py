@@ -9,14 +9,17 @@ from together.types.completions import (
     CompletionRequest,
     CompletionResponse,
 )
+from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 
 
 __all__ = [
+    "TogetherClient",
     "CompletionChunk",
     "CompletionRequest",
     "CompletionResponse",
     "ChatCompletionChunk",
     "ChatCompletionRequest",
     "ChatCompletionResponse",
-    "TogetherClient",
+    "EmbeddingRequest",
+    "EmbeddingResponse",
 ]

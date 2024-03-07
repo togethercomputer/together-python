@@ -23,6 +23,7 @@ class ObjectType(str, Enum):
     CompletionChunk = "completion.chunk"
     ChatCompletion = "chat.completion"
     ChatCompletionChunk = "chat.completion.chunk"
+    Embedding = "embedding"
 
 
 class LogprobsPart(BaseModel):
