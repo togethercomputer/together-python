@@ -11,8 +11,8 @@ from together.types import (
 
 
 class Completions:
-    def __init__(self, config: TogetherClient) -> None:
-        self.client_config = config
+    def __init__(self, client: TogetherClient) -> None:
+        self._client = client
 
     def create(
         self,
@@ -31,7 +31,7 @@ class Completions:
         safety_model: str | None = None,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
         requestor = api_requestor.APIRequestor(
-            config=self.client_config,
+            config=self._client,
         )
 
         parameter_payload = CompletionRequest(
@@ -55,8 +55,8 @@ class Completions:
             url="/completions",
             params=parameter_payload,
             stream=stream,
-            headers=self.client_config.default_headers,
-            request_timeout=self.client_config.timeout,
+            headers=self._client.default_headers,
+            request_timeout=self._client.timeout,
         )
 
         if stream:
@@ -68,8 +68,8 @@ class Completions:
 
 
 class AsyncCompletions:
-    def __init__(self, config: TogetherClient) -> None:
-        self.client_config = config
+    def __init__(self, client: TogetherClient) -> None:
+        self._client = client
 
     async def create(
         self,
@@ -88,7 +88,7 @@ class AsyncCompletions:
         safety_model: str | None = None,
     ) -> Any:
         requestor = api_requestor.APIRequestor(
-            config=self.client_config,
+            config=self._client,
         )
 
         parameter_payload = CompletionRequest(
@@ -112,8 +112,8 @@ class AsyncCompletions:
             url="/completions",
             params=parameter_payload,
             stream=stream,
-            headers=self.client_config.default_headers,
-            request_timeout=self.client_config.timeout,
+            headers=self._client.default_headers,
+            request_timeout=self._client.timeout,
         )
 
         if stream:
