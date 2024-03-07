@@ -1,4 +1,4 @@
-from typing import Any, Iterator, List, Dict
+from typing import Any, Dict, Iterator, List
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse

@@ -1,5 +1,5 @@
-from together.resources.completions import AsyncCompletions, Completions
 from together.resources.chat import Chat
+from together.resources.completions import AsyncCompletions, Completions
 
 
 __all__ = ["AsyncCompletions", "Completions"]

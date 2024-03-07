@@ -1,9 +1,9 @@
+from functools import cached_property
+
 from together.resources.chat.completions import ChatCompletions
 from together.types import (
     TogetherClient,
 )
-
-from functools import cached_property
 
 
 class Chat:
