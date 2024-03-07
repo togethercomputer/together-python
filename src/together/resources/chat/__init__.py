@@ -1,6 +1,6 @@
 from functools import cached_property
 
-from together.resources.chat.completions import ChatCompletions, AsyncChatCompletions
+from together.resources.chat.completions import AsyncChatCompletions, ChatCompletions
 from together.types import (
     TogetherClient,
 )

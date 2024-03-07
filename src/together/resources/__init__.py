@@ -1,6 +1,6 @@
-from together.resources.chat import Chat, AsyncChat
+from together.resources.chat import AsyncChat, Chat
 from together.resources.completions import AsyncCompletions, Completions
-from together.resources.embeddings import Embeddings, AsyncEmbeddings
+from together.resources.embeddings import AsyncEmbeddings, Embeddings
 
 
 __all__ = [
