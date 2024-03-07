@@ -74,7 +74,7 @@ class ChatCompletions:
         return ChatCompletionResponse(**response.data)
 
 
-class AsyncCompletions:
+class AsyncChatCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 

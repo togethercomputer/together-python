@@ -18,7 +18,7 @@ class Together:
     # fine_tuning: resources.FineTuning
 
     # client options
-    config: TogetherClient
+    client: TogetherClient
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class Together:
         if base_url is None:
             base_url = BASE_URL
 
-        self.config = TogetherClient(
+        self.client = TogetherClient(
             api_key=api_key,
             base_url=base_url,
             timeout=timeout,
@@ -57,8 +57,8 @@ class Together:
             default_headers=default_headers,
         )
 
-        self.completions = resources.Completions(self.config)
-        self.chat = resources.Chat(self.config)
+        self.completions = resources.Completions(self.client)
+        self.chat = resources.Chat(self.client)
         # self.embeddings = resources.Embeddings(self)
         # self.files = resources.Files(self)
         # self.images = resources.Images(self)
@@ -69,7 +69,7 @@ class Together:
 
 class AsyncTogether:
     completions: resources.AsyncCompletions
-    # chat: resources.AsyncChat
+    chat: resources.AsyncChat
     # embeddings: resources.AsyncEmbeddings
     # files: resources.AsyncFiles
     # images: resources.AsyncImages
@@ -78,7 +78,7 @@ class AsyncTogether:
     # fine_tuning: resources.AsyncFineTuning
 
     # client options
-    config: TogetherClient
+    client: TogetherClient
 
     def __init__(
         self,
@@ -109,7 +109,7 @@ class AsyncTogether:
         if base_url is None:
             base_url = BASE_URL
 
-        self.config = TogetherClient(
+        self.client = TogetherClient(
             api_key=api_key,
             base_url=base_url,
             timeout=timeout,
@@ -117,8 +117,8 @@ class AsyncTogether:
             default_headers=default_headers,
         )
 
-        self.completions = resources.AsyncCompletions(self.config)
-        # self.chat = resources.AsyncChat(self)
+        self.completions = resources.AsyncCompletions(self.client)
+        self.chat = resources.AsyncChat(self.client)
         # self.embeddings = resources.AsyncEmbeddings(self)
         # self.files = resources.AsyncFiles(self)
         # self.images = resources.AsyncImages(self)
