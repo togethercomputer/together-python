@@ -9,7 +9,7 @@ from together.types import TogetherClient
 
 class Together:
     completions: resources.Completions
-    # chat: resources.Chat
+    chat: resources.Chat
     # embeddings: resources.Embeddings
     # files: resources.Files
     # images: resources.Images
@@ -58,7 +58,7 @@ class Together:
         )
 
         self.completions = resources.Completions(self.config)
-        # self.chat = resources.Chat(self)
+        self.chat = resources.Chat(self.completions)
         # self.embeddings = resources.Embeddings(self)
         # self.files = resources.Files(self)
         # self.images = resources.Images(self)
