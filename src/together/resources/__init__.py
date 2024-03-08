@@ -12,5 +12,5 @@ __all__ = [
     "Embeddings",
     "AsyncEmbeddings",
     "FineTuning",
-    "AsyncFineTuning"
+    "AsyncFineTuning",
 ]

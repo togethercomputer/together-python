@@ -60,7 +60,6 @@ class ToolChoiceEnum(str, Enum):
 
 
 class ChatCompletionRequest(BaseModel):
-    model_config = ConfigDict(extra='allow')
     messages: List[ChatCompletionMessage]
     model: str
     max_tokens: int | None = 512

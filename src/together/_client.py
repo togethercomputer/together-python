@@ -28,7 +28,6 @@ class Together:
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
         default_headers: Dict[str, str] | None = None,
-        _strict_response_validation: bool = False,  # TODO: use this
     ) -> None:
         """Construct a new synchronous together client instance.
 
@@ -88,7 +87,6 @@ class AsyncTogether:
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
         default_headers: Dict[str, str] | None = None,
-        _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new async together client instance.
 

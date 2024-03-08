@@ -1,6 +1,6 @@
 from typing import List, Literal
 
-from together.types._abstract import BaseModel
+from together.types._abstract import BaseModel, Field
 from enum import Enum
 
 from together.types.common import (
@@ -83,7 +83,7 @@ class FinetuneResponse(BaseModel):
     training_file: str | None = None
     validation_file: str | None = None
     model: str | None = None
-    model_output_name: str | None = None
+    modeloutput: str | None = Field(None, alias="model_output_name")
     n_epochs: int | None = None
     n_checkpoints: int | None = None
     batch_size: int | None = None
@@ -97,7 +97,7 @@ class FinetuneResponse(BaseModel):
     updated_at: str | None = None
     status: FinetuneJobStatus | None = None
     job_id: str | None = None
-    events: FinetuneEvent | None = None
+    events: List[FinetuneEvent] | None = None
     token_count: int | None = None
     param_count: int | None = None
     total_price: int | None = None

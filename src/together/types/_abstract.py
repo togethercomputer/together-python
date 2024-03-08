@@ -9,6 +9,7 @@ from together._constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
 
 PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
 
+
 @dataclass
 class TogetherClient:
     api_key: str | None = None
@@ -17,10 +18,12 @@ class TogetherClient:
     max_retries: int | None = MAX_CONNECTION_RETRIES
     default_headers: Dict[str, str] | None = None
 
+
 class BaseModel(pydantic.BaseModel):
     if PYDANTIC_V2:
         model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
     else:
+
         @property
         @override
         def model_fields_set(self) -> set[str]:
