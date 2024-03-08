@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, List, Generator
+from typing import Any, Dict, Generator, Iterator, List
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -13,6 +13,9 @@ from together.types import (
 class ChatCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
     def create(
         self,
@@ -33,10 +36,6 @@ class ChatCompletions:
         tools: Dict[str, str | Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
-        requestor = api_requestor.APIRequestor(
-            config=self._client,
-        )
-
         parameter_payload = ChatCompletionRequest(
             model=model,
             messages=messages,
@@ -56,13 +55,11 @@ class ChatCompletions:
             tool_choice=tool_choice,
         ).model_dump()
 
-        response, _, _ = requestor.request(
+        response, _, _ = self.requestor.request(
             method="POST",
             url="/chat/completions",
             params=parameter_payload,
             stream=stream,
-            headers=self._client.default_headers,
-            request_timeout=self._client.timeout,
         )
 
         if stream:
@@ -77,6 +74,9 @@ class ChatCompletions:
 class AsyncChatCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
     async def create(
         self,
@@ -97,10 +97,6 @@ class AsyncChatCompletions:
         tools: Dict[str, str | Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
     ) -> Generator[ChatCompletionChunk, None, None] | ChatCompletionResponse:
-        requestor = api_requestor.APIRequestor(
-            config=self._client,
-        )
-
         parameter_payload = ChatCompletionRequest(
             model=model,
             messages=messages,
@@ -120,18 +116,16 @@ class AsyncChatCompletions:
             tool_choice=tool_choice,
         ).model_dump()
 
-        response, _, _ = requestor.request(
+        response, _, _ = await self.requestor.arequest(
             method="POST",
             url="/completions",
             params=parameter_payload,
             stream=stream,
-            headers=self._client.default_headers,
-            request_timeout=self._client.timeout,
         )
 
         if stream:
             # must be an iterator
             assert not isinstance(response, TogetherResponse)
-            return (ChatCompletionChunk(**line.data) for line in response)
+            return (ChatCompletionChunk(**line.data) async for line in response)
         assert isinstance(response, TogetherResponse)
         return ChatCompletionResponse(**response.data)

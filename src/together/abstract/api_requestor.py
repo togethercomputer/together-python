@@ -98,10 +98,12 @@ async def parse_stream_async(rbody: aiohttp.StreamReader) -> AsyncGenerator[str,
 
 
 class APIRequestor:
-    def __init__(self, config: TogetherClient):
-        self.api_base = config.base_url or BASE_URL
-        self.api_key = config.api_key or utils.default_api_key()
-        self.max_retries = config.max_retries or MAX_CONNECTION_RETRIES
+    def __init__(self, client: TogetherClient):
+        self.api_base = client.base_url or BASE_URL
+        self.api_key = client.api_key or utils.default_api_key()
+        self.max_retries = client.max_retries or MAX_CONNECTION_RETRIES
+        self.supplied_headers = client.supplied_headers
+        self.timeout = client.timeout or TIMEOUT_SECS
 
     @classmethod
     def format_app_info(cls, info: Dict[str, str]) -> str:
@@ -122,6 +124,7 @@ class APIRequestor:
         files: Dict[str, Any] | None,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
 
@@ -136,6 +139,7 @@ class APIRequestor:
         *,
         stream: Literal[True],
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
 
@@ -149,6 +153,7 @@ class APIRequestor:
         files: Dict[str, Any] | None = ...,
         stream: Literal[False] = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
@@ -162,7 +167,23 @@ class APIRequestor:
         files: Dict[str, Any] | None = ...,
         stream: bool = ...,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
-    ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str]:
+        return_raw: Literal[False] = ...,
+    ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        *,
+        return_raw: Literal[True],
+    ) -> Tuple[requests.Response, bool, str]:
         pass
 
     def request(
@@ -174,7 +195,12 @@ class APIRequestor:
         files: Dict[str, Any] | None = None,
         stream: bool = False,
         request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool, str | None]:
+        return_raw: bool = False,
+    ) -> Tuple[
+        TogetherResponse | Iterator[TogetherResponse] | requests.Response,
+        bool,
+        str | None,
+    ]:
         result = self.request_raw(
             method.lower(),
             url,
@@ -184,8 +210,12 @@ class APIRequestor:
             stream=stream,
             request_timeout=request_timeout,
         )
-        resp, got_stream = self._interpret_response(result, stream)
-        return resp, got_stream, self.api_key
+
+        if not return_raw:
+            resp, got_stream = self._interpret_response(result, stream)
+            return resp, got_stream, self.api_key
+        else:
+            return result, stream, self.api_key
 
     @overload
     async def arequest(
@@ -400,7 +430,7 @@ class APIRequestor:
         files,
     ) -> Tuple[str, Dict[str, str], Optional[bytes]]:
         abs_url = "%s%s" % (self.api_base, url)
-        headers = self._validate_headers(supplied_headers)
+        headers = self._validate_headers(supplied_headers or self.supplied_headers)
 
         data = None
         if method == "get" or method == "delete":
@@ -462,7 +492,7 @@ class APIRequestor:
                 data=data,
                 files=files,
                 stream=stream,
-                timeout=request_timeout if request_timeout else TIMEOUT_SECS,
+                timeout=request_timeout or self.timeout,
                 proxies=_thread_context.session.proxies,
             )
         except requests.exceptions.Timeout as e:
@@ -478,11 +508,7 @@ class APIRequestor:
             processing_ms=result.headers.get("x-total-time"),
             request_id=result.headers.get("CF-RAY"),
         )
-        # Don't read the whole stream for debug logging unless necessary.
-        if together.log == "debug":
-            utils.log_debug(
-                "API response body", body=result.content, headers=result.headers
-            )
+
         return result
 
     async def arequest_raw(
@@ -506,9 +532,7 @@ class APIRequestor:
                 total=request_timeout[1],
             )
         else:
-            timeout = aiohttp.ClientTimeout(
-                total=request_timeout if request_timeout else TIMEOUT_SECS
-            )
+            timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
 
         if files:
             # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.

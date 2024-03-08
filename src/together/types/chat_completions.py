@@ -1,8 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, List
 
-from together.types._abstract import BaseModel, Field, ConfigDict
-
+from together.types._abstract import BaseModel, Field
 from together.types.common import (
     DeltaContent,
     FinishReason,

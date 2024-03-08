@@ -1,8 +1,7 @@
+from enum import Enum
 from typing import List, Literal
 
 from together.types._abstract import BaseModel, Field
-from enum import Enum
-
 from together.types.common import (
     ObjectType,
 )
@@ -25,6 +24,9 @@ class FinetuneEventLevels(str, Enum):
     INFO = "Info"
     WARNING = "Warning"
     ERROR = "Error"
+    LEGACY_INFO = "info"
+    LEGACY_IWARNING = "warning"
+    LEGACY_IERROR = "error"
 
 
 class FinetuneEventType(str, Enum):
@@ -83,7 +85,7 @@ class FinetuneResponse(BaseModel):
     training_file: str | None = None
     validation_file: str | None = None
     model: str | None = None
-    modeloutput: str | None = Field(None, alias="model_output_name")
+    output_name: str | None = Field(None, alias="model_output_name")
     n_epochs: int | None = None
     n_checkpoints: int | None = None
     batch_size: int | None = None
@@ -107,3 +109,13 @@ class FinetuneResponse(BaseModel):
     wandb_url: str | None = None
     TrainingFileNumLines: int | None = None
     TrainingFileSize: int | None = None
+
+
+class FinetuneList(BaseModel):
+    object: Literal["list"] | None = None
+    data: List[FinetuneResponse] | None = None
+
+
+class FinetuneListEvents(BaseModel):
+    object: Literal["list"] | None = None
+    data: List[FinetuneEvent] | None = None

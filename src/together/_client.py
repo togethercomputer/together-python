@@ -27,7 +27,7 @@ class Together:
         base_url: str | None = None,
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
-        default_headers: Dict[str, str] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new synchronous together client instance.
 
@@ -53,7 +53,7 @@ class Together:
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
-            default_headers=default_headers,
+            supplied_headers=supplied_headers,
         )
 
         self.completions = resources.Completions(self.client)
@@ -86,7 +86,7 @@ class AsyncTogether:
         base_url: str | None = None,
         timeout: Union[float, None] = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
-        default_headers: Dict[str, str] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new async together client instance.
 
@@ -112,7 +112,7 @@ class AsyncTogether:
             base_url=base_url,
             timeout=timeout,
             max_retries=max_retries,
-            default_headers=default_headers,
+            supplied_headers=supplied_headers,
         )
 
         self.completions = resources.AsyncCompletions(self.client)

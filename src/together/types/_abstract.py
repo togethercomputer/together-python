@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict
-from typing_extensions import ClassVar, override
+from typing import Any, Dict
 
 import pydantic
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict
+from typing_extensions import ClassVar, override
 
 from together._constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+
 
 PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
 
@@ -16,7 +17,7 @@ class TogetherClient:
     base_url: str | None = BASE_URL
     timeout: float | None = TIMEOUT_SECS
     max_retries: int | None = MAX_CONNECTION_RETRIES
-    default_headers: Dict[str, str] | None = None
+    supplied_headers: Dict[str, str] | None = None
 
 
 class BaseModel(pydantic.BaseModel):

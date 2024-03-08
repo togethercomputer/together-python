@@ -153,3 +153,12 @@ class ServiceUnavailableError(TogetherException):
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
+
+
+class DownloadError(TogetherException):
+    def __init__(
+        self,
+        message: Optional[Union[Exception, str, RequestException]] = "",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(message=message, **kwargs)
