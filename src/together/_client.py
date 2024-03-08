@@ -15,7 +15,7 @@ class Together:
     # images: resources.Images
     # audio: resources.Audio
     # models: resources.Models
-    # fine_tuning: resources.FineTuning
+    fine_tuning: resources.FineTuning
 
     # client options
     client: TogetherClient
@@ -64,7 +64,7 @@ class Together:
         # self.images = resources.Images(self)
         # self.audio = resources.Audio(self)
         # self.models = resources.Models(self)
-        # self.fine_tuning = resources.FineTuning(self)
+        self.fine_tuning = resources.FineTuning(self.client)
 
 
 class AsyncTogether:
@@ -75,7 +75,7 @@ class AsyncTogether:
     # images: resources.AsyncImages
     # audio: resources.AsyncAudio
     # models: resources.AsyncModels
-    # fine_tuning: resources.AsyncFineTuning
+    fine_tuning: resources.AsyncFineTuning
 
     # client options
     client: TogetherClient
@@ -124,7 +124,7 @@ class AsyncTogether:
         # self.images = resources.AsyncImages(self)
         # self.audio = resources.AsyncAudio(self)
         # self.models = resources.AsyncModels(self)
-        # self.fine_tuning = resources.AsyncFineTuning(self)
+        self.fine_tuning = resources.AsyncFineTuning(self.client)
 
 
 Client = Together
