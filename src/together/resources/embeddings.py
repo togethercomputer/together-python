@@ -48,7 +48,7 @@ class AsyncEmbeddings:
         self,
         input: str | List[str],
         model: str,
-    ) -> Any:
+    ) -> EmbeddingResponse:
         requestor = api_requestor.APIRequestor(
             config=self._client,
         )

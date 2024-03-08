@@ -1,4 +1,4 @@
-from typing import Any, Iterator, List
+from typing import Any, Iterator, List, Generator
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -86,7 +86,7 @@ class AsyncCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
-    ) -> Any:
+    ) -> Generator[CompletionChunk, None, None] | CompletionResponse:
         requestor = api_requestor.APIRequestor(
             config=self._client,
         )

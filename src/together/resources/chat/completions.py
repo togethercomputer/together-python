@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, Iterator, List, Generator
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -96,7 +96,7 @@ class AsyncChatCompletions:
         response_format: Dict[str, Any] | None = None,
         tools: Dict[str, str | Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
-    ) -> Any:
+    ) -> Generator[ChatCompletionChunk, None, None] | ChatCompletionResponse:
         requestor = api_requestor.APIRequestor(
             config=self._client,
         )
