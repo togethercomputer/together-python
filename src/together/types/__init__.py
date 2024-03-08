@@ -11,6 +11,8 @@ from together.types.completions import (
 )
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 
+from together.types.finetune import FinetuneRequest, FinetuneResponse
+
 
 __all__ = [
     "TogetherClient",
@@ -22,4 +24,6 @@ __all__ = [
     "ChatCompletionResponse",
     "EmbeddingRequest",
     "EmbeddingResponse",
+    "FinetuneRequest",
+    "FinetuneResponse",
 ]

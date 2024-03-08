@@ -1,6 +1,6 @@
 from typing import List, Literal
 
-from pydantic import BaseModel
+from together.types._abstract import BaseModel
 
 from together.types.common import (
     ObjectType,

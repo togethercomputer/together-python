@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel
+from together.types._abstract import BaseModel
 
 
 # Generation finish reason
@@ -24,6 +24,7 @@ class ObjectType(str, Enum):
     ChatCompletion = "chat.completion"
     ChatCompletionChunk = "chat.completion.chunk"
     Embedding = "embedding"
+    FinetuneEvent = "fine-tune-event"
 
 
 class LogprobsPart(BaseModel):

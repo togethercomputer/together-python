@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, List
 
-from pydantic import BaseModel, Field
+from together.types._abstract import BaseModel, Field, ConfigDict
 
 from together.types.common import (
     DeltaContent,
@@ -60,6 +60,7 @@ class ToolChoiceEnum(str, Enum):
 
 
 class ChatCompletionRequest(BaseModel):
+    model_config = ConfigDict(extra='allow')
     messages: List[ChatCompletionMessage]
     model: str
     max_tokens: int | None = 512
