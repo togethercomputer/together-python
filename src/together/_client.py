@@ -11,7 +11,7 @@ class Together:
     completions: resources.Completions
     chat: resources.Chat
     embeddings: resources.Embeddings
-    # files: resources.Files
+    files: resources.Files
     # images: resources.Images
     # audio: resources.Audio
     # models: resources.Models
@@ -59,7 +59,7 @@ class Together:
         self.completions = resources.Completions(self.client)
         self.chat = resources.Chat(self.client)
         self.embeddings = resources.Embeddings(self.client)
-        # self.files = resources.Files(self)
+        self.files = resources.Files(self.client)
         # self.images = resources.Images(self)
         # self.audio = resources.Audio(self)
         # self.models = resources.Models(self)
@@ -70,7 +70,7 @@ class AsyncTogether:
     completions: resources.AsyncCompletions
     chat: resources.AsyncChat
     embeddings: resources.AsyncEmbeddings
-    # files: resources.AsyncFiles
+    files: resources.AsyncFiles
     # images: resources.AsyncImages
     # audio: resources.AsyncAudio
     # models: resources.AsyncModels
@@ -118,7 +118,7 @@ class AsyncTogether:
         self.completions = resources.AsyncCompletions(self.client)
         self.chat = resources.AsyncChat(self.client)
         self.embeddings = resources.AsyncEmbeddings(self.client)
-        # self.files = resources.AsyncFiles(self)
+        self.files = resources.AsyncFiles(self.client)
         # self.images = resources.AsyncImages(self)
         # self.audio = resources.AsyncAudio(self)
         # self.models = resources.AsyncModels(self)
