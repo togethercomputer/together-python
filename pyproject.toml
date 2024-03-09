@@ -46,6 +46,7 @@ optional = true
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.4.2"
+pytest-watch = "^4.2.0"
 
 
 [tool.poetry.urls]
