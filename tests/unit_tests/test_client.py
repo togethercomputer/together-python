@@ -2,15 +2,15 @@ from unittest.mock import patch
 
 import pytest
 
-from together.client import AsyncTogether, Together
 from together.abstract.api_requestor import APIRequestor
+from together.client import AsyncTogether, Together
 from together.error import AuthenticationError
 from together.types import TogetherClient
 
 
 class TestTogether:
     @pytest.fixture
-    def sync_together_instance(self):
+    def sync_together_instance(self) -> None:
         """
         Initialize object with mocked API key
         """
