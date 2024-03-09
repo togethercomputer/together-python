@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Any, Dict, List
+
 from pydantic import Field
 
 from together.types._abstract import BaseModel

@@ -1,8 +1,9 @@
 from together.resources.chat import AsyncChat, Chat
 from together.resources.completions import AsyncCompletions, Completions
 from together.resources.embeddings import AsyncEmbeddings, Embeddings
-from together.resources.finetune import AsyncFineTuning, FineTuning
 from together.resources.files import AsyncFiles, Files
+from together.resources.finetune import AsyncFineTuning, FineTuning
+
 
 __all__ = [
     "AsyncCompletions",
@@ -14,5 +15,5 @@ __all__ = [
     "FineTuning",
     "AsyncFineTuning",
     "Files",
-    "AsyncFiles"
+    "AsyncFiles",
 ]
