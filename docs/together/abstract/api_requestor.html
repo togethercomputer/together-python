@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>together.abstract.api_requestor API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>together.abstract.api_requestor</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import asyncio
+import json
+import sys
+import threading
+import time
+from json import JSONDecodeError
+from typing import (
+    Any,
+    AsyncContextManager,
+    AsyncGenerator,
+    Dict,
+    Iterator,
+    Optional,
+    Tuple,
+    Union,
+    overload,
+)
+from urllib.parse import urlencode, urlsplit, urlunsplit
+
+import aiohttp
+import requests
+
+
+if sys.version_info &gt;= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
+
+import together
+from together import error, utils
+from together.constants import (
+    BASE_URL,
+    MAX_CONNECTION_RETRIES,
+    MAX_SESSION_LIFETIME_SECS,
+    TIMEOUT_SECS,
+)
+from together.together_response import TogetherResponse
+from together.types import TogetherClient
+
+
+# Has one attribute per thread, &#39;session&#39;.
+_thread_context = threading.local()
+
+
+def _build_api_url(url: str, query: str) -&gt; str:
+    scheme, netloc, path, base_query, fragment = urlsplit(url)
+
+    if base_query:
+        query = &#34;%s&amp;%s&#34; % (base_query, query)
+
+    return str(urlunsplit((scheme, netloc, path, query, fragment)))
+
+
+def _make_session(max_retries: int | None = None) -&gt; requests.Session:
+    if together.requestssession:
+        if isinstance(together.requestssession, requests.Session):
+            return together.requestssession
+        return together.requestssession()
+    s = requests.Session()
+    s.mount(
+        &#34;https://&#34;,
+        requests.adapters.HTTPAdapter(
+            max_retries=max_retries or MAX_CONNECTION_RETRIES
+        ),
+    )
+    return s
+
+
+def parse_stream_helper(line: bytes) -&gt; Optional[str]:
+    if line and line.startswith(b&#34;data:&#34;):
+        if line.startswith(b&#34;data: &#34;):
+            # SSE event may be valid when it contains whitespace
+            line = line[len(b&#34;data: &#34;) :]
+        else:
+            line = line[len(b&#34;data:&#34;) :]
+        if line.strip() == b&#34;[DONE]&#34;:
+            # return here will cause GeneratorExit exception in urllib3
+            # and it will close http connection with TCP Reset
+            return None
+        else:
+            return line.decode(&#34;utf-8&#34;)
+    return None
+
+
+def parse_stream(rbody: Iterator[bytes]) -&gt; Iterator[str]:
+    for line in rbody:
+        _line = parse_stream_helper(line)
+        if _line is not None:
+            yield _line
+
+
+async def parse_stream_async(rbody: aiohttp.StreamReader) -&gt; AsyncGenerator[str, Any]:
+    async for line in rbody:
+        _line = parse_stream_helper(line)
+        if _line is not None:
+            yield _line
+
+
+class APIRequestor:
+    def __init__(self, client: TogetherClient):
+        self.api_base = client.base_url or BASE_URL
+        self.api_key = client.api_key or utils.default_api_key()
+        self.max_retries = client.max_retries or MAX_CONNECTION_RETRIES
+        self.supplied_headers = client.supplied_headers
+        self.timeout = client.timeout or TIMEOUT_SECS
+
+    @classmethod
+    def format_app_info(cls, info: Dict[str, str]) -&gt; str:
+        fmt_str = info[&#34;name&#34;]
+        if info[&#34;version&#34;]:
+            fmt_str += &#34;/%s&#34; % (info[&#34;version&#34;],)
+        if info[&#34;url&#34;]:
+            fmt_str += &#34; (%s)&#34; % (info[&#34;url&#34;],)
+        return fmt_str
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[TogetherResponse, bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        *,
+        return_raw: Literal[True],
+    ) -&gt; Tuple[requests.Response, bool, str]:
+        pass
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        return_raw: bool = False,
+    ) -&gt; Tuple[
+        TogetherResponse | Iterator[TogetherResponse] | requests.Response,
+        bool,
+        str | None,
+    ]:
+        result = self.request_raw(
+            method.lower(),
+            url,
+            params=params,
+            supplied_headers=headers,
+            files=files,
+            stream=stream,
+            request_timeout=request_timeout,
+        )
+
+        if not return_raw:
+            resp, got_stream = self._interpret_response(result, stream)
+            return resp, got_stream, self.api_key
+        else:
+            return result, stream, self.api_key
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[TogetherResponse, bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
+        pass
+
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -&gt; Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
+        ctx = AioHTTPSession()
+        session = await ctx.__aenter__()
+        result = None
+        try:
+            result = await self.arequest_raw(
+                method.lower(),
+                url,
+                session,
+                params=params,
+                supplied_headers=headers,
+                files=files,
+                request_timeout=request_timeout,
+            )
+            resp, got_stream = await self._interpret_async_response(result, stream)
+        except Exception:
+            # Close the request before exiting session context.
+            if result is not None:
+                result.release()
+            await ctx.__aexit__(None, None, None)
+            raise
+        if got_stream:
+
+            async def wrap_resp() -&gt; AsyncGenerator[TogetherResponse, None]:
+                assert isinstance(resp, AsyncGenerator)
+                try:
+                    async for r in resp:
+                        yield r
+                finally:
+                    # Close the request before exiting session context. Important to do it here
+                    # as if stream is not fully exhausted, we need to close the request nevertheless.
+                    result.release()
+                    await ctx.__aexit__(None, None, None)
+
+            return wrap_resp(), got_stream, self.api_key  # type: ignore
+        else:
+            # Close the request before exiting session context.
+            result.release()
+            await ctx.__aexit__(None, None, None)
+            return resp, got_stream, self.api_key  # type: ignore
+
+    @classmethod
+    def handle_error_response(
+        cls,
+        resp: TogetherResponse,
+        rcode: int,
+        stream_error: bool = False,
+    ) -&gt; Exception:
+        try:
+            assert isinstance(resp.data, dict)
+            error_resp = resp.data.get(&#34;error&#34;)
+            assert isinstance(error_resp, dict)
+            error_data = error.TogetherErrorResponse(**(error_resp))
+        except (KeyError, TypeError):
+            raise error.APIError(
+                &#34;Invalid response object from API: %r (HTTP response code &#34;
+                &#34;was %d)&#34; % (resp.data, rcode),
+                http_status=rcode,
+                response=resp.data,
+            )
+
+        utils.log_info(
+            &#34;Together API error received&#34;,
+            error_code=error_data.code,
+            error_type=error_data.type_,
+            error_message=error_data.message,
+            error_param=error_data.param,
+            stream_error=stream_error,
+        )
+
+        # Rate limits were previously coded as 400&#39;s with code &#39;rate_limit&#39;
+        if rcode == 429:
+            return error.RateLimitError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        elif rcode in [400, 404, 415]:
+            return error.InvalidRequestError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        elif rcode == 401:
+            return error.AuthenticationError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+
+        elif stream_error:
+            parts = [error_data.message, &#34;(Error occurred while streaming.)&#34;]
+            message = &#34; &#34;.join([p for p in parts if p is not None])
+            return error.APIError(
+                message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        else:
+            return error.APIError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+
+    @classmethod
+    def _validate_headers(
+        cls, supplied_headers: Optional[Dict[str, str]]
+    ) -&gt; Dict[str, str]:
+        headers: Dict[str, str] = {}
+        if supplied_headers is None:
+            return headers
+
+        if not isinstance(supplied_headers, dict):
+            raise TypeError(&#34;Headers must be a dictionary&#34;)
+
+        for k, v in supplied_headers.items():
+            if not isinstance(k, str):
+                raise TypeError(&#34;Header keys must be strings&#34;)
+            if not isinstance(v, str):
+                raise TypeError(&#34;Header values must be strings&#34;)
+            headers[k] = v
+
+        # NOTE: It is possible to do more validation of the headers, but a request could always
+        # be made to the API manually with invalid headers, so we need to handle them server side.
+
+        return headers
+
+    def _prepare_request_raw(
+        self,
+        url: str,
+        supplied_headers: Dict[str, str] | None = None,
+        method: str | None = None,
+        params: Dict[str, Any] | None = None,
+        files: Dict[str, Any] | None = None,
+    ) -&gt; Tuple[str, Dict[str, str], Dict[str, str] | bytes | None]:
+        abs_url = &#34;%s%s&#34; % (self.api_base, url)
+        headers = self._validate_headers(supplied_headers or self.supplied_headers)
+
+        data = None
+        data_bytes = None
+        if method == &#34;get&#34; or method == &#34;delete&#34;:
+            if params:
+                encoded_params = urlencode(
+                    [(k, v) for k, v in params.items() if v is not None]
+                )
+                abs_url = _build_api_url(abs_url, encoded_params)
+        elif method in {&#34;post&#34;, &#34;put&#34;}:
+            if params and files:
+                data = params
+            if params and not files:
+                data_bytes = json.dumps(params).encode()
+                headers[&#34;Content-Type&#34;] = &#34;application/json&#34;
+        else:
+            raise error.APIConnectionError(
+                &#34;Unrecognized HTTP method %r. This may indicate a bug in the &#34;
+                &#34;Together bindings. Please contact us by filling out https://www.together.ai/contact for &#34;
+                &#34;assistance.&#34; % (method,)
+            )
+
+        headers = utils.get_headers(method, self.api_key, headers)
+
+        utils.log_debug(&#34;Request to Together API&#34;, method=method, path=abs_url)
+        utils.log_debug(&#34;Post details&#34;, data=(data or data_bytes))
+
+        return abs_url, headers, (data or data_bytes)
+
+    def request_raw(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
+    ) -&gt; requests.Response:
+        abs_url, headers, data = self._prepare_request_raw(
+            url, supplied_headers, method, params, files
+        )
+
+        if not hasattr(_thread_context, &#34;session&#34;):
+            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session_create_time = time.time()
+        elif (
+            time.time() - getattr(_thread_context, &#34;session_create_time&#34;, 0)
+            &gt;= MAX_SESSION_LIFETIME_SECS
+        ):
+            _thread_context.session.close()
+            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session_create_time = time.time()
+        try:
+            result = _thread_context.session.request(
+                method,
+                abs_url,
+                headers=headers,
+                data=data,
+                files=files,
+                stream=stream,
+                timeout=request_timeout or self.timeout,
+                proxies=_thread_context.session.proxies,
+            )
+        except requests.exceptions.Timeout as e:
+            raise error.Timeout(&#34;Request timed out: {}&#34;.format(e)) from e
+        except requests.exceptions.RequestException as e:
+            raise error.APIConnectionError(
+                &#34;Error communicating with Together: {}&#34;.format(e)
+            ) from e
+        utils.log_debug(
+            &#34;Together API response&#34;,
+            path=abs_url,
+            response_code=result.status_code,
+            processing_ms=result.headers.get(&#34;x-total-time&#34;),
+            request_id=result.headers.get(&#34;CF-RAY&#34;),
+        )
+
+        return result  # type: ignore
+
+    async def arequest_raw(
+        self,
+        method: str,
+        url: str,
+        session: aiohttp.ClientSession,
+        *,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
+    ) -&gt; aiohttp.ClientResponse:
+        abs_url, headers, data = self._prepare_request_raw(
+            url, supplied_headers, method, params, files
+        )
+
+        if isinstance(request_timeout, tuple):
+            timeout = aiohttp.ClientTimeout(
+                connect=request_timeout[0],
+                total=request_timeout[1],
+            )
+        else:
+            timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
+
+        if files:
+            # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.
+            # For now we use the private `requests` method that is known to have worked so far.
+            data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
+                files, data
+            )
+            headers[&#34;Content-Type&#34;] = content_type
+        request_kwargs = {
+            &#34;headers&#34;: headers,
+            &#34;data&#34;: data,
+            &#34;timeout&#34;: timeout,
+        }
+        try:
+            result = await session.request(method=method, url=abs_url, **request_kwargs)
+            utils.log_info(
+                &#34;Together API response&#34;,
+                path=abs_url,
+                response_code=result.status,
+                processing_ms=result.headers.get(&#34;x-total-time&#34;),
+                request_id=result.headers.get(&#34;CF-RAY&#34;),
+            )
+            # Don&#39;t read the whole stream for debug logging unless necessary.
+            if together.log == &#34;debug&#34;:
+                utils.log_debug(
+                    &#34;API response body&#34;, body=result.content, headers=result.headers
+                )
+            return result
+        except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+            raise error.Timeout(&#34;Request timed out&#34;) from e
+        except aiohttp.ClientError as e:
+            raise error.APIConnectionError(&#34;Error communicating with Together&#34;) from e
+
+    def _interpret_response(
+        self, result: requests.Response, stream: bool
+    ) -&gt; Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool]:
+        &#34;&#34;&#34;Returns the response(s) and a bool indicating whether it is a stream.&#34;&#34;&#34;
+        if stream and &#34;text/event-stream&#34; in result.headers.get(&#34;Content-Type&#34;, &#34;&#34;):
+            return (
+                self._interpret_response_line(
+                    line, result.status_code, result.headers, stream=True
+                )
+                for line in parse_stream(result.iter_lines())
+            ), True
+        else:
+            return (
+                self._interpret_response_line(
+                    result.content.decode(&#34;utf-8&#34;),
+                    result.status_code,
+                    result.headers,
+                    stream=False,
+                ),
+                False,
+            )
+
+    async def _interpret_async_response(
+        self, result: aiohttp.ClientResponse, stream: bool
+    ) -&gt; (
+        tuple[AsyncGenerator[TogetherResponse, None], bool]
+        | tuple[TogetherResponse, bool]
+    ):
+        &#34;&#34;&#34;Returns the response(s) and a bool indicating whether it is a stream.&#34;&#34;&#34;
+        if stream and &#34;text/event-stream&#34; in result.headers.get(&#34;Content-Type&#34;, &#34;&#34;):
+            return (
+                self._interpret_response_line(
+                    line, result.status, result.headers, stream=True
+                )
+                async for line in parse_stream_async(result.content)
+            ), True
+        else:
+            try:
+                await result.read()
+            except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+                raise error.Timeout(&#34;Request timed out&#34;) from e
+            except aiohttp.ClientError as e:
+                utils.log_warn(e, body=result.content)
+            return (
+                self._interpret_response_line(
+                    (await result.read()).decode(&#34;utf-8&#34;),
+                    result.status,
+                    result.headers,
+                    stream=False,
+                ),
+                False,
+            )
+
+    def _interpret_response_line(
+        self, rbody: str, rcode: int, rheaders: Any, stream: bool
+    ) -&gt; TogetherResponse:
+        # HTTP 204 response code does not have any content in the body.
+        if rcode == 204:
+            return TogetherResponse({}, rheaders)
+
+        if rcode == 503:
+            raise error.ServiceUnavailableError(
+                &#34;The server is overloaded or not ready yet.&#34;,
+                http_body=rbody,
+                http_status=rcode,
+                headers=rheaders,
+            )
+        try:
+            if &#34;text/plain&#34; in rheaders.get(&#34;Content-Type&#34;, &#34;&#34;):
+                data: Dict[str, Any] = {&#34;message&#34;: rbody}
+            else:
+                data = json.loads(rbody)
+        except (JSONDecodeError, UnicodeDecodeError) as e:
+            raise error.APIError(
+                f&#34;HTTP code {rcode} from API ({rbody})&#34;,
+                http_body=rbody,
+                http_status=rcode,
+                headers=rheaders,
+            ) from e
+        resp = TogetherResponse(data, rheaders)
+
+        # Handle streaming errors
+        if stream and not 200 &lt;= rcode &lt; 300:
+            raise self.handle_error_response(resp, rcode, stream_error=True)
+        return resp
+
+
+class AioHTTPSession(AsyncContextManager[aiohttp.ClientSession]):
+    def __init__(self) -&gt; None:
+        self._session: aiohttp.ClientSession | None = None
+        self._should_close_session: bool = False
+
+    async def __aenter__(self) -&gt; aiohttp.ClientSession:
+        self._session = together.aiosession.get()
+        if self._session is None:
+            self._session = await aiohttp.ClientSession().__aenter__()
+            self._should_close_session = True
+
+        return self._session
+
+    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -&gt; None:
+        if self._session is None:
+            raise RuntimeError(&#34;Session is not initialized&#34;)
+
+        if self._should_close_session:
+            await self._session.__aexit__(exc_type, exc_value, traceback)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="together.abstract.api_requestor.parse_stream"><code class="name flex">
+<span>def <span class="ident">parse_stream</span></span>(<span>rbody: Iterator[bytes]) ‑> Iterator[str]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_stream(rbody: Iterator[bytes]) -&gt; Iterator[str]:
+    for line in rbody:
+        _line = parse_stream_helper(line)
+        if _line is not None:
+            yield _line</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.parse_stream_async"><code class="name flex">
+<span>async def <span class="ident">parse_stream_async</span></span>(<span>rbody: aiohttp.streams.StreamReader) ‑> AsyncGenerator[str, Any]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def parse_stream_async(rbody: aiohttp.StreamReader) -&gt; AsyncGenerator[str, Any]:
+    async for line in rbody:
+        _line = parse_stream_helper(line)
+        if _line is not None:
+            yield _line</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.parse_stream_helper"><code class="name flex">
+<span>def <span class="ident">parse_stream_helper</span></span>(<span>line: bytes) ‑> str | None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_stream_helper(line: bytes) -&gt; Optional[str]:
+    if line and line.startswith(b&#34;data:&#34;):
+        if line.startswith(b&#34;data: &#34;):
+            # SSE event may be valid when it contains whitespace
+            line = line[len(b&#34;data: &#34;) :]
+        else:
+            line = line[len(b&#34;data:&#34;) :]
+        if line.strip() == b&#34;[DONE]&#34;:
+            # return here will cause GeneratorExit exception in urllib3
+            # and it will close http connection with TCP Reset
+            return None
+        else:
+            return line.decode(&#34;utf-8&#34;)
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="together.abstract.api_requestor.APIRequestor"><code class="flex name class">
+<span>class <span class="ident">APIRequestor</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class APIRequestor:
+    def __init__(self, client: TogetherClient):
+        self.api_base = client.base_url or BASE_URL
+        self.api_key = client.api_key or utils.default_api_key()
+        self.max_retries = client.max_retries or MAX_CONNECTION_RETRIES
+        self.supplied_headers = client.supplied_headers
+        self.timeout = client.timeout or TIMEOUT_SECS
+
+    @classmethod
+    def format_app_info(cls, info: Dict[str, str]) -&gt; str:
+        fmt_str = info[&#34;name&#34;]
+        if info[&#34;version&#34;]:
+            fmt_str += &#34;/%s&#34; % (info[&#34;version&#34;],)
+        if info[&#34;url&#34;]:
+            fmt_str += &#34; (%s)&#34; % (info[&#34;url&#34;],)
+        return fmt_str
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[TogetherResponse, bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        return_raw: Literal[False] = ...,
+    ) -&gt; Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        *,
+        return_raw: Literal[True],
+    ) -&gt; Tuple[requests.Response, bool, str]:
+        pass
+
+    def request(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        return_raw: bool = False,
+    ) -&gt; Tuple[
+        TogetherResponse | Iterator[TogetherResponse] | requests.Response,
+        bool,
+        str | None,
+    ]:
+        result = self.request_raw(
+            method.lower(),
+            url,
+            params=params,
+            supplied_headers=headers,
+            files=files,
+            stream=stream,
+            request_timeout=request_timeout,
+        )
+
+        if not return_raw:
+            resp, got_stream = self._interpret_response(result, stream)
+            return resp, got_stream, self.api_key
+        else:
+            return result, stream, self.api_key
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None,
+        headers: Dict[str, str] | None,
+        files: Dict[str, Any] | None,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        *,
+        stream: Literal[True],
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: Literal[False] = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[TogetherResponse, bool, str]:
+        pass
+
+    @overload
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = ...,
+        headers: Dict[str, str] | None = ...,
+        files: Dict[str, Any] | None = ...,
+        stream: bool = ...,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+    ) -&gt; Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
+        pass
+
+    async def arequest(
+        self,
+        method: str,
+        url: str,
+        params: Dict[str, Any] | None = None,
+        headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    ) -&gt; Tuple[
+        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+    ]:
+        ctx = AioHTTPSession()
+        session = await ctx.__aenter__()
+        result = None
+        try:
+            result = await self.arequest_raw(
+                method.lower(),
+                url,
+                session,
+                params=params,
+                supplied_headers=headers,
+                files=files,
+                request_timeout=request_timeout,
+            )
+            resp, got_stream = await self._interpret_async_response(result, stream)
+        except Exception:
+            # Close the request before exiting session context.
+            if result is not None:
+                result.release()
+            await ctx.__aexit__(None, None, None)
+            raise
+        if got_stream:
+
+            async def wrap_resp() -&gt; AsyncGenerator[TogetherResponse, None]:
+                assert isinstance(resp, AsyncGenerator)
+                try:
+                    async for r in resp:
+                        yield r
+                finally:
+                    # Close the request before exiting session context. Important to do it here
+                    # as if stream is not fully exhausted, we need to close the request nevertheless.
+                    result.release()
+                    await ctx.__aexit__(None, None, None)
+
+            return wrap_resp(), got_stream, self.api_key  # type: ignore
+        else:
+            # Close the request before exiting session context.
+            result.release()
+            await ctx.__aexit__(None, None, None)
+            return resp, got_stream, self.api_key  # type: ignore
+
+    @classmethod
+    def handle_error_response(
+        cls,
+        resp: TogetherResponse,
+        rcode: int,
+        stream_error: bool = False,
+    ) -&gt; Exception:
+        try:
+            assert isinstance(resp.data, dict)
+            error_resp = resp.data.get(&#34;error&#34;)
+            assert isinstance(error_resp, dict)
+            error_data = error.TogetherErrorResponse(**(error_resp))
+        except (KeyError, TypeError):
+            raise error.APIError(
+                &#34;Invalid response object from API: %r (HTTP response code &#34;
+                &#34;was %d)&#34; % (resp.data, rcode),
+                http_status=rcode,
+                response=resp.data,
+            )
+
+        utils.log_info(
+            &#34;Together API error received&#34;,
+            error_code=error_data.code,
+            error_type=error_data.type_,
+            error_message=error_data.message,
+            error_param=error_data.param,
+            stream_error=stream_error,
+        )
+
+        # Rate limits were previously coded as 400&#39;s with code &#39;rate_limit&#39;
+        if rcode == 429:
+            return error.RateLimitError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        elif rcode in [400, 404, 415]:
+            return error.InvalidRequestError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        elif rcode == 401:
+            return error.AuthenticationError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+
+        elif stream_error:
+            parts = [error_data.message, &#34;(Error occurred while streaming.)&#34;]
+            message = &#34; &#34;.join([p for p in parts if p is not None])
+            return error.APIError(
+                message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+        else:
+            return error.APIError(
+                error_data.message,
+                http_status=rcode,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
+            )
+
+    @classmethod
+    def _validate_headers(
+        cls, supplied_headers: Optional[Dict[str, str]]
+    ) -&gt; Dict[str, str]:
+        headers: Dict[str, str] = {}
+        if supplied_headers is None:
+            return headers
+
+        if not isinstance(supplied_headers, dict):
+            raise TypeError(&#34;Headers must be a dictionary&#34;)
+
+        for k, v in supplied_headers.items():
+            if not isinstance(k, str):
+                raise TypeError(&#34;Header keys must be strings&#34;)
+            if not isinstance(v, str):
+                raise TypeError(&#34;Header values must be strings&#34;)
+            headers[k] = v
+
+        # NOTE: It is possible to do more validation of the headers, but a request could always
+        # be made to the API manually with invalid headers, so we need to handle them server side.
+
+        return headers
+
+    def _prepare_request_raw(
+        self,
+        url: str,
+        supplied_headers: Dict[str, str] | None = None,
+        method: str | None = None,
+        params: Dict[str, Any] | None = None,
+        files: Dict[str, Any] | None = None,
+    ) -&gt; Tuple[str, Dict[str, str], Dict[str, str] | bytes | None]:
+        abs_url = &#34;%s%s&#34; % (self.api_base, url)
+        headers = self._validate_headers(supplied_headers or self.supplied_headers)
+
+        data = None
+        data_bytes = None
+        if method == &#34;get&#34; or method == &#34;delete&#34;:
+            if params:
+                encoded_params = urlencode(
+                    [(k, v) for k, v in params.items() if v is not None]
+                )
+                abs_url = _build_api_url(abs_url, encoded_params)
+        elif method in {&#34;post&#34;, &#34;put&#34;}:
+            if params and files:
+                data = params
+            if params and not files:
+                data_bytes = json.dumps(params).encode()
+                headers[&#34;Content-Type&#34;] = &#34;application/json&#34;
+        else:
+            raise error.APIConnectionError(
+                &#34;Unrecognized HTTP method %r. This may indicate a bug in the &#34;
+                &#34;Together bindings. Please contact us by filling out https://www.together.ai/contact for &#34;
+                &#34;assistance.&#34; % (method,)
+            )
+
+        headers = utils.get_headers(method, self.api_key, headers)
+
+        utils.log_debug(&#34;Request to Together API&#34;, method=method, path=abs_url)
+        utils.log_debug(&#34;Post details&#34;, data=(data or data_bytes))
+
+        return abs_url, headers, (data or data_bytes)
+
+    def request_raw(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        stream: bool = False,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
+    ) -&gt; requests.Response:
+        abs_url, headers, data = self._prepare_request_raw(
+            url, supplied_headers, method, params, files
+        )
+
+        if not hasattr(_thread_context, &#34;session&#34;):
+            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session_create_time = time.time()
+        elif (
+            time.time() - getattr(_thread_context, &#34;session_create_time&#34;, 0)
+            &gt;= MAX_SESSION_LIFETIME_SECS
+        ):
+            _thread_context.session.close()
+            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session_create_time = time.time()
+        try:
+            result = _thread_context.session.request(
+                method,
+                abs_url,
+                headers=headers,
+                data=data,
+                files=files,
+                stream=stream,
+                timeout=request_timeout or self.timeout,
+                proxies=_thread_context.session.proxies,
+            )
+        except requests.exceptions.Timeout as e:
+            raise error.Timeout(&#34;Request timed out: {}&#34;.format(e)) from e
+        except requests.exceptions.RequestException as e:
+            raise error.APIConnectionError(
+                &#34;Error communicating with Together: {}&#34;.format(e)
+            ) from e
+        utils.log_debug(
+            &#34;Together API response&#34;,
+            path=abs_url,
+            response_code=result.status_code,
+            processing_ms=result.headers.get(&#34;x-total-time&#34;),
+            request_id=result.headers.get(&#34;CF-RAY&#34;),
+        )
+
+        return result  # type: ignore
+
+    async def arequest_raw(
+        self,
+        method: str,
+        url: str,
+        session: aiohttp.ClientSession,
+        *,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
+    ) -&gt; aiohttp.ClientResponse:
+        abs_url, headers, data = self._prepare_request_raw(
+            url, supplied_headers, method, params, files
+        )
+
+        if isinstance(request_timeout, tuple):
+            timeout = aiohttp.ClientTimeout(
+                connect=request_timeout[0],
+                total=request_timeout[1],
+            )
+        else:
+            timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
+
+        if files:
+            # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.
+            # For now we use the private `requests` method that is known to have worked so far.
+            data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
+                files, data
+            )
+            headers[&#34;Content-Type&#34;] = content_type
+        request_kwargs = {
+            &#34;headers&#34;: headers,
+            &#34;data&#34;: data,
+            &#34;timeout&#34;: timeout,
+        }
+        try:
+            result = await session.request(method=method, url=abs_url, **request_kwargs)
+            utils.log_info(
+                &#34;Together API response&#34;,
+                path=abs_url,
+                response_code=result.status,
+                processing_ms=result.headers.get(&#34;x-total-time&#34;),
+                request_id=result.headers.get(&#34;CF-RAY&#34;),
+            )
+            # Don&#39;t read the whole stream for debug logging unless necessary.
+            if together.log == &#34;debug&#34;:
+                utils.log_debug(
+                    &#34;API response body&#34;, body=result.content, headers=result.headers
+                )
+            return result
+        except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+            raise error.Timeout(&#34;Request timed out&#34;) from e
+        except aiohttp.ClientError as e:
+            raise error.APIConnectionError(&#34;Error communicating with Together&#34;) from e
+
+    def _interpret_response(
+        self, result: requests.Response, stream: bool
+    ) -&gt; Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool]:
+        &#34;&#34;&#34;Returns the response(s) and a bool indicating whether it is a stream.&#34;&#34;&#34;
+        if stream and &#34;text/event-stream&#34; in result.headers.get(&#34;Content-Type&#34;, &#34;&#34;):
+            return (
+                self._interpret_response_line(
+                    line, result.status_code, result.headers, stream=True
+                )
+                for line in parse_stream(result.iter_lines())
+            ), True
+        else:
+            return (
+                self._interpret_response_line(
+                    result.content.decode(&#34;utf-8&#34;),
+                    result.status_code,
+                    result.headers,
+                    stream=False,
+                ),
+                False,
+            )
+
+    async def _interpret_async_response(
+        self, result: aiohttp.ClientResponse, stream: bool
+    ) -&gt; (
+        tuple[AsyncGenerator[TogetherResponse, None], bool]
+        | tuple[TogetherResponse, bool]
+    ):
+        &#34;&#34;&#34;Returns the response(s) and a bool indicating whether it is a stream.&#34;&#34;&#34;
+        if stream and &#34;text/event-stream&#34; in result.headers.get(&#34;Content-Type&#34;, &#34;&#34;):
+            return (
+                self._interpret_response_line(
+                    line, result.status, result.headers, stream=True
+                )
+                async for line in parse_stream_async(result.content)
+            ), True
+        else:
+            try:
+                await result.read()
+            except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+                raise error.Timeout(&#34;Request timed out&#34;) from e
+            except aiohttp.ClientError as e:
+                utils.log_warn(e, body=result.content)
+            return (
+                self._interpret_response_line(
+                    (await result.read()).decode(&#34;utf-8&#34;),
+                    result.status,
+                    result.headers,
+                    stream=False,
+                ),
+                False,
+            )
+
+    def _interpret_response_line(
+        self, rbody: str, rcode: int, rheaders: Any, stream: bool
+    ) -&gt; TogetherResponse:
+        # HTTP 204 response code does not have any content in the body.
+        if rcode == 204:
+            return TogetherResponse({}, rheaders)
+
+        if rcode == 503:
+            raise error.ServiceUnavailableError(
+                &#34;The server is overloaded or not ready yet.&#34;,
+                http_body=rbody,
+                http_status=rcode,
+                headers=rheaders,
+            )
+        try:
+            if &#34;text/plain&#34; in rheaders.get(&#34;Content-Type&#34;, &#34;&#34;):
+                data: Dict[str, Any] = {&#34;message&#34;: rbody}
+            else:
+                data = json.loads(rbody)
+        except (JSONDecodeError, UnicodeDecodeError) as e:
+            raise error.APIError(
+                f&#34;HTTP code {rcode} from API ({rbody})&#34;,
+                http_body=rbody,
+                http_status=rcode,
+                headers=rheaders,
+            ) from e
+        resp = TogetherResponse(data, rheaders)
+
+        # Handle streaming errors
+        if stream and not 200 &lt;= rcode &lt; 300:
+            raise self.handle_error_response(resp, rcode, stream_error=True)
+        return resp</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="together.abstract.api_requestor.APIRequestor.format_app_info"><code class="name flex">
+<span>def <span class="ident">format_app_info</span></span>(<span>info: Dict[str, str]) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def format_app_info(cls, info: Dict[str, str]) -&gt; str:
+    fmt_str = info[&#34;name&#34;]
+    if info[&#34;version&#34;]:
+        fmt_str += &#34;/%s&#34; % (info[&#34;version&#34;],)
+    if info[&#34;url&#34;]:
+        fmt_str += &#34; (%s)&#34; % (info[&#34;url&#34;],)
+    return fmt_str</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.APIRequestor.handle_error_response"><code class="name flex">
+<span>def <span class="ident">handle_error_response</span></span>(<span>resp: <a title="together.together_response.TogetherResponse" href="../together_response.html#together.together_response.TogetherResponse">TogetherResponse</a>, rcode: int, stream_error: bool = False) ‑> Exception</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def handle_error_response(
+    cls,
+    resp: TogetherResponse,
+    rcode: int,
+    stream_error: bool = False,
+) -&gt; Exception:
+    try:
+        assert isinstance(resp.data, dict)
+        error_resp = resp.data.get(&#34;error&#34;)
+        assert isinstance(error_resp, dict)
+        error_data = error.TogetherErrorResponse(**(error_resp))
+    except (KeyError, TypeError):
+        raise error.APIError(
+            &#34;Invalid response object from API: %r (HTTP response code &#34;
+            &#34;was %d)&#34; % (resp.data, rcode),
+            http_status=rcode,
+            response=resp.data,
+        )
+
+    utils.log_info(
+        &#34;Together API error received&#34;,
+        error_code=error_data.code,
+        error_type=error_data.type_,
+        error_message=error_data.message,
+        error_param=error_data.param,
+        stream_error=stream_error,
+    )
+
+    # Rate limits were previously coded as 400&#39;s with code &#39;rate_limit&#39;
+    if rcode == 429:
+        return error.RateLimitError(
+            error_data.message,
+            http_status=rcode,
+            response=resp.data,
+            headers=resp._headers,
+            request_id=resp.request_id,
+        )
+    elif rcode in [400, 404, 415]:
+        return error.InvalidRequestError(
+            error_data.message,
+            http_status=rcode,
+            response=resp.data,
+            headers=resp._headers,
+            request_id=resp.request_id,
+        )
+    elif rcode == 401:
+        return error.AuthenticationError(
+            error_data.message,
+            http_status=rcode,
+            response=resp.data,
+            headers=resp._headers,
+            request_id=resp.request_id,
+        )
+
+    elif stream_error:
+        parts = [error_data.message, &#34;(Error occurred while streaming.)&#34;]
+        message = &#34; &#34;.join([p for p in parts if p is not None])
+        return error.APIError(
+            message,
+            http_status=rcode,
+            response=resp.data,
+            headers=resp._headers,
+            request_id=resp.request_id,
+        )
+    else:
+        return error.APIError(
+            error_data.message,
+            http_status=rcode,
+            response=resp.data,
+            headers=resp._headers,
+            request_id=resp.request_id,
+        )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="together.abstract.api_requestor.APIRequestor.arequest"><code class="name flex">
+<span>async def <span class="ident">arequest</span></span>(<span>self, method: str, url: str, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None, files: Optional[Dict[str, Any]] = None, stream: bool = False, request_timeout: Union[float, Tuple[float, float], ForwardRef(None)] = None) ‑> Tuple[Union[<a title="together.together_response.TogetherResponse" href="../together_response.html#together.together_response.TogetherResponse">TogetherResponse</a>, AsyncGenerator[<a title="together.together_response.TogetherResponse" href="../together_response.html#together.together_response.TogetherResponse">TogetherResponse</a>, None]], bool, str]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def arequest(
+    self,
+    method: str,
+    url: str,
+    params: Dict[str, Any] | None = None,
+    headers: Dict[str, str] | None = None,
+    files: Dict[str, Any] | None = None,
+    stream: bool = False,
+    request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+) -&gt; Tuple[
+    Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
+]:
+    ctx = AioHTTPSession()
+    session = await ctx.__aenter__()
+    result = None
+    try:
+        result = await self.arequest_raw(
+            method.lower(),
+            url,
+            session,
+            params=params,
+            supplied_headers=headers,
+            files=files,
+            request_timeout=request_timeout,
+        )
+        resp, got_stream = await self._interpret_async_response(result, stream)
+    except Exception:
+        # Close the request before exiting session context.
+        if result is not None:
+            result.release()
+        await ctx.__aexit__(None, None, None)
+        raise
+    if got_stream:
+
+        async def wrap_resp() -&gt; AsyncGenerator[TogetherResponse, None]:
+            assert isinstance(resp, AsyncGenerator)
+            try:
+                async for r in resp:
+                    yield r
+            finally:
+                # Close the request before exiting session context. Important to do it here
+                # as if stream is not fully exhausted, we need to close the request nevertheless.
+                result.release()
+                await ctx.__aexit__(None, None, None)
+
+        return wrap_resp(), got_stream, self.api_key  # type: ignore
+    else:
+        # Close the request before exiting session context.
+        result.release()
+        await ctx.__aexit__(None, None, None)
+        return resp, got_stream, self.api_key  # type: ignore</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.APIRequestor.arequest_raw"><code class="name flex">
+<span>async def <span class="ident">arequest_raw</span></span>(<span>self, method: str, url: str, session: aiohttp.client.ClientSession, *, params: Optional[Dict[str, Any]] = None, supplied_headers: Optional[Dict[str, str]] = None, files: Optional[Dict[str, Any]] = None, request_timeout: Union[float, Tuple[float, float], ForwardRef(None)] = None) ‑> aiohttp.client_reqrep.ClientResponse</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def arequest_raw(
+    self,
+    method: str,
+    url: str,
+    session: aiohttp.ClientSession,
+    *,
+    params: Dict[str, Any] | None = None,
+    supplied_headers: Dict[str, str] | None = None,
+    files: Dict[str, Any] | None = None,
+    request_timeout: Union[float, Tuple[float, float]] | None = None,
+) -&gt; aiohttp.ClientResponse:
+    abs_url, headers, data = self._prepare_request_raw(
+        url, supplied_headers, method, params, files
+    )
+
+    if isinstance(request_timeout, tuple):
+        timeout = aiohttp.ClientTimeout(
+            connect=request_timeout[0],
+            total=request_timeout[1],
+        )
+    else:
+        timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
+
+    if files:
+        # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.
+        # For now we use the private `requests` method that is known to have worked so far.
+        data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
+            files, data
+        )
+        headers[&#34;Content-Type&#34;] = content_type
+    request_kwargs = {
+        &#34;headers&#34;: headers,
+        &#34;data&#34;: data,
+        &#34;timeout&#34;: timeout,
+    }
+    try:
+        result = await session.request(method=method, url=abs_url, **request_kwargs)
+        utils.log_info(
+            &#34;Together API response&#34;,
+            path=abs_url,
+            response_code=result.status,
+            processing_ms=result.headers.get(&#34;x-total-time&#34;),
+            request_id=result.headers.get(&#34;CF-RAY&#34;),
+        )
+        # Don&#39;t read the whole stream for debug logging unless necessary.
+        if together.log == &#34;debug&#34;:
+            utils.log_debug(
+                &#34;API response body&#34;, body=result.content, headers=result.headers
+            )
+        return result
+    except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+        raise error.Timeout(&#34;Request timed out&#34;) from e
+    except aiohttp.ClientError as e:
+        raise error.APIConnectionError(&#34;Error communicating with Together&#34;) from e</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.APIRequestor.request"><code class="name flex">
+<span>def <span class="ident">request</span></span>(<span>self, method: str, url: str, params: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None, files: Optional[Dict[str, Any]] = None, stream: bool = False, request_timeout: Union[float, Tuple[float, float], ForwardRef(None)] = None, return_raw: bool = False) ‑> Tuple[Union[<a title="together.together_response.TogetherResponse" href="../together_response.html#together.together_response.TogetherResponse">TogetherResponse</a>, Iterator[<a title="together.together_response.TogetherResponse" href="../together_response.html#together.together_response.TogetherResponse">TogetherResponse</a>], requests.models.Response], bool, str | None]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def request(
+    self,
+    method: str,
+    url: str,
+    params: Dict[str, Any] | None = None,
+    headers: Dict[str, str] | None = None,
+    files: Dict[str, Any] | None = None,
+    stream: bool = False,
+    request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+    return_raw: bool = False,
+) -&gt; Tuple[
+    TogetherResponse | Iterator[TogetherResponse] | requests.Response,
+    bool,
+    str | None,
+]:
+    result = self.request_raw(
+        method.lower(),
+        url,
+        params=params,
+        supplied_headers=headers,
+        files=files,
+        stream=stream,
+        request_timeout=request_timeout,
+    )
+
+    if not return_raw:
+        resp, got_stream = self._interpret_response(result, stream)
+        return resp, got_stream, self.api_key
+    else:
+        return result, stream, self.api_key</code></pre>
+</details>
+</dd>
+<dt id="together.abstract.api_requestor.APIRequestor.request_raw"><code class="name flex">
+<span>def <span class="ident">request_raw</span></span>(<span>self, method: str, url: str, *, params: Optional[Dict[str, Any]] = None, supplied_headers: Optional[Dict[str, str]] = None, files: Optional[Dict[str, Any]] = None, stream: bool = False, request_timeout: Union[float, Tuple[float, float], ForwardRef(None)] = None) ‑> requests.models.Response</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def request_raw(
+    self,
+    method: str,
+    url: str,
+    *,
+    params: Dict[str, Any] | None = None,
+    supplied_headers: Dict[str, str] | None = None,
+    files: Dict[str, Any] | None = None,
+    stream: bool = False,
+    request_timeout: Union[float, Tuple[float, float]] | None = None,
+) -&gt; requests.Response:
+    abs_url, headers, data = self._prepare_request_raw(
+        url, supplied_headers, method, params, files
+    )
+
+    if not hasattr(_thread_context, &#34;session&#34;):
+        _thread_context.session = _make_session(self.max_retries)
+        _thread_context.session_create_time = time.time()
+    elif (
+        time.time() - getattr(_thread_context, &#34;session_create_time&#34;, 0)
+        &gt;= MAX_SESSION_LIFETIME_SECS
+    ):
+        _thread_context.session.close()
+        _thread_context.session = _make_session(self.max_retries)
+        _thread_context.session_create_time = time.time()
+    try:
+        result = _thread_context.session.request(
+            method,
+            abs_url,
+            headers=headers,
+            data=data,
+            files=files,
+            stream=stream,
+            timeout=request_timeout or self.timeout,
+            proxies=_thread_context.session.proxies,
+        )
+    except requests.exceptions.Timeout as e:
+        raise error.Timeout(&#34;Request timed out: {}&#34;.format(e)) from e
+    except requests.exceptions.RequestException as e:
+        raise error.APIConnectionError(
+            &#34;Error communicating with Together: {}&#34;.format(e)
+        ) from e
+    utils.log_debug(
+        &#34;Together API response&#34;,
+        path=abs_url,
+        response_code=result.status_code,
+        processing_ms=result.headers.get(&#34;x-total-time&#34;),
+        request_id=result.headers.get(&#34;CF-RAY&#34;),
+    )
+
+    return result  # type: ignore</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.abstract.api_requestor.AioHTTPSession"><code class="flex name class">
+<span>class <span class="ident">AioHTTPSession</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>An abstract base class for asynchronous context managers.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AioHTTPSession(AsyncContextManager[aiohttp.ClientSession]):
+    def __init__(self) -&gt; None:
+        self._session: aiohttp.ClientSession | None = None
+        self._should_close_session: bool = False
+
+    async def __aenter__(self) -&gt; aiohttp.ClientSession:
+        self._session = together.aiosession.get()
+        if self._session is None:
+            self._session = await aiohttp.ClientSession().__aenter__()
+            self._should_close_session = True
+
+        return self._session
+
+    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -&gt; None:
+        if self._session is None:
+            raise RuntimeError(&#34;Session is not initialized&#34;)
+
+        if self._should_close_session:
+            await self._session.__aexit__(exc_type, exc_value, traceback)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>contextlib.AbstractAsyncContextManager</li>
+<li>abc.ABC</li>
+<li>typing.Generic</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="together.abstract" href="index.html">together.abstract</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="together.abstract.api_requestor.parse_stream" href="#together.abstract.api_requestor.parse_stream">parse_stream</a></code></li>
+<li><code><a title="together.abstract.api_requestor.parse_stream_async" href="#together.abstract.api_requestor.parse_stream_async">parse_stream_async</a></code></li>
+<li><code><a title="together.abstract.api_requestor.parse_stream_helper" href="#together.abstract.api_requestor.parse_stream_helper">parse_stream_helper</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="together.abstract.api_requestor.APIRequestor" href="#together.abstract.api_requestor.APIRequestor">APIRequestor</a></code></h4>
+<ul class="">
+<li><code><a title="together.abstract.api_requestor.APIRequestor.arequest" href="#together.abstract.api_requestor.APIRequestor.arequest">arequest</a></code></li>
+<li><code><a title="together.abstract.api_requestor.APIRequestor.arequest_raw" href="#together.abstract.api_requestor.APIRequestor.arequest_raw">arequest_raw</a></code></li>
+<li><code><a title="together.abstract.api_requestor.APIRequestor.format_app_info" href="#together.abstract.api_requestor.APIRequestor.format_app_info">format_app_info</a></code></li>
+<li><code><a title="together.abstract.api_requestor.APIRequestor.handle_error_response" href="#together.abstract.api_requestor.APIRequestor.handle_error_response">handle_error_response</a></code></li>
+<li><code><a title="together.abstract.api_requestor.APIRequestor.request" href="#together.abstract.api_requestor.APIRequestor.request">request</a></code></li>
+<li><code><a title="together.abstract.api_requestor.APIRequestor.request_raw" href="#together.abstract.api_requestor.APIRequestor.request_raw">request_raw</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.abstract.api_requestor.AioHTTPSession" href="#together.abstract.api_requestor.AioHTTPSession">AioHTTPSession</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,1349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>together.types.finetune API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>together.types.finetune</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from enum import Enum
+from pathlib import Path
+from typing import Annotated, List, Literal
+
+from pydantic import Field, StringConstraints
+
+from together.types.abstract import BaseModel
+from together.types.common import (
+    ObjectType,
+)
+
+
+class FinetuneJobStatus(str, Enum):
+    STATUS_PENDING = &#34;pending&#34;
+    STATUS_QUEUED = &#34;queued&#34;
+    STATUS_RUNNING = &#34;running&#34;
+    STATUS_COMPRESSING = &#34;compressing&#34;
+    STATUS_UPLOADING = &#34;uploading&#34;
+    STATUS_CANCEL_REQUESTED = &#34;cancel_requested&#34;
+    STATUS_CANCELLED = &#34;cancelled&#34;
+    STATUS_ERROR = &#34;error&#34;
+    STATUS_COMPLETED = &#34;completed&#34;
+
+
+class FinetuneEventLevels(str, Enum):
+    NULL = &#34;&#34;
+    INFO = &#34;Info&#34;
+    WARNING = &#34;Warning&#34;
+    ERROR = &#34;Error&#34;
+    LEGACY_INFO = &#34;info&#34;
+    LEGACY_IWARNING = &#34;warning&#34;
+    LEGACY_IERROR = &#34;error&#34;
+
+
+class FinetuneEventType(str, Enum):
+    JOB_PENDING = &#34;JOB_PENDING&#34;
+    JOB_START = &#34;JOB_START&#34;
+    JOB_STOPPED = &#34;JOB_STOPPED&#34;
+    MODEL_DOWNLOADING = &#34;MODEL_DOWNLOADING&#34;
+    MODEL_DOWNLOAD_COMPLETE = &#34;MODEL_DOWNLOAD_COMPLETE&#34;
+    TRAINING_DATA_DOWNLOADING = &#34;TRAINING_DATA_DOWNLOADING&#34;
+    TRAINING_DATA_DOWNLOAD_COMPLETE = &#34;TRAINING_DATA_DOWNLOAD_COMPLETE&#34;
+    VALIDATION_DATA_DOWNLOADING = &#34;VALIDATION_DATA_DOWNLOADING&#34;
+    VALIDATION_DATA_DOWNLOAD_COMPLETE = &#34;VALIDATION_DATA_DOWNLOAD_COMPLETE&#34;
+    WANDB_INIT = &#34;WANDB_INIT&#34;
+    TRAINING_START = &#34;TRAINING_START&#34;
+    CHECKPOINT_SAVE = &#34;CHECKPOINT_SAVE&#34;
+    BILLING_LIMIT = &#34;BILLING_LIMIT&#34;
+    EPOCH_COMPLETE = &#34;EPOCH_COMPLETE&#34;
+    TRAINING_COMPLETE = &#34;TRAINING_COMPLETE&#34;
+    MODEL_COMPRESSING = &#34;COMPRESSING_MODEL&#34;
+    MODEL_COMPRESSION_COMPLETE = &#34;MODEL_COMPRESSION_COMPLETE&#34;
+    MODEL_UPLOADING = &#34;MODEL_UPLOADING&#34;
+    MODEL_UPLOAD_COMPLETE = &#34;MODEL_UPLOAD_COMPLETE&#34;
+    JOB_COMPLETE = &#34;JOB_COMPLETE&#34;
+    JOB_ERROR = &#34;JOB_ERROR&#34;
+    CANCEL_REQUESTED = &#34;CANCEL_REQUESTED&#34;
+    JOB_RESTARTED = &#34;JOB_RESTARTED&#34;
+    REFUND = &#34;REFUND&#34;
+    WARNING = &#34;WARNING&#34;
+
+
+class FinetuneEvent(BaseModel):
+    object: Literal[ObjectType.FinetuneEvent]
+    created_at: str | None = None
+    level: FinetuneEventLevels | None = None
+    message: str | None = None
+    type: FinetuneEventType | None = None
+    param_count: int | None = None
+    token_count: int | None = None
+    wandb_url: str | None = None
+    hash: str | None = None
+
+
+class FinetuneRequest(BaseModel):
+    training_file: str
+    model: str
+    n_epochs: int
+    learning_rate: float
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    suffix: Annotated[str, StringConstraints(max_length=40)] | None = None
+    wandb_api_key: str | None = None
+
+
+class FinetuneResponse(BaseModel):
+    id: str | None = None
+    training_file: str | None = None
+    validation_file: str | None = None
+    model: str | None = None
+    output_name: str | None = Field(None, alias=&#34;model_output_name&#34;)
+    n_epochs: int | None = None
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    learning_rate: float | None = None
+    eval_steps: int | None = None
+    lora: bool | None = None
+    lora_r: int | None = None
+    lora_alpha: int | None = None
+    lora_dropout: int | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    status: FinetuneJobStatus | None = None
+    job_id: str | None = None
+    events: List[FinetuneEvent] | None = None
+    token_count: int | None = None
+    param_count: int | None = None
+    total_price: int | None = None
+    epochs_completed: int | None = None
+    queue_depth: int | None = None
+    wandb_project_name: str | None = None
+    wandb_url: str | None = None
+    TrainingFileNumLines: int | None = None
+    TrainingFileSize: int | None = None
+
+
+class FinetuneList(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneResponse] | None = None
+
+
+class FinetuneListEvents(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneEvent] | None = None
+
+
+class FinetuneDownloadResult(BaseModel):
+    object: Literal[&#34;local&#34;] | None = None
+    id: str | None = None
+    checkpoint_step: int | None = None
+    filename: Path | None = None
+    size: int | None = None</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="together.types.finetune.FinetuneDownloadResult"><code class="flex name class">
+<span>class <span class="ident">FinetuneDownloadResult</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneDownloadResult(BaseModel):
+    object: Literal[&#34;local&#34;] | None = None
+    id: str | None = None
+    checkpoint_step: int | None = None
+    filename: Path | None = None
+    size: int | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneDownloadResult.checkpoint_step"><code class="name">var <span class="ident">checkpoint_step</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.filename"><code class="name">var <span class="ident">filename</span> : pathlib.Path | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['local']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneDownloadResult.size"><code class="name">var <span class="ident">size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent"><code class="flex name class">
+<span>class <span class="ident">FinetuneEvent</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneEvent(BaseModel):
+    object: Literal[ObjectType.FinetuneEvent]
+    created_at: str | None = None
+    level: FinetuneEventLevels | None = None
+    message: str | None = None
+    type: FinetuneEventType | None = None
+    param_count: int | None = None
+    token_count: int | None = None
+    wandb_url: str | None = None
+    hash: str | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneEvent.created_at"><code class="name">var <span class="ident">created_at</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.hash"><code class="name">var <span class="ident">hash</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.level"><code class="name">var <span class="ident">level</span> : <a title="together.types.finetune.FinetuneEventLevels" href="#together.types.finetune.FinetuneEventLevels">FinetuneEventLevels</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.message"><code class="name">var <span class="ident">message</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.object"><code class="name">var <span class="ident">object</span> : Literal[<ObjectType.FinetuneEvent: 'fine-tune-event'>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.param_count"><code class="name">var <span class="ident">param_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.token_count"><code class="name">var <span class="ident">token_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.type"><code class="name">var <span class="ident">type</span> : <a title="together.types.finetune.FinetuneEventType" href="#together.types.finetune.FinetuneEventType">FinetuneEventType</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEvent.wandb_url"><code class="name">var <span class="ident">wandb_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels"><code class="flex name class">
+<span>class <span class="ident">FinetuneEventLevels</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An enumeration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneEventLevels(str, Enum):
+    NULL = &#34;&#34;
+    INFO = &#34;Info&#34;
+    WARNING = &#34;Warning&#34;
+    ERROR = &#34;Error&#34;
+    LEGACY_INFO = &#34;info&#34;
+    LEGACY_IWARNING = &#34;warning&#34;
+    LEGACY_IERROR = &#34;error&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneEventLevels.ERROR"><code class="name">var <span class="ident">ERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.INFO"><code class="name">var <span class="ident">INFO</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.LEGACY_IERROR"><code class="name">var <span class="ident">LEGACY_IERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.LEGACY_INFO"><code class="name">var <span class="ident">LEGACY_INFO</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.LEGACY_IWARNING"><code class="name">var <span class="ident">LEGACY_IWARNING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.NULL"><code class="name">var <span class="ident">NULL</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventLevels.WARNING"><code class="name">var <span class="ident">WARNING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType"><code class="flex name class">
+<span>class <span class="ident">FinetuneEventType</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An enumeration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneEventType(str, Enum):
+    JOB_PENDING = &#34;JOB_PENDING&#34;
+    JOB_START = &#34;JOB_START&#34;
+    JOB_STOPPED = &#34;JOB_STOPPED&#34;
+    MODEL_DOWNLOADING = &#34;MODEL_DOWNLOADING&#34;
+    MODEL_DOWNLOAD_COMPLETE = &#34;MODEL_DOWNLOAD_COMPLETE&#34;
+    TRAINING_DATA_DOWNLOADING = &#34;TRAINING_DATA_DOWNLOADING&#34;
+    TRAINING_DATA_DOWNLOAD_COMPLETE = &#34;TRAINING_DATA_DOWNLOAD_COMPLETE&#34;
+    VALIDATION_DATA_DOWNLOADING = &#34;VALIDATION_DATA_DOWNLOADING&#34;
+    VALIDATION_DATA_DOWNLOAD_COMPLETE = &#34;VALIDATION_DATA_DOWNLOAD_COMPLETE&#34;
+    WANDB_INIT = &#34;WANDB_INIT&#34;
+    TRAINING_START = &#34;TRAINING_START&#34;
+    CHECKPOINT_SAVE = &#34;CHECKPOINT_SAVE&#34;
+    BILLING_LIMIT = &#34;BILLING_LIMIT&#34;
+    EPOCH_COMPLETE = &#34;EPOCH_COMPLETE&#34;
+    TRAINING_COMPLETE = &#34;TRAINING_COMPLETE&#34;
+    MODEL_COMPRESSING = &#34;COMPRESSING_MODEL&#34;
+    MODEL_COMPRESSION_COMPLETE = &#34;MODEL_COMPRESSION_COMPLETE&#34;
+    MODEL_UPLOADING = &#34;MODEL_UPLOADING&#34;
+    MODEL_UPLOAD_COMPLETE = &#34;MODEL_UPLOAD_COMPLETE&#34;
+    JOB_COMPLETE = &#34;JOB_COMPLETE&#34;
+    JOB_ERROR = &#34;JOB_ERROR&#34;
+    CANCEL_REQUESTED = &#34;CANCEL_REQUESTED&#34;
+    JOB_RESTARTED = &#34;JOB_RESTARTED&#34;
+    REFUND = &#34;REFUND&#34;
+    WARNING = &#34;WARNING&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneEventType.BILLING_LIMIT"><code class="name">var <span class="ident">BILLING_LIMIT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.CANCEL_REQUESTED"><code class="name">var <span class="ident">CANCEL_REQUESTED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.CHECKPOINT_SAVE"><code class="name">var <span class="ident">CHECKPOINT_SAVE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.EPOCH_COMPLETE"><code class="name">var <span class="ident">EPOCH_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_COMPLETE"><code class="name">var <span class="ident">JOB_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_ERROR"><code class="name">var <span class="ident">JOB_ERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_PENDING"><code class="name">var <span class="ident">JOB_PENDING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_RESTARTED"><code class="name">var <span class="ident">JOB_RESTARTED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_START"><code class="name">var <span class="ident">JOB_START</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.JOB_STOPPED"><code class="name">var <span class="ident">JOB_STOPPED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_COMPRESSING"><code class="name">var <span class="ident">MODEL_COMPRESSING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_COMPRESSION_COMPLETE"><code class="name">var <span class="ident">MODEL_COMPRESSION_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_DOWNLOADING"><code class="name">var <span class="ident">MODEL_DOWNLOADING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_DOWNLOAD_COMPLETE"><code class="name">var <span class="ident">MODEL_DOWNLOAD_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_UPLOADING"><code class="name">var <span class="ident">MODEL_UPLOADING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.MODEL_UPLOAD_COMPLETE"><code class="name">var <span class="ident">MODEL_UPLOAD_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.REFUND"><code class="name">var <span class="ident">REFUND</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.TRAINING_COMPLETE"><code class="name">var <span class="ident">TRAINING_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOADING"><code class="name">var <span class="ident">TRAINING_DATA_DOWNLOADING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOAD_COMPLETE"><code class="name">var <span class="ident">TRAINING_DATA_DOWNLOAD_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.TRAINING_START"><code class="name">var <span class="ident">TRAINING_START</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOADING"><code class="name">var <span class="ident">VALIDATION_DATA_DOWNLOADING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOAD_COMPLETE"><code class="name">var <span class="ident">VALIDATION_DATA_DOWNLOAD_COMPLETE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.WANDB_INIT"><code class="name">var <span class="ident">WANDB_INIT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneEventType.WARNING"><code class="name">var <span class="ident">WARNING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus"><code class="flex name class">
+<span>class <span class="ident">FinetuneJobStatus</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>An enumeration.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneJobStatus(str, Enum):
+    STATUS_PENDING = &#34;pending&#34;
+    STATUS_QUEUED = &#34;queued&#34;
+    STATUS_RUNNING = &#34;running&#34;
+    STATUS_COMPRESSING = &#34;compressing&#34;
+    STATUS_UPLOADING = &#34;uploading&#34;
+    STATUS_CANCEL_REQUESTED = &#34;cancel_requested&#34;
+    STATUS_CANCELLED = &#34;cancelled&#34;
+    STATUS_ERROR = &#34;error&#34;
+    STATUS_COMPLETED = &#34;completed&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.str</li>
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_CANCELLED"><code class="name">var <span class="ident">STATUS_CANCELLED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_CANCEL_REQUESTED"><code class="name">var <span class="ident">STATUS_CANCEL_REQUESTED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_COMPLETED"><code class="name">var <span class="ident">STATUS_COMPLETED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_COMPRESSING"><code class="name">var <span class="ident">STATUS_COMPRESSING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_ERROR"><code class="name">var <span class="ident">STATUS_ERROR</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_PENDING"><code class="name">var <span class="ident">STATUS_PENDING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_QUEUED"><code class="name">var <span class="ident">STATUS_QUEUED</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_RUNNING"><code class="name">var <span class="ident">STATUS_RUNNING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneJobStatus.STATUS_UPLOADING"><code class="name">var <span class="ident">STATUS_UPLOADING</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneList"><code class="flex name class">
+<span>class <span class="ident">FinetuneList</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneList(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneResponse] | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneList.data"><code class="name">var <span class="ident">data</span> : Optional[List[<a title="together.types.finetune.FinetuneResponse" href="#together.types.finetune.FinetuneResponse">FinetuneResponse</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneList.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneList.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneList.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneList.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['list']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneListEvents"><code class="flex name class">
+<span>class <span class="ident">FinetuneListEvents</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneListEvents(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneEvent] | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneListEvents.data"><code class="name">var <span class="ident">data</span> : Optional[List[<a title="together.types.finetune.FinetuneEvent" href="#together.types.finetune.FinetuneEvent">FinetuneEvent</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneListEvents.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneListEvents.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneListEvents.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneListEvents.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['list']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest"><code class="flex name class">
+<span>class <span class="ident">FinetuneRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneRequest(BaseModel):
+    training_file: str
+    model: str
+    n_epochs: int
+    learning_rate: float
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    suffix: Annotated[str, StringConstraints(max_length=40)] | None = None
+    wandb_api_key: str | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneRequest.batch_size"><code class="name">var <span class="ident">batch_size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.learning_rate"><code class="name">var <span class="ident">learning_rate</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.n_checkpoints"><code class="name">var <span class="ident">n_checkpoints</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.n_epochs"><code class="name">var <span class="ident">n_epochs</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.suffix"><code class="name">var <span class="ident">suffix</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.training_file"><code class="name">var <span class="ident">training_file</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneRequest.wandb_api_key"><code class="name">var <span class="ident">wandb_api_key</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse"><code class="flex name class">
+<span>class <span class="ident">FinetuneResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneResponse(BaseModel):
+    id: str | None = None
+    training_file: str | None = None
+    validation_file: str | None = None
+    model: str | None = None
+    output_name: str | None = Field(None, alias=&#34;model_output_name&#34;)
+    n_epochs: int | None = None
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    learning_rate: float | None = None
+    eval_steps: int | None = None
+    lora: bool | None = None
+    lora_r: int | None = None
+    lora_alpha: int | None = None
+    lora_dropout: int | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    status: FinetuneJobStatus | None = None
+    job_id: str | None = None
+    events: List[FinetuneEvent] | None = None
+    token_count: int | None = None
+    param_count: int | None = None
+    total_price: int | None = None
+    epochs_completed: int | None = None
+    queue_depth: int | None = None
+    wandb_project_name: str | None = None
+    wandb_url: str | None = None
+    TrainingFileNumLines: int | None = None
+    TrainingFileSize: int | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.finetune.FinetuneResponse.TrainingFileNumLines"><code class="name">var <span class="ident">TrainingFileNumLines</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.TrainingFileSize"><code class="name">var <span class="ident">TrainingFileSize</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.batch_size"><code class="name">var <span class="ident">batch_size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.created_at"><code class="name">var <span class="ident">created_at</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.epochs_completed"><code class="name">var <span class="ident">epochs_completed</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.eval_steps"><code class="name">var <span class="ident">eval_steps</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.events"><code class="name">var <span class="ident">events</span> : Optional[List[<a title="together.types.finetune.FinetuneEvent" href="#together.types.finetune.FinetuneEvent">FinetuneEvent</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.job_id"><code class="name">var <span class="ident">job_id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.learning_rate"><code class="name">var <span class="ident">learning_rate</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.lora"><code class="name">var <span class="ident">lora</span> : bool | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.lora_alpha"><code class="name">var <span class="ident">lora_alpha</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.lora_dropout"><code class="name">var <span class="ident">lora_dropout</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.lora_r"><code class="name">var <span class="ident">lora_r</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.n_checkpoints"><code class="name">var <span class="ident">n_checkpoints</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.n_epochs"><code class="name">var <span class="ident">n_epochs</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.output_name"><code class="name">var <span class="ident">output_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.param_count"><code class="name">var <span class="ident">param_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.queue_depth"><code class="name">var <span class="ident">queue_depth</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.status"><code class="name">var <span class="ident">status</span> : <a title="together.types.finetune.FinetuneJobStatus" href="#together.types.finetune.FinetuneJobStatus">FinetuneJobStatus</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.token_count"><code class="name">var <span class="ident">token_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.total_price"><code class="name">var <span class="ident">total_price</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.training_file"><code class="name">var <span class="ident">training_file</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.validation_file"><code class="name">var <span class="ident">validation_file</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.wandb_project_name"><code class="name">var <span class="ident">wandb_project_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.finetune.FinetuneResponse.wandb_url"><code class="name">var <span class="ident">wandb_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="together.types" href="index.html">together.types</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneDownloadResult" href="#together.types.finetune.FinetuneDownloadResult">FinetuneDownloadResult</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.checkpoint_step" href="#together.types.finetune.FinetuneDownloadResult.checkpoint_step">checkpoint_step</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.filename" href="#together.types.finetune.FinetuneDownloadResult.filename">filename</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.id" href="#together.types.finetune.FinetuneDownloadResult.id">id</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.model_computed_fields" href="#together.types.finetune.FinetuneDownloadResult.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.model_config" href="#together.types.finetune.FinetuneDownloadResult.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.model_fields" href="#together.types.finetune.FinetuneDownloadResult.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.object" href="#together.types.finetune.FinetuneDownloadResult.object">object</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneDownloadResult.size" href="#together.types.finetune.FinetuneDownloadResult.size">size</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneEvent" href="#together.types.finetune.FinetuneEvent">FinetuneEvent</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneEvent.created_at" href="#together.types.finetune.FinetuneEvent.created_at">created_at</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.hash" href="#together.types.finetune.FinetuneEvent.hash">hash</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.level" href="#together.types.finetune.FinetuneEvent.level">level</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.message" href="#together.types.finetune.FinetuneEvent.message">message</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.model_computed_fields" href="#together.types.finetune.FinetuneEvent.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.model_config" href="#together.types.finetune.FinetuneEvent.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.model_fields" href="#together.types.finetune.FinetuneEvent.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.object" href="#together.types.finetune.FinetuneEvent.object">object</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.param_count" href="#together.types.finetune.FinetuneEvent.param_count">param_count</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.token_count" href="#together.types.finetune.FinetuneEvent.token_count">token_count</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.type" href="#together.types.finetune.FinetuneEvent.type">type</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEvent.wandb_url" href="#together.types.finetune.FinetuneEvent.wandb_url">wandb_url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneEventLevels" href="#together.types.finetune.FinetuneEventLevels">FinetuneEventLevels</a></code></h4>
+<ul class="two-column">
+<li><code><a title="together.types.finetune.FinetuneEventLevels.ERROR" href="#together.types.finetune.FinetuneEventLevels.ERROR">ERROR</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.INFO" href="#together.types.finetune.FinetuneEventLevels.INFO">INFO</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.LEGACY_IERROR" href="#together.types.finetune.FinetuneEventLevels.LEGACY_IERROR">LEGACY_IERROR</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.LEGACY_INFO" href="#together.types.finetune.FinetuneEventLevels.LEGACY_INFO">LEGACY_INFO</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.LEGACY_IWARNING" href="#together.types.finetune.FinetuneEventLevels.LEGACY_IWARNING">LEGACY_IWARNING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.NULL" href="#together.types.finetune.FinetuneEventLevels.NULL">NULL</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventLevels.WARNING" href="#together.types.finetune.FinetuneEventLevels.WARNING">WARNING</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneEventType" href="#together.types.finetune.FinetuneEventType">FinetuneEventType</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneEventType.BILLING_LIMIT" href="#together.types.finetune.FinetuneEventType.BILLING_LIMIT">BILLING_LIMIT</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.CANCEL_REQUESTED" href="#together.types.finetune.FinetuneEventType.CANCEL_REQUESTED">CANCEL_REQUESTED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.CHECKPOINT_SAVE" href="#together.types.finetune.FinetuneEventType.CHECKPOINT_SAVE">CHECKPOINT_SAVE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.EPOCH_COMPLETE" href="#together.types.finetune.FinetuneEventType.EPOCH_COMPLETE">EPOCH_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_COMPLETE" href="#together.types.finetune.FinetuneEventType.JOB_COMPLETE">JOB_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_ERROR" href="#together.types.finetune.FinetuneEventType.JOB_ERROR">JOB_ERROR</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_PENDING" href="#together.types.finetune.FinetuneEventType.JOB_PENDING">JOB_PENDING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_RESTARTED" href="#together.types.finetune.FinetuneEventType.JOB_RESTARTED">JOB_RESTARTED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_START" href="#together.types.finetune.FinetuneEventType.JOB_START">JOB_START</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.JOB_STOPPED" href="#together.types.finetune.FinetuneEventType.JOB_STOPPED">JOB_STOPPED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_COMPRESSING" href="#together.types.finetune.FinetuneEventType.MODEL_COMPRESSING">MODEL_COMPRESSING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_COMPRESSION_COMPLETE" href="#together.types.finetune.FinetuneEventType.MODEL_COMPRESSION_COMPLETE">MODEL_COMPRESSION_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_DOWNLOADING" href="#together.types.finetune.FinetuneEventType.MODEL_DOWNLOADING">MODEL_DOWNLOADING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_DOWNLOAD_COMPLETE" href="#together.types.finetune.FinetuneEventType.MODEL_DOWNLOAD_COMPLETE">MODEL_DOWNLOAD_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_UPLOADING" href="#together.types.finetune.FinetuneEventType.MODEL_UPLOADING">MODEL_UPLOADING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.MODEL_UPLOAD_COMPLETE" href="#together.types.finetune.FinetuneEventType.MODEL_UPLOAD_COMPLETE">MODEL_UPLOAD_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.REFUND" href="#together.types.finetune.FinetuneEventType.REFUND">REFUND</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.TRAINING_COMPLETE" href="#together.types.finetune.FinetuneEventType.TRAINING_COMPLETE">TRAINING_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOADING" href="#together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOADING">TRAINING_DATA_DOWNLOADING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOAD_COMPLETE" href="#together.types.finetune.FinetuneEventType.TRAINING_DATA_DOWNLOAD_COMPLETE">TRAINING_DATA_DOWNLOAD_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.TRAINING_START" href="#together.types.finetune.FinetuneEventType.TRAINING_START">TRAINING_START</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOADING" href="#together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOADING">VALIDATION_DATA_DOWNLOADING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOAD_COMPLETE" href="#together.types.finetune.FinetuneEventType.VALIDATION_DATA_DOWNLOAD_COMPLETE">VALIDATION_DATA_DOWNLOAD_COMPLETE</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.WANDB_INIT" href="#together.types.finetune.FinetuneEventType.WANDB_INIT">WANDB_INIT</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneEventType.WARNING" href="#together.types.finetune.FinetuneEventType.WARNING">WARNING</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneJobStatus" href="#together.types.finetune.FinetuneJobStatus">FinetuneJobStatus</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_CANCELLED" href="#together.types.finetune.FinetuneJobStatus.STATUS_CANCELLED">STATUS_CANCELLED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_CANCEL_REQUESTED" href="#together.types.finetune.FinetuneJobStatus.STATUS_CANCEL_REQUESTED">STATUS_CANCEL_REQUESTED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_COMPLETED" href="#together.types.finetune.FinetuneJobStatus.STATUS_COMPLETED">STATUS_COMPLETED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_COMPRESSING" href="#together.types.finetune.FinetuneJobStatus.STATUS_COMPRESSING">STATUS_COMPRESSING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_ERROR" href="#together.types.finetune.FinetuneJobStatus.STATUS_ERROR">STATUS_ERROR</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_PENDING" href="#together.types.finetune.FinetuneJobStatus.STATUS_PENDING">STATUS_PENDING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_QUEUED" href="#together.types.finetune.FinetuneJobStatus.STATUS_QUEUED">STATUS_QUEUED</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_RUNNING" href="#together.types.finetune.FinetuneJobStatus.STATUS_RUNNING">STATUS_RUNNING</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneJobStatus.STATUS_UPLOADING" href="#together.types.finetune.FinetuneJobStatus.STATUS_UPLOADING">STATUS_UPLOADING</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneList" href="#together.types.finetune.FinetuneList">FinetuneList</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneList.data" href="#together.types.finetune.FinetuneList.data">data</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneList.model_computed_fields" href="#together.types.finetune.FinetuneList.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneList.model_config" href="#together.types.finetune.FinetuneList.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneList.model_fields" href="#together.types.finetune.FinetuneList.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneList.object" href="#together.types.finetune.FinetuneList.object">object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneListEvents" href="#together.types.finetune.FinetuneListEvents">FinetuneListEvents</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneListEvents.data" href="#together.types.finetune.FinetuneListEvents.data">data</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneListEvents.model_computed_fields" href="#together.types.finetune.FinetuneListEvents.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneListEvents.model_config" href="#together.types.finetune.FinetuneListEvents.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneListEvents.model_fields" href="#together.types.finetune.FinetuneListEvents.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneListEvents.object" href="#together.types.finetune.FinetuneListEvents.object">object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneRequest" href="#together.types.finetune.FinetuneRequest">FinetuneRequest</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneRequest.batch_size" href="#together.types.finetune.FinetuneRequest.batch_size">batch_size</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.learning_rate" href="#together.types.finetune.FinetuneRequest.learning_rate">learning_rate</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.model" href="#together.types.finetune.FinetuneRequest.model">model</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.model_computed_fields" href="#together.types.finetune.FinetuneRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.model_config" href="#together.types.finetune.FinetuneRequest.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.model_fields" href="#together.types.finetune.FinetuneRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.n_checkpoints" href="#together.types.finetune.FinetuneRequest.n_checkpoints">n_checkpoints</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.n_epochs" href="#together.types.finetune.FinetuneRequest.n_epochs">n_epochs</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.suffix" href="#together.types.finetune.FinetuneRequest.suffix">suffix</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.training_file" href="#together.types.finetune.FinetuneRequest.training_file">training_file</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneRequest.wandb_api_key" href="#together.types.finetune.FinetuneRequest.wandb_api_key">wandb_api_key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.finetune.FinetuneResponse" href="#together.types.finetune.FinetuneResponse">FinetuneResponse</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.finetune.FinetuneResponse.TrainingFileNumLines" href="#together.types.finetune.FinetuneResponse.TrainingFileNumLines">TrainingFileNumLines</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.TrainingFileSize" href="#together.types.finetune.FinetuneResponse.TrainingFileSize">TrainingFileSize</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.batch_size" href="#together.types.finetune.FinetuneResponse.batch_size">batch_size</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.created_at" href="#together.types.finetune.FinetuneResponse.created_at">created_at</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.epochs_completed" href="#together.types.finetune.FinetuneResponse.epochs_completed">epochs_completed</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.eval_steps" href="#together.types.finetune.FinetuneResponse.eval_steps">eval_steps</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.events" href="#together.types.finetune.FinetuneResponse.events">events</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.id" href="#together.types.finetune.FinetuneResponse.id">id</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.job_id" href="#together.types.finetune.FinetuneResponse.job_id">job_id</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.learning_rate" href="#together.types.finetune.FinetuneResponse.learning_rate">learning_rate</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.lora" href="#together.types.finetune.FinetuneResponse.lora">lora</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.lora_alpha" href="#together.types.finetune.FinetuneResponse.lora_alpha">lora_alpha</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.lora_dropout" href="#together.types.finetune.FinetuneResponse.lora_dropout">lora_dropout</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.lora_r" href="#together.types.finetune.FinetuneResponse.lora_r">lora_r</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.model" href="#together.types.finetune.FinetuneResponse.model">model</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.model_computed_fields" href="#together.types.finetune.FinetuneResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.model_config" href="#together.types.finetune.FinetuneResponse.model_config">model_config</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.model_fields" href="#together.types.finetune.FinetuneResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.n_checkpoints" href="#together.types.finetune.FinetuneResponse.n_checkpoints">n_checkpoints</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.n_epochs" href="#together.types.finetune.FinetuneResponse.n_epochs">n_epochs</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.output_name" href="#together.types.finetune.FinetuneResponse.output_name">output_name</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.param_count" href="#together.types.finetune.FinetuneResponse.param_count">param_count</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.queue_depth" href="#together.types.finetune.FinetuneResponse.queue_depth">queue_depth</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.status" href="#together.types.finetune.FinetuneResponse.status">status</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.token_count" href="#together.types.finetune.FinetuneResponse.token_count">token_count</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.total_price" href="#together.types.finetune.FinetuneResponse.total_price">total_price</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.training_file" href="#together.types.finetune.FinetuneResponse.training_file">training_file</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.updated_at" href="#together.types.finetune.FinetuneResponse.updated_at">updated_at</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.validation_file" href="#together.types.finetune.FinetuneResponse.validation_file">validation_file</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.wandb_project_name" href="#together.types.finetune.FinetuneResponse.wandb_project_name">wandb_project_name</a></code></li>
+<li><code><a title="together.types.finetune.FinetuneResponse.wandb_url" href="#together.types.finetune.FinetuneResponse.wandb_url">wandb_url</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

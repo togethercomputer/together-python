@@ -1,0 +1,1930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>together.types API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>together.types</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from together.types.abstract import TogetherClient
+from together.types.chat_completions import (
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+)
+from together.types.completions import (
+    CompletionChunk,
+    CompletionRequest,
+    CompletionResponse,
+)
+from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
+from together.types.finetune import (
+    FinetuneDownloadResult,
+    FinetuneList,
+    FinetuneListEvents,
+    FinetuneRequest,
+    FinetuneResponse,
+)
+
+
+__all__ = [
+    &#34;TogetherClient&#34;,
+    &#34;CompletionChunk&#34;,
+    &#34;CompletionRequest&#34;,
+    &#34;CompletionResponse&#34;,
+    &#34;ChatCompletionChunk&#34;,
+    &#34;ChatCompletionRequest&#34;,
+    &#34;ChatCompletionResponse&#34;,
+    &#34;EmbeddingRequest&#34;,
+    &#34;EmbeddingResponse&#34;,
+    &#34;FinetuneRequest&#34;,
+    &#34;FinetuneResponse&#34;,
+    &#34;FinetuneList&#34;,
+    &#34;FinetuneListEvents&#34;,
+    &#34;FinetuneDownloadResult&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="together.types.abstract" href="abstract.html">together.types.abstract</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.chat_completions" href="chat_completions.html">together.types.chat_completions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.common" href="common.html">together.types.common</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.completions" href="completions.html">together.types.completions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.embeddings" href="embeddings.html">together.types.embeddings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.files" href="files.html">together.types.files</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.types.finetune" href="finetune.html">together.types.finetune</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="together.types.ChatCompletionChunk"><code class="flex name class">
+<span>class <span class="ident">ChatCompletionChunk</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ChatCompletionChunk(BaseModel):
+    id: str | None = None
+    object: ObjectType
+    created: int
+    delta: DeltaContent
+    model: str
+    usage: UsageData
+    finish_reason: FinishReason</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.ChatCompletionChunk.created"><code class="name">var <span class="ident">created</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.delta"><code class="name">var <span class="ident">delta</span> : <a title="together.types.common.DeltaContent" href="common.html#together.types.common.DeltaContent">DeltaContent</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.finish_reason"><code class="name">var <span class="ident">finish_reason</span> : <a title="together.types.common.FinishReason" href="common.html#together.types.common.FinishReason">FinishReason</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.object"><code class="name">var <span class="ident">object</span> : <a title="together.types.common.ObjectType" href="common.html#together.types.common.ObjectType">ObjectType</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionChunk.usage"><code class="name">var <span class="ident">usage</span> : <a title="together.types.common.UsageData" href="common.html#together.types.common.UsageData">UsageData</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.ChatCompletionRequest"><code class="flex name class">
+<span>class <span class="ident">ChatCompletionRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ChatCompletionRequest(BaseModel):
+    messages: List[ChatCompletionMessage]
+    model: str
+    max_tokens: int | None = 512
+    stop: List[str] | None = None
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
+    repetition_penalty: float | None = None
+    stream: bool = False
+    logprobs: int | None = None
+    echo: bool | None = None
+    n: int | None = None
+    safety_model: str | None = None
+    response_format: ResponseFormat | None = None
+    tools: List[Tools] | None = None
+    tool_choice: ToolChoice | ToolChoiceEnum | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.ChatCompletionRequest.echo"><code class="name">var <span class="ident">echo</span> : bool | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.logprobs"><code class="name">var <span class="ident">logprobs</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.messages"><code class="name">var <span class="ident">messages</span> : List[<a title="together.types.chat_completions.ChatCompletionMessage" href="chat_completions.html#together.types.chat_completions.ChatCompletionMessage">ChatCompletionMessage</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.n"><code class="name">var <span class="ident">n</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.repetition_penalty"><code class="name">var <span class="ident">repetition_penalty</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.response_format"><code class="name">var <span class="ident">response_format</span> : <a title="together.types.chat_completions.ResponseFormat" href="chat_completions.html#together.types.chat_completions.ResponseFormat">ResponseFormat</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.safety_model"><code class="name">var <span class="ident">safety_model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.stop"><code class="name">var <span class="ident">stop</span> : Optional[List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.stream"><code class="name">var <span class="ident">stream</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.temperature"><code class="name">var <span class="ident">temperature</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.tool_choice"><code class="name">var <span class="ident">tool_choice</span> : <a title="together.types.chat_completions.ToolChoice" href="chat_completions.html#together.types.chat_completions.ToolChoice">ToolChoice</a> | <a title="together.types.chat_completions.ToolChoiceEnum" href="chat_completions.html#together.types.chat_completions.ToolChoiceEnum">ToolChoiceEnum</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.tools"><code class="name">var <span class="ident">tools</span> : Optional[List[<a title="together.types.chat_completions.Tools" href="chat_completions.html#together.types.chat_completions.Tools">Tools</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.top_k"><code class="name">var <span class="ident">top_k</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionRequest.top_p"><code class="name">var <span class="ident">top_p</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.ChatCompletionResponse"><code class="flex name class">
+<span>class <span class="ident">ChatCompletionResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ChatCompletionResponse(BaseModel):
+    id: str | None = None
+    created: int | None = None
+    model: str | None = None
+    object: ObjectType | None = None
+    choices: List[ChatCompletionChoicesData] | None = None
+    prompt: List[PromptPart] | List[None] | None = None
+    usage: UsageData | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.ChatCompletionResponse.choices"><code class="name">var <span class="ident">choices</span> : Optional[List[<a title="together.types.chat_completions.ChatCompletionChoicesData" href="chat_completions.html#together.types.chat_completions.ChatCompletionChoicesData">ChatCompletionChoicesData</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.created"><code class="name">var <span class="ident">created</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.object"><code class="name">var <span class="ident">object</span> : <a title="together.types.common.ObjectType" href="common.html#together.types.common.ObjectType">ObjectType</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.prompt"><code class="name">var <span class="ident">prompt</span> : Union[List[<a title="together.types.common.PromptPart" href="common.html#together.types.common.PromptPart">PromptPart</a>], List[None], ForwardRef(None)]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.ChatCompletionResponse.usage"><code class="name">var <span class="ident">usage</span> : <a title="together.types.common.UsageData" href="common.html#together.types.common.UsageData">UsageData</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.CompletionChunk"><code class="flex name class">
+<span>class <span class="ident">CompletionChunk</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CompletionChunk(BaseModel):
+    id: str | None = None
+    object: ObjectType | None = None
+    created: int | None = None
+    choices: List[CompletionChoicesChunk] | None = None
+    model: str | None = None
+    usage: UsageData | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.CompletionChunk.choices"><code class="name">var <span class="ident">choices</span> : Optional[List[<a title="together.types.completions.CompletionChoicesChunk" href="completions.html#together.types.completions.CompletionChoicesChunk">CompletionChoicesChunk</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.created"><code class="name">var <span class="ident">created</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.object"><code class="name">var <span class="ident">object</span> : <a title="together.types.common.ObjectType" href="common.html#together.types.common.ObjectType">ObjectType</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionChunk.usage"><code class="name">var <span class="ident">usage</span> : <a title="together.types.common.UsageData" href="common.html#together.types.common.UsageData">UsageData</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.CompletionRequest"><code class="flex name class">
+<span>class <span class="ident">CompletionRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CompletionRequest(BaseModel):
+    prompt: str
+    model: str
+    max_tokens: int | None = 512
+    stop: List[str] | None = None
+    temperature: float | None = None
+    top_p: float | None = None
+    top_k: int | None = None
+    repetition_penalty: float | None = None
+    stream: bool = False
+    logprobs: int | None = None
+    echo: bool | None = None
+    n: int | None = None
+    safety_model: str | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.CompletionRequest.echo"><code class="name">var <span class="ident">echo</span> : bool | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.logprobs"><code class="name">var <span class="ident">logprobs</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.max_tokens"><code class="name">var <span class="ident">max_tokens</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.n"><code class="name">var <span class="ident">n</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.prompt"><code class="name">var <span class="ident">prompt</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.repetition_penalty"><code class="name">var <span class="ident">repetition_penalty</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.safety_model"><code class="name">var <span class="ident">safety_model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.stop"><code class="name">var <span class="ident">stop</span> : Optional[List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.stream"><code class="name">var <span class="ident">stream</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.temperature"><code class="name">var <span class="ident">temperature</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.top_k"><code class="name">var <span class="ident">top_k</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionRequest.top_p"><code class="name">var <span class="ident">top_p</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.CompletionResponse"><code class="flex name class">
+<span>class <span class="ident">CompletionResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CompletionResponse(BaseModel):
+    id: str | None = None
+    created: int | None = None
+    model: str | None = None
+    object: ObjectType | None = None
+    choices: List[CompletionChoicesData] | None = None
+    prompt: List[PromptPart] | None = None
+    usage: UsageData | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.CompletionResponse.choices"><code class="name">var <span class="ident">choices</span> : Optional[List[<a title="together.types.completions.CompletionChoicesData" href="completions.html#together.types.completions.CompletionChoicesData">CompletionChoicesData</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.created"><code class="name">var <span class="ident">created</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.object"><code class="name">var <span class="ident">object</span> : <a title="together.types.common.ObjectType" href="common.html#together.types.common.ObjectType">ObjectType</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.prompt"><code class="name">var <span class="ident">prompt</span> : Optional[List[<a title="together.types.common.PromptPart" href="common.html#together.types.common.PromptPart">PromptPart</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.CompletionResponse.usage"><code class="name">var <span class="ident">usage</span> : <a title="together.types.common.UsageData" href="common.html#together.types.common.UsageData">UsageData</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.EmbeddingRequest"><code class="flex name class">
+<span>class <span class="ident">EmbeddingRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EmbeddingRequest(BaseModel):
+    input: str | List[str]
+    model: str</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.EmbeddingRequest.input"><code class="name">var <span class="ident">input</span> : Union[str, List[str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingRequest.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingRequest.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.EmbeddingResponse"><code class="flex name class">
+<span>class <span class="ident">EmbeddingResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EmbeddingResponse(BaseModel):
+    id: str | None = None
+    model: str | None = None
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[EmbeddingChoicesData] | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.EmbeddingResponse.data"><code class="name">var <span class="ident">data</span> : Optional[List[<a title="together.types.embeddings.EmbeddingChoicesData" href="embeddings.html#together.types.embeddings.EmbeddingChoicesData">EmbeddingChoicesData</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.EmbeddingResponse.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['list']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.FinetuneDownloadResult"><code class="flex name class">
+<span>class <span class="ident">FinetuneDownloadResult</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneDownloadResult(BaseModel):
+    object: Literal[&#34;local&#34;] | None = None
+    id: str | None = None
+    checkpoint_step: int | None = None
+    filename: Path | None = None
+    size: int | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.FinetuneDownloadResult.checkpoint_step"><code class="name">var <span class="ident">checkpoint_step</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.filename"><code class="name">var <span class="ident">filename</span> : pathlib.Path | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['local']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneDownloadResult.size"><code class="name">var <span class="ident">size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.FinetuneList"><code class="flex name class">
+<span>class <span class="ident">FinetuneList</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneList(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneResponse] | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.FinetuneList.data"><code class="name">var <span class="ident">data</span> : Optional[List[<a title="together.types.finetune.FinetuneResponse" href="finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneList.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneList.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneList.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneList.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['list']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.FinetuneListEvents"><code class="flex name class">
+<span>class <span class="ident">FinetuneListEvents</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneListEvents(BaseModel):
+    object: Literal[&#34;list&#34;] | None = None
+    data: List[FinetuneEvent] | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.FinetuneListEvents.data"><code class="name">var <span class="ident">data</span> : Optional[List[<a title="together.types.finetune.FinetuneEvent" href="finetune.html#together.types.finetune.FinetuneEvent">FinetuneEvent</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneListEvents.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneListEvents.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneListEvents.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneListEvents.object"><code class="name">var <span class="ident">object</span> : Optional[Literal['list']]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.FinetuneRequest"><code class="flex name class">
+<span>class <span class="ident">FinetuneRequest</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneRequest(BaseModel):
+    training_file: str
+    model: str
+    n_epochs: int
+    learning_rate: float
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    suffix: Annotated[str, StringConstraints(max_length=40)] | None = None
+    wandb_api_key: str | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.FinetuneRequest.batch_size"><code class="name">var <span class="ident">batch_size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.learning_rate"><code class="name">var <span class="ident">learning_rate</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.model"><code class="name">var <span class="ident">model</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.n_checkpoints"><code class="name">var <span class="ident">n_checkpoints</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.n_epochs"><code class="name">var <span class="ident">n_epochs</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.suffix"><code class="name">var <span class="ident">suffix</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.training_file"><code class="name">var <span class="ident">training_file</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneRequest.wandb_api_key"><code class="name">var <span class="ident">wandb_api_key</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.FinetuneResponse"><code class="flex name class">
+<span>class <span class="ident">FinetuneResponse</span></span>
+<span>(</span><span>**data: Any)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Usage docs: <a href="https://docs.pydantic.dev/2.6/concepts/models/">https://docs.pydantic.dev/2.6/concepts/models/</a></p>
+<p>A base class for creating Pydantic models.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>__class_vars__</code></strong></dt>
+<dd>The names of classvars defined on the model.</dd>
+<dt><strong><code>__private_attributes__</code></strong></dt>
+<dd>Metadata about the private attributes of the model.</dd>
+<dt><strong><code>__signature__</code></strong></dt>
+<dd>The signature for instantiating the model.</dd>
+<dt><strong><code>__pydantic_complete__</code></strong></dt>
+<dd>Whether model building is completed, or if there are still undefined fields.</dd>
+<dt><strong><code>__pydantic_core_schema__</code></strong></dt>
+<dd>The pydantic-core schema used to build the SchemaValidator and SchemaSerializer.</dd>
+<dt><strong><code>__pydantic_custom_init__</code></strong></dt>
+<dd>Whether the model has a custom <code>__init__</code> function.</dd>
+<dt><strong><code>__pydantic_decorators__</code></strong></dt>
+<dd>Metadata containing the decorators defined on the model.
+This replaces <code>Model.__validators__</code> and <code>Model.__root_validators__</code> from Pydantic V1.</dd>
+<dt><strong><code>__pydantic_generic_metadata__</code></strong></dt>
+<dd>Metadata for generic models; contains data used for a similar purpose to
+<strong>args</strong>, <strong>origin</strong>, <strong>parameters</strong> in typing-module generics. May eventually be replaced by these.</dd>
+<dt><strong><code>__pydantic_parent_namespace__</code></strong></dt>
+<dd>Parent namespace of the model, used for automatic rebuilding of models.</dd>
+<dt><strong><code>__pydantic_post_init__</code></strong></dt>
+<dd>The name of the post-init method for the model, if defined.</dd>
+<dt><strong><code>__pydantic_root_model__</code></strong></dt>
+<dd>Whether the model is a <code>RootModel</code>.</dd>
+<dt><strong><code>__pydantic_serializer__</code></strong></dt>
+<dd>The pydantic-core SchemaSerializer used to dump instances of the model.</dd>
+<dt><strong><code>__pydantic_validator__</code></strong></dt>
+<dd>The pydantic-core SchemaValidator used to validate instances of the model.</dd>
+<dt><strong><code>__pydantic_extra__</code></strong></dt>
+<dd>An instance attribute with the values of extra fields from validation when
+<code>model_config['extra'] == 'allow'</code>.</dd>
+<dt><strong><code>__pydantic_fields_set__</code></strong></dt>
+<dd>An instance attribute with the names of fields explicitly set.</dd>
+<dt><strong><code>__pydantic_private__</code></strong></dt>
+<dd>Instance attribute with the values of private attributes set on the model instance.</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FinetuneResponse(BaseModel):
+    id: str | None = None
+    training_file: str | None = None
+    validation_file: str | None = None
+    model: str | None = None
+    output_name: str | None = Field(None, alias=&#34;model_output_name&#34;)
+    n_epochs: int | None = None
+    n_checkpoints: int | None = None
+    batch_size: int | None = None
+    learning_rate: float | None = None
+    eval_steps: int | None = None
+    lora: bool | None = None
+    lora_r: int | None = None
+    lora_alpha: int | None = None
+    lora_dropout: int | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+    status: FinetuneJobStatus | None = None
+    job_id: str | None = None
+    events: List[FinetuneEvent] | None = None
+    token_count: int | None = None
+    param_count: int | None = None
+    total_price: int | None = None
+    epochs_completed: int | None = None
+    queue_depth: int | None = None
+    wandb_project_name: str | None = None
+    wandb_url: str | None = None
+    TrainingFileNumLines: int | None = None
+    TrainingFileSize: int | None = None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="together.types.abstract.BaseModel" href="abstract.html#together.types.abstract.BaseModel">BaseModel</a></li>
+<li>pydantic.main.BaseModel</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.FinetuneResponse.TrainingFileNumLines"><code class="name">var <span class="ident">TrainingFileNumLines</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.TrainingFileSize"><code class="name">var <span class="ident">TrainingFileSize</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.batch_size"><code class="name">var <span class="ident">batch_size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.created_at"><code class="name">var <span class="ident">created_at</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.epochs_completed"><code class="name">var <span class="ident">epochs_completed</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.eval_steps"><code class="name">var <span class="ident">eval_steps</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.events"><code class="name">var <span class="ident">events</span> : Optional[List[<a title="together.types.finetune.FinetuneEvent" href="finetune.html#together.types.finetune.FinetuneEvent">FinetuneEvent</a>]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.id"><code class="name">var <span class="ident">id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.job_id"><code class="name">var <span class="ident">job_id</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.learning_rate"><code class="name">var <span class="ident">learning_rate</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.lora"><code class="name">var <span class="ident">lora</span> : bool | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.lora_alpha"><code class="name">var <span class="ident">lora_alpha</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.lora_dropout"><code class="name">var <span class="ident">lora_dropout</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.lora_r"><code class="name">var <span class="ident">lora_r</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.model"><code class="name">var <span class="ident">model</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.model_computed_fields"><code class="name">var <span class="ident">model_computed_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.model_config"><code class="name">var <span class="ident">model_config</span> : ClassVar[pydantic.config.ConfigDict]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.model_fields"><code class="name">var <span class="ident">model_fields</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.n_checkpoints"><code class="name">var <span class="ident">n_checkpoints</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.n_epochs"><code class="name">var <span class="ident">n_epochs</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.output_name"><code class="name">var <span class="ident">output_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.param_count"><code class="name">var <span class="ident">param_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.queue_depth"><code class="name">var <span class="ident">queue_depth</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.status"><code class="name">var <span class="ident">status</span> : <a title="together.types.finetune.FinetuneJobStatus" href="finetune.html#together.types.finetune.FinetuneJobStatus">FinetuneJobStatus</a> | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.token_count"><code class="name">var <span class="ident">token_count</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.total_price"><code class="name">var <span class="ident">total_price</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.training_file"><code class="name">var <span class="ident">training_file</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.updated_at"><code class="name">var <span class="ident">updated_at</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.validation_file"><code class="name">var <span class="ident">validation_file</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.wandb_project_name"><code class="name">var <span class="ident">wandb_project_name</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.FinetuneResponse.wandb_url"><code class="name">var <span class="ident">wandb_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.types.TogetherClient"><code class="flex name class">
+<span>class <span class="ident">TogetherClient</span></span>
+<span>(</span><span>api_key: str | None = None, base_url: str | None = 'https://api.together.xyz/v1', timeout: Optional[float] = 600, max_retries: Optional[int] = 2, supplied_headers: Optional[Dict[str, str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TogetherClient(api_key: str | None = None, base_url: str | None = 'https://api.together.xyz/v1', timeout: float | None = 600, max_retries: int | None = 2, supplied_headers: Optional[Dict[str, str]] = None)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@dataclass
+class TogetherClient:
+    api_key: str | None = None
+    base_url: str | None = BASE_URL
+    timeout: float | None = TIMEOUT_SECS
+    max_retries: int | None = MAX_CONNECTION_RETRIES
+    supplied_headers: Dict[str, str] | None = None</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.types.TogetherClient.api_key"><code class="name">var <span class="ident">api_key</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.TogetherClient.base_url"><code class="name">var <span class="ident">base_url</span> : str | None</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.TogetherClient.max_retries"><code class="name">var <span class="ident">max_retries</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.TogetherClient.supplied_headers"><code class="name">var <span class="ident">supplied_headers</span> : Optional[Dict[str, str]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.types.TogetherClient.timeout"><code class="name">var <span class="ident">timeout</span> : Optional[float]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="together" href="../index.html">together</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="together.types.abstract" href="abstract.html">together.types.abstract</a></code></li>
+<li><code><a title="together.types.chat_completions" href="chat_completions.html">together.types.chat_completions</a></code></li>
+<li><code><a title="together.types.common" href="common.html">together.types.common</a></code></li>
+<li><code><a title="together.types.completions" href="completions.html">together.types.completions</a></code></li>
+<li><code><a title="together.types.embeddings" href="embeddings.html">together.types.embeddings</a></code></li>
+<li><code><a title="together.types.files" href="files.html">together.types.files</a></code></li>
+<li><code><a title="together.types.finetune" href="finetune.html">together.types.finetune</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="together.types.ChatCompletionChunk" href="#together.types.ChatCompletionChunk">ChatCompletionChunk</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.ChatCompletionChunk.created" href="#together.types.ChatCompletionChunk.created">created</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.delta" href="#together.types.ChatCompletionChunk.delta">delta</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.finish_reason" href="#together.types.ChatCompletionChunk.finish_reason">finish_reason</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.id" href="#together.types.ChatCompletionChunk.id">id</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.model" href="#together.types.ChatCompletionChunk.model">model</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.model_computed_fields" href="#together.types.ChatCompletionChunk.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.model_config" href="#together.types.ChatCompletionChunk.model_config">model_config</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.model_fields" href="#together.types.ChatCompletionChunk.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.object" href="#together.types.ChatCompletionChunk.object">object</a></code></li>
+<li><code><a title="together.types.ChatCompletionChunk.usage" href="#together.types.ChatCompletionChunk.usage">usage</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.ChatCompletionRequest" href="#together.types.ChatCompletionRequest">ChatCompletionRequest</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.ChatCompletionRequest.echo" href="#together.types.ChatCompletionRequest.echo">echo</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.logprobs" href="#together.types.ChatCompletionRequest.logprobs">logprobs</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.max_tokens" href="#together.types.ChatCompletionRequest.max_tokens">max_tokens</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.messages" href="#together.types.ChatCompletionRequest.messages">messages</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.model" href="#together.types.ChatCompletionRequest.model">model</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.model_computed_fields" href="#together.types.ChatCompletionRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.model_config" href="#together.types.ChatCompletionRequest.model_config">model_config</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.model_fields" href="#together.types.ChatCompletionRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.n" href="#together.types.ChatCompletionRequest.n">n</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.repetition_penalty" href="#together.types.ChatCompletionRequest.repetition_penalty">repetition_penalty</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.response_format" href="#together.types.ChatCompletionRequest.response_format">response_format</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.safety_model" href="#together.types.ChatCompletionRequest.safety_model">safety_model</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.stop" href="#together.types.ChatCompletionRequest.stop">stop</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.stream" href="#together.types.ChatCompletionRequest.stream">stream</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.temperature" href="#together.types.ChatCompletionRequest.temperature">temperature</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.tool_choice" href="#together.types.ChatCompletionRequest.tool_choice">tool_choice</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.tools" href="#together.types.ChatCompletionRequest.tools">tools</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.top_k" href="#together.types.ChatCompletionRequest.top_k">top_k</a></code></li>
+<li><code><a title="together.types.ChatCompletionRequest.top_p" href="#together.types.ChatCompletionRequest.top_p">top_p</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.ChatCompletionResponse" href="#together.types.ChatCompletionResponse">ChatCompletionResponse</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.ChatCompletionResponse.choices" href="#together.types.ChatCompletionResponse.choices">choices</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.created" href="#together.types.ChatCompletionResponse.created">created</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.id" href="#together.types.ChatCompletionResponse.id">id</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.model" href="#together.types.ChatCompletionResponse.model">model</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.model_computed_fields" href="#together.types.ChatCompletionResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.model_config" href="#together.types.ChatCompletionResponse.model_config">model_config</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.model_fields" href="#together.types.ChatCompletionResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.object" href="#together.types.ChatCompletionResponse.object">object</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.prompt" href="#together.types.ChatCompletionResponse.prompt">prompt</a></code></li>
+<li><code><a title="together.types.ChatCompletionResponse.usage" href="#together.types.ChatCompletionResponse.usage">usage</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.CompletionChunk" href="#together.types.CompletionChunk">CompletionChunk</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.CompletionChunk.choices" href="#together.types.CompletionChunk.choices">choices</a></code></li>
+<li><code><a title="together.types.CompletionChunk.created" href="#together.types.CompletionChunk.created">created</a></code></li>
+<li><code><a title="together.types.CompletionChunk.id" href="#together.types.CompletionChunk.id">id</a></code></li>
+<li><code><a title="together.types.CompletionChunk.model" href="#together.types.CompletionChunk.model">model</a></code></li>
+<li><code><a title="together.types.CompletionChunk.model_computed_fields" href="#together.types.CompletionChunk.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.CompletionChunk.model_config" href="#together.types.CompletionChunk.model_config">model_config</a></code></li>
+<li><code><a title="together.types.CompletionChunk.model_fields" href="#together.types.CompletionChunk.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.CompletionChunk.object" href="#together.types.CompletionChunk.object">object</a></code></li>
+<li><code><a title="together.types.CompletionChunk.usage" href="#together.types.CompletionChunk.usage">usage</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.CompletionRequest" href="#together.types.CompletionRequest">CompletionRequest</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.CompletionRequest.echo" href="#together.types.CompletionRequest.echo">echo</a></code></li>
+<li><code><a title="together.types.CompletionRequest.logprobs" href="#together.types.CompletionRequest.logprobs">logprobs</a></code></li>
+<li><code><a title="together.types.CompletionRequest.max_tokens" href="#together.types.CompletionRequest.max_tokens">max_tokens</a></code></li>
+<li><code><a title="together.types.CompletionRequest.model" href="#together.types.CompletionRequest.model">model</a></code></li>
+<li><code><a title="together.types.CompletionRequest.model_computed_fields" href="#together.types.CompletionRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.CompletionRequest.model_config" href="#together.types.CompletionRequest.model_config">model_config</a></code></li>
+<li><code><a title="together.types.CompletionRequest.model_fields" href="#together.types.CompletionRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.CompletionRequest.n" href="#together.types.CompletionRequest.n">n</a></code></li>
+<li><code><a title="together.types.CompletionRequest.prompt" href="#together.types.CompletionRequest.prompt">prompt</a></code></li>
+<li><code><a title="together.types.CompletionRequest.repetition_penalty" href="#together.types.CompletionRequest.repetition_penalty">repetition_penalty</a></code></li>
+<li><code><a title="together.types.CompletionRequest.safety_model" href="#together.types.CompletionRequest.safety_model">safety_model</a></code></li>
+<li><code><a title="together.types.CompletionRequest.stop" href="#together.types.CompletionRequest.stop">stop</a></code></li>
+<li><code><a title="together.types.CompletionRequest.stream" href="#together.types.CompletionRequest.stream">stream</a></code></li>
+<li><code><a title="together.types.CompletionRequest.temperature" href="#together.types.CompletionRequest.temperature">temperature</a></code></li>
+<li><code><a title="together.types.CompletionRequest.top_k" href="#together.types.CompletionRequest.top_k">top_k</a></code></li>
+<li><code><a title="together.types.CompletionRequest.top_p" href="#together.types.CompletionRequest.top_p">top_p</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.CompletionResponse" href="#together.types.CompletionResponse">CompletionResponse</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.CompletionResponse.choices" href="#together.types.CompletionResponse.choices">choices</a></code></li>
+<li><code><a title="together.types.CompletionResponse.created" href="#together.types.CompletionResponse.created">created</a></code></li>
+<li><code><a title="together.types.CompletionResponse.id" href="#together.types.CompletionResponse.id">id</a></code></li>
+<li><code><a title="together.types.CompletionResponse.model" href="#together.types.CompletionResponse.model">model</a></code></li>
+<li><code><a title="together.types.CompletionResponse.model_computed_fields" href="#together.types.CompletionResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.CompletionResponse.model_config" href="#together.types.CompletionResponse.model_config">model_config</a></code></li>
+<li><code><a title="together.types.CompletionResponse.model_fields" href="#together.types.CompletionResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.CompletionResponse.object" href="#together.types.CompletionResponse.object">object</a></code></li>
+<li><code><a title="together.types.CompletionResponse.prompt" href="#together.types.CompletionResponse.prompt">prompt</a></code></li>
+<li><code><a title="together.types.CompletionResponse.usage" href="#together.types.CompletionResponse.usage">usage</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.EmbeddingRequest" href="#together.types.EmbeddingRequest">EmbeddingRequest</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.EmbeddingRequest.input" href="#together.types.EmbeddingRequest.input">input</a></code></li>
+<li><code><a title="together.types.EmbeddingRequest.model" href="#together.types.EmbeddingRequest.model">model</a></code></li>
+<li><code><a title="together.types.EmbeddingRequest.model_computed_fields" href="#together.types.EmbeddingRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.EmbeddingRequest.model_config" href="#together.types.EmbeddingRequest.model_config">model_config</a></code></li>
+<li><code><a title="together.types.EmbeddingRequest.model_fields" href="#together.types.EmbeddingRequest.model_fields">model_fields</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.EmbeddingResponse" href="#together.types.EmbeddingResponse">EmbeddingResponse</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.EmbeddingResponse.data" href="#together.types.EmbeddingResponse.data">data</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.id" href="#together.types.EmbeddingResponse.id">id</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.model" href="#together.types.EmbeddingResponse.model">model</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.model_computed_fields" href="#together.types.EmbeddingResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.model_config" href="#together.types.EmbeddingResponse.model_config">model_config</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.model_fields" href="#together.types.EmbeddingResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.EmbeddingResponse.object" href="#together.types.EmbeddingResponse.object">object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.FinetuneDownloadResult" href="#together.types.FinetuneDownloadResult">FinetuneDownloadResult</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.FinetuneDownloadResult.checkpoint_step" href="#together.types.FinetuneDownloadResult.checkpoint_step">checkpoint_step</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.filename" href="#together.types.FinetuneDownloadResult.filename">filename</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.id" href="#together.types.FinetuneDownloadResult.id">id</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.model_computed_fields" href="#together.types.FinetuneDownloadResult.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.model_config" href="#together.types.FinetuneDownloadResult.model_config">model_config</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.model_fields" href="#together.types.FinetuneDownloadResult.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.object" href="#together.types.FinetuneDownloadResult.object">object</a></code></li>
+<li><code><a title="together.types.FinetuneDownloadResult.size" href="#together.types.FinetuneDownloadResult.size">size</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.FinetuneList" href="#together.types.FinetuneList">FinetuneList</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.FinetuneList.data" href="#together.types.FinetuneList.data">data</a></code></li>
+<li><code><a title="together.types.FinetuneList.model_computed_fields" href="#together.types.FinetuneList.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.FinetuneList.model_config" href="#together.types.FinetuneList.model_config">model_config</a></code></li>
+<li><code><a title="together.types.FinetuneList.model_fields" href="#together.types.FinetuneList.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.FinetuneList.object" href="#together.types.FinetuneList.object">object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.FinetuneListEvents" href="#together.types.FinetuneListEvents">FinetuneListEvents</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.FinetuneListEvents.data" href="#together.types.FinetuneListEvents.data">data</a></code></li>
+<li><code><a title="together.types.FinetuneListEvents.model_computed_fields" href="#together.types.FinetuneListEvents.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.FinetuneListEvents.model_config" href="#together.types.FinetuneListEvents.model_config">model_config</a></code></li>
+<li><code><a title="together.types.FinetuneListEvents.model_fields" href="#together.types.FinetuneListEvents.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.FinetuneListEvents.object" href="#together.types.FinetuneListEvents.object">object</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.FinetuneRequest" href="#together.types.FinetuneRequest">FinetuneRequest</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.FinetuneRequest.batch_size" href="#together.types.FinetuneRequest.batch_size">batch_size</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.learning_rate" href="#together.types.FinetuneRequest.learning_rate">learning_rate</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.model" href="#together.types.FinetuneRequest.model">model</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.model_computed_fields" href="#together.types.FinetuneRequest.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.model_config" href="#together.types.FinetuneRequest.model_config">model_config</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.model_fields" href="#together.types.FinetuneRequest.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.n_checkpoints" href="#together.types.FinetuneRequest.n_checkpoints">n_checkpoints</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.n_epochs" href="#together.types.FinetuneRequest.n_epochs">n_epochs</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.suffix" href="#together.types.FinetuneRequest.suffix">suffix</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.training_file" href="#together.types.FinetuneRequest.training_file">training_file</a></code></li>
+<li><code><a title="together.types.FinetuneRequest.wandb_api_key" href="#together.types.FinetuneRequest.wandb_api_key">wandb_api_key</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.FinetuneResponse" href="#together.types.FinetuneResponse">FinetuneResponse</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.FinetuneResponse.TrainingFileNumLines" href="#together.types.FinetuneResponse.TrainingFileNumLines">TrainingFileNumLines</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.TrainingFileSize" href="#together.types.FinetuneResponse.TrainingFileSize">TrainingFileSize</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.batch_size" href="#together.types.FinetuneResponse.batch_size">batch_size</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.created_at" href="#together.types.FinetuneResponse.created_at">created_at</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.epochs_completed" href="#together.types.FinetuneResponse.epochs_completed">epochs_completed</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.eval_steps" href="#together.types.FinetuneResponse.eval_steps">eval_steps</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.events" href="#together.types.FinetuneResponse.events">events</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.id" href="#together.types.FinetuneResponse.id">id</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.job_id" href="#together.types.FinetuneResponse.job_id">job_id</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.learning_rate" href="#together.types.FinetuneResponse.learning_rate">learning_rate</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.lora" href="#together.types.FinetuneResponse.lora">lora</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.lora_alpha" href="#together.types.FinetuneResponse.lora_alpha">lora_alpha</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.lora_dropout" href="#together.types.FinetuneResponse.lora_dropout">lora_dropout</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.lora_r" href="#together.types.FinetuneResponse.lora_r">lora_r</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.model" href="#together.types.FinetuneResponse.model">model</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.model_computed_fields" href="#together.types.FinetuneResponse.model_computed_fields">model_computed_fields</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.model_config" href="#together.types.FinetuneResponse.model_config">model_config</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.model_fields" href="#together.types.FinetuneResponse.model_fields">model_fields</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.n_checkpoints" href="#together.types.FinetuneResponse.n_checkpoints">n_checkpoints</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.n_epochs" href="#together.types.FinetuneResponse.n_epochs">n_epochs</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.output_name" href="#together.types.FinetuneResponse.output_name">output_name</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.param_count" href="#together.types.FinetuneResponse.param_count">param_count</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.queue_depth" href="#together.types.FinetuneResponse.queue_depth">queue_depth</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.status" href="#together.types.FinetuneResponse.status">status</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.token_count" href="#together.types.FinetuneResponse.token_count">token_count</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.total_price" href="#together.types.FinetuneResponse.total_price">total_price</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.training_file" href="#together.types.FinetuneResponse.training_file">training_file</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.updated_at" href="#together.types.FinetuneResponse.updated_at">updated_at</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.validation_file" href="#together.types.FinetuneResponse.validation_file">validation_file</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.wandb_project_name" href="#together.types.FinetuneResponse.wandb_project_name">wandb_project_name</a></code></li>
+<li><code><a title="together.types.FinetuneResponse.wandb_url" href="#together.types.FinetuneResponse.wandb_url">wandb_url</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.types.TogetherClient" href="#together.types.TogetherClient">TogetherClient</a></code></h4>
+<ul class="">
+<li><code><a title="together.types.TogetherClient.api_key" href="#together.types.TogetherClient.api_key">api_key</a></code></li>
+<li><code><a title="together.types.TogetherClient.base_url" href="#together.types.TogetherClient.base_url">base_url</a></code></li>
+<li><code><a title="together.types.TogetherClient.max_retries" href="#together.types.TogetherClient.max_retries">max_retries</a></code></li>
+<li><code><a title="together.types.TogetherClient.supplied_headers" href="#together.types.TogetherClient.supplied_headers">supplied_headers</a></code></li>
+<li><code><a title="together.types.TogetherClient.timeout" href="#together.types.TogetherClient.timeout">timeout</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

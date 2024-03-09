@@ -1,0 +1,1921 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>together.resources API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>together.resources</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from together.resources.chat import AsyncChat, Chat
+from together.resources.completions import AsyncCompletions, Completions
+from together.resources.embeddings import AsyncEmbeddings, Embeddings
+from together.resources.files import AsyncFiles, Files
+from together.resources.finetune import AsyncFineTuning, FineTuning
+
+
+__all__ = [
+    &#34;AsyncCompletions&#34;,
+    &#34;Completions&#34;,
+    &#34;Chat&#34;,
+    &#34;AsyncChat&#34;,
+    &#34;Embeddings&#34;,
+    &#34;AsyncEmbeddings&#34;,
+    &#34;FineTuning&#34;,
+    &#34;AsyncFineTuning&#34;,
+    &#34;Files&#34;,
+    &#34;AsyncFiles&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="together.resources.chat" href="chat/index.html">together.resources.chat</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.completions" href="completions.html">together.resources.completions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.embeddings" href="embeddings.html">together.resources.embeddings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.files" href="files.html">together.resources.files</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.finetune" href="finetune.html">together.resources.finetune</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.images" href="images.html">together.resources.images</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="together.resources.models" href="models.html">together.resources.models</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="together.resources.AsyncChat"><code class="flex name class">
+<span>class <span class="ident">AsyncChat</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncChat:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+
+    @cached_property
+    def completions(self) -&gt; AsyncChatCompletions:
+        return AsyncChatCompletions(self._client)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="together.resources.AsyncChat.completions"><code class="name">var <span class="ident">completions</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner=None):
+    if instance is None:
+        return self
+    if self.attrname is None:
+        raise TypeError(
+            &#34;Cannot use cached_property instance without calling __set_name__ on it.&#34;)
+    try:
+        cache = instance.__dict__
+    except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+        msg = (
+            f&#34;No &#39;__dict__&#39; attribute on {type(instance).__name__!r} &#34;
+            f&#34;instance to cache {self.attrname!r} property.&#34;
+        )
+        raise TypeError(msg) from None
+    val = cache.get(self.attrname, _NOT_FOUND)
+    if val is _NOT_FOUND:
+        with self.lock:
+            # check if another thread filled cache while we awaited lock
+            val = cache.get(self.attrname, _NOT_FOUND)
+            if val is _NOT_FOUND:
+                val = self.func(instance)
+                try:
+                    cache[self.attrname] = val
+                except TypeError:
+                    msg = (
+                        f&#34;The &#39;__dict__&#39; attribute on {type(instance).__name__!r} instance &#34;
+                        f&#34;does not support item assignment for caching {self.attrname!r} property.&#34;
+                    )
+                    raise TypeError(msg) from None
+    return val</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.AsyncCompletions"><code class="flex name class">
+<span>class <span class="ident">AsyncCompletions</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncCompletions:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    async def create(
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int | None = 512,
+        stop: List[str] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        top_k: int | None = None,
+        repetition_penalty: float | None = None,
+        stream: bool = False,
+        logprobs: int | None = None,
+        echo: bool | None = None,
+        n: int | None = None,
+        safety_model: str | None = None,
+    ) -&gt; AsyncGenerator[CompletionChunk, None] | CompletionResponse:
+        parameter_payload = CompletionRequest(
+            model=model,
+            prompt=prompt,
+            top_p=top_p,
+            top_k=top_k,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop,
+            repetition_penalty=repetition_penalty,
+            stream=stream,
+            logprobs=logprobs,
+            echo=echo,
+            n=n,
+            safety_model=safety_model,
+        ).model_dump()
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;POST&#34;,
+            url=&#34;/completions&#34;,
+            params=parameter_payload,
+            stream=stream,
+        )
+
+        if stream:
+            # must be an iterator
+            assert not isinstance(response, TogetherResponse)
+            return (CompletionChunk(**line.data) async for line in response)
+        assert isinstance(response, TogetherResponse)
+        return CompletionResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.AsyncCompletions.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, prompt: str, model: str, max_tokens: Optional[int] = 512, stop: Optional[List[str]] = None, temperature: Optional[float] = None, top_p: Optional[float] = None, top_k: Optional[int] = None, repetition_penalty: Optional[float] = None, stream: bool = False, logprobs: Optional[int] = None, echo: bool | None = None, n: Optional[int] = None, safety_model: str | None = None) ‑> Union[AsyncGenerator[<a title="together.types.completions.CompletionChunk" href="../types/completions.html#together.types.completions.CompletionChunk">CompletionChunk</a>, None], <a title="together.types.completions.CompletionResponse" href="../types/completions.html#together.types.completions.CompletionResponse">CompletionResponse</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self,
+    prompt: str,
+    model: str,
+    max_tokens: int | None = 512,
+    stop: List[str] | None = None,
+    temperature: float | None = None,
+    top_p: float | None = None,
+    top_k: int | None = None,
+    repetition_penalty: float | None = None,
+    stream: bool = False,
+    logprobs: int | None = None,
+    echo: bool | None = None,
+    n: int | None = None,
+    safety_model: str | None = None,
+) -&gt; AsyncGenerator[CompletionChunk, None] | CompletionResponse:
+    parameter_payload = CompletionRequest(
+        model=model,
+        prompt=prompt,
+        top_p=top_p,
+        top_k=top_k,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        stop=stop,
+        repetition_penalty=repetition_penalty,
+        stream=stream,
+        logprobs=logprobs,
+        echo=echo,
+        n=n,
+        safety_model=safety_model,
+    ).model_dump()
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;POST&#34;,
+        url=&#34;/completions&#34;,
+        params=parameter_payload,
+        stream=stream,
+    )
+
+    if stream:
+        # must be an iterator
+        assert not isinstance(response, TogetherResponse)
+        return (CompletionChunk(**line.data) async for line in response)
+    assert isinstance(response, TogetherResponse)
+    return CompletionResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.AsyncEmbeddings"><code class="flex name class">
+<span>class <span class="ident">AsyncEmbeddings</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncEmbeddings:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    async def create(
+        self,
+        input: str | List[str],
+        model: str,
+    ) -&gt; EmbeddingResponse:
+        parameter_payload = EmbeddingRequest(
+            input=input,
+            model=model,
+        ).model_dump()
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;POST&#34;,
+            url=&#34;/embeddings&#34;,
+            params=parameter_payload,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        return EmbeddingResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.AsyncEmbeddings.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, input: Union[str, List[str]], model: str) ‑> <a title="together.types.embeddings.EmbeddingResponse" href="../types/embeddings.html#together.types.embeddings.EmbeddingResponse">EmbeddingResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self,
+    input: str | List[str],
+    model: str,
+) -&gt; EmbeddingResponse:
+    parameter_payload = EmbeddingRequest(
+        input=input,
+        model=model,
+    ).model_dump()
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;POST&#34;,
+        url=&#34;/embeddings&#34;,
+        params=parameter_payload,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+    return EmbeddingResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.AsyncFiles"><code class="flex name class">
+<span>class <span class="ident">AsyncFiles</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncFiles:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    async def create(
+        self,
+        input: str | List[str],
+        model: str,
+    ) -&gt; EmbeddingResponse:
+        parameter_payload = EmbeddingRequest(
+            input=input,
+            model=model,
+        ).model_dump()
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;POST&#34;,
+            url=&#34;/embeddings&#34;,
+            params=parameter_payload,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        return EmbeddingResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.AsyncFiles.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, input: Union[str, List[str]], model: str) ‑> <a title="together.types.embeddings.EmbeddingResponse" href="../types/embeddings.html#together.types.embeddings.EmbeddingResponse">EmbeddingResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self,
+    input: str | List[str],
+    model: str,
+) -&gt; EmbeddingResponse:
+    parameter_payload = EmbeddingRequest(
+        input=input,
+        model=model,
+    ).model_dump()
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;POST&#34;,
+        url=&#34;/embeddings&#34;,
+        params=parameter_payload,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+    return EmbeddingResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.AsyncFineTuning"><code class="flex name class">
+<span>class <span class="ident">AsyncFineTuning</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncFineTuning:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    async def create(
+        self,
+        training_file: str,
+        model: str,
+        n_epochs: int = 1,
+        n_checkpoints: int | None = 1,
+        batch_size: int | None = 32,
+        learning_rate: float = 0.00001,
+        suffix: str | None = None,
+        wandb_api_key: str | None = None,
+    ) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Async method to initiate a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+                Defaults to 1.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            learning_rate (float, optional): Learning rate multiplier to use for training
+                Defaults to 0.00001.
+            suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+                Defaults to None.
+            wandb_api_key (str, optional): API key for Weights &amp; Biases integration.
+                Defaults to None.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        &#34;&#34;&#34;
+
+        parameter_payload = FinetuneRequest(
+            model=model,
+            training_file=training_file,
+            n_epochs=n_epochs,
+            n_checkpoints=n_checkpoints,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            suffix=suffix,
+            wandb_api_key=wandb_api_key,
+        ).model_dump()
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;POST&#34;,
+            url=&#34;/fine-tunes&#34;,
+            params=parameter_payload,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    async def list(self) -&gt; FinetuneList:
+        &#34;&#34;&#34;
+        Async method to list fine-tune job history
+
+        Returns:
+            FinetuneList: Object containing a list of fine-tune jobs
+        &#34;&#34;&#34;
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;GET&#34;,
+            url=&#34;/fine-tunes&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneList(**response.data)
+
+    async def retrieve(self, id: str) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Async method to retrieve fine-tune job details
+
+        Args:
+            id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        &#34;&#34;&#34;
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;GET&#34;,
+            url=f&#34;/fine-tunes/{id}&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    async def cancel(self, id: str) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Async method to cancel a running fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about cancelled fine-tuning job.
+        &#34;&#34;&#34;
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;POST&#34;,
+            url=f&#34;/fine-tunes/{id}/cancel&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    async def list_events(self, id: str) -&gt; FinetuneListEvents:
+        &#34;&#34;&#34;
+        Async method to lists events of a fine-tune job
+
+        Args:
+            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneListEvents: Object containing list of fine-tune events
+        &#34;&#34;&#34;
+
+        response, _, _ = await self.requestor.arequest(
+            method=&#34;GET&#34;,
+            url=f&#34;/fine-tunes/{id}/events&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneListEvents(**response.data)
+
+    async def download(
+        self, id: str, output: str | None = None, checkpoint_step: int = -1
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        TODO: Implement async download method
+        &#34;&#34;&#34;
+
+        raise NotImplementedError(
+            &#34;AsyncFineTuning.download not implemented. &#34;
+            &#34;Please use FineTuning.download function instead.&#34;
+        )</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.AsyncFineTuning.cancel"><code class="name flex">
+<span>async def <span class="ident">cancel</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Async method to cancel a running fine-tuning job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to cancel. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about cancelled fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def cancel(self, id: str) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Async method to cancel a running fine-tuning job
+
+    Args:
+        id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneResponse: Object containing information about cancelled fine-tuning job.
+    &#34;&#34;&#34;
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;POST&#34;,
+        url=f&#34;/fine-tunes/{id}/cancel&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.AsyncFineTuning.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, training_file: str, model: str, n_epochs: int = 1, n_checkpoints: Optional[int] = 1, batch_size: Optional[int] = 32, learning_rate: float = 1e-05, suffix: str | None = None, wandb_api_key: str | None = None) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Async method to initiate a fine-tuning job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>training_file</code></strong> :&ensp;<code>str</code></dt>
+<dd>File-ID of a file uploaded to the Together API</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the base model to run fine-tune job on</dd>
+<dt><strong><code>n_epochs</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of epochs for fine-tuning. Defaults to 1.</dd>
+<dt><strong><code>n_checkpoints</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of checkpoints to save during fine-tuning.
+Defaults to 1.</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Batch size for fine-tuning. Defaults to 32.</dd>
+<dt><strong><code>learning_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Learning rate multiplier to use for training
+Defaults to 0.00001.</dd>
+<dt><strong><code>suffix</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Up to 40 character suffix that will be added to your fine-tuned model name.
+Defaults to None.</dd>
+<dt><strong><code>wandb_api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>API key for Weights &amp; Biases integration.
+Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self,
+    training_file: str,
+    model: str,
+    n_epochs: int = 1,
+    n_checkpoints: int | None = 1,
+    batch_size: int | None = 32,
+    learning_rate: float = 0.00001,
+    suffix: str | None = None,
+    wandb_api_key: str | None = None,
+) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Async method to initiate a fine-tuning job
+
+    Args:
+        training_file (str): File-ID of a file uploaded to the Together API
+        model (str): Name of the base model to run fine-tune job on
+        n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+        n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+            Defaults to 1.
+        batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+        learning_rate (float, optional): Learning rate multiplier to use for training
+            Defaults to 0.00001.
+        suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+            Defaults to None.
+        wandb_api_key (str, optional): API key for Weights &amp; Biases integration.
+            Defaults to None.
+
+    Returns:
+        FinetuneResponse: Object containing information about fine-tuning job.
+    &#34;&#34;&#34;
+
+    parameter_payload = FinetuneRequest(
+        model=model,
+        training_file=training_file,
+        n_epochs=n_epochs,
+        n_checkpoints=n_checkpoints,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        suffix=suffix,
+        wandb_api_key=wandb_api_key,
+    ).model_dump()
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;POST&#34;,
+        url=&#34;/fine-tunes&#34;,
+        params=parameter_payload,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.AsyncFineTuning.download"><code class="name flex">
+<span>async def <span class="ident">download</span></span>(<span>self, id: str, output: str | None = None, checkpoint_step: int = -1) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>TODO: Implement async download method</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def download(
+    self, id: str, output: str | None = None, checkpoint_step: int = -1
+) -&gt; str:
+    &#34;&#34;&#34;
+    TODO: Implement async download method
+    &#34;&#34;&#34;
+
+    raise NotImplementedError(
+        &#34;AsyncFineTuning.download not implemented. &#34;
+        &#34;Please use FineTuning.download function instead.&#34;
+    )</code></pre>
+</details>
+</dd>
+<dt id="together.resources.AsyncFineTuning.list"><code class="name flex">
+<span>async def <span class="ident">list</span></span>(<span>self) ‑> <a title="together.types.finetune.FinetuneList" href="../types/finetune.html#together.types.finetune.FinetuneList">FinetuneList</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Async method to list fine-tune job history</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneList</code></dt>
+<dd>Object containing a list of fine-tune jobs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def list(self) -&gt; FinetuneList:
+    &#34;&#34;&#34;
+    Async method to list fine-tune job history
+
+    Returns:
+        FinetuneList: Object containing a list of fine-tune jobs
+    &#34;&#34;&#34;
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;GET&#34;,
+        url=&#34;/fine-tunes&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneList(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.AsyncFineTuning.list_events"><code class="name flex">
+<span>async def <span class="ident">list_events</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneListEvents" href="../types/finetune.html#together.types.finetune.FinetuneListEvents">FinetuneListEvents</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Async method to lists events of a fine-tune job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to list events for. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneListEvents</code></dt>
+<dd>Object containing list of fine-tune events</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def list_events(self, id: str) -&gt; FinetuneListEvents:
+    &#34;&#34;&#34;
+    Async method to lists events of a fine-tune job
+
+    Args:
+        id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneListEvents: Object containing list of fine-tune events
+    &#34;&#34;&#34;
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;GET&#34;,
+        url=f&#34;/fine-tunes/{id}/events&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneListEvents(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.AsyncFineTuning.retrieve"><code class="name flex">
+<span>async def <span class="ident">retrieve</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Async method to retrieve fine-tune job details</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to retrieve. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def retrieve(self, id: str) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Async method to retrieve fine-tune job details
+
+    Args:
+        id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneResponse: Object containing information about fine-tuning job.
+    &#34;&#34;&#34;
+
+    response, _, _ = await self.requestor.arequest(
+        method=&#34;GET&#34;,
+        url=f&#34;/fine-tunes/{id}&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.Chat"><code class="flex name class">
+<span>class <span class="ident">Chat</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Chat:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+
+    @cached_property
+    def completions(self) -&gt; ChatCompletions:
+        return ChatCompletions(self._client)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="together.resources.Chat.completions"><code class="name">var <span class="ident">completions</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner=None):
+    if instance is None:
+        return self
+    if self.attrname is None:
+        raise TypeError(
+            &#34;Cannot use cached_property instance without calling __set_name__ on it.&#34;)
+    try:
+        cache = instance.__dict__
+    except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+        msg = (
+            f&#34;No &#39;__dict__&#39; attribute on {type(instance).__name__!r} &#34;
+            f&#34;instance to cache {self.attrname!r} property.&#34;
+        )
+        raise TypeError(msg) from None
+    val = cache.get(self.attrname, _NOT_FOUND)
+    if val is _NOT_FOUND:
+        with self.lock:
+            # check if another thread filled cache while we awaited lock
+            val = cache.get(self.attrname, _NOT_FOUND)
+            if val is _NOT_FOUND:
+                val = self.func(instance)
+                try:
+                    cache[self.attrname] = val
+                except TypeError:
+                    msg = (
+                        f&#34;The &#39;__dict__&#39; attribute on {type(instance).__name__!r} instance &#34;
+                        f&#34;does not support item assignment for caching {self.attrname!r} property.&#34;
+                    )
+                    raise TypeError(msg) from None
+    return val</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.Completions"><code class="flex name class">
+<span>class <span class="ident">Completions</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Completions:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    def create(
+        self,
+        prompt: str,
+        model: str,
+        max_tokens: int | None = 512,
+        stop: List[str] | None = None,
+        temperature: float | None = None,
+        top_p: float | None = None,
+        top_k: int | None = None,
+        repetition_penalty: float | None = None,
+        stream: bool = False,
+        logprobs: int | None = None,
+        echo: bool | None = None,
+        n: int | None = None,
+        safety_model: str | None = None,
+    ) -&gt; CompletionResponse | Iterator[CompletionChunk]:
+        &#34;&#34;&#34;
+        Method to generate completions based on a given prompt using a specified model.
+
+        Args:
+            prompt (str): A string providing context for the model to complete.
+            model (str): The name of the model to query.
+            max_tokens (int, optional): The maximum number of tokens to generate.
+                Defaults to 512.
+            stop (List[str], optional): List of strings at which to stop generation.
+                Defaults to None.
+            temperature (float, optional): A decimal number that determines the degree of randomness in the response.
+                Defaults to None.
+            top_p (float, optional): The top_p (nucleus) parameter is used to dynamically adjust the number
+                    of choices for each predicted token based on the cumulative probabilities.
+                Defaults to None.
+            top_k (int, optional): The top_k parameter is used to limit the number of choices for the
+                    next predicted word or token.
+                Defaults to None.
+            repetition_penalty (float, optional): A number that controls the diversity of generated text
+                    by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+                Defaults to None.
+            stream (bool, optional): Flag indicating whether to stream the generated completions.
+                Defaults to False.
+            logprobs (int, optional): Number of top-k logprobs to return
+                Defaults to None.
+            echo (bool, optional): Echo prompt in output. Can be used with logprobs to return prompt logprobs.
+                Defaults to None.
+            n (int, optional): Number of completions to generate. Setting to None will return a single generation.
+                Defaults to None.
+            safety_model (str, optional): A moderation model to validate tokens. Choice between available moderation
+                    models found [here](https://docs.together.ai/docs/inference-models#moderation-models).
+                Defaults to None.
+
+        Returns:
+            Union[CompletionResponse, Iterator[CompletionChunk]]: Object containing the completions
+            or an iterator over completion chunks.
+        &#34;&#34;&#34;
+        parameter_payload = CompletionRequest(
+            model=model,
+            prompt=prompt,
+            top_p=top_p,
+            top_k=top_k,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stop=stop,
+            repetition_penalty=repetition_penalty,
+            stream=stream,
+            logprobs=logprobs,
+            echo=echo,
+            n=n,
+            safety_model=safety_model,
+        ).model_dump()
+
+        response, _, _ = self.requestor.request(
+            method=&#34;POST&#34;,
+            url=&#34;/completions&#34;,
+            params=parameter_payload,
+            stream=stream,
+        )
+
+        if stream:
+            # must be an iterator
+            assert not isinstance(response, TogetherResponse)
+            return (CompletionChunk(**line.data) for line in response)
+        assert isinstance(response, TogetherResponse)
+        return CompletionResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.Completions.create"><code class="name flex">
+<span>def <span class="ident">create</span></span>(<span>self, prompt: str, model: str, max_tokens: Optional[int] = 512, stop: Optional[List[str]] = None, temperature: Optional[float] = None, top_p: Optional[float] = None, top_k: Optional[int] = None, repetition_penalty: Optional[float] = None, stream: bool = False, logprobs: Optional[int] = None, echo: bool | None = None, n: Optional[int] = None, safety_model: str | None = None) ‑> Union[<a title="together.types.completions.CompletionResponse" href="../types/completions.html#together.types.completions.CompletionResponse">CompletionResponse</a>, Iterator[<a title="together.types.completions.CompletionChunk" href="../types/completions.html#together.types.completions.CompletionChunk">CompletionChunk</a>]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to generate completions based on a given prompt using a specified model.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>prompt</code></strong> :&ensp;<code>str</code></dt>
+<dd>A string providing context for the model to complete.</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the model to query.</dd>
+<dt><strong><code>max_tokens</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The maximum number of tokens to generate.
+Defaults to 512.</dd>
+<dt><strong><code>stop</code></strong> :&ensp;<code>List[str]</code>, optional</dt>
+<dd>List of strings at which to stop generation.
+Defaults to None.</dd>
+<dt><strong><code>temperature</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>A decimal number that determines the degree of randomness in the response.
+Defaults to None.</dd>
+<dt><strong><code>top_p</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>The top_p (nucleus) parameter is used to dynamically adjust the number
+of choices for each predicted token based on the cumulative probabilities.
+Defaults to None.</dd>
+<dt><strong><code>top_k</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>The top_k parameter is used to limit the number of choices for the
+next predicted word or token.
+Defaults to None.</dd>
+<dt><strong><code>repetition_penalty</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>A number that controls the diversity of generated text
+by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+Defaults to None.</dd>
+<dt><strong><code>stream</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Flag indicating whether to stream the generated completions.
+Defaults to False.</dd>
+<dt><strong><code>logprobs</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of top-k logprobs to return
+Defaults to None.</dd>
+<dt><strong><code>echo</code></strong> :&ensp;<code>bool</code>, optional</dt>
+<dd>Echo prompt in output. Can be used with logprobs to return prompt logprobs.
+Defaults to None.</dd>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of completions to generate. Setting to None will return a single generation.
+Defaults to None.</dd>
+<dt><strong><code>safety_model</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>A moderation model to validate tokens. Choice between available moderation
+models found <a href="https://docs.together.ai/docs/inference-models#moderation-models">here</a>.
+Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Union[CompletionResponse, Iterator[CompletionChunk]]</code></dt>
+<dd>Object containing the completions</dd>
+</dl>
+<p>or an iterator over completion chunks.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create(
+    self,
+    prompt: str,
+    model: str,
+    max_tokens: int | None = 512,
+    stop: List[str] | None = None,
+    temperature: float | None = None,
+    top_p: float | None = None,
+    top_k: int | None = None,
+    repetition_penalty: float | None = None,
+    stream: bool = False,
+    logprobs: int | None = None,
+    echo: bool | None = None,
+    n: int | None = None,
+    safety_model: str | None = None,
+) -&gt; CompletionResponse | Iterator[CompletionChunk]:
+    &#34;&#34;&#34;
+    Method to generate completions based on a given prompt using a specified model.
+
+    Args:
+        prompt (str): A string providing context for the model to complete.
+        model (str): The name of the model to query.
+        max_tokens (int, optional): The maximum number of tokens to generate.
+            Defaults to 512.
+        stop (List[str], optional): List of strings at which to stop generation.
+            Defaults to None.
+        temperature (float, optional): A decimal number that determines the degree of randomness in the response.
+            Defaults to None.
+        top_p (float, optional): The top_p (nucleus) parameter is used to dynamically adjust the number
+                of choices for each predicted token based on the cumulative probabilities.
+            Defaults to None.
+        top_k (int, optional): The top_k parameter is used to limit the number of choices for the
+                next predicted word or token.
+            Defaults to None.
+        repetition_penalty (float, optional): A number that controls the diversity of generated text
+                by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+            Defaults to None.
+        stream (bool, optional): Flag indicating whether to stream the generated completions.
+            Defaults to False.
+        logprobs (int, optional): Number of top-k logprobs to return
+            Defaults to None.
+        echo (bool, optional): Echo prompt in output. Can be used with logprobs to return prompt logprobs.
+            Defaults to None.
+        n (int, optional): Number of completions to generate. Setting to None will return a single generation.
+            Defaults to None.
+        safety_model (str, optional): A moderation model to validate tokens. Choice between available moderation
+                models found [here](https://docs.together.ai/docs/inference-models#moderation-models).
+            Defaults to None.
+
+    Returns:
+        Union[CompletionResponse, Iterator[CompletionChunk]]: Object containing the completions
+        or an iterator over completion chunks.
+    &#34;&#34;&#34;
+    parameter_payload = CompletionRequest(
+        model=model,
+        prompt=prompt,
+        top_p=top_p,
+        top_k=top_k,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        stop=stop,
+        repetition_penalty=repetition_penalty,
+        stream=stream,
+        logprobs=logprobs,
+        echo=echo,
+        n=n,
+        safety_model=safety_model,
+    ).model_dump()
+
+    response, _, _ = self.requestor.request(
+        method=&#34;POST&#34;,
+        url=&#34;/completions&#34;,
+        params=parameter_payload,
+        stream=stream,
+    )
+
+    if stream:
+        # must be an iterator
+        assert not isinstance(response, TogetherResponse)
+        return (CompletionChunk(**line.data) for line in response)
+    assert isinstance(response, TogetherResponse)
+    return CompletionResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.Embeddings"><code class="flex name class">
+<span>class <span class="ident">Embeddings</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Embeddings:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    def create(
+        self,
+        input: str | List[str],
+        model: str,
+    ) -&gt; EmbeddingResponse:
+        parameter_payload = EmbeddingRequest(
+            input=input,
+            model=model,
+        ).model_dump()
+
+        response, _, _ = self.requestor.request(
+            method=&#34;POST&#34;,
+            url=&#34;/embeddings&#34;,
+            params=parameter_payload,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        return EmbeddingResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.Embeddings.create"><code class="name flex">
+<span>def <span class="ident">create</span></span>(<span>self, input: Union[str, List[str]], model: str) ‑> <a title="together.types.embeddings.EmbeddingResponse" href="../types/embeddings.html#together.types.embeddings.EmbeddingResponse">EmbeddingResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create(
+    self,
+    input: str | List[str],
+    model: str,
+) -&gt; EmbeddingResponse:
+    parameter_payload = EmbeddingRequest(
+        input=input,
+        model=model,
+    ).model_dump()
+
+    response, _, _ = self.requestor.request(
+        method=&#34;POST&#34;,
+        url=&#34;/embeddings&#34;,
+        params=parameter_payload,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+    return EmbeddingResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.Files"><code class="flex name class">
+<span>class <span class="ident">Files</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Files:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    def list(self) -&gt; EmbeddingResponse:
+        response, _, _ = self.requestor.request(
+            method=&#34;GET&#34;,
+            url=&#34;/files&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        return EmbeddingResponse(**response.data)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.Files.list"><code class="name flex">
+<span>def <span class="ident">list</span></span>(<span>self) ‑> <a title="together.types.embeddings.EmbeddingResponse" href="../types/embeddings.html#together.types.embeddings.EmbeddingResponse">EmbeddingResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list(self) -&gt; EmbeddingResponse:
+    response, _, _ = self.requestor.request(
+        method=&#34;GET&#34;,
+        url=&#34;/files&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+    return EmbeddingResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="together.resources.FineTuning"><code class="flex name class">
+<span>class <span class="ident">FineTuning</span></span>
+<span>(</span><span>client: <a title="together.types.abstract.TogetherClient" href="../types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FineTuning:
+    def __init__(self, client: TogetherClient) -&gt; None:
+        self._client = client
+
+        self.requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+    def create(
+        self,
+        training_file: str,
+        model: str,
+        n_epochs: int = 1,
+        n_checkpoints: int | None = 1,
+        batch_size: int | None = 32,
+        learning_rate: float = 0.00001,
+        suffix: str | None = None,
+        wandb_api_key: str | None = None,
+    ) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Method to initiate a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+                Defaults to 1.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            learning_rate (float, optional): Learning rate multiplier to use for training
+                Defaults to 0.00001.
+            suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+                Defaults to None.
+            wandb_api_key (str, optional): API key for Weights &amp; Biases integration.
+                Defaults to None.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        &#34;&#34;&#34;
+
+        parameter_payload = FinetuneRequest(
+            model=model,
+            training_file=training_file,
+            n_epochs=n_epochs,
+            n_checkpoints=n_checkpoints,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            suffix=suffix,
+            wandb_api_key=wandb_api_key,
+        ).model_dump()
+
+        response, _, _ = self.requestor.request(
+            method=&#34;POST&#34;,
+            url=&#34;/fine-tunes&#34;,
+            params=parameter_payload,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    def list(self) -&gt; FinetuneList:
+        &#34;&#34;&#34;
+        Lists fine-tune job history
+
+        Returns:
+            FinetuneList: Object containing a list of fine-tune jobs
+        &#34;&#34;&#34;
+
+        response, _, _ = self.requestor.request(
+            method=&#34;GET&#34;,
+            url=&#34;/fine-tunes&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneList(**response.data)
+
+    def retrieve(self, id: str) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Retrieves fine-tune job details
+
+        Args:
+            id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        &#34;&#34;&#34;
+
+        response, _, _ = self.requestor.request(
+            method=&#34;GET&#34;,
+            url=f&#34;/fine-tunes/{id}&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    def cancel(self, id: str) -&gt; FinetuneResponse:
+        &#34;&#34;&#34;
+        Method to cancel a running fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about cancelled fine-tuning job.
+        &#34;&#34;&#34;
+
+        response, _, _ = self.requestor.request(
+            method=&#34;POST&#34;,
+            url=f&#34;/fine-tunes/{id}/cancel&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneResponse(**response.data)
+
+    def list_events(self, id: str) -&gt; FinetuneListEvents:
+        &#34;&#34;&#34;
+        Lists events of a fine-tune job
+
+        Args:
+            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneListEvents: Object containing list of fine-tune events
+        &#34;&#34;&#34;
+
+        response, _, _ = self.requestor.request(
+            method=&#34;GET&#34;,
+            url=f&#34;/fine-tunes/{id}/events&#34;,
+            params=None,
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneListEvents(**response.data)
+
+    def download(
+        self, id: str, output: str | None = None, checkpoint_step: int = -1
+    ) -&gt; FinetuneDownloadResult:
+        &#34;&#34;&#34;
+        Downloads compressed fine-tuned model or checkpoint to local disk.
+
+        Defaults file location to `$PWD/{model_name}.{extension}`
+
+        Args:
+            id (str): Fine-tune ID to download. A string that starts with `ft-`.
+            output (str, optional): Specifies output file name for downloaded model.
+                Defaults to None.
+            checkpoint_step (int, optional): Specifies step number for checkpoint to download.
+                Defaults to -1 (download the final model)
+
+        Returns:
+            FinetuneDownloadResult: Object containing downloaded model metadata
+        &#34;&#34;&#34;
+
+        url = f&#34;/finetune/download?ft_id={id}&#34;
+
+        if checkpoint_step &gt; 0:
+            url += f&#34;&amp;checkpoint_step={checkpoint_step}&#34;
+
+        remote_name = self.retrieve(id).output_name
+
+        download_manager = DownloadManager(self._client)
+
+        downloaded_filename, file_size = download_manager.download(
+            url, output, remote_name
+        )
+
+        return FinetuneDownloadResult(
+            object=&#34;local&#34;,
+            id=id,
+            checkpoint_step=checkpoint_step,
+            filename=downloaded_filename,
+            size=file_size,
+        )</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="together.resources.FineTuning.cancel"><code class="name flex">
+<span>def <span class="ident">cancel</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to cancel a running fine-tuning job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to cancel. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about cancelled fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cancel(self, id: str) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Method to cancel a running fine-tuning job
+
+    Args:
+        id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneResponse: Object containing information about cancelled fine-tuning job.
+    &#34;&#34;&#34;
+
+    response, _, _ = self.requestor.request(
+        method=&#34;POST&#34;,
+        url=f&#34;/fine-tunes/{id}/cancel&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.FineTuning.create"><code class="name flex">
+<span>def <span class="ident">create</span></span>(<span>self, training_file: str, model: str, n_epochs: int = 1, n_checkpoints: Optional[int] = 1, batch_size: Optional[int] = 32, learning_rate: float = 1e-05, suffix: str | None = None, wandb_api_key: str | None = None) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Method to initiate a fine-tuning job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>training_file</code></strong> :&ensp;<code>str</code></dt>
+<dd>File-ID of a file uploaded to the Together API</dd>
+<dt><strong><code>model</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the base model to run fine-tune job on</dd>
+<dt><strong><code>n_epochs</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of epochs for fine-tuning. Defaults to 1.</dd>
+<dt><strong><code>n_checkpoints</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of checkpoints to save during fine-tuning.
+Defaults to 1.</dd>
+<dt><strong><code>batch_size</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Batch size for fine-tuning. Defaults to 32.</dd>
+<dt><strong><code>learning_rate</code></strong> :&ensp;<code>float</code>, optional</dt>
+<dd>Learning rate multiplier to use for training
+Defaults to 0.00001.</dd>
+<dt><strong><code>suffix</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Up to 40 character suffix that will be added to your fine-tuned model name.
+Defaults to None.</dd>
+<dt><strong><code>wandb_api_key</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>API key for Weights &amp; Biases integration.
+Defaults to None.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create(
+    self,
+    training_file: str,
+    model: str,
+    n_epochs: int = 1,
+    n_checkpoints: int | None = 1,
+    batch_size: int | None = 32,
+    learning_rate: float = 0.00001,
+    suffix: str | None = None,
+    wandb_api_key: str | None = None,
+) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Method to initiate a fine-tuning job
+
+    Args:
+        training_file (str): File-ID of a file uploaded to the Together API
+        model (str): Name of the base model to run fine-tune job on
+        n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+        n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+            Defaults to 1.
+        batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+        learning_rate (float, optional): Learning rate multiplier to use for training
+            Defaults to 0.00001.
+        suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+            Defaults to None.
+        wandb_api_key (str, optional): API key for Weights &amp; Biases integration.
+            Defaults to None.
+
+    Returns:
+        FinetuneResponse: Object containing information about fine-tuning job.
+    &#34;&#34;&#34;
+
+    parameter_payload = FinetuneRequest(
+        model=model,
+        training_file=training_file,
+        n_epochs=n_epochs,
+        n_checkpoints=n_checkpoints,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        suffix=suffix,
+        wandb_api_key=wandb_api_key,
+    ).model_dump()
+
+    response, _, _ = self.requestor.request(
+        method=&#34;POST&#34;,
+        url=&#34;/fine-tunes&#34;,
+        params=parameter_payload,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.FineTuning.download"><code class="name flex">
+<span>def <span class="ident">download</span></span>(<span>self, id: str, output: str | None = None, checkpoint_step: int = -1) ‑> <a title="together.types.finetune.FinetuneDownloadResult" href="../types/finetune.html#together.types.finetune.FinetuneDownloadResult">FinetuneDownloadResult</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Downloads compressed fine-tuned model or checkpoint to local disk.</p>
+<p>Defaults file location to <code>$PWD/{model_name}.{extension}</code></p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to download. A string that starts with <code>ft-</code>.</dd>
+<dt><strong><code>output</code></strong> :&ensp;<code>str</code>, optional</dt>
+<dd>Specifies output file name for downloaded model.
+Defaults to None.</dd>
+<dt><strong><code>checkpoint_step</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Specifies step number for checkpoint to download.
+Defaults to -1 (download the final model)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneDownloadResult</code></dt>
+<dd>Object containing downloaded model metadata</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def download(
+    self, id: str, output: str | None = None, checkpoint_step: int = -1
+) -&gt; FinetuneDownloadResult:
+    &#34;&#34;&#34;
+    Downloads compressed fine-tuned model or checkpoint to local disk.
+
+    Defaults file location to `$PWD/{model_name}.{extension}`
+
+    Args:
+        id (str): Fine-tune ID to download. A string that starts with `ft-`.
+        output (str, optional): Specifies output file name for downloaded model.
+            Defaults to None.
+        checkpoint_step (int, optional): Specifies step number for checkpoint to download.
+            Defaults to -1 (download the final model)
+
+    Returns:
+        FinetuneDownloadResult: Object containing downloaded model metadata
+    &#34;&#34;&#34;
+
+    url = f&#34;/finetune/download?ft_id={id}&#34;
+
+    if checkpoint_step &gt; 0:
+        url += f&#34;&amp;checkpoint_step={checkpoint_step}&#34;
+
+    remote_name = self.retrieve(id).output_name
+
+    download_manager = DownloadManager(self._client)
+
+    downloaded_filename, file_size = download_manager.download(
+        url, output, remote_name
+    )
+
+    return FinetuneDownloadResult(
+        object=&#34;local&#34;,
+        id=id,
+        checkpoint_step=checkpoint_step,
+        filename=downloaded_filename,
+        size=file_size,
+    )</code></pre>
+</details>
+</dd>
+<dt id="together.resources.FineTuning.list"><code class="name flex">
+<span>def <span class="ident">list</span></span>(<span>self) ‑> <a title="together.types.finetune.FinetuneList" href="../types/finetune.html#together.types.finetune.FinetuneList">FinetuneList</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Lists fine-tune job history</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneList</code></dt>
+<dd>Object containing a list of fine-tune jobs</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list(self) -&gt; FinetuneList:
+    &#34;&#34;&#34;
+    Lists fine-tune job history
+
+    Returns:
+        FinetuneList: Object containing a list of fine-tune jobs
+    &#34;&#34;&#34;
+
+    response, _, _ = self.requestor.request(
+        method=&#34;GET&#34;,
+        url=&#34;/fine-tunes&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneList(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.FineTuning.list_events"><code class="name flex">
+<span>def <span class="ident">list_events</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneListEvents" href="../types/finetune.html#together.types.finetune.FinetuneListEvents">FinetuneListEvents</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Lists events of a fine-tune job</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to list events for. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneListEvents</code></dt>
+<dd>Object containing list of fine-tune events</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def list_events(self, id: str) -&gt; FinetuneListEvents:
+    &#34;&#34;&#34;
+    Lists events of a fine-tune job
+
+    Args:
+        id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneListEvents: Object containing list of fine-tune events
+    &#34;&#34;&#34;
+
+    response, _, _ = self.requestor.request(
+        method=&#34;GET&#34;,
+        url=f&#34;/fine-tunes/{id}/events&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneListEvents(**response.data)</code></pre>
+</details>
+</dd>
+<dt id="together.resources.FineTuning.retrieve"><code class="name flex">
+<span>def <span class="ident">retrieve</span></span>(<span>self, id: str) ‑> <a title="together.types.finetune.FinetuneResponse" href="../types/finetune.html#together.types.finetune.FinetuneResponse">FinetuneResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves fine-tune job details</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>id</code></strong> :&ensp;<code>str</code></dt>
+<dd>Fine-tune ID to retrieve. A string that starts with <code>ft-</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>FinetuneResponse</code></dt>
+<dd>Object containing information about fine-tuning job.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def retrieve(self, id: str) -&gt; FinetuneResponse:
+    &#34;&#34;&#34;
+    Retrieves fine-tune job details
+
+    Args:
+        id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+    Returns:
+        FinetuneResponse: Object containing information about fine-tuning job.
+    &#34;&#34;&#34;
+
+    response, _, _ = self.requestor.request(
+        method=&#34;GET&#34;,
+        url=f&#34;/fine-tunes/{id}&#34;,
+        params=None,
+        stream=False,
+    )
+
+    assert isinstance(response, TogetherResponse)
+
+    return FinetuneResponse(**response.data)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="together" href="../index.html">together</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="together.resources.chat" href="chat/index.html">together.resources.chat</a></code></li>
+<li><code><a title="together.resources.completions" href="completions.html">together.resources.completions</a></code></li>
+<li><code><a title="together.resources.embeddings" href="embeddings.html">together.resources.embeddings</a></code></li>
+<li><code><a title="together.resources.files" href="files.html">together.resources.files</a></code></li>
+<li><code><a title="together.resources.finetune" href="finetune.html">together.resources.finetune</a></code></li>
+<li><code><a title="together.resources.images" href="images.html">together.resources.images</a></code></li>
+<li><code><a title="together.resources.models" href="models.html">together.resources.models</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="together.resources.AsyncChat" href="#together.resources.AsyncChat">AsyncChat</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.AsyncChat.completions" href="#together.resources.AsyncChat.completions">completions</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.AsyncCompletions" href="#together.resources.AsyncCompletions">AsyncCompletions</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.AsyncCompletions.create" href="#together.resources.AsyncCompletions.create">create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.AsyncEmbeddings" href="#together.resources.AsyncEmbeddings">AsyncEmbeddings</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.AsyncEmbeddings.create" href="#together.resources.AsyncEmbeddings.create">create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.AsyncFiles" href="#together.resources.AsyncFiles">AsyncFiles</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.AsyncFiles.create" href="#together.resources.AsyncFiles.create">create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.AsyncFineTuning" href="#together.resources.AsyncFineTuning">AsyncFineTuning</a></code></h4>
+<ul class="two-column">
+<li><code><a title="together.resources.AsyncFineTuning.cancel" href="#together.resources.AsyncFineTuning.cancel">cancel</a></code></li>
+<li><code><a title="together.resources.AsyncFineTuning.create" href="#together.resources.AsyncFineTuning.create">create</a></code></li>
+<li><code><a title="together.resources.AsyncFineTuning.download" href="#together.resources.AsyncFineTuning.download">download</a></code></li>
+<li><code><a title="together.resources.AsyncFineTuning.list" href="#together.resources.AsyncFineTuning.list">list</a></code></li>
+<li><code><a title="together.resources.AsyncFineTuning.list_events" href="#together.resources.AsyncFineTuning.list_events">list_events</a></code></li>
+<li><code><a title="together.resources.AsyncFineTuning.retrieve" href="#together.resources.AsyncFineTuning.retrieve">retrieve</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.Chat" href="#together.resources.Chat">Chat</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.Chat.completions" href="#together.resources.Chat.completions">completions</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.Completions" href="#together.resources.Completions">Completions</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.Completions.create" href="#together.resources.Completions.create">create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.Embeddings" href="#together.resources.Embeddings">Embeddings</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.Embeddings.create" href="#together.resources.Embeddings.create">create</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.Files" href="#together.resources.Files">Files</a></code></h4>
+<ul class="">
+<li><code><a title="together.resources.Files.list" href="#together.resources.Files.list">list</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.resources.FineTuning" href="#together.resources.FineTuning">FineTuning</a></code></h4>
+<ul class="two-column">
+<li><code><a title="together.resources.FineTuning.cancel" href="#together.resources.FineTuning.cancel">cancel</a></code></li>
+<li><code><a title="together.resources.FineTuning.create" href="#together.resources.FineTuning.create">create</a></code></li>
+<li><code><a title="together.resources.FineTuning.download" href="#together.resources.FineTuning.download">download</a></code></li>
+<li><code><a title="together.resources.FineTuning.list" href="#together.resources.FineTuning.list">list</a></code></li>
+<li><code><a title="together.resources.FineTuning.list_events" href="#together.resources.FineTuning.list_events">list_events</a></code></li>
+<li><code><a title="together.resources.FineTuning.retrieve" href="#together.resources.FineTuning.retrieve">retrieve</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
