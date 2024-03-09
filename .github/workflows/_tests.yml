@@ -43,9 +43,9 @@ jobs:
         shell: bash
         run: poetry install --with quality,tests
 
-      - name: Install editable
+      - name: Install together
         run: |
-          poetry run pip install -e .
+          poetry run pip install .
 
       - name: Run core tests
         shell: bash
