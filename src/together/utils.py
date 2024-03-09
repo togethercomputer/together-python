@@ -136,7 +136,7 @@ def default_api_key(api_key: Optional[str] = None) -> str | None:
     if os.environ.get("TOGETHER_API_KEY"):
         return os.environ.get("TOGETHER_API_KEY")
 
-    raise error.AuthenticationError(together.MISSING_API_KEY_MESSAGE)
+    raise error.AuthenticationError(together.constants.MISSING_API_KEY_MESSAGE)
 
 
 def _console_log_level() -> str | None:

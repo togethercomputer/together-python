@@ -21,15 +21,4 @@ class TogetherClient:
 
 
 class BaseModel(pydantic.BaseModel):
-    if PYDANTIC_V2:
-        model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
-    else:
-
-        @property
-        @override
-        def model_fields_set(self) -> set[str]:
-            # a forwards-compat shim for pydantic v2
-            return self.__fields_set__
-
-        class Config(pydantic.BaseConfig):  # pyright: ignore[reportDeprecated]
-            extra: Any = pydantic.Extra.allow
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
