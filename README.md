@@ -79,8 +79,8 @@ Once you've started a model instance, you can start querying. Notice the inputs 
 
 ```python
 output = together.Complete.create(
-  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
-  model = "togethercomputer/LLaMA-2-7B-32K", 
+  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ",
+  model = "togethercomputer/LLaMA-2-7B-32K",
   max_tokens = 70,
   temperature = 0.6,
   top_k = 90,
@@ -96,7 +96,7 @@ print(output['prompt'][0]+output['output']['choices'][0]['text'])
 Since the temperature is > 0.0, you will see some creative variation in the output text, here is one example:
 
 ```
-Isaac Asimov's Three Laws of Robotics are: 
+Isaac Asimov's Three Laws of Robotics are:
 
 1. A robot may not injure a human being or, through inaction, allow a human being to come to harm.
 2. A robot must obey the orders given it by human beings except where such orders would conflict with the First Law.
@@ -171,16 +171,16 @@ In the example below we provide a link for you to download a jsonl file locally 
 curl https://huggingface.co/datasets/clam004/antihallucination_dataset/resolve/main/antihallucination.jsonl -o antihallucination.jsonl
 ```
 
-This will download the dataset to a file called `antihallucination.jsonl`. Below are two examples of lines you will find in this `.jsonl` file. 
+This will download the dataset to a file called `antihallucination.jsonl`. Below are two examples of lines you will find in this `.jsonl` file.
 
 ```Text JSONL
 {"text": "<truth>Wilhelm Windelband (May 11, 1848 - October 22, 1915) was a German philosopher of the Baden School. Windelband is now mainly remembered for the terms \"nomothetic\" and \"idiographic\", which he introduced. These have currency in psychology and other areas, though not necessarily in line with his original meanings. Windelband was a Neo-Kantian who protested other Neo-Kantians of his time and maintained that \"to understand Kant rightly means to go beyond him\". Against his positivist contemporaries, Windelband argued that philosophy should engage in humanistic dialogue with the natural sciences rather than uncritically appropriating its methodologies. His interests in psychology and cultural sciences represented an opposition to psychologism and historicism schools by a critical philosophic system. Windelband relied in his effort to reach beyond Kant on such philosophers as Georg Wilhelm Friedrich Hegel, Johann Friedrich Herbart, and Hermann Lotze. Closely associated with Windelband was Heinrich Rickert. Windelband's disciples were not only noted philosophers, but sociologists like Max Weber and theologians like Ernst Troeltsch and Albert Schweitzer.<generated>Wilhelm Windelband (15 March 1848 – 18 September 1915) was a German philosopher of the late 19th and early 20th centuries. He is now remembered mainly for the terms \"nomothetic\" and \"idiographic,\" which he introduced. He also wrote on history, psychology, the philosophy of religion, values, and other topics. He was a neo-Kantian who protested other neo-Kantians of his time and maintained a critical position towards psychologism. Windelband is known as one of the founders of the \"Baden School\" of neo-Kantianism. He was a student of Kuno Fischer and Franz Brentano. His students included Edmund Husserl, Adolf Reinach, Carl Stumpf, and Richard von Mises.<eval>Wilhelm Windelband (15 March 1848 – 18 September 1915) was a German philosopher of the late 19th and early 20th centuries.<minor_inaccurate>He is now remembered mainly for the terms \"nomothetic\" and \"idiographic,\" which he introduced.<accurate>He also wrote on history, psychology, the philosophy of religion, values, and other topics.<accurate>He was a neo-Kantian who protested other neo-Kantians of his time and maintained a critical position towards psychologism.<accurate>Windelband is known as one of the founders of the \"Baden School\" of neo-Kantianism.<accurate>He was a student of Kuno Fischer and Franz Brentano.<major_inaccurate>His students included Edmund Husserl, Adolf Reinach, Carl Stumpf, and Richard von Mises.<major_inaccurate><stop>"}
 {"text": "<truth>Admiral of the Fleet Matthew Aylmer, 1st Baron Aylmer (ca. 1650 - 18 August 1720) was a Royal Navy officer. He was one of the captains who sent a letter to Prince William of Orange, who had just landed at Torbay, assuring the Prince of the captains' support; the Prince's response ultimately led to the Royal Navy switching allegiance to the Prince and the Glorious Revolution of November 1688. Aylmer saw action at the Battle of Bantry Bay in May 1689, at the Battle of Beachy Head in July 1690, and again at the Battle of Barfleur in May 1692 during the Nine Years' War. Aylmer became Commander-in-Chief of the Navy on 12 November 1709. However, when Aylmer met a French squadron and convoy, he was only able to capture one merchantman and the 56-gun \"Superbe\": the new Harley ministry used this failure as an excuse to remove him as Commander-in-Chief and did so a few months later. Following the accession of George I and the appointment of the Townshend ministry, Aylmer was reappointed Commander-in-Chief on 5 November 1714. He was also appointed Governor of Greenwich Hospital: in this post he founded the Royal Hospital School for the sons of seamen.<generated>Matthew Aylmer, 1st Baron Aylmer (1708–1794) was an Irish soldier and colonial administrator. He was born in Dublin, the son of a barrister, and was educated at Trinity College, Dublin. He joined the British Army in 1727 and served in the War of the Austrian Succession and the Seven Years' War. He was promoted to lieutenant-general in 1772 and was appointed Governor of Gibraltar in 1775. He was made a baron in 1782 and was appointed Commander-in-Chief of the British forces in North America in 1783. He was recalled in 1790 and died in London in 1794. He was buried in Westminster Abbey.<eval>Matthew Aylmer, 1st Baron Aylmer (1708–1794) was an Irish soldier and colonial administrator.<minor_inaccurate>He was born in Dublin, the son of a barrister, and was educated at Trinity College, Dublin.<minor_inaccurate>He joined the British Army in 1727 and served in the War of the Austrian Succession and the Seven Years' War.<minor_inaccurate>He was promoted to lieutenant-general in 1772 and was appointed Governor of Gibraltar in 1775.<major_inaccurate>He was made a baron in 1782 and was appointed Commander-in-Chief of the British forces in North America in 1783.<major_inaccurate>He was recalled in 1790 and died in London in 1794.<major_inaccurate>He was buried in Westminster Abbey.<major_inaccurate><stop>"}
 ```
 
-This dataset teaches your model a special task using special sequences not found elsewhere. It teaches your model how to check another model's generated text against a ground truth and annotate the generated text for hallucinations. We made up special sequences `<truth>`, `<generated>`, `<eval>` and `<stop>` in order to do this. Read more about how to come up with your own special sequences [here](https://docs.together.ai/docs/fine-tuning-task-specific-sequences).   
+This dataset teaches your model a special task using special sequences not found elsewhere. It teaches your model how to check another model's generated text against a ground truth and annotate the generated text for hallucinations. We made up special sequences `<truth>`, `<generated>`, `<eval>` and `<stop>` in order to do this. Read more about how to come up with your own special sequences [here](https://docs.together.ai/docs/fine-tuning-task-specific-sequences).
 
-Use `together.Files.check` to check if your jsonl file has the correct format. Also take a look at it with the editor of your choice. 
+Use `together.Files.check` to check if your jsonl file has the correct format. Also take a look at it with the editor of your choice.
 
 ```python
 resp = together.Files.check(file="antihallucination.jsonl")
@@ -308,7 +308,7 @@ fine_tune_id = resp['id']
 print(resp)
 ```
 
-Unless you set `confirm_inputs=False` in `together.Finetune.create`, or `--quiet` in the CLI, there will be a confirmation step to make sure you are aware of any defaults or arguments that needed to be reset from their original inputs for this specific finetune job. Type `y` then `Enter` to submit the job, or anything else to abort. 
+Unless you set `confirm_inputs=False` in `together.Finetune.create`, or `--quiet` in the CLI, there will be a confirmation step to make sure you are aware of any defaults or arguments that needed to be reset from their original inputs for this specific finetune job. Type `y` then `Enter` to submit the job, or anything else to abort.
 
 ```
 10-02-2023 11:14:27 - together.finetune - WARNING - Batch size must be 144 for togethercomputer/llama-2-70b-chat model. Setting batch size to 144 (finetune.py:114)
@@ -354,7 +354,7 @@ Here is an example of only part of the `resp` response to highlight some of the 
     'wandb_url': '...'}
 ```
 
-The response `resp` has alot of information for you that you can retrieve again later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing. 
+The response `resp` has alot of information for you that you can retrieve again later with `together.Finetune.retrieve` using the `fine_tune_id` for this job. You can find this `fine_tune_id` in `resp['id']` and use it to check in on how your finetune job is doing.
 
 ```python
 print(together.Finetune.retrieve(fine_tune_id=fine_tune_id)) # retrieves information on finetune event
@@ -363,7 +363,7 @@ print(together.Finetune.is_final_model_available(fine_tune_id=fine_tune_id)) # T
 print(together.Finetune.get_checkpoints(fine_tune_id=fine_tune_id)) # list of checkpoints
 ```
 
-The `get_job_status` should change from `pending` to `running` to `completed` as `is_final_model_available` changes from `False` to `True`. Once in the `running` state, you can retrieve the `wandb_url` and visit this page to monitor the learning progress of this finetune job. 
+The `get_job_status` should change from `pending` to `running` to `completed` as `is_final_model_available` changes from `False` to `True`. Once in the `running` state, you can retrieve the `wandb_url` and visit this page to monitor the learning progress of this finetune job.
 
 Under `model_output_name` you will find the unique name that will be given to the new finetuned model whose creation is underway. This name includes your username, the base model name, your suffix and the datetime the job was created. In addition to using the API to track the status as shown above, you can use `model_output_name` to find helpful features related to the new model within the Jobs section of your account on our webpage.
 
@@ -379,8 +379,8 @@ then calling it to do completions:
 
 ```
 output = together.Complete.create(
-  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ", 
-  model = model_output_name, 
+  prompt = "Isaac Asimov's Three Laws of Robotics are:\n\n1. ",
+  model = model_output_name,
 )
 ```
 
@@ -405,7 +405,7 @@ together.Finetune.download(
 )
 ```
 
-To uncompress this filetype on Mac you need to install zstd. 
+To uncompress this filetype on Mac you need to install zstd.
 
 ```
 brew install zstd
@@ -415,7 +415,7 @@ tar -xvf model.tar
 cd ..
 ```
 
-Within the folder that you uncompress the file, you will find a set of files like this:  
+Within the folder that you uncompress the file, you will find a set of files like this:
 `ls my-model`
 
 ```
@@ -438,8 +438,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 tokenizer = AutoTokenizer.from_pretrained("./my-model")
 
 model = AutoModelForCausalLM.from_pretrained(
-  "./my-model", 
-  trust_remote_code=True, 
+  "./my-model",
+  trust_remote_code=True,
 ).to(device)
 
 input_context = "Space Robots are"
@@ -508,7 +508,7 @@ together files list
 together finetune create -t file-9263d6b7-736f-43fc-8d14-b7f0efae9079 -m togethercomputer/RedPajama-INCITE-Chat-3B-v1
 
 # download your finetuned model (with your fine_tune_id from the id key given during create or from together finetune list)
-together finetune download ft-dd93c727-f35e-41c2-a370-7d55b54128fa 
+together finetune download ft-dd93c727-f35e-41c2-a370-7d55b54128fa
 
 # inference using your new finetuned model (with new finetuned model name from together models list)
 together complete "Space robots are" -m yourname/ft-dd93c727-f35e-41c2-a370-7d55b54128fa-2023-08-16-10-15-09

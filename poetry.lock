@@ -862,17 +862,6 @@ files = [
 ]
 
 [[package]]
-name = "sseclient-py"
-version = "1.8.0"
-description = "SSE client for Python"
-optional = false
-python-versions = "*"
-files = [
-    {file = "sseclient-py-1.8.0.tar.gz", hash = "sha256:c547c5c1a7633230a38dc599a21a2dc638f9b5c297286b48b46b935c71fac3e8"},
-    {file = "sseclient_py-1.8.0-py2.py3-none-any.whl", hash = "sha256:4ecca6dc0b9f963f8384e9d7fd529bf93dd7d708144c4fb5da0e0a1a926fee83"},
-]
-
-[[package]]
 name = "tabulate"
 version = "0.9.0"
 description = "Pretty-print tabular data"
@@ -1108,4 +1097,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "3218f386d21f0e153a59f9920e23094d694e2f7be6a331f6e9720751797a71ba"
+content-hash = "f7a3a722471af6ff27a92cf6824f793b179570a3047a5e235ade01109ff3ee5a"
