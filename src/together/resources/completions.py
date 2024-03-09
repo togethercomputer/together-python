@@ -69,7 +69,7 @@ class Completions:
                 Defaults to None.
 
         Returns:
-            Union[CompletionResponse, Iterator[CompletionChunk]]: Object containing the completions
+            CompletionResponse | Iterator[CompletionChunk]: Object containing the completions
             or an iterator over completion chunks.
         """
         parameter_payload = CompletionRequest(

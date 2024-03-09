@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Dict, Union
+from typing import Dict
 
 from together import resources
 from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
@@ -27,7 +27,7 @@ class Together:
         *,
         api_key: str | None = None,
         base_url: str | None = None,
-        timeout: Union[float, None] = TIMEOUT_SECS,
+        timeout: float | None = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:
@@ -89,7 +89,7 @@ class AsyncTogether:
         *,
         api_key: str | None = None,
         base_url: str | None = None,
-        timeout: Union[float, None] = TIMEOUT_SECS,
+        timeout: float | None = TIMEOUT_SECS,
         max_retries: int = MAX_CONNECTION_RETRIES,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 from pydantic import Field
 from requests import RequestException
@@ -22,11 +22,11 @@ class TogetherErrorResponse(BaseModel):
 class TogetherException(Exception):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
-        response: Optional[Union[str]] = None,
-        headers: Optional[Union[str, Dict[Any, Any]]] = None,
-        request_id: Optional[str] = "",
-        http_status: Optional[int] = None,
+        message: Exception | str | RequestException | None = None,
+        response: str | None = None,
+        headers: str | Dict[Any, Any] | None = None,
+        request_id: str | None = None,
+        http_status: int | None = None,
     ) -> None:
         super(TogetherException, self).__init__(message)
 
@@ -48,7 +48,7 @@ class TogetherException(Exception):
 class AuthenticationError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -57,7 +57,7 @@ class AuthenticationError(TogetherException):
 class ResponseError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -66,14 +66,14 @@ class ResponseError(TogetherException):
 class JSONError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
 
 
 class InstanceError(TogetherException):
-    def __init__(self, model: Optional[str] = "model", **kwargs: Any) -> None:
+    def __init__(self, model: str | None = "model", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.message = f"""No running instances for {model}.
                 You can start an instance with one of the following methods:
@@ -88,7 +88,7 @@ class InstanceError(TogetherException):
 class RateLimitError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -97,7 +97,7 @@ class RateLimitError(TogetherException):
 class FileTypeError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -106,7 +106,7 @@ class FileTypeError(TogetherException):
 class AttributeError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -115,7 +115,7 @@ class AttributeError(TogetherException):
 class Timeout(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -124,7 +124,7 @@ class Timeout(TogetherException):
 class APIConnectionError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -133,8 +133,7 @@ class APIConnectionError(TogetherException):
 class InvalidRequestError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
-        params: Optional[Dict[str, Any]] = None,
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -143,7 +142,7 @@ class InvalidRequestError(TogetherException):
 class APIError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -152,7 +151,7 @@ class APIError(TogetherException):
 class ServiceUnavailableError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -161,7 +160,7 @@ class ServiceUnavailableError(TogetherException):
 class DownloadError(TogetherException):
     def __init__(
         self,
-        message: Optional[Union[Exception, str, RequestException]] = "",
+        message: str | Exception | RequestException | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)

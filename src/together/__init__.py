@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import TYPE_CHECKING, Callable
 
 from together.version import VERSION
 from together import constants
@@ -23,11 +25,9 @@ if TYPE_CHECKING:
     import requests
     from aiohttp import ClientSession
 
-requestssession: Optional[
-    Union["requests.Session", Callable[[], "requests.Session"]]
-] = None
+requestssession: "requests.Session" | Callable[[], "requests.Session"] | None = None
 
-aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
+aiosession: ContextVar["ClientSession" | None] = ContextVar(
     "aiohttp-session", default=None
 )
 

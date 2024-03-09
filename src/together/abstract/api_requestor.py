@@ -12,9 +12,7 @@ from typing import (
     AsyncGenerator,
     Dict,
     Iterator,
-    Optional,
     Tuple,
-    Union,
     overload,
 )
 from urllib.parse import urlencode, urlsplit, urlunsplit
@@ -68,7 +66,7 @@ def _make_session(max_retries: int | None = None) -> requests.Session:
     return s
 
 
-def parse_stream_helper(line: bytes) -> Optional[str]:
+def parse_stream_helper(line: bytes) -> str | None:
     if line and line.startswith(b"data:"):
         if line.startswith(b"data: "):
             # SSE event may be valid when it contains whitespace
@@ -124,7 +122,7 @@ class APIRequestor:
         headers: Dict[str, str] | None,
         files: Dict[str, Any] | None,
         stream: Literal[True],
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
@@ -139,7 +137,7 @@ class APIRequestor:
         files: Dict[str, Any] | None = ...,
         *,
         stream: Literal[True],
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
@@ -153,7 +151,7 @@ class APIRequestor:
         headers: Dict[str, str] | None = ...,
         files: Dict[str, Any] | None = ...,
         stream: Literal[False] = ...,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
@@ -167,7 +165,7 @@ class APIRequestor:
         headers: Dict[str, str] | None = ...,
         files: Dict[str, Any] | None = ...,
         stream: bool = ...,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
         pass
@@ -181,7 +179,7 @@ class APIRequestor:
         headers: Dict[str, str] | None = ...,
         files: Dict[str, Any] | None = ...,
         stream: bool = ...,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
         *,
         return_raw: Literal[True],
     ) -> Tuple[requests.Response, bool, str]:
@@ -195,7 +193,7 @@ class APIRequestor:
         headers: Dict[str, str] | None = None,
         files: Dict[str, Any] | None = None,
         stream: bool = False,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        request_timeout: float | Tuple[float, float] | None = None,
         return_raw: bool = False,
     ) -> Tuple[
         TogetherResponse | Iterator[TogetherResponse] | requests.Response,
@@ -227,7 +225,7 @@ class APIRequestor:
         headers: Dict[str, str] | None,
         files: Dict[str, Any] | None,
         stream: Literal[True],
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
         pass
 
@@ -241,7 +239,7 @@ class APIRequestor:
         files: Dict[str, Any] | None = ...,
         *,
         stream: Literal[True],
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
         pass
 
@@ -254,7 +252,7 @@ class APIRequestor:
         headers: Dict[str, str] | None = ...,
         files: Dict[str, Any] | None = ...,
         stream: Literal[False] = ...,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
@@ -267,10 +265,8 @@ class APIRequestor:
         headers: Dict[str, str] | None = ...,
         files: Dict[str, Any] | None = ...,
         stream: bool = ...,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = ...,
-    ) -> Tuple[
-        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
-    ]:
+        request_timeout: float | Tuple[float, float] | None = ...,
+    ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
         pass
 
     async def arequest(
@@ -281,10 +277,8 @@ class APIRequestor:
         headers: Dict[str, str] | None = None,
         files: Dict[str, Any] | None = None,
         stream: bool = False,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
-    ) -> Tuple[
-        Union[TogetherResponse, AsyncGenerator[TogetherResponse, None]], bool, str
-    ]:
+        request_timeout: float | Tuple[float, float] | None = None,
+    ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
         ctx = AioHTTPSession()
         session = await ctx.__aenter__()
         result = None
@@ -401,7 +395,7 @@ class APIRequestor:
 
     @classmethod
     def _validate_headers(
-        cls, supplied_headers: Optional[Dict[str, str]]
+        cls, supplied_headers: Dict[str, str] | None
     ) -> Dict[str, str]:
         headers: Dict[str, str] = {}
         if supplied_headers is None:
@@ -470,7 +464,7 @@ class APIRequestor:
         supplied_headers: Dict[str, str] | None = None,
         files: Dict[str, Any] | None = None,
         stream: bool = False,
-        request_timeout: Union[float, Tuple[float, float]] | None = None,
+        request_timeout: float | Tuple[float, float] | None = None,
     ) -> requests.Response:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -522,7 +516,7 @@ class APIRequestor:
         params: Dict[str, Any] | None = None,
         supplied_headers: Dict[str, str] | None = None,
         files: Dict[str, Any] | None = None,
-        request_timeout: Union[float, Tuple[float, float]] | None = None,
+        request_timeout: float | Tuple[float, float] | None = None,
     ) -> aiohttp.ClientResponse:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -570,7 +564,7 @@ class APIRequestor:
 
     def _interpret_response(
         self, result: requests.Response, stream: bool
-    ) -> Tuple[Union[TogetherResponse, Iterator[TogetherResponse]], bool]:
+    ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (

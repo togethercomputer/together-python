@@ -7,7 +7,7 @@ import platform
 import re
 import sys
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict
 
 
 if TYPE_CHECKING:
@@ -105,7 +105,7 @@ def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
     return response_json
 
 
-def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:
+def round_to_closest_multiple_of_32(batch_size: int | None) -> int:
     if batch_size is None:
         return 32
     batch_size = int(batch_size)
@@ -116,7 +116,7 @@ def round_to_closest_multiple_of_32(batch_size: Optional[int]) -> int:
     return 32 * ((batch_size + 31) // 32)
 
 
-def bytes_to_human_readable(num: float, suffix: Optional[str] = "B") -> str:
+def bytes_to_human_readable(num: float, suffix: str | None = "B") -> str:
     for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
         if abs(num) < 1024.0:
             return f"{num:3.1f}{unit}{suffix}"
@@ -132,7 +132,7 @@ def nanodollars_to_dollars(price: int) -> float:
     return (price * 4000) / 1000000000
 
 
-def default_api_key(api_key: Optional[str] = None) -> str | None:
+def default_api_key(api_key: str | None = None) -> str | None:
     if api_key:
         return api_key
     if os.environ.get("TOGETHER_API_KEY"):
