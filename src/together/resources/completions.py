@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import AsyncGenerator, Iterator, List
 
 from together.abstract import api_requestor

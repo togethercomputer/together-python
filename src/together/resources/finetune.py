@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from together.abstract import api_requestor
 from together.downloadmanager import DownloadManager
 from together.together_response import TogetherResponse
