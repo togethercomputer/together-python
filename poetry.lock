@@ -922,6 +922,20 @@ doc = ["cairosvg (>=2.5.2,<3.0.0)", "mdx-include (>=1.4.1,<2.0.0)", "mkdocs (>=1
 test = ["black (>=22.3.0,<23.0.0)", "coverage (>=6.2,<7.0)", "isort (>=5.0.6,<6.0.0)", "mypy (==0.910)", "pytest (>=4.4.0,<8.0.0)", "pytest-cov (>=2.10.0,<5.0.0)", "pytest-sugar (>=0.9.4,<0.10.0)", "pytest-xdist (>=1.32.0,<4.0.0)", "rich (>=10.11.0,<14.0.0)", "shellingham (>=1.3.0,<2.0.0)"]
 
 [[package]]
+name = "types-requests"
+version = "2.31.0.20240218"
+description = "Typing stubs for requests"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-requests-2.31.0.20240218.tar.gz", hash = "sha256:f1721dba8385958f504a5386240b92de4734e047a08a40751c1654d1ac3349c5"},
+    {file = "types_requests-2.31.0.20240218-py3-none-any.whl", hash = "sha256:a82807ec6ddce8f00fe0e949da6d6bc1fbf1715420218a9640d695f70a9e5a9b"},
+]
+
+[package.dependencies]
+urllib3 = ">=2"
+
+[[package]]
 name = "types-tabulate"
 version = "0.9.0.20240106"
 description = "Typing stubs for tabulate"
@@ -1077,4 +1091,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "004050d3ae710593bc79f79184f17b0238c177381c8702abe472d85773bb04f6"
+content-hash = "acb4459f286058b9e78192aa37589e7751c430b18323b32c7e3c367b735502a8"
