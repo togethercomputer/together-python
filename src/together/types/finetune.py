@@ -4,7 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Literal
 
-from pydantic import Field, StringConstraints
+from pydantic import Field
 
 from together.types.abstract import BaseModel
 from together.types.common import (

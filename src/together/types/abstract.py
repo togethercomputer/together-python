@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Dict
 
 import pydantic
 from pydantic import ConfigDict
-from typing_extensions import ClassVar, override
+from typing_extensions import ClassVar
 
 from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
 

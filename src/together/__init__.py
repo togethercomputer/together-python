@@ -3,18 +3,18 @@ from __future__ import annotations
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, Callable
 
-from together.version import VERSION
-from together import constants
 from together import (
-    resources,
-    types,
     abstract,
+    client,
+    constants,
     downloadmanager,
     error,
+    resources,
     together_response,
+    types,
     utils,
-    client,
 )
+from together.version import VERSION
 
 
 version = VERSION
@@ -31,7 +31,7 @@ aiosession: ContextVar["ClientSession" | None] = ContextVar(
     "aiohttp-session", default=None
 )
 
-from together.client import AsyncTogether, Together, Client, AsyncClient
+from together.client import AsyncClient, AsyncTogether, Client, Together
 
 
 __all__ = [

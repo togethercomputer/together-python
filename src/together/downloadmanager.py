@@ -14,13 +14,13 @@ from filelock import FileLock
 from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
 
+from together.abstract import api_requestor
 from together.constants import (
     DISABLE_TQDM,
     DOWNLOAD_BLOCK_SIZE,
     DOWNLOAD_CONCURRENCY,
     MAX_CONNECTION_RETRIES,
 )
-from together.abstract import api_requestor
 from together.error import DownloadError, FileTypeError
 from together.types import TogetherClient
 from together.utils import log_warn
