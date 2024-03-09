@@ -64,10 +64,18 @@ aiosession: ContextVar[Optional[&#34;ClientSession&#34;]] = ContextVar(
     &#34;aiohttp-session&#34;, default=None
 )
 
-from together.client import AsyncTogether, Together
+from together.client import AsyncTogether, Together, Client, AsyncClient
 
 
-__all__ = [&#34;aiosession&#34;, &#34;version&#34;, &#34;min_samples&#34;, &#34;Together&#34;, &#34;AsyncTogether&#34;]</code></pre>
+__all__ = [
+    &#34;aiosession&#34;,
+    &#34;version&#34;,
+    &#34;min_samples&#34;,
+    &#34;Together&#34;,
+    &#34;AsyncTogether&#34;,
+    &#34;Client&#34;,
+    &#34;AsyncClient&#34;,
+]</code></pre>
 </details>
 </section>
 <section>
@@ -124,6 +132,108 @@ __all__ = [&#34;aiosession&#34;, &#34;version&#34;, &#34;min_samples&#34;, &#34;
 <dl>
 <dt id="together.AsyncTogether"><code class="flex name class">
 <span>class <span class="ident">AsyncTogether</span></span>
+<span>(</span><span>*, api_key: str | None = None, base_url: str | None = None, timeout: Optional[float] = 600, max_retries: int = 2, supplied_headers: Optional[Dict[str, str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a new async together client instance.</p>
+<p>This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+- <code>api_key</code> from <code>TOGETHER_API_KEY</code>
+- <code>base_url</code> from <code>TOGETHER_BASE_URL</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncTogether:
+    completions: resources.AsyncCompletions
+    chat: resources.AsyncChat
+    embeddings: resources.AsyncEmbeddings
+    files: resources.AsyncFiles
+    # images: resources.AsyncImages
+    # audio: resources.AsyncAudio
+    # models: resources.AsyncModels
+    fine_tuning: resources.AsyncFineTuning
+
+    # client options
+    client: TogetherClient
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout: Union[float, None] = TIMEOUT_SECS,
+        max_retries: int = MAX_CONNECTION_RETRIES,
+        supplied_headers: Dict[str, str] | None = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Construct a new async together client instance.
+
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `TOGETHER_API_KEY`
+        - `base_url` from `TOGETHER_BASE_URL`
+        &#34;&#34;&#34;
+
+        if api_key is None:
+            api_key = os.environ.get(&#34;TOGETHER_API_KEY&#34;)
+
+        if api_key is None:
+            raise TogetherException(
+                &#34;The api_key client option must be set either by passing api_key to the client or by setting the &#34;
+                &#34;TOGETHER_API_KEY environment variable&#34;
+            )
+
+        if base_url is None:
+            base_url = os.environ.get(&#34;TOGETHER_BASE_URL&#34;)
+
+        if base_url is None:
+            base_url = BASE_URL
+
+        self.client = TogetherClient(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            supplied_headers=supplied_headers,
+        )
+
+        self.completions = resources.AsyncCompletions(self.client)
+        self.chat = resources.AsyncChat(self.client)
+        self.embeddings = resources.AsyncEmbeddings(self.client)
+        self.files = resources.AsyncFiles(self.client)
+        # self.images = resources.AsyncImages(self)
+        # self.audio = resources.AsyncAudio(self)
+        # self.models = resources.AsyncModels(self)
+        self.fine_tuning = resources.AsyncFineTuning(self.client)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.AsyncTogether.chat"><code class="name">var <span class="ident">chat</span> : <a title="together.resources.chat.AsyncChat" href="resources/chat/index.html#together.resources.chat.AsyncChat">AsyncChat</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.AsyncTogether.client"><code class="name">var <span class="ident">client</span> : <a title="together.types.abstract.TogetherClient" href="types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.AsyncTogether.completions"><code class="name">var <span class="ident">completions</span> : <a title="together.resources.completions.AsyncCompletions" href="resources/completions.html#together.resources.completions.AsyncCompletions">AsyncCompletions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.AsyncTogether.embeddings"><code class="name">var <span class="ident">embeddings</span> : <a title="together.resources.embeddings.AsyncEmbeddings" href="resources/embeddings.html#together.resources.embeddings.AsyncEmbeddings">AsyncEmbeddings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.AsyncTogether.files"><code class="name">var <span class="ident">files</span> : <a title="together.resources.files.AsyncFiles" href="resources/files.html#together.resources.files.AsyncFiles">AsyncFiles</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.AsyncTogether.fine_tuning"><code class="name">var <span class="ident">fine_tuning</span> : <a title="together.resources.finetune.AsyncFineTuning" href="resources/finetune.html#together.resources.finetune.AsyncFineTuning">AsyncFineTuning</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+<dt id="together.AsyncTogether"><code class="flex name class">
+<span>class <span class="ident">AsyncClient</span></span>
 <span>(</span><span>*, api_key: str | None = None, base_url: str | None = None, timeout: Optional[float] = 600, max_retries: int = 2, supplied_headers: Optional[Dict[str, str]] = None)</span>
 </code></dt>
 <dd>
@@ -326,6 +436,108 @@ __all__ = [&#34;aiosession&#34;, &#34;version&#34;, &#34;min_samples&#34;, &#34;
 </dd>
 </dl>
 </dd>
+<dt id="together.Together"><code class="flex name class">
+<span>class <span class="ident">Client</span></span>
+<span>(</span><span>*, api_key: str | None = None, base_url: str | None = None, timeout: Optional[float] = 600, max_retries: int = 2, supplied_headers: Optional[Dict[str, str]] = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Construct a new synchronous together client instance.</p>
+<p>This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+- <code>api_key</code> from <code>TOGETHER_API_KEY</code>
+- <code>base_url</code> from <code>TOGETHER_BASE_URL</code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Together:
+    completions: resources.Completions
+    chat: resources.Chat
+    embeddings: resources.Embeddings
+    files: resources.Files
+    # images: resources.Images
+    # audio: resources.Audio
+    # models: resources.Models
+    fine_tuning: resources.FineTuning
+
+    # client options
+    client: TogetherClient
+
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout: Union[float, None] = TIMEOUT_SECS,
+        max_retries: int = MAX_CONNECTION_RETRIES,
+        supplied_headers: Dict[str, str] | None = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;Construct a new synchronous together client instance.
+
+        This automatically infers the following arguments from their corresponding environment variables if they are not provided:
+        - `api_key` from `TOGETHER_API_KEY`
+        - `base_url` from `TOGETHER_BASE_URL`
+        &#34;&#34;&#34;
+
+        if api_key is None:
+            api_key = os.environ.get(&#34;TOGETHER_API_KEY&#34;)
+
+        if api_key is None:
+            raise TogetherException(
+                &#34;The api_key client option must be set either by passing api_key to the client or by setting the &#34;
+                &#34;TOGETHER_API_KEY environment variable&#34;
+            )
+
+        if base_url is None:
+            base_url = os.environ.get(&#34;TOGETHER_BASE_URL&#34;)
+
+        if base_url is None:
+            base_url = BASE_URL
+
+        self.client = TogetherClient(
+            api_key=api_key,
+            base_url=base_url,
+            timeout=timeout,
+            max_retries=max_retries,
+            supplied_headers=supplied_headers,
+        )
+
+        self.completions = resources.Completions(self.client)
+        self.chat = resources.Chat(self.client)
+        self.embeddings = resources.Embeddings(self.client)
+        self.files = resources.Files(self.client)
+        # self.images = resources.Images(self)
+        # self.audio = resources.Audio(self)
+        # self.models = resources.Models(self)
+        self.fine_tuning = resources.FineTuning(self.client)</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="together.Together.chat"><code class="name">var <span class="ident">chat</span> : <a title="together.resources.chat.Chat" href="resources/chat/index.html#together.resources.chat.Chat">Chat</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.Together.client"><code class="name">var <span class="ident">client</span> : <a title="together.types.abstract.TogetherClient" href="types/abstract.html#together.types.abstract.TogetherClient">TogetherClient</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.Together.completions"><code class="name">var <span class="ident">completions</span> : <a title="together.resources.completions.Completions" href="resources/completions.html#together.resources.completions.Completions">Completions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.Together.embeddings"><code class="name">var <span class="ident">embeddings</span> : <a title="together.resources.embeddings.Embeddings" href="resources/embeddings.html#together.resources.embeddings.Embeddings">Embeddings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.Together.files"><code class="name">var <span class="ident">files</span> : <a title="together.resources.files.Files" href="resources/files.html#together.resources.files.Files">Files</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="together.Together.fine_tuning"><code class="name">var <span class="ident">fine_tuning</span> : <a title="together.resources.finetune.FineTuning" href="resources/finetune.html#together.resources.finetune.FineTuning">FineTuning</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -360,6 +572,28 @@ __all__ = [&#34;aiosession&#34;, &#34;version&#34;, &#34;min_samples&#34;, &#34;
 <li><code><a title="together.AsyncTogether.embeddings" href="#together.AsyncTogether.embeddings">embeddings</a></code></li>
 <li><code><a title="together.AsyncTogether.files" href="#together.AsyncTogether.files">files</a></code></li>
 <li><code><a title="together.AsyncTogether.fine_tuning" href="#together.AsyncTogether.fine_tuning">fine_tuning</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.AsyncTogether" href="#together.AsyncTogether">AsyncTogether</a></code></h4>
+<ul class="two-column">
+<li><code><a title="together.AsyncTogether.chat" href="#together.AsyncTogether.chat">chat</a></code></li>
+<li><code><a title="together.AsyncTogether.client" href="#together.AsyncTogether.client">client</a></code></li>
+<li><code><a title="together.AsyncTogether.completions" href="#together.AsyncTogether.completions">completions</a></code></li>
+<li><code><a title="together.AsyncTogether.embeddings" href="#together.AsyncTogether.embeddings">embeddings</a></code></li>
+<li><code><a title="together.AsyncTogether.files" href="#together.AsyncTogether.files">files</a></code></li>
+<li><code><a title="together.AsyncTogether.fine_tuning" href="#together.AsyncTogether.fine_tuning">fine_tuning</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="together.Together" href="#together.Together">Together</a></code></h4>
+<ul class="two-column">
+<li><code><a title="together.Together.chat" href="#together.Together.chat">chat</a></code></li>
+<li><code><a title="together.Together.client" href="#together.Together.client">client</a></code></li>
+<li><code><a title="together.Together.completions" href="#together.Together.completions">completions</a></code></li>
+<li><code><a title="together.Together.embeddings" href="#together.Together.embeddings">embeddings</a></code></li>
+<li><code><a title="together.Together.files" href="#together.Together.files">files</a></code></li>
+<li><code><a title="together.Together.fine_tuning" href="#together.Together.fine_tuning">fine_tuning</a></code></li>
 </ul>
 </li>
 <li>
