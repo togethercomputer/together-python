@@ -25,6 +25,7 @@ class ObjectType(str, Enum):
     ChatCompletionChunk = "chat.completion.chunk"
     Embedding = "embedding"
     FinetuneEvent = "fine-tune-event"
+    File = "file"
 
 
 class LogprobsPart(BaseModel):

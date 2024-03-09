@@ -25,8 +25,6 @@ class Files:
         )
 
         assert isinstance(response, TogetherResponse)
-
-        print(response.data)
         return EmbeddingResponse(**response.data)
 
 

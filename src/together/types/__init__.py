@@ -11,6 +11,7 @@ from together.types.completions import (
 )
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 from together.types.finetune import (
+    FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
     FinetuneRequest,
@@ -32,4 +33,5 @@ __all__ = [
     "FinetuneResponse",
     "FinetuneList",
     "FinetuneListEvents",
+    "FinetuneDownloadResult",
 ]

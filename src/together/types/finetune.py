@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import List, Literal
 
 from pydantic import Field
@@ -121,3 +122,10 @@ class FinetuneList(BaseModel):
 class FinetuneListEvents(BaseModel):
     object: Literal["list"] | None = None
     data: List[FinetuneEvent] | None = None
+
+
+class FinetuneDownloadResult(BaseModel):
+    object: Literal["local"] | None = None
+    id: str | None = None
+    checkpoint_step: int | None = None
+    filename: Path | None = None

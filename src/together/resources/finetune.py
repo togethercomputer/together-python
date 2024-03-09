@@ -2,6 +2,7 @@ from together.abstract import api_requestor
 from together.downloadmanager import DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
+    FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
     FinetuneRequest,
@@ -95,7 +96,7 @@ class FineTuning:
 
     def download(
         self, id: str, output: str | None = None, checkpoint_step: int = -1
-    ) -> str:
+    ) -> FinetuneDownloadResult:
         url = f"/finetune/download?ft_id={id}"
 
         if checkpoint_step > 0:
@@ -107,7 +108,12 @@ class FineTuning:
 
         downloaded_filename = download_manager.download(url, output, remote_name)
 
-        return downloaded_filename
+        return FinetuneDownloadResult(
+            object="local",
+            id=id,
+            checkpoint_step=checkpoint_step,
+            filename=downloaded_filename,
+        )
 
 
 class AsyncFineTuning:

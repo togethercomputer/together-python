@@ -72,7 +72,7 @@ def download_part(
                 f.seek(start_byte)
                 f.write(response.content)
 
-            return
+            return None
 
         except Exception:
             log_warn(
@@ -100,7 +100,7 @@ class DownloadManager:
     ) -> Tuple[Path, int]:
         total_size_in_bytes = 0
 
-        parts = headers.get("Content-Range").split(" ")
+        parts = headers.get("Content-Range", "").split(" ")
         if len(parts) == 2:
             range_parts = parts[1].split("/")
             if len(range_parts) == 2:
@@ -109,7 +109,7 @@ class DownloadManager:
         assert total_size_in_bytes != 0, "Unable to retrieve remote file."
 
         if output:
-            return output, total_size_in_bytes
+            return Path(output), total_size_in_bytes
 
         content_type = str(headers.get("content-type"))
 
@@ -118,7 +118,7 @@ class DownloadManager:
             "Please specify an `output` file name."
         )
 
-        output: str = remote_name.split("/")[1]
+        output = remote_name.split("/")[1]
 
         if step > 0:
             output += f"-checkpoint-{step}"
@@ -136,7 +136,7 @@ class DownloadManager:
 
     def download(
         self, url: str, output: str | None = None, remote_name: str | None = None
-    ) -> str:
+    ) -> Path:
         headers = download_part(
             requestor=self.requestor,
             url=url,
@@ -145,13 +145,15 @@ class DownloadManager:
             first_chunk=True,
         )
 
+        assert isinstance(headers, CaseInsensitiveDict)
+
         file_path, file_size = self._prepare_output(
             headers=headers,
             output=output,
             remote_name=remote_name,
         )
 
-        temp_file_manager = partial(  # type: ignore
+        temp_file_manager = partial(
             tempfile.NamedTemporaryFile, mode="wb", dir=file_path.parent, delete=False
         )
 
@@ -184,7 +186,7 @@ class DownloadManager:
                 total=file_size,
                 unit="B",
                 unit_scale=True,
-                desc=f"Downloading file {file_path}",
+                desc=f"Downloading file {file_path.name}",
                 disable=bool(DISABLE_TQDM),
             ) as pbar:
                 for future in as_completed(futures):
@@ -198,6 +200,6 @@ class DownloadManager:
                 f"remote file size `{file_size}` bytes."
             )
 
-        _chmod_and_replace(temp_file.name, file_path)
+        _chmod_and_replace(temp_file.name, str(file_path))
 
         return file_path

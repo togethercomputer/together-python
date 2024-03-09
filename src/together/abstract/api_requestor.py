@@ -9,7 +9,6 @@ from typing import (
     AsyncContextManager,
     AsyncGenerator,
     Dict,
-    Generator,
     Iterator,
     Optional,
     Tuple,
@@ -327,75 +326,75 @@ class APIRequestor:
     @classmethod
     def handle_error_response(
         cls,
-        rbody: str,
+        resp: TogetherResponse,
         rcode: int,
-        resp: Dict[str, Dict[str, Any]],
-        rheaders: Dict[str, Any],
         stream_error: bool = False,
-    ) -> Exception | None:
+    ) -> Exception:
         try:
-            error_data: Dict[str, Any] = resp["error"]
+            assert isinstance(resp.data, dict)
+            error_resp = resp.data.get("error")
+            assert isinstance(error_resp, dict)
+            error_data = error.TogetherErrorResponse(**(error_resp))
         except (KeyError, TypeError):
             raise error.APIError(
                 "Invalid response object from API: %r (HTTP response code "
-                "was %d)" % (rbody, rcode),
-                http_body=rbody,
+                "was %d)" % (resp.data, rcode),
                 http_status=rcode,
-                response=resp,
+                response=resp.data,
             )
 
         utils.log_info(
             "Together API error received",
-            error_code=error_data.get("code"),
-            error_type=error_data.get("error_type"),
-            error_message=error_data.get("error"),
-            error_param=error_data.get("param"),
+            error_code=error_data.code,
+            error_type=error_data.type_,
+            error_message=error_data.message,
+            error_param=error_data.param,
             stream_error=stream_error,
         )
 
         # Rate limits were previously coded as 400's with code 'rate_limit'
         if rcode == 429:
             return error.RateLimitError(
-                error_data,
-                http_body=rbody,
+                error_data.message,
                 http_status=rcode,
-                response=resp,
-                headers=rheaders,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
             )
         elif rcode in [400, 404, 415]:
             return error.InvalidRequestError(
-                error_data,
-                http_body=rbody,
+                error_data.message,
                 http_status=rcode,
-                response=resp,
-                headers=rheaders,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
             )
         elif rcode == 401:
             return error.AuthenticationError(
-                error_data,
-                http_body=rbody,
+                error_data.message,
                 http_status=rcode,
-                response=resp,
-                headers=rheaders,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
             )
 
         elif stream_error:
-            parts = [error_data.get("error"), "(Error occurred while streaming.)"]
+            parts = [error_data.message, "(Error occurred while streaming.)"]
             message = " ".join([p for p in parts if p is not None])
             return error.APIError(
                 message,
-                http_body=rbody,
                 http_status=rcode,
-                response=resp,
-                headers=rheaders,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
             )
         else:
             return error.APIError(
-                f"{error_data.get('error')} {rbody} {rcode} {resp} {rheaders}",
-                http_body=rbody,
+                error_data.message,
                 http_status=rcode,
-                response=resp,
-                headers=rheaders,
+                response=resp.data,
+                headers=resp._headers,
+                request_id=resp.request_id,
             )
 
     @classmethod
@@ -423,16 +422,17 @@ class APIRequestor:
 
     def _prepare_request_raw(
         self,
-        url,
-        supplied_headers,
-        method,
-        params,
-        files,
-    ) -> Tuple[str, Dict[str, str], Optional[bytes]]:
+        url: str,
+        supplied_headers: Dict[str, str] | None = None,
+        method: str | None = None,
+        params: Dict[str, Any] | None = None,
+        files: Dict[str, Any] | None = None,
+    ) -> Tuple[str, Dict[str, str], Dict[str, str] | bytes | None]:
         abs_url = "%s%s" % (self.api_base, url)
         headers = self._validate_headers(supplied_headers or self.supplied_headers)
 
         data = None
+        data_bytes = None
         if method == "get" or method == "delete":
             if params:
                 encoded_params = urlencode(
@@ -443,7 +443,7 @@ class APIRequestor:
             if params and files:
                 data = params
             if params and not files:
-                data = json.dumps(params).encode()
+                data_bytes = json.dumps(params).encode()
                 headers["Content-Type"] = "application/json"
         else:
             raise error.APIConnectionError(
@@ -455,20 +455,20 @@ class APIRequestor:
         headers = utils.get_headers(method, self.api_key, headers)
 
         utils.log_debug("Request to Together API", method=method, path=abs_url)
-        utils.log_debug("Post details", data=data)
+        utils.log_debug("Post details", data=(data or data_bytes))
 
-        return abs_url, headers, data
+        return abs_url, headers, (data or data_bytes)
 
     def request_raw(
         self,
-        method,
-        url,
+        method: str,
+        url: str,
         *,
-        params=None,
-        supplied_headers: Optional[Dict[str, str]] = None,
-        files=None,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
         stream: bool = False,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
     ) -> requests.Response:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -509,18 +509,18 @@ class APIRequestor:
             request_id=result.headers.get("CF-RAY"),
         )
 
-        return result
+        return result  # type: ignore
 
     async def arequest_raw(
         self,
-        method,
-        url,
-        session,
+        method: str,
+        url: str,
+        session: aiohttp.ClientSession,
         *,
-        params=None,
-        supplied_headers: Optional[Dict[str, str]] = None,
-        files=None,
-        request_timeout: Optional[Union[float, Tuple[float, float]]] = None,
+        params: Dict[str, Any] | None = None,
+        supplied_headers: Dict[str, str] | None = None,
+        files: Dict[str, Any] | None = None,
+        request_timeout: Union[float, Tuple[float, float]] | None = None,
     ) -> aiohttp.ClientResponse:
         abs_url, headers, data = self._prepare_request_raw(
             url, supplied_headers, method, params, files
@@ -542,14 +542,12 @@ class APIRequestor:
             )
             headers["Content-Type"] = content_type
         request_kwargs = {
-            "method": method,
-            "url": abs_url,
             "headers": headers,
             "data": data,
             "timeout": timeout,
         }
         try:
-            result = await session.request(**request_kwargs)
+            result = await session.request(method=method, url=abs_url, **request_kwargs)
             utils.log_info(
                 "Together API response",
                 path=abs_url,
@@ -592,7 +590,7 @@ class APIRequestor:
 
     async def _interpret_async_response(
         self, result: aiohttp.ClientResponse, stream: bool
-    ) -> tuple[Generator[TogetherResponse, Any, None], bool] | tuple[
+    ) -> tuple[AsyncGenerator[TogetherResponse, None], bool] | tuple[
         TogetherResponse, bool
     ]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
@@ -621,11 +619,11 @@ class APIRequestor:
             )
 
     def _interpret_response_line(
-        self, rbody: str, rcode: int, rheaders, stream: bool
+        self, rbody: str, rcode: int, rheaders: Any, stream: bool
     ) -> TogetherResponse:
         # HTTP 204 response code does not have any content in the body.
         if rcode == 204:
-            return TogetherResponse(None, rheaders)
+            return TogetherResponse({}, rheaders)
 
         if rcode == 503:
             raise error.ServiceUnavailableError(
@@ -636,7 +634,7 @@ class APIRequestor:
             )
         try:
             if "text/plain" in rheaders.get("Content-Type", ""):
-                data = rbody
+                data: Dict[str, Any] = {"message": rbody}
             else:
                 data = json.loads(rbody)
         except (JSONDecodeError, UnicodeDecodeError) as e:
@@ -647,13 +645,10 @@ class APIRequestor:
                 headers=rheaders,
             ) from e
         resp = TogetherResponse(data, rheaders)
-        # In the future, we might add a "status" parameter to errors
-        # to better handle the "error while streaming" case.
-        stream_error = stream and "error" in resp.data
-        if stream_error or not 200 <= rcode < 300:
-            raise self.handle_error_response(
-                rbody, rcode, resp.data, rheaders, stream_error=stream_error
-            )
+
+        # Handle streaming errors
+        if stream and not 200 <= rcode < 300:
+            raise self.handle_error_response(resp, rcode, stream_error=True)
         return resp
 
 
