@@ -44,7 +44,12 @@ tell Poetry to use the virtualenv python environment (`poetry config virtualenvs
 Install Together development requirements (for running Together, running examples, linting, formatting, and tests):
 
 ```bash
-poetry install --with --with quality,tests
+$ poetry install --with quality,tests
+```
+
+And set up pre-commit for auto-formatting and linting
+```bash
+$ pre-commit install
 ```
 
 ### Formatting and Linting
@@ -52,9 +57,7 @@ poetry install --with --with quality,tests
 Run these locally before submitting a PR; the CI system will check also.
 
 ```
-$ black .
-$ ruff --fix .
-$ mypy --strict .
+$ pre-commit run --all-files
 ```
 
 ### Working with Optional Dependencies
@@ -80,6 +83,12 @@ To introduce the dependency to the pyproject.toml file correctly, please do the 
 test makes use of lightweight fixtures to test the logic of the code.
 5. Please use the `@pytest.mark.requires(package_name)` decorator for any tests that require the dependency.
 
+### Updating Documentation
+
+Documentation under `docs/together` are auto-generated with `pdoc3`. To update documentation, run:
+```bash
+pdoc -o docs src/together/ --html --force
+```
 
 ## :repeat: Submitting Pull Requests
 
