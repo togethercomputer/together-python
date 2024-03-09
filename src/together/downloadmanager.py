@@ -176,40 +176,42 @@ class DownloadManager:
         # Prevent parallel downloads of the same file with a lock.
         lock_path = file_path.with_suffix(".lock")
 
-        with (
-            ThreadPoolExecutor(max_workers=DOWNLOAD_CONCURRENCY) as executor,
-            FileLock(lock_path),
-            temp_file_manager() as temp_file,
-        ):
-            futures = []
+        # layered with-as statements instead of using grouping parentheses for python<3.10
+        # https://docs.python.org/3/reference/compound_stmts.html#the-with-statement
+        with ThreadPoolExecutor(max_workers=DOWNLOAD_CONCURRENCY) as executor:
+            with FileLock(lock_path):
+                with temp_file_manager() as temp_file:
+                    futures = []
 
-            start_byte = 0
+                    start_byte = 0
 
-            while start_byte < file_size:
-                end_byte = min(start_byte + DOWNLOAD_BLOCK_SIZE - 1, file_size - 1)
+                    while start_byte < file_size:
+                        end_byte = min(
+                            start_byte + DOWNLOAD_BLOCK_SIZE - 1, file_size - 1
+                        )
 
-                futures.append(
-                    executor.submit(
-                        download_part,
-                        self.requestor,
-                        url,
-                        start_byte,
-                        end_byte,
-                        temp_file.name,
-                    )
-                )
+                        futures.append(
+                            executor.submit(
+                                download_part,
+                                self.requestor,
+                                url,
+                                start_byte,
+                                end_byte,
+                                temp_file.name,
+                            )
+                        )
 
-                start_byte = end_byte + 1
+                        start_byte = end_byte + 1
 
-            with tqdm(
-                total=file_size,
-                unit="B",
-                unit_scale=True,
-                desc=f"Downloading file {file_path.name}",
-                disable=bool(DISABLE_TQDM),
-            ) as pbar:
-                for future in as_completed(futures):
-                    pbar.update(DOWNLOAD_BLOCK_SIZE)
+                    with tqdm(
+                        total=file_size,
+                        unit="B",
+                        unit_scale=True,
+                        desc=f"Downloading file {file_path.name}",
+                        disable=bool(DISABLE_TQDM),
+                    ) as pbar:
+                        for future in as_completed(futures):
+                            pbar.update(DOWNLOAD_BLOCK_SIZE)
 
         executor.shutdown()
 
