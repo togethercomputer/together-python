@@ -48,9 +48,6 @@ optional = true
 pytest = "^7.4.2"
 
 
-[tool.poetry.group.docs.dependencies]
-pdoc = "^14.4.0"
-
 [tool.poetry.urls]
 "Homepage" = "https://github.com/togethercomputer/together"
 "Bug Tracker" = "https://github.com/togethercomputer/together/issues"
