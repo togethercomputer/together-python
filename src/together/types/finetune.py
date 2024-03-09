@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, List, Literal
+from typing import List, Literal
 
 from pydantic import Field, StringConstraints
 
@@ -81,7 +81,7 @@ class FinetuneRequest(BaseModel):
     learning_rate: float
     n_checkpoints: int | None = None
     batch_size: int | None = None
-    suffix: Annotated[str, StringConstraints(max_length=40)] | None = None
+    suffix: str | None = None
     wandb_api_key: str | None = None
 
 
