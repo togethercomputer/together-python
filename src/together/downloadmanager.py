@@ -30,12 +30,17 @@ def _chmod_and_replace(src: str, dst: str) -> None:
     Do not take into account the `umask` from the process as there is no convenient way
     to get it that is thread-safe.
     """
-    # Get umask by creating a temporary file in the cached repo folder.
+
+    # Get umask by creating a temporary file in the cache folder.
     tmp_file = Path(dst).parent.parent / f"tmp_{uuid.uuid4()}"
+
     try:
         tmp_file.touch()
+
         cache_dir_mode = Path(tmp_file).stat().st_mode
+
         os.chmod(src, stat.S_IMODE(cache_dir_mode))
+
     finally:
         tmp_file.unlink()
 
@@ -53,7 +58,9 @@ def download_part(
     """
     Multi-part download helper - downloads part of a remote file
     """
+
     retries = MAX_CONNECTION_RETRIES
+
     while retries > 0:
         try:
             response, _, _ = requestor.request(
@@ -78,7 +85,9 @@ def download_part(
             log_warn(
                 f"Error downloading part {start_byte}-{end_byte} of {url}. Retries left: {retries}"
             )
+
             retries -= 1
+
     raise Exception(
         f"Error downloading part {start_byte}-{end_byte} of {url}. Tried {retries} times."
     )
@@ -87,6 +96,7 @@ def download_part(
 class DownloadManager:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
+
         self.requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -101,8 +111,10 @@ class DownloadManager:
         total_size_in_bytes = 0
 
         parts = headers.get("Content-Range", "").split(" ")
+
         if len(parts) == 2:
             range_parts = parts[1].split("/")
+
             if len(range_parts) == 2:
                 total_size_in_bytes = int(range_parts[1])
 
@@ -125,8 +137,10 @@ class DownloadManager:
 
         if "x-tar" in content_type.lower():
             output += ".tar.gz"
+
         elif "zstd" in content_type.lower() or step != -1:
             output += ".tar.zst"
+
         else:
             raise FileTypeError(
                 f"Unknown file type {content_type} found. Aborting download."
@@ -136,7 +150,7 @@ class DownloadManager:
 
     def download(
         self, url: str, output: str | None = None, remote_name: str | None = None
-    ) -> Path:
+    ) -> Tuple[Path, int]:
         headers = download_part(
             requestor=self.requestor,
             url=url,
@@ -166,10 +180,12 @@ class DownloadManager:
             temp_file_manager() as temp_file,
         ):
             futures = []
+
             start_byte = 0
 
             while start_byte < file_size:
                 end_byte = min(start_byte + DOWNLOAD_BLOCK_SIZE - 1, file_size - 1)
+
                 futures.append(
                     executor.submit(
                         download_part,
@@ -180,6 +196,7 @@ class DownloadManager:
                         temp_file.name,
                     )
                 )
+
                 start_byte = end_byte + 1
 
             with tqdm(
@@ -202,4 +219,4 @@ class DownloadManager:
 
         _chmod_and_replace(temp_file.name, str(file_path))
 
-        return file_path
+        return file_path, file_size

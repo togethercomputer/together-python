@@ -14,6 +14,7 @@ from together.types import (
 class FineTuning:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
+
         self.requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -29,6 +30,27 @@ class FineTuning:
         suffix: str | None = None,
         wandb_api_key: str | None = None,
     ) -> FinetuneResponse:
+        """
+        Method to initiate a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+                Defaults to 1.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            learning_rate (float, optional): Learning rate multiplier to use for training
+                Defaults to 0.00001.
+            suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+                Defaults to None.
+            wandb_api_key (str, optional): API key for Weights & Biases integration.
+                Defaults to None.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        """
+
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
@@ -48,9 +70,17 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     def list(self) -> FinetuneList:
+        """
+        Lists fine-tune job history
+
+        Returns:
+            FinetuneList: Object containing a list of fine-tune jobs
+        """
+
         response, _, _ = self.requestor.request(
             method="GET",
             url="/fine-tunes",
@@ -59,9 +89,20 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneList(**response.data)
 
     def retrieve(self, id: str) -> FinetuneResponse:
+        """
+        Retrieves fine-tune job details
+
+        Args:
+            id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        """
+
         response, _, _ = self.requestor.request(
             method="GET",
             url=f"/fine-tunes/{id}",
@@ -70,9 +111,20 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     def cancel(self, id: str) -> FinetuneResponse:
+        """
+        Method to cancel a running fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about cancelled fine-tuning job.
+        """
+
         response, _, _ = self.requestor.request(
             method="POST",
             url=f"/fine-tunes/{id}/cancel",
@@ -81,9 +133,20 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     def list_events(self, id: str) -> FinetuneListEvents:
+        """
+        Lists events of a fine-tune job
+
+        Args:
+            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneListEvents: Object containing list of fine-tune events
+        """
+
         response, _, _ = self.requestor.request(
             method="GET",
             url=f"/fine-tunes/{id}/events",
@@ -92,11 +155,28 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneListEvents(**response.data)
 
     def download(
         self, id: str, output: str | None = None, checkpoint_step: int = -1
     ) -> FinetuneDownloadResult:
+        """
+        Downloads compressed fine-tuned model or checkpoint to local disk.
+
+        Defaults file location to `$PWD/{model_name}.{extension}`
+
+        Args:
+            id (str): Fine-tune ID to download. A string that starts with `ft-`.
+            output (str, optional): Specifies output file name for downloaded model.
+                Defaults to None.
+            checkpoint_step (int, optional): Specifies step number for checkpoint to download.
+                Defaults to -1 (download the final model)
+
+        Returns:
+            FinetuneDownloadResult: Object containing downloaded model metadata
+        """
+
         url = f"/finetune/download?ft_id={id}"
 
         if checkpoint_step > 0:
@@ -106,19 +186,23 @@ class FineTuning:
 
         download_manager = DownloadManager(self._client)
 
-        downloaded_filename = download_manager.download(url, output, remote_name)
+        downloaded_filename, file_size = download_manager.download(
+            url, output, remote_name
+        )
 
         return FinetuneDownloadResult(
             object="local",
             id=id,
             checkpoint_step=checkpoint_step,
             filename=downloaded_filename,
+            size=file_size,
         )
 
 
 class AsyncFineTuning:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
+
         self.requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -134,6 +218,27 @@ class AsyncFineTuning:
         suffix: str | None = None,
         wandb_api_key: str | None = None,
     ) -> FinetuneResponse:
+        """
+        Async method to initiate a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
+                Defaults to 1.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            learning_rate (float, optional): Learning rate multiplier to use for training
+                Defaults to 0.00001.
+            suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
+                Defaults to None.
+            wandb_api_key (str, optional): API key for Weights & Biases integration.
+                Defaults to None.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        """
+
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
@@ -153,9 +258,17 @@ class AsyncFineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     async def list(self) -> FinetuneList:
+        """
+        Async method to list fine-tune job history
+
+        Returns:
+            FinetuneList: Object containing a list of fine-tune jobs
+        """
+
         response, _, _ = await self.requestor.arequest(
             method="GET",
             url="/fine-tunes",
@@ -164,9 +277,20 @@ class AsyncFineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneList(**response.data)
 
     async def retrieve(self, id: str) -> FinetuneResponse:
+        """
+        Async method to retrieve fine-tune job details
+
+        Args:
+            id (str): Fine-tune ID to retrieve. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about fine-tuning job.
+        """
+
         response, _, _ = await self.requestor.arequest(
             method="GET",
             url=f"/fine-tunes/{id}",
@@ -175,9 +299,20 @@ class AsyncFineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     async def cancel(self, id: str) -> FinetuneResponse:
+        """
+        Async method to cancel a running fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to cancel. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneResponse: Object containing information about cancelled fine-tuning job.
+        """
+
         response, _, _ = await self.requestor.arequest(
             method="POST",
             url=f"/fine-tunes/{id}/cancel",
@@ -186,9 +321,20 @@ class AsyncFineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneResponse(**response.data)
 
     async def list_events(self, id: str) -> FinetuneListEvents:
+        """
+        Async method to lists events of a fine-tune job
+
+        Args:
+            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneListEvents: Object containing list of fine-tune events
+        """
+
         response, _, _ = await self.requestor.arequest(
             method="GET",
             url=f"/fine-tunes/{id}/events",
@@ -197,11 +343,16 @@ class AsyncFineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return FinetuneListEvents(**response.data)
 
     async def download(
         self, id: str, output: str | None = None, checkpoint_step: int = -1
     ) -> str:
+        """
+        TODO: Implement async download method
+        """
+
         raise NotImplementedError(
             "AsyncFineTuning.download not implemented. "
             "Please use FineTuning.download function instead."

@@ -35,8 +35,10 @@ class Together:
         - `api_key` from `TOGETHER_API_KEY`
         - `base_url` from `TOGETHER_BASE_URL`
         """
+
         if api_key is None:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
         if api_key is None:
             raise TogetherException(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
@@ -45,6 +47,7 @@ class Together:
 
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
+
         if base_url is None:
             base_url = BASE_URL
 
@@ -94,8 +97,10 @@ class AsyncTogether:
         - `api_key` from `TOGETHER_API_KEY`
         - `base_url` from `TOGETHER_BASE_URL`
         """
+
         if api_key is None:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
         if api_key is None:
             raise TogetherException(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
@@ -104,6 +109,7 @@ class AsyncTogether:
 
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
+
         if base_url is None:
             base_url = BASE_URL
 
@@ -126,4 +132,5 @@ class AsyncTogether:
 
 
 Client = Together
+
 AsyncClient = AsyncTogether

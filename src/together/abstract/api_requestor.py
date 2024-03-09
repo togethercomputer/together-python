@@ -590,9 +590,10 @@ class APIRequestor:
 
     async def _interpret_async_response(
         self, result: aiohttp.ClientResponse, stream: bool
-    ) -> tuple[AsyncGenerator[TogetherResponse, None], bool] | tuple[
-        TogetherResponse, bool
-    ]:
+    ) -> (
+        tuple[AsyncGenerator[TogetherResponse, None], bool]
+        | tuple[TogetherResponse, bool]
+    ):
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (

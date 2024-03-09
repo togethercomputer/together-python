@@ -33,6 +33,43 @@ class Completions:
         n: int | None = None,
         safety_model: str | None = None,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
+        """
+        Method to generate completions based on a given prompt using a specified model.
+
+        Args:
+            prompt (str): A string providing context for the model to complete.
+            model (str): The name of the model to query.
+            max_tokens (int, optional): The maximum number of tokens to generate.
+                Defaults to 512.
+            stop (List[str], optional): List of strings at which to stop generation.
+                Defaults to None.
+            temperature (float, optional): A decimal number that determines the degree of randomness in the response.
+                Defaults to None.
+            top_p (float, optional): The top_p (nucleus) parameter is used to dynamically adjust the number
+                    of choices for each predicted token based on the cumulative probabilities.
+                Defaults to None.
+            top_k (int, optional): The top_k parameter is used to limit the number of choices for the
+                    next predicted word or token.
+                Defaults to None.
+            repetition_penalty (float, optional): A number that controls the diversity of generated text
+                    by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+                Defaults to None.
+            stream (bool, optional): Flag indicating whether to stream the generated completions.
+                Defaults to False.
+            logprobs (int, optional): Number of top-k logprobs to return
+                Defaults to None.
+            echo (bool, optional): Echo prompt in output. Can be used with logprobs to return prompt logprobs.
+                Defaults to None.
+            n (int, optional): Number of completions to generate. Setting to None will return a single generation.
+                Defaults to None.
+            safety_model (str, optional): A moderation model to validate tokens. Choice between available moderation
+                    models found [here](https://docs.together.ai/docs/inference-models#moderation-models).
+                Defaults to None.
+
+        Returns:
+            Union[CompletionResponse, Iterator[CompletionChunk]]: Object containing the completions
+            or an iterator over completion chunks.
+        """
         parameter_payload = CompletionRequest(
             model=model,
             prompt=prompt,

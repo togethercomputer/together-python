@@ -1,8 +1,8 @@
 from enum import Enum
 from pathlib import Path
-from typing import List, Literal
+from typing import Annotated, List, Literal
 
-from pydantic import Field
+from pydantic import Field, StringConstraints
 
 from together.types._abstract import BaseModel
 from together.types.common import (
@@ -79,7 +79,7 @@ class FinetuneRequest(BaseModel):
     learning_rate: float
     n_checkpoints: int | None = None
     batch_size: int | None = None
-    suffix: str | None = None
+    suffix: Annotated[str, StringConstraints(max_length=40)] | None = None
     wandb_api_key: str | None = None
 
 
@@ -129,3 +129,4 @@ class FinetuneDownloadResult(BaseModel):
     id: str | None = None
     checkpoint_step: int | None = None
     filename: Path | None = None
+    size: int | None = None
