@@ -38,7 +38,7 @@ class ChatCompletions:
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
         parameter_payload = ChatCompletionRequest(
             model=model,
-            messages=messages,  # type: ignore
+            messages=messages,
             top_p=top_p,
             top_k=top_k,
             temperature=temperature,
@@ -50,9 +50,9 @@ class ChatCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
-            response_format=response_format,  # type: ignore
-            tools=tools,  # type: ignore
-            tool_choice=tool_choice,  # type: ignore
+            response_format=response_format,
+            tools=tools,
+            tool_choice=tool_choice,
         ).model_dump()
 
         response, _, _ = self.requestor.request(
@@ -99,7 +99,7 @@ class AsyncChatCompletions:
     ) -> AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse:
         parameter_payload = ChatCompletionRequest(
             model=model,
-            messages=messages,  # type: ignore
+            messages=messages,
             top_p=top_p,
             top_k=top_k,
             temperature=temperature,
@@ -111,9 +111,9 @@ class AsyncChatCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
-            response_format=response_format,  # type: ignore
-            tools=tools,  # type: ignore
-            tool_choice=tool_choice,  # type: ignore
+            response_format=response_format,
+            tools=tools,
+            tool_choice=tool_choice,
         ).model_dump()
 
         response, _, _ = await self.requestor.arequest(

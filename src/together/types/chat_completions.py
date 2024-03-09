@@ -33,7 +33,7 @@ class ChatCompletionMessage(BaseModel):
 
 class ResponseFormat(BaseModel):
     type: str
-    schema_: Dict[str, Any] = Field(None, alias="schema")
+    schema_: Dict[str, Any] | None = Field(None, alias="schema")
 
 
 class FunctionTool(BaseModel):

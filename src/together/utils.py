@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from _typeshed import SupportsKeysAndGetItem
 
 import requests
-import sseclient
 
 import together
 from together import error
@@ -93,10 +92,6 @@ def get_headers(
         headers.update(extra)
 
     return headers
-
-
-def sse_client(response: requests.Response) -> sseclient.SSEClient:
-    return sseclient.SSEClient(response)  # type: ignore
 
 
 def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
