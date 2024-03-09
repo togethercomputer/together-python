@@ -36,7 +36,7 @@ aiosession: ContextVar[Optional["ClientSession"]] = ContextVar(
     "aiohttp-session", default=None
 )
 
-from together._client import AsyncTogether, Together
+from together.client import AsyncTogether, Together
 
 
 __all__ = ["aiosession", "version", "min_samples", "Together", "AsyncTogether"]

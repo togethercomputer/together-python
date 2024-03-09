@@ -1,4 +1,4 @@
-from together.types._abstract import TogetherClient
+from together.types.abstract import TogetherClient
 from together.types.chat_completions import (
     ChatCompletionChunk,
     ChatCompletionRequest,

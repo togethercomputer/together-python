@@ -12,7 +12,7 @@ from filelock import FileLock
 from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
 
-from together._constants import (
+from together.constants import (
     DISABLE_TQDM,
     DOWNLOAD_BLOCK_SIZE,
     DOWNLOAD_CONCURRENCY,

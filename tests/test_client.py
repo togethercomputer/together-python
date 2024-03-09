@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from together._client import AsyncTogether, Together
+from together.client import AsyncTogether, Together
 from together.abstract.api_requestor import APIRequestor
 from together.error import AuthenticationError
 from together.types import TogetherClient

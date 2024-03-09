@@ -28,7 +28,7 @@ else:
 
 import together
 from together import error, utils
-from together._constants import (
+from together.constants import (
     BASE_URL,
     MAX_CONNECTION_RETRIES,
     MAX_SESSION_LIFETIME_SECS,

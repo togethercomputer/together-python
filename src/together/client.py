@@ -2,7 +2,7 @@ import os
 from typing import Dict, Union
 
 from together import resources
-from together._constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
 from together.error import TogetherException
 from together.types import TogetherClient
 

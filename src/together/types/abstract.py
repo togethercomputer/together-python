@@ -5,7 +5,7 @@ import pydantic
 from pydantic import ConfigDict
 from typing_extensions import ClassVar, override
 
-from together._constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
 
 
 PYDANTIC_V2 = pydantic.VERSION.startswith("2.")

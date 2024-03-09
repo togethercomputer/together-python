@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Union
 from pydantic import Field
 from requests import RequestException
 
-from together.types._abstract import BaseModel
+from together.types.abstract import BaseModel
 
 
 class TogetherErrorResponse(BaseModel):

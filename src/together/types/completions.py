@@ -1,6 +1,6 @@
 from typing import List
 
-from together.types._abstract import BaseModel
+from together.types.abstract import BaseModel
 from together.types.common import (
     DeltaContent,
     FinishReason,

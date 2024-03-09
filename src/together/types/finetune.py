@@ -4,7 +4,7 @@ from typing import Annotated, List, Literal
 
 from pydantic import Field, StringConstraints
 
-from together.types._abstract import BaseModel
+from together.types.abstract import BaseModel
 from together.types.common import (
     ObjectType,
 )
