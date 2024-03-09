@@ -20,9 +20,6 @@ env:
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ${{ inputs.working-directory }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
