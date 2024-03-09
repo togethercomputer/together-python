@@ -3,7 +3,7 @@ from typing import Dict, Union
 
 from together import resources
 from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
-from together.error import TogetherException
+from together.error import AuthenticationError
 from together.types import TogetherClient
 
 
@@ -40,7 +40,7 @@ class Together:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
         if api_key is None:
-            raise TogetherException(
+            raise AuthenticationError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
@@ -102,7 +102,7 @@ class AsyncTogether:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
         if api_key is None:
-            raise TogetherException(
+            raise AuthenticationError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
