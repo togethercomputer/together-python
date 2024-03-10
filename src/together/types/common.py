@@ -31,12 +31,16 @@ class ObjectType(str, Enum):
 
 
 class LogprobsPart(BaseModel):
+    # token list
     tokens: List[str | None] | None = None
+    # token logprob list
     token_logprobs: List[float | None] | None = None
 
 
 class PromptPart(BaseModel):
+    # prompt string
     text: str | None = None
+    # list of prompt logprobs
     logprobs: LogprobsPart | None = None
 
 

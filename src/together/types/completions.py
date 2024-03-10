@@ -14,18 +14,29 @@ from together.types.common import (
 
 
 class CompletionRequest(BaseModel):
+    # prompt to complete
     prompt: str
+    # query model
     model: str
+    # stopping criteria: max tokens to generate
     max_tokens: int | None = 512
+    # stopping criteria: list of strings to stop generation
     stop: List[str] | None = None
+    # sampling hyperparameters
     temperature: float | None = None
     top_p: float | None = None
     top_k: int | None = None
     repetition_penalty: float | None = None
+    # stream SSE token chunks
     stream: bool = False
+    # return logprobs
     logprobs: int | None = None
+    # echo prompt.
+    # can be used with logprobs to return prompt logprobs
     echo: bool | None = None
+    # number of output generations
     n: int | None = None
+    # moderation model
     safety_model: str | None = None
 
 
@@ -44,19 +55,32 @@ class CompletionChoicesChunk(BaseModel):
 
 
 class CompletionResponse(BaseModel):
+    # request id
     id: str | None = None
-    created: int | None = None
-    model: str | None = None
+    # object type
     object: ObjectType | None = None
+    # created timestamp
+    created: int | None = None
+    # model name
+    model: str | None = None
+    # choices list
     choices: List[CompletionChoicesData] | None = None
+    # prompt list
     prompt: List[PromptPart] | None = None
+    # token usage data
     usage: UsageData | None = None
 
 
 class CompletionChunk(BaseModel):
+    # request id
     id: str | None = None
+    # object type
     object: ObjectType | None = None
+    # created timestamp
     created: int | None = None
-    choices: List[CompletionChoicesChunk] | None = None
+    # model name
     model: str | None = None
+    # choices list
+    choices: List[CompletionChoicesChunk] | None = None
+    # token usage data
     usage: UsageData | None = None

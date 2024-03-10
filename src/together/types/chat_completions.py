@@ -63,19 +63,31 @@ class ToolChoiceEnum(str, Enum):
 
 
 class ChatCompletionRequest(BaseModel):
+    # list of messages
     messages: List[ChatCompletionMessage]
+    # model name
     model: str
-    max_tokens: int | None = 512
+    # stopping criteria: max tokens to generate
+    max_tokens: int | None = None
+    # stopping criteria: list of strings to stop generation
     stop: List[str] | None = None
+    # sampling hyperparameters
     temperature: float | None = None
     top_p: float | None = None
     top_k: int | None = None
     repetition_penalty: float | None = None
+    # stream SSE token chunks
     stream: bool = False
+    # return logprobs
     logprobs: int | None = None
+    # echo prompt.
+    # can be used with logprobs to return prompt logprobs
     echo: bool | None = None
+    # number of output generations
     n: int | None = None
+    # moderation model
     safety_model: str | None = None
+    # constraints
     response_format: ResponseFormat | None = None
     tools: List[Tools] | None = None
     tool_choice: ToolChoice | ToolChoiceEnum | None = None
@@ -89,20 +101,34 @@ class ChatCompletionChoicesData(BaseModel):
 
 
 class ChatCompletionResponse(BaseModel):
+    # request id
     id: str | None = None
-    created: int | None = None
-    model: str | None = None
+    # object type
     object: ObjectType | None = None
+    # created timestamp
+    created: int | None = None
+    # model name
+    model: str | None = None
+    # choices list
     choices: List[ChatCompletionChoicesData] | None = None
+    # prompt list
     prompt: List[PromptPart] | List[None] | None = None
+    # token usage data
     usage: UsageData | None = None
 
 
 class ChatCompletionChunk(BaseModel):
+    # request id
     id: str | None = None
+    # object type
     object: ObjectType
+    # created timestamp
     created: int
-    delta: DeltaContent
+    # model name
     model: str
-    usage: UsageData
+    # delta content
+    delta: DeltaContent
+    # finish reason
     finish_reason: FinishReason
+    # token usage data
+    usage: UsageData
