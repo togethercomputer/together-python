@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import email.utils
 import json
 import sys
 import threading
 import time
+
+from random import random
 from json import JSONDecodeError
 from typing import (
     Any,
@@ -31,11 +34,15 @@ from together import error, utils
 from together.constants import (
     BASE_URL,
     MAX_CONNECTION_RETRIES,
+    MAX_RETRIES,
     MAX_SESSION_LIFETIME_SECS,
     TIMEOUT_SECS,
+    INITIAL_RETRY_DELAY,
+    MAX_RETRY_DELAY,
 )
 from together.together_response import TogetherResponse
-from together.types import TogetherClient
+from together.types import TogetherClient, TogetherRequest
+from together.types.error import TogetherErrorResponse
 
 
 # Has one attribute per thread, 'session'.
@@ -59,9 +66,7 @@ def _make_session(max_retries: int | None = None) -> requests.Session:
     s = requests.Session()
     s.mount(
         "https://",
-        requests.adapters.HTTPAdapter(
-            max_retries=max_retries or MAX_CONNECTION_RETRIES
-        ),
+        requests.adapters.HTTPAdapter(max_retries=max_retries),
     )
     return s
 
@@ -100,34 +105,106 @@ class APIRequestor:
     def __init__(self, client: TogetherClient):
         self.api_base = client.base_url or BASE_URL
         self.api_key = client.api_key or utils.default_api_key()
-        self.max_retries = client.max_retries or MAX_CONNECTION_RETRIES
+        self.retries = MAX_RETRIES if client.max_retries is None else client.max_retries
         self.supplied_headers = client.supplied_headers
         self.timeout = client.timeout or TIMEOUT_SECS
 
-    @overload
-    def request(
+    def _parse_retry_after_header(
+        self, response_headers: Dict[str, Any] | None = None
+    ) -> float | None:
+        """
+        Returns a float of the number of seconds (not milliseconds)
+        to wait after retrying, or None if unspecified.
+
+        About the Retry-After header:
+            https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
+        See also
+            https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After#syntax
+        """
+        if response_headers is None:
+            return None
+
+        # First, try the non-standard `retry-after-ms` header for milliseconds,
+        # which is more precise than integer-seconds `retry-after`
+        try:
+            retry_ms_header = response_headers.get("retry-after-ms", None)
+            return float(retry_ms_header) / 1000
+        except (TypeError, ValueError):
+            pass
+
+        # Next, try parsing `retry-after` header as seconds (allowing nonstandard floats).
+        retry_header = str(response_headers.get("retry-after"))
+        try:
+            # note: the spec indicates that this should only ever be an integer
+            # but if someone sends a float there's no reason for us to not respect it
+            return float(retry_header)
+        except (TypeError, ValueError):
+            pass
+
+        # Last, try parsing `retry-after` as a date.
+        retry_date_tuple = email.utils.parsedate_tz(retry_header)
+        if retry_date_tuple is None:
+            return None
+
+        retry_date = email.utils.mktime_tz(retry_date_tuple)
+        return float(retry_date - time.time())
+
+    def _calculate_retry_timeout(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None,
-        headers: Dict[str, str] | None,
-        files: Dict[str, Any] | None,
-        stream: Literal[True],
-        request_timeout: float | Tuple[float, float] | None = ...,
-        return_raw: Literal[False] = ...,
-    ) -> Tuple[Iterator[TogetherResponse], bool, str]:
-        pass
+        remaining_retries: int,
+        response_headers: Dict[str, Any] | None = None,
+    ) -> float:
+        # If the API asks us to wait a certain amount of time (and it's a reasonable amount), just do what it says.
+        retry_after = self._parse_retry_after_header(response_headers)
+        if retry_after is not None and 0 < retry_after <= 60:
+            return retry_after
+
+        nb_retries = self.retries - remaining_retries
+
+        # Apply exponential backoff, but not more than the max.
+        sleep_seconds = min(INITIAL_RETRY_DELAY * pow(2.0, nb_retries), MAX_RETRY_DELAY)
+
+        # Apply some jitter, plus-or-minus half a second.
+        jitter = 1 - 0.25 * random()
+        timeout = sleep_seconds * jitter
+        return timeout if timeout >= 0 else 0
+
+    def _retry_request(
+        self,
+        options: TogetherRequest,
+        remaining_retries: int,
+        response_headers: Dict[str, Any] | None,
+        *,
+        stream: bool,
+        request_timeout: float | Tuple[float, float] | None = None,
+    ) -> requests.Response:
+        remaining = remaining_retries - 1
+        if remaining == 1:
+            utils.log_debug("1 retry left")
+        else:
+            utils.log_debug(f"{remaining} retries left")
+
+        timeout = self._calculate_retry_timeout(remaining, response_headers)
+        ("Retrying request to %s in %f seconds", options.url, timeout)
+
+        # In a synchronous context we are blocking the entire thread. Up to the library user to run the client in a
+        # different thread if necessary.
+        time.sleep(timeout)
+
+        return self.request_raw(
+            options=options,
+            stream=stream,
+            request_timeout=request_timeout,
+            remaining_retries=remaining,
+        )
 
     @overload
     def request(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         *,
         stream: Literal[True],
+        remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
@@ -136,12 +213,20 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
+        stream: Literal[True],
+        remaining_retries: int | None = ...,
+        request_timeout: float | Tuple[float, float] | None = ...,
+        return_raw: Literal[False] = ...,
+    ) -> Tuple[Iterator[TogetherResponse], bool, str]:
+        pass
+
+    @overload
+    def request(
+        self,
+        options: TogetherRequest,
         stream: Literal[False] = ...,
+        remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
@@ -150,12 +235,9 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         stream: bool = ...,
+        remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
         return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
@@ -164,12 +246,9 @@ class APIRequestor:
     @overload
     def request(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         stream: bool = ...,
+        remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
         *,
         return_raw: Literal[True],
@@ -178,12 +257,9 @@ class APIRequestor:
 
     def request(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = None,
-        headers: Dict[str, str] | None = None,
-        files: Dict[str, Any] | None = None,
+        options: TogetherRequest,
         stream: bool = False,
+        remaining_retries: int | None = None,
         request_timeout: float | Tuple[float, float] | None = None,
         return_raw: bool = False,
     ) -> Tuple[
@@ -192,11 +268,8 @@ class APIRequestor:
         str | None,
     ]:
         result = self.request_raw(
-            method.lower(),
-            url,
-            params=params,
-            supplied_headers=headers,
-            files=files,
+            options=options,
+            remaining_retries=remaining_retries or self.retries,
             stream=stream,
             request_timeout=request_timeout,
         )
@@ -210,11 +283,7 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None,
-        headers: Dict[str, str] | None,
-        files: Dict[str, Any] | None,
+        options: TogetherRequest,
         stream: Literal[True],
         request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
@@ -223,11 +292,7 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         *,
         stream: Literal[True],
         request_timeout: float | Tuple[float, float] | None = ...,
@@ -237,11 +302,7 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         stream: Literal[False] = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
@@ -250,11 +311,7 @@ class APIRequestor:
     @overload
     async def arequest(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = ...,
-        headers: Dict[str, str] | None = ...,
-        files: Dict[str, Any] | None = ...,
+        options: TogetherRequest,
         stream: bool = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
     ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
@@ -262,11 +319,7 @@ class APIRequestor:
 
     async def arequest(
         self,
-        method: str,
-        url: str,
-        params: Dict[str, Any] | None = None,
-        headers: Dict[str, str] | None = None,
-        files: Dict[str, Any] | None = None,
+        options: TogetherRequest,
         stream: bool = False,
         request_timeout: float | Tuple[float, float] | None = None,
     ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
@@ -275,12 +328,8 @@ class APIRequestor:
         result = None
         try:
             result = await self.arequest_raw(
-                method.lower(),
-                url,
+                options,
                 session,
-                params=params,
-                supplied_headers=headers,
-                files=files,
                 request_timeout=request_timeout,
             )
             resp, got_stream = await self._interpret_async_response(result, stream)
@@ -321,13 +370,12 @@ class APIRequestor:
             assert isinstance(resp.data, dict)
             error_resp = resp.data.get("error")
             assert isinstance(error_resp, dict)
-            error_data = error.TogetherErrorResponse(**(error_resp))
+            error_data = TogetherErrorResponse(**(error_resp))
         except (KeyError, TypeError):
             raise error.APIError(
                 "Invalid response object from API: %r (HTTP response code "
                 "was %d)" % (resp.data, rcode),
                 http_status=rcode,
-                response=resp.data,
             )
 
         utils.log_info(
@@ -342,25 +390,22 @@ class APIRequestor:
         # Rate limits were previously coded as 400's with code 'rate_limit'
         if rcode == 429:
             return error.RateLimitError(
-                error_data.message,
+                error_data,
                 http_status=rcode,
-                response=resp.data,
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
-        elif rcode in [400, 404, 415]:
+        elif rcode in [400, 403, 404, 415]:
             return error.InvalidRequestError(
-                error_data.message,
+                error_data,
                 http_status=rcode,
-                response=resp.data,
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
         elif rcode == 401:
             return error.AuthenticationError(
-                error_data.message,
+                error_data,
                 http_status=rcode,
-                response=resp.data,
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
@@ -371,15 +416,13 @@ class APIRequestor:
             return error.APIError(
                 message,
                 http_status=rcode,
-                response=resp.data,
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
         else:
             return error.APIError(
-                error_data.message,
+                error_data,
                 http_status=rcode,
-                response=resp.data,
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
@@ -409,88 +452,122 @@ class APIRequestor:
 
     def _prepare_request_raw(
         self,
-        url: str,
-        supplied_headers: Dict[str, str] | None = None,
-        method: str | None = None,
-        params: Dict[str, Any] | None = None,
-        files: Dict[str, Any] | None = None,
+        options: TogetherRequest,
     ) -> Tuple[str, Dict[str, str], Dict[str, str] | bytes | None]:
-        abs_url = "%s%s" % (self.api_base, url)
-        headers = self._validate_headers(supplied_headers or self.supplied_headers)
+        abs_url = "%s%s" % (self.api_base, options.url)
+        headers = self._validate_headers(options.headers or self.supplied_headers)
 
         data = None
         data_bytes = None
-        if method == "get" or method == "delete":
-            if params:
+        if options.method.lower() == "get" or options.method.lower() == "delete":
+            if options.params:
                 encoded_params = urlencode(
-                    [(k, v) for k, v in params.items() if v is not None]
+                    [(k, v) for k, v in options.params.items() if v is not None]
                 )
                 abs_url = _build_api_url(abs_url, encoded_params)
-        elif method in {"post", "put"}:
-            if params and files:
-                data = params
-            if params and not files:
-                data_bytes = json.dumps(params).encode()
+        elif options.method.lower() in {"post", "put"}:
+            if options.params and options.files:
+                data = options.params
+            if options.params and not options.files:
+                data_bytes = json.dumps(options.params).encode()
                 headers["Content-Type"] = "application/json"
         else:
             raise error.APIConnectionError(
                 "Unrecognized HTTP method %r. This may indicate a bug in the "
-                "Together bindings. Please contact us by filling out https://www.together.ai/contact for "
-                "assistance." % (method,)
+                "Together SDK. Please contact us by filling out https://www.together.ai/contact for "
+                "assistance." % (options.method,)
             )
 
-        headers = utils.get_headers(method, self.api_key, headers)
+        headers = utils.get_headers(options.method, self.api_key, headers)
 
-        utils.log_debug("Request to Together API", method=method, path=abs_url)
-        utils.log_debug("Post details", data=(data or data_bytes))
+        utils.log_debug(
+            "Request to Together API",
+            method=options.method,
+            path=abs_url,
+            post_data=(data or data_bytes),
+        )
 
         return abs_url, headers, (data or data_bytes)
 
     def request_raw(
         self,
-        method: str,
-        url: str,
+        options: TogetherRequest,
+        remaining_retries: int,
         *,
-        params: Dict[str, Any] | None = None,
-        supplied_headers: Dict[str, str] | None = None,
-        files: Dict[str, Any] | None = None,
         stream: bool = False,
         request_timeout: float | Tuple[float, float] | None = None,
     ) -> requests.Response:
-        abs_url, headers, data = self._prepare_request_raw(
-            url, supplied_headers, method, params, files
-        )
+        abs_url, headers, data = self._prepare_request_raw(options)
 
         if not hasattr(_thread_context, "session"):
-            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
             _thread_context.session_create_time = time.time()
         elif (
             time.time() - getattr(_thread_context, "session_create_time", 0)
             >= MAX_SESSION_LIFETIME_SECS
         ):
             _thread_context.session.close()
-            _thread_context.session = _make_session(self.max_retries)
+            _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
             _thread_context.session_create_time = time.time()
         try:
             result = _thread_context.session.request(
-                method,
+                options.method,
                 abs_url,
                 headers=headers,
                 data=data,
-                files=files,
+                files=options.files,
                 stream=stream,
                 timeout=request_timeout or self.timeout,
                 proxies=_thread_context.session.proxies,
             )
         except requests.exceptions.Timeout as e:
+            utils.log_debug(f"Encountered requests.exceptions.Timeout")
+
+            if remaining_retries > 0:
+                return self._retry_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=dict(result.headers),
+                    stream=stream,
+                    request_timeout=request_timeout,
+                )
+
             raise error.Timeout("Request timed out: {}".format(e)) from e
         except requests.exceptions.RequestException as e:
+            utils.log_debug(f"Encountered requests.exceptions.RequestException")
+
+            if remaining_retries > 0:
+                return self._retry_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=dict(result.headers),
+                    stream=stream,
+                    request_timeout=request_timeout,
+                )
+
             raise error.APIConnectionError(
-                "Error communicating with Together: {}".format(e)
+                "Error communicating with API: {}".format(e)
             ) from e
+
+        # retry on 5XX error or rate-limit
+        if 500 <= result.status_code < 600 or result.status_code == 429:
+            utils.log_info(
+                f"Encountered requests.exceptions.HTTPError. Error code: {result.status_code}"
+            )
+
+            if remaining_retries > 0:
+                return self._retry_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=dict(result.headers),
+                    stream=stream,
+                    request_timeout=request_timeout,
+                )
+
         utils.log_debug(
             "Together API response",
             path=abs_url,
+            result=result.content,
             response_code=result.status_code,
             processing_ms=result.headers.get("x-total-time"),
             request_id=result.headers.get("CF-RAY"),
@@ -500,18 +577,12 @@ class APIRequestor:
 
     async def arequest_raw(
         self,
-        method: str,
-        url: str,
+        options: TogetherRequest,
         session: aiohttp.ClientSession,
         *,
-        params: Dict[str, Any] | None = None,
-        supplied_headers: Dict[str, str] | None = None,
-        files: Dict[str, Any] | None = None,
         request_timeout: float | Tuple[float, float] | None = None,
     ) -> aiohttp.ClientResponse:
-        abs_url, headers, data = self._prepare_request_raw(
-            url, supplied_headers, method, params, files
-        )
+        abs_url, headers, data = self._prepare_request_raw(options)
 
         if isinstance(request_timeout, tuple):
             timeout = aiohttp.ClientTimeout(
@@ -521,11 +592,11 @@ class APIRequestor:
         else:
             timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
 
-        if files:
+        if options.files:
             # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.
             # For now we use the private `requests` method that is known to have worked so far.
             data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
-                files, data
+                options.files, data
             )
             headers["Content-Type"] = content_type
         request_kwargs = {
@@ -534,8 +605,10 @@ class APIRequestor:
             "timeout": timeout,
         }
         try:
-            result = await session.request(method=method, url=abs_url, **request_kwargs)
-            utils.log_info(
+            result = await session.request(
+                method=options.method, url=abs_url, **request_kwargs
+            )
+            utils.log_debug(
                 "Together API response",
                 path=abs_url,
                 response_code=result.status,
@@ -620,6 +693,7 @@ class APIRequestor:
                 http_status=rcode,
                 headers=rheaders,
             )
+
         try:
             if "text/plain" in rheaders.get("Content-Type", ""):
                 data: Dict[str, Any] = {"message": rbody}
@@ -627,7 +701,7 @@ class APIRequestor:
                 data = json.loads(rbody)
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
-                f"HTTP code {rcode} from API ({rbody})",
+                f"Error code: {rcode} -{rbody}",
                 http_body=rbody,
                 http_status=rcode,
                 headers=rheaders,
@@ -635,8 +709,8 @@ class APIRequestor:
         resp = TogetherResponse(data, rheaders)
 
         # Handle streaming errors
-        if stream and not 200 <= rcode < 300:
-            raise self.handle_error_response(resp, rcode, stream_error=True)
+        if not 200 <= rcode < 300:
+            raise self.handle_error_response(resp, rcode, stream_error=stream)
         return resp
 
 

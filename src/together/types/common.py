@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List
+from typing import List, Dict, Any
 
 from together.types.abstract import BaseModel
 
@@ -46,3 +46,11 @@ class PromptPart(BaseModel):
 
 class DeltaContent(BaseModel):
     content: str | None = None
+
+
+class TogetherRequest(BaseModel):
+    method: str
+    url: str
+    headers: Dict[str, str] | None = None
+    params: Dict[str, Any] | None = None
+    files: Dict[str, Any] | None = None

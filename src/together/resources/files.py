@@ -8,21 +8,24 @@ from together.types import (
     EmbeddingRequest,
     EmbeddingResponse,
     TogetherClient,
+    TogetherRequest,
 )
 
 
 class Files:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
+
+    def list(self) -> EmbeddingResponse:
+        requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-    def list(self) -> EmbeddingResponse:
-        response, _, _ = self.requestor.request(
-            method="GET",
-            url="/files",
-            params=None,
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="/files",
+            ),
             stream=False,
         )
 
@@ -33,24 +36,27 @@ class Files:
 class AsyncFiles:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     async def create(
         self,
         input: str | List[str],
         model: str,
     ) -> EmbeddingResponse:
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
         ).model_dump()
 
-        response, _, _ = await self.requestor.arequest(
-            method="POST",
-            url="/embeddings",
-            params=parameter_payload,
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url="/embeddings",
+                params=parameter_payload,
+            ),
             stream=False,
         )
 

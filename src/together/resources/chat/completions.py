@@ -9,15 +9,13 @@ from together.types import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     TogetherClient,
+    TogetherRequest,
 )
 
 
 class ChatCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     def create(
         self,
@@ -88,6 +86,10 @@ class ChatCompletions:
             or an iterator over completion chunks.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = ChatCompletionRequest(
             model=model,
             messages=messages,
@@ -107,10 +109,12 @@ class ChatCompletions:
             tool_choice=tool_choice,
         ).model_dump()
 
-        response, _, _ = self.requestor.request(
-            method="POST",
-            url="/chat/completions",
-            params=parameter_payload,
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="/chat/completions",
+                params=parameter_payload,
+            ),
             stream=stream,
         )
 
@@ -126,9 +130,6 @@ class ChatCompletions:
 class AsyncChatCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     async def create(
         self,
@@ -199,6 +200,10 @@ class AsyncChatCompletions:
             or an iterator over completion chunks.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = ChatCompletionRequest(
             model=model,
             messages=messages,
@@ -218,10 +223,12 @@ class AsyncChatCompletions:
             tool_choice=tool_choice,
         ).model_dump()
 
-        response, _, _ = await self.requestor.arequest(
-            method="POST",
-            url="/completions",
-            params=parameter_payload,
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url="/completions",
+                params=parameter_payload,
+            ),
             stream=stream,
         )
 

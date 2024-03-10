@@ -17,10 +17,12 @@ from together.types.finetune import (
     FinetuneRequest,
     FinetuneResponse,
 )
+from together.types.common import TogetherRequest
 
 
 __all__ = [
     "TogetherClient",
+    "TogetherRequest",
     "CompletionChunk",
     "CompletionRequest",
     "CompletionResponse",

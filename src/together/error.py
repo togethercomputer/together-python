@@ -1,54 +1,55 @@
 from __future__ import annotations
 
+import json
+
 from typing import Any, Dict
 
-from pydantic import Field
 from requests import RequestException
 
-from together.types.abstract import BaseModel
-
-
-class TogetherErrorResponse(BaseModel):
-    # error message
-    message: str | None = None
-    # error type
-    type_: str | None = Field(None, alias="type")
-    # param causing error
-    param: str | None = None
-    # error code
-    code: str | None = None
+from together.types.error import TogetherErrorResponse
 
 
 class TogetherException(Exception):
     def __init__(
         self,
-        message: Exception | str | RequestException | None = None,
-        response: str | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         headers: str | Dict[Any, Any] | None = None,
         request_id: str | None = None,
         http_status: int | None = None,
     ) -> None:
-        super(TogetherException, self).__init__(message)
+        _message = (
+            json.dumps(message.model_dump())
+            if isinstance(message, TogetherErrorResponse)
+            else message
+        )
+        self._message = f"Error code: {http_status} - {_message}"
 
-        self._message = message
+        super(TogetherException, self).__init__(self._message)
+
         self.http_status = http_status
         self.headers = headers or {}
         self.request_id = request_id
-        self.response = response
 
     def __repr__(self) -> str:
-        return "%s(message=%r, http_status=%r, request_id=%r)" % (
-            self.__class__.__name__,
-            self._message,
-            self.http_status,
-            self.request_id,
+        repr_message = json.dumps(
+            {
+                "response": self._message,
+                "status": self.http_status,
+                "request_id": self.request_id,
+                "headers": self.headers,
+            }
         )
+        return "%s(%r)" % (self.__class__.__name__, repr_message)
 
 
 class AuthenticationError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -57,7 +58,9 @@ class AuthenticationError(TogetherException):
 class ResponseError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -66,7 +69,9 @@ class ResponseError(TogetherException):
 class JSONError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -88,7 +93,9 @@ class InstanceError(TogetherException):
 class RateLimitError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -97,7 +104,9 @@ class RateLimitError(TogetherException):
 class FileTypeError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -106,7 +115,9 @@ class FileTypeError(TogetherException):
 class AttributeError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -115,7 +126,9 @@ class AttributeError(TogetherException):
 class Timeout(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -124,7 +137,9 @@ class Timeout(TogetherException):
 class APIConnectionError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -133,7 +148,9 @@ class APIConnectionError(TogetherException):
 class InvalidRequestError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -142,7 +159,9 @@ class InvalidRequestError(TogetherException):
 class APIError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -151,7 +170,9 @@ class APIError(TogetherException):
 class ServiceUnavailableError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)
@@ -160,7 +181,9 @@ class ServiceUnavailableError(TogetherException):
 class DownloadError(TogetherException):
     def __init__(
         self,
-        message: str | Exception | RequestException | None = None,
+        message: (
+            TogetherErrorResponse | Exception | str | RequestException | None
+        ) = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(message=message, **kwargs)

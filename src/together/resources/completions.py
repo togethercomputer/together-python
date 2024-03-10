@@ -9,15 +9,13 @@ from together.types import (
     CompletionRequest,
     CompletionResponse,
     TogetherClient,
+    TogetherRequest,
 )
 
 
 class Completions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     def create(
         self,
@@ -72,6 +70,11 @@ class Completions:
             CompletionResponse | Iterator[CompletionChunk]: Object containing the completions
             or an iterator over completion chunks.
         """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = CompletionRequest(
             model=model,
             prompt=prompt,
@@ -88,10 +91,12 @@ class Completions:
             safety_model=safety_model,
         ).model_dump()
 
-        response, _, _ = self.requestor.request(
-            method="POST",
-            url="/completions",
-            params=parameter_payload,
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="/completions",
+                params=parameter_payload,
+            ),
             stream=stream,
         )
 
@@ -106,9 +111,6 @@ class Completions:
 class AsyncCompletions:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     async def create(
         self,
@@ -164,6 +166,10 @@ class AsyncCompletions:
             or an iterator over completion chunks.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = CompletionRequest(
             model=model,
             prompt=prompt,
@@ -180,10 +186,12 @@ class AsyncCompletions:
             safety_model=safety_model,
         ).model_dump()
 
-        response, _, _ = await self.requestor.arequest(
-            method="POST",
-            url="/completions",
-            params=parameter_payload,
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url="/completions",
+                params=parameter_payload,
+            ),
             stream=stream,
         )
 

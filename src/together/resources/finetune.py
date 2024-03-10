@@ -10,16 +10,13 @@ from together.types import (
     FinetuneRequest,
     FinetuneResponse,
     TogetherClient,
+    TogetherRequest,
 )
 
 
 class FineTuning:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     def create(
         self,
@@ -53,6 +50,10 @@ class FineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
@@ -64,10 +65,12 @@ class FineTuning:
             wandb_api_key=wandb_api_key,
         ).model_dump()
 
-        response, _, _ = self.requestor.request(
-            method="POST",
-            url="/fine-tunes",
-            params=parameter_payload,
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="/fine-tunes",
+                params=parameter_payload,
+            ),
             stream=False,
         )
 
@@ -83,10 +86,15 @@ class FineTuning:
             FinetuneList: Object containing a list of fine-tune jobs
         """
 
-        response, _, _ = self.requestor.request(
-            method="GET",
-            url="/fine-tunes",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="/fine-tunes",
+            ),
             stream=False,
         )
 
@@ -105,10 +113,15 @@ class FineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
-        response, _, _ = self.requestor.request(
-            method="GET",
-            url=f"/fine-tunes/{id}",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url=f"/fine-tunes/{id}",
+            ),
             stream=False,
         )
 
@@ -127,10 +140,15 @@ class FineTuning:
             FinetuneResponse: Object containing information about cancelled fine-tuning job.
         """
 
-        response, _, _ = self.requestor.request(
-            method="POST",
-            url=f"/fine-tunes/{id}/cancel",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url=f"/fine-tunes/{id}/cancel",
+            ),
             stream=False,
         )
 
@@ -149,10 +167,15 @@ class FineTuning:
             FinetuneListEvents: Object containing list of fine-tune events
         """
 
-        response, _, _ = self.requestor.request(
-            method="GET",
-            url=f"/fine-tunes/{id}/events",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url=f"/fine-tunes/{id}/events",
+            ),
             stream=False,
         )
 
@@ -205,10 +228,6 @@ class AsyncFineTuning:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
-
     async def create(
         self,
         training_file: str,
@@ -241,6 +260,10 @@ class AsyncFineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
@@ -252,10 +275,12 @@ class AsyncFineTuning:
             wandb_api_key=wandb_api_key,
         ).model_dump()
 
-        response, _, _ = await self.requestor.arequest(
-            method="POST",
-            url="/fine-tunes",
-            params=parameter_payload,
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url="/fine-tunes",
+                params=parameter_payload,
+            ),
             stream=False,
         )
 
@@ -271,10 +296,15 @@ class AsyncFineTuning:
             FinetuneList: Object containing a list of fine-tune jobs
         """
 
-        response, _, _ = await self.requestor.arequest(
-            method="GET",
-            url="/fine-tunes",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url="/fine-tunes",
+            ),
             stream=False,
         )
 
@@ -293,10 +323,15 @@ class AsyncFineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
-        response, _, _ = await self.requestor.arequest(
-            method="GET",
-            url=f"/fine-tunes/{id}",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url=f"/fine-tunes/{id}",
+            ),
             stream=False,
         )
 
@@ -315,10 +350,15 @@ class AsyncFineTuning:
             FinetuneResponse: Object containing information about cancelled fine-tuning job.
         """
 
-        response, _, _ = await self.requestor.arequest(
-            method="POST",
-            url=f"/fine-tunes/{id}/cancel",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url=f"/fine-tunes/{id}/cancel",
+            ),
             stream=False,
         )
 
@@ -337,10 +377,15 @@ class AsyncFineTuning:
             FinetuneListEvents: Object containing list of fine-tune events
         """
 
-        response, _, _ = await self.requestor.arequest(
-            method="GET",
-            url=f"/fine-tunes/{id}/events",
-            params=None,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url=f"/fine-tunes/{id}/events",
+            ),
             stream=False,
         )
 

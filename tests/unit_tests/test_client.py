@@ -41,7 +41,7 @@ class TestTogether:
         with patch.dict("os.environ", {"TOGETHER_BASE_URL": "https://example.com"}):
             sync_together = Together(api_key="fake_api_key")
 
-            assert sync_together.client.base_url == "https://example.com"
+            assert sync_together.client.base_url == "https://example.com/"
 
     def test_init_with_default_base_url(self):
         """
@@ -50,7 +50,7 @@ class TestTogether:
 
         sync_together = Together(api_key="fake_api_key")
 
-        assert sync_together.client.base_url == "https://api.together.xyz/v1"
+        assert sync_together.client.base_url == "https://api.together.xyz/v1/"
 
     def test_init_with_supplied_headers(self):
         """
@@ -159,7 +159,7 @@ class TestAsyncTogether:
         with patch.dict("os.environ", {"TOGETHER_BASE_URL": "https://example.com"}):
             async_together = AsyncTogether(api_key="fake_api_key")
 
-            assert async_together.client.base_url == "https://example.com"
+            assert async_together.client.base_url == "https://example.com/"
 
     def test_init_with_default_base_url(self):
         """
@@ -168,7 +168,7 @@ class TestAsyncTogether:
 
         async_together = AsyncTogether(api_key="fake_api_key")
 
-        assert async_together.client.base_url == "https://api.together.xyz/v1"
+        assert async_together.client.base_url == "https://api.together.xyz/v1/"
 
     def test_init_with_supplied_headers(self):
         """

@@ -138,3 +138,10 @@ def log_warn(message: str | Any, **params: Any) -> None:
     msg = logfmt(dict(message=message, **params))
     print(msg, file=sys.stderr)
     logger.warn(msg)
+
+
+def enforce_trailing_slash(url: str) -> str:
+    if not url.endswith("/"):
+        return url + "/"
+    else:
+        return url

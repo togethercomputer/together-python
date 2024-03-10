@@ -4,9 +4,10 @@ import os
 from typing import Dict
 
 from together import resources
-from together.constants import BASE_URL, MAX_CONNECTION_RETRIES, TIMEOUT_SECS
+from together.constants import BASE_URL, MAX_RETRIES, TIMEOUT_SECS
 from together.error import AuthenticationError
 from together.types import TogetherClient
+from together.utils import enforce_trailing_slash
 
 
 class Together:
@@ -27,7 +28,7 @@ class Together:
         api_key: str | None = None,
         base_url: str | None = None,
         timeout: float | None = TIMEOUT_SECS,
-        max_retries: int = MAX_CONNECTION_RETRIES,
+        max_retries: int = MAX_RETRIES,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new synchronous together client instance.
@@ -57,7 +58,7 @@ class Together:
         # TogetherClient object
         self.client = TogetherClient(
             api_key=api_key,
-            base_url=base_url,
+            base_url=enforce_trailing_slash(base_url),
             timeout=timeout,
             max_retries=max_retries,
             supplied_headers=supplied_headers,
@@ -90,7 +91,7 @@ class AsyncTogether:
         api_key: str | None = None,
         base_url: str | None = None,
         timeout: float | None = TIMEOUT_SECS,
-        max_retries: int = MAX_CONNECTION_RETRIES,
+        max_retries: int = MAX_RETRIES,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new async together client instance.
@@ -120,7 +121,7 @@ class AsyncTogether:
         # TogetherClient object
         self.client = TogetherClient(
             api_key=api_key,
-            base_url=base_url,
+            base_url=enforce_trailing_slash(base_url),
             timeout=timeout,
             max_retries=max_retries,
             supplied_headers=supplied_headers,

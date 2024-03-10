@@ -22,7 +22,7 @@ from together.constants import (
     MAX_CONNECTION_RETRIES,
 )
 from together.error import DownloadError, FileTypeError
-from together.types import TogetherClient
+from together.types import TogetherClient, TogetherRequest
 from together.utils import log_warn
 
 
@@ -66,12 +66,13 @@ def download_part(
     while retries > 0:
         try:
             response, _, _ = requestor.request(
-                method="GET",
-                url=url,
-                params=None,
+                options=TogetherRequest(
+                    method="GET",
+                    url=url,
+                    headers={"Range": f"bytes={start_byte}-{end_byte}"},
+                ),
                 stream=False,
                 return_raw=True,
-                headers={"Range": f"bytes={start_byte}-{end_byte}"},
             )
 
             if first_chunk:
@@ -98,10 +99,6 @@ def download_part(
 class DownloadManager:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
-
-        self.requestor = api_requestor.APIRequestor(
-            client=self._client,
-        )
 
     def _get_file_size(
         self,
@@ -168,8 +165,13 @@ class DownloadManager:
         """
         gets remote file head and parses out file name and file size
         """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         headers = download_part(
-            requestor=self.requestor,
+            requestor=requestor,
             url=url,
             start_byte=0,
             end_byte=1,
@@ -197,6 +199,10 @@ class DownloadManager:
         chunk size defined in together.constants.
         """
 
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
         file_path, file_size = self.get_file_metadata(url, output, remote_name)
 
         temp_file_manager = partial(
@@ -223,7 +229,7 @@ class DownloadManager:
                         futures.append(
                             executor.submit(
                                 download_part,
-                                self.requestor,
+                                requestor,
                                 url,
                                 start_byte,
                                 end_byte,
