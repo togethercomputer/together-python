@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pytest
 
-from together.abstract.api_requestor import APIRequestor
 from together.client import AsyncTogether, Together
 from together.error import AuthenticationError
 from together.types import TogetherClient
@@ -74,8 +73,6 @@ class TestTogether:
 
         assert isinstance(sync_together_instance.completions._client, TogetherClient)
 
-        assert isinstance(sync_together_instance.completions.requestor, APIRequestor)
-
     def test_chat_initialized(self, sync_together_instance):
         """
         Test initializing chat
@@ -89,10 +86,6 @@ class TestTogether:
             sync_together_instance.chat.completions._client, TogetherClient
         )
 
-        assert isinstance(
-            sync_together_instance.chat.completions.requestor, APIRequestor
-        )
-
     def test_embeddings_initialized(self, sync_together_instance):
         """
         Test initializing embeddings
@@ -101,8 +94,6 @@ class TestTogether:
         assert sync_together_instance.embeddings is not None
 
         assert isinstance(sync_together_instance.embeddings._client, TogetherClient)
-
-        assert isinstance(sync_together_instance.embeddings.requestor, APIRequestor)
 
     def test_files_initialized(self, sync_together_instance):
         """
@@ -113,8 +104,6 @@ class TestTogether:
 
         assert isinstance(sync_together_instance.files._client, TogetherClient)
 
-        assert isinstance(sync_together_instance.files.requestor, APIRequestor)
-
     def test_fine_tuning_initialized(self, sync_together_instance):
         """
         Test initializing fine_tuning
@@ -123,8 +112,6 @@ class TestTogether:
         assert sync_together_instance.fine_tuning is not None
 
         assert isinstance(sync_together_instance.fine_tuning._client, TogetherClient)
-
-        assert isinstance(sync_together_instance.fine_tuning.requestor, APIRequestor)
 
 
 class TestAsyncTogether:
@@ -192,8 +179,6 @@ class TestAsyncTogether:
 
         assert isinstance(async_together_instance.completions._client, TogetherClient)
 
-        assert isinstance(async_together_instance.completions.requestor, APIRequestor)
-
     def test_chat_initialized(self, async_together_instance):
         """
         Test initializing chat
@@ -207,10 +192,6 @@ class TestAsyncTogether:
             async_together_instance.chat.completions._client, TogetherClient
         )
 
-        assert isinstance(
-            async_together_instance.chat.completions.requestor, APIRequestor
-        )
-
     def test_embeddings_initialized(self, async_together_instance):
         """
         Test initializing embeddings
@@ -219,8 +200,6 @@ class TestAsyncTogether:
         assert async_together_instance.embeddings is not None
 
         assert isinstance(async_together_instance.embeddings._client, TogetherClient)
-
-        assert isinstance(async_together_instance.embeddings.requestor, APIRequestor)
 
     def test_files_initialized(self, async_together_instance):
         """
@@ -231,8 +210,6 @@ class TestAsyncTogether:
 
         assert isinstance(async_together_instance.files._client, TogetherClient)
 
-        assert isinstance(async_together_instance.files.requestor, APIRequestor)
-
     def test_fine_tuning_initialized(self, async_together_instance):
         """
         Test initializing fine_tuning
@@ -241,5 +218,3 @@ class TestAsyncTogether:
         assert async_together_instance.fine_tuning is not None
 
         assert isinstance(async_together_instance.fine_tuning._client, TogetherClient)
-
-        assert isinstance(async_together_instance.fine_tuning.requestor, APIRequestor)
