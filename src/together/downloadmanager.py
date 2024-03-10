@@ -26,7 +26,7 @@ from together.types import TogetherClient
 from together.utils import log_warn
 
 
-def _chmod_and_replace(src: str, dst: str) -> None:
+def chmod_and_replace(src: Path, dst: Path) -> None:
     """Set correct permission before moving a blob from tmp directory to cache dir.
 
     Do not take into account the `umask` from the process as there is no convenient way
@@ -34,7 +34,7 @@ def _chmod_and_replace(src: str, dst: str) -> None:
     """
 
     # Get umask by creating a temporary file in the cache folder.
-    tmp_file = Path(dst).parent.parent / f"tmp_{uuid.uuid4()}"
+    tmp_file = dst.parent.parent / f"tmp_{uuid.uuid4()}"
 
     try:
         tmp_file.touch()
@@ -103,13 +103,13 @@ class DownloadManager:
             client=self._client,
         )
 
-    def _prepare_output(
+    def _get_file_size(
         self,
         headers: CaseInsensitiveDict[str],
-        step: int = -1,
-        output: str | None = None,
-        remote_name: str | None = None,
-    ) -> Tuple[Path, int]:
+    ) -> int:
+        """
+        Extracts file size from header
+        """
         total_size_in_bytes = 0
 
         parts = headers.get("Content-Range", "").split(" ")
@@ -122,8 +122,20 @@ class DownloadManager:
 
         assert total_size_in_bytes != 0, "Unable to retrieve remote file."
 
+        return total_size_in_bytes
+
+    def _prepare_output(
+        self,
+        headers: CaseInsensitiveDict[str],
+        step: int = -1,
+        output: str | None = None,
+        remote_name: str | None = None,
+    ) -> Path:
+        """
+        Generates output file name from remote name and headers
+        """
         if output:
-            return Path(output), total_size_in_bytes
+            return Path(output)
 
         content_type = str(headers.get("content-type"))
 
@@ -148,11 +160,14 @@ class DownloadManager:
                 f"Unknown file type {content_type} found. Aborting download."
             )
 
-        return Path(output), total_size_in_bytes
+        return Path(output)
 
-    def download(
+    def get_file_metadata(
         self, url: str, output: str | None = None, remote_name: str | None = None
     ) -> Tuple[Path, int]:
+        """
+        gets remote file head and parses out file name and file size
+        """
         headers = download_part(
             requestor=self.requestor,
             url=url,
@@ -163,11 +178,26 @@ class DownloadManager:
 
         assert isinstance(headers, CaseInsensitiveDict)
 
-        file_path, file_size = self._prepare_output(
+        file_path = self._prepare_output(
             headers=headers,
             output=output,
             remote_name=remote_name,
         )
+
+        file_size = self._get_file_size(headers)
+
+        return file_path, file_size
+
+    def download(
+        self, url: str, output: str | None = None, remote_name: str | None = None
+    ) -> Tuple[Path, int]:
+        """
+        Multi-part download method from remote HTTP endpoint.
+        Downloads data to a temp file with a lock with concurrency and
+        chunk size defined in together.constants.
+        """
+
+        file_path, file_size = self.get_file_metadata(url, output, remote_name)
 
         temp_file_manager = partial(
             tempfile.NamedTemporaryFile, mode="wb", dir=file_path.parent, delete=False
@@ -215,12 +245,14 @@ class DownloadManager:
 
         executor.shutdown()
 
-        if file_size and pbar.n != file_size:
+        # Raise exception if remote file size does not match downloaded file size
+        if os.stat(temp_file).st_size != file_size:
             DownloadError(
                 f"Downloaded file size `{pbar.n}` bytes does not match "
                 f"remote file size `{file_size}` bytes."
             )
 
-        _chmod_and_replace(temp_file.name, str(file_path))
+        # Moves temp file to output file path
+        chmod_and_replace(Path(temp_file.name), file_path)
 
         return file_path, file_size

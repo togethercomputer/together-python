@@ -13,10 +13,10 @@ tests:
 	poetry run pytest $(TEST_FILE)
 
 test_watch:
-	poetry run ptw . -- tests/unit_tests
+	poetry run ptw --ignore ./tests/integration_tests . -- ./tests/unit_tests
 
 extended_tests:
-	poetry run pytest --only-extended tests/unit_tests
+	poetry run pytest --only-extended ./tests/unit_tests
 
 integration_tests:
 	poetry run pytest tests/integration_tests

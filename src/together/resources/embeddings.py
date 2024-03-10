@@ -23,6 +23,17 @@ class Embeddings:
         input: str | List[str],
         model: str,
     ) -> EmbeddingResponse:
+        """
+        Method to generate completions based on a given prompt using a specified model.
+
+        Args:
+            input (str | List[str]): A string or list of strings to embed
+            model (str): The name of the model to query.
+
+        Returns:
+            EmbeddingResponse: Object containing embeddings
+        """
+
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
@@ -36,6 +47,7 @@ class Embeddings:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return EmbeddingResponse(**response.data)
 
 
@@ -51,6 +63,17 @@ class AsyncEmbeddings:
         input: str | List[str],
         model: str,
     ) -> EmbeddingResponse:
+        """
+        Async method to generate completions based on a given prompt using a specified model.
+
+        Args:
+            input (str | List[str]): A string or list of strings to embed
+            model (str): The name of the model to query.
+
+        Returns:
+            EmbeddingResponse: Object containing embeddings
+        """
+
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
@@ -64,4 +87,5 @@ class AsyncEmbeddings:
         )
 
         assert isinstance(response, TogetherResponse)
+
         return EmbeddingResponse(**response.data)

@@ -15,7 +15,6 @@ class Together:
     embeddings: resources.Embeddings
     files: resources.Files
     # images: resources.Images
-    # audio: resources.Audio
     # models: resources.Models
     fine_tuning: resources.FineTuning
 
@@ -38,6 +37,7 @@ class Together:
         - `base_url` from `TOGETHER_BASE_URL`
         """
 
+        # get api key
         if api_key is None:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
@@ -47,12 +47,14 @@ class Together:
                 "TOGETHER_API_KEY environment variable"
             )
 
+        # get base url
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
 
         if base_url is None:
             base_url = BASE_URL
 
+        # TogetherClient object
         self.client = TogetherClient(
             api_key=api_key,
             base_url=base_url,
@@ -66,7 +68,6 @@ class Together:
         self.embeddings = resources.Embeddings(self.client)
         self.files = resources.Files(self.client)
         # self.images = resources.Images(self)
-        # self.audio = resources.Audio(self)
         # self.models = resources.Models(self)
         self.fine_tuning = resources.FineTuning(self.client)
 
@@ -77,7 +78,6 @@ class AsyncTogether:
     embeddings: resources.AsyncEmbeddings
     files: resources.AsyncFiles
     # images: resources.AsyncImages
-    # audio: resources.AsyncAudio
     # models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
 
@@ -100,6 +100,7 @@ class AsyncTogether:
         - `base_url` from `TOGETHER_BASE_URL`
         """
 
+        # get api key
         if api_key is None:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
@@ -109,12 +110,14 @@ class AsyncTogether:
                 "TOGETHER_API_KEY environment variable"
             )
 
+        # get base url
         if base_url is None:
             base_url = os.environ.get("TOGETHER_BASE_URL")
 
         if base_url is None:
             base_url = BASE_URL
 
+        # TogetherClient object
         self.client = TogetherClient(
             api_key=api_key,
             base_url=base_url,
@@ -128,7 +131,6 @@ class AsyncTogether:
         self.embeddings = resources.AsyncEmbeddings(self.client)
         self.files = resources.AsyncFiles(self.client)
         # self.images = resources.AsyncImages(self)
-        # self.audio = resources.AsyncAudio(self)
         # self.models = resources.AsyncModels(self)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
 

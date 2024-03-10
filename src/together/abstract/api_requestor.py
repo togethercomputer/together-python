@@ -104,15 +104,6 @@ class APIRequestor:
         self.supplied_headers = client.supplied_headers
         self.timeout = client.timeout or TIMEOUT_SECS
 
-    @classmethod
-    def format_app_info(cls, info: Dict[str, str]) -> str:
-        fmt_str = info["name"]
-        if info["version"]:
-            fmt_str += "/%s" % (info["version"],)
-        if info["url"]:
-            fmt_str += " (%s)" % (info["url"],)
-        return fmt_str
-
     @overload
     def request(
         self,

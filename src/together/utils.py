@@ -5,15 +5,14 @@ import logging
 import os
 import platform
 import re
+import requests
 import sys
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict
 
-
 if TYPE_CHECKING:
     from _typeshed import SupportsKeysAndGetItem
-
-import requests
 
 import together
 from together import error
@@ -24,49 +23,26 @@ logger = logging.getLogger("together")
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")
 
 
-def extract_time(json_obj: Dict[str, Any]) -> int:
-    try:
-        return int(json_obj["created_at"])
-    except KeyError:
-        return 0
-
-
-def parse_timestamp(timestamp: str) -> datetime:
-    formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
-    for fmt in formats:
-        try:
-            return datetime.strptime(timestamp, fmt)
-        except ValueError:
-            continue
-    raise ValueError("Timestamp does not match any expected format")
-
-
-def response_status_exception(response: requests.Response) -> None:
-    if response.status_code == 429:
-        raise error.RateLimitError(
-            message="Too many requests received. Please pace your requests."
-        )
-    elif response.status_code == 500:
-        raise Exception("server encountered an unexpected condition")
-    elif response.status_code == 401:
-        raise Exception("invalid authentication credentials")
-    response.raise_for_status()
-
-
-def format_app_info(info: Dict[str, Any]) -> str:
-    resp = str(info["name"])
-    if info["version"]:
-        resp += "/%s" % (info["version"],)
-    if info["url"]:
-        resp += " (%s)" % (info["url"],)
-    return resp
-
-
 def get_headers(
     method: str | None = None,
     api_key: str | None = None,
     extra: "SupportsKeysAndGetItem[str, Any] | None" = None,
 ) -> Dict[str, str]:
+    """
+    Generates request headers with API key, metadata, and supplied headers
+
+    Args:
+        method (str, optional): HTTP request type (POST, GET, etc.)
+            Defaults to None.
+        api_key (str, optional): API key to add as an Authorization header.
+            Defaults to None.
+        extra (SupportsKeysAndGetItem[str, Any], optional): Additional headers to add to request.
+            Defaults to None.
+
+    Returns:
+        headers (Dict[str, str]): Compiled headers from data
+    """
+
     user_agent = "Together/v1 PythonBindings/%s" % (together.version,)
 
     uname_without_node = " ".join(
@@ -96,43 +72,19 @@ def get_headers(
     return headers
 
 
-def response_to_dict(response: requests.Response) -> Dict[Any, Any]:
-    try:
-        response_json = dict(response.json())
-    except Exception as e:
-        raise error.JSONError(e, http_status=response.status_code)
-
-    return response_json
-
-
-def round_to_closest_multiple_of_32(batch_size: int | None) -> int:
-    if batch_size is None:
-        return 32
-    batch_size = int(batch_size)
-    if batch_size < 32:
-        return 32
-    elif batch_size > 256:
-        return 256
-    return 32 * ((batch_size + 31) // 32)
-
-
-def bytes_to_human_readable(num: float, suffix: str | None = "B") -> str:
-    for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
-    return f"{num:.1f}Yi{suffix}"
-
-
-def finetune_price_to_dollars(price: float) -> float:
-    return price / 1000000000
-
-
-def nanodollars_to_dollars(price: int) -> float:
-    return (price * 4000) / 1000000000
-
-
 def default_api_key(api_key: str | None = None) -> str | None:
+    """
+    API key fallback logic from input argument and environment variable
+
+    Args:
+        api_key (str, optional): Supplied API key. This argument takes priority over env var
+
+    Returns:
+        together_api_key (str): Returns API key from supplied input or env var
+
+    Raises:
+        together.error.AuthenticationError: if API key not found
+    """
     if api_key:
         return api_key
     if os.environ.get("TOGETHER_API_KEY"):

@@ -16,6 +16,16 @@ from together.types.common import (
 )
 
 
+class MessageRole(str, Enum):
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+    USER = "user"
+
+
+class ResponseFormatType(str, Enum):
+    JSON_OBJECT = "json_object"
+
+
 class FunctionCall(BaseModel):
     name: str | None = None
     arguments: str | None = None
@@ -28,13 +38,13 @@ class ToolCalls(BaseModel):
 
 
 class ChatCompletionMessage(BaseModel):
-    role: str
+    role: MessageRole
     content: str | None = None
     tool_calls: List[ToolCalls] | None = None
 
 
 class ResponseFormat(BaseModel):
-    type: str
+    type: ResponseFormatType
     schema_: Dict[str, Any] | None = Field(None, alias="schema")
 
 
