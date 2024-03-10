@@ -372,7 +372,7 @@ class APIRequestor:
             assert isinstance(error_resp, dict)
             error_data = TogetherErrorResponse(**(error_resp))
         except (KeyError, TypeError):
-            raise error.APIError(
+            raise error.JSONError(
                 "Invalid response object from API: %r (HTTP response code "
                 "was %d)" % (resp.data, rcode),
                 http_status=rcode,
@@ -689,7 +689,6 @@ class APIRequestor:
         if rcode == 503:
             raise error.ServiceUnavailableError(
                 "The server is overloaded or not ready yet.",
-                http_body=rbody,
                 http_status=rcode,
                 headers=rheaders,
             )
@@ -702,7 +701,6 @@ class APIRequestor:
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
                 f"Error code: {rcode} -{rbody}",
-                http_body=rbody,
                 http_status=rcode,
                 headers=rheaders,
             ) from e
