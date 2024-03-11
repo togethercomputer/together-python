@@ -8,11 +8,11 @@ from together.types.common import ObjectType, UsageData
 from together.types.completions import CompletionChoicesData
 
 from generate_hyperparameters import (
-    random_max_tokens,
-    random_repetition_penalty,
-    random_temperature,
-    random_top_k,
-    random_top_p,
+    random_max_tokens,  # noqa
+    random_repetition_penalty,  # noqa
+    random_temperature,  # noqa
+    random_top_k,  # noqa
+    random_top_p,  # noqa
 )
 
 
@@ -28,11 +28,11 @@ class TestTogetherCompletion:
     def test_create(
         self,
         sync_together_client,
-        random_max_tokens,
-        random_temperature,
-        random_top_p,
-        random_top_k,
-        random_repetition_penalty,
+        random_max_tokens,  # noqa
+        random_temperature,  # noqa
+        random_top_p,  # noqa
+        random_top_k,  # noqa
+        random_repetition_penalty,  # noqa
     ) -> None:
         prompt = "The space robots have"
         model = "mistralai/Mixtral-8x7B-v0.1"
