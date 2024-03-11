@@ -6,9 +6,8 @@ import json
 import sys
 import threading
 import time
-
-from random import random
 from json import JSONDecodeError
+from random import random
 from typing import (
     Any,
     AsyncContextManager,
@@ -33,12 +32,12 @@ import together
 from together import error, utils
 from together.constants import (
     BASE_URL,
+    INITIAL_RETRY_DELAY,
     MAX_CONNECTION_RETRIES,
     MAX_RETRIES,
+    MAX_RETRY_DELAY,
     MAX_SESSION_LIFETIME_SECS,
     TIMEOUT_SECS,
-    INITIAL_RETRY_DELAY,
-    MAX_RETRY_DELAY,
 )
 from together.together_response import TogetherResponse
 from together.types import TogetherClient, TogetherRequest
@@ -521,7 +520,7 @@ class APIRequestor:
                 proxies=_thread_context.session.proxies,
             )
         except requests.exceptions.Timeout as e:
-            utils.log_debug(f"Encountered requests.exceptions.Timeout")
+            utils.log_debug("Encountered requests.exceptions.Timeout")
 
             if remaining_retries > 0:
                 return self._retry_request(
@@ -534,7 +533,7 @@ class APIRequestor:
 
             raise error.Timeout("Request timed out: {}".format(e)) from e
         except requests.exceptions.RequestException as e:
-            utils.log_debug(f"Encountered requests.exceptions.RequestException")
+            utils.log_debug("Encountered requests.exceptions.RequestException")
 
             if remaining_retries > 0:
                 return self._retry_request(
@@ -567,7 +566,6 @@ class APIRequestor:
         utils.log_debug(
             "Together API response",
             path=abs_url,
-            result=result.content,
             response_code=result.status_code,
             processing_ms=result.headers.get("x-total-time"),
             request_id=result.headers.get("CF-RAY"),

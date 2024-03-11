@@ -44,7 +44,7 @@ class Embeddings:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/embeddings",
+                url="embeddings",
                 params=parameter_payload,
             ),
             stream=False,
@@ -87,7 +87,7 @@ class AsyncEmbeddings:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/embeddings",
+                url="embeddings",
                 params=parameter_payload,
             ),
             stream=False,

@@ -4,12 +4,20 @@ from together.types.chat_completions import (
     ChatCompletionRequest,
     ChatCompletionResponse,
 )
+from together.types.common import TogetherRequest
 from together.types.completions import (
     CompletionChunk,
     CompletionRequest,
     CompletionResponse,
 )
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
+from together.types.files import (
+    FileDeleteResponse,
+    FileDownloadResult,
+    FileList,
+    FileRequest,
+    FileResponse,
+)
 from together.types.finetune import (
     FinetuneDownloadResult,
     FinetuneList,
@@ -17,7 +25,6 @@ from together.types.finetune import (
     FinetuneRequest,
     FinetuneResponse,
 )
-from together.types.common import TogetherRequest
 
 
 __all__ = [
@@ -36,4 +43,9 @@ __all__ = [
     "FinetuneList",
     "FinetuneListEvents",
     "FinetuneDownloadResult",
+    "FileRequest",
+    "FileResponse",
+    "FileList",
+    "FileDeleteResponse",
+    "FileDownloadResult",
 ]

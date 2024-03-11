@@ -5,11 +5,9 @@ import logging
 import os
 import platform
 import re
-import requests
 import sys
-
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict
+
 
 if TYPE_CHECKING:
     from _typeshed import SupportsKeysAndGetItem
@@ -145,3 +143,7 @@ def enforce_trailing_slash(url: str) -> str:
         return url + "/"
     else:
         return url
+
+
+def normalize_key(key: str) -> str:
+    return key.replace("/", "--").replace("_", "-").replace(" ", "-").lower()

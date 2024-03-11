@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from together.types.abstract import BaseModel
 

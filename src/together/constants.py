@@ -11,7 +11,6 @@ BASE_URL = "https://api.together.xyz/v1"
 
 # Download defaults
 DOWNLOAD_BLOCK_SIZE = 10 * 1024 * 1024  # 10 MB
-DOWNLOAD_CONCURRENCY = 32
 DISABLE_TQDM = False
 
 # Messages

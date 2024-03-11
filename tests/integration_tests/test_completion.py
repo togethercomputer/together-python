@@ -1,13 +1,6 @@
 import os
 
 import pytest
-from generate_hyperparameters import (
-    random_max_tokens,
-    random_repetition_penalty,
-    random_temperature,
-    random_top_k,
-    random_top_p,
-)
 
 from together.client import Together
 from together.types import CompletionResponse

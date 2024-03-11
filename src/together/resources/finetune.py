@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from together.abstract import api_requestor
-from together.downloadmanager import DownloadManager
+from together.filemanager import DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
     FinetuneDownloadResult,
@@ -12,6 +14,7 @@ from together.types import (
     TogetherClient,
     TogetherRequest,
 )
+from together.utils import normalize_key
 
 
 class FineTuning:
@@ -68,7 +71,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/fine-tunes",
+                url="fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
@@ -93,7 +96,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="/fine-tunes",
+                url="fine-tunes",
             ),
             stream=False,
         )
@@ -120,7 +123,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"/fine-tunes/{id}",
+                url=f"fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -147,7 +150,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url=f"/fine-tunes/{id}/cancel",
+                url=f"fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -174,7 +177,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"/fine-tunes/{id}/events",
+                url=f"fine-tunes/{id}/events",
             ),
             stream=False,
         )
@@ -184,7 +187,7 @@ class FineTuning:
         return FinetuneListEvents(**response.data)
 
     def download(
-        self, id: str, output: str | None = None, checkpoint_step: int = -1
+        self, id: str, output: Path | str | None = None, checkpoint_step: int = -1
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -193,7 +196,7 @@ class FineTuning:
 
         Args:
             id (str): Fine-tune ID to download. A string that starts with `ft-`.
-            output (str, optional): Specifies output file name for downloaded model.
+            output (pathlib.Path | str, optional): Specifies output file name for downloaded model.
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
@@ -202,7 +205,7 @@ class FineTuning:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
 
-        url = f"/finetune/download?ft_id={id}"
+        url = f"finetune/download?ft_id={id}"
 
         if checkpoint_step > 0:
             url += f"&checkpoint_step={checkpoint_step}"
@@ -211,8 +214,11 @@ class FineTuning:
 
         download_manager = DownloadManager(self._client)
 
+        if isinstance(output, str):
+            output = Path(output)
+
         downloaded_filename, file_size = download_manager.download(
-            url, output, remote_name
+            url, output, normalize_key(remote_name or "")
         )
 
         return FinetuneDownloadResult(
@@ -278,7 +284,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/fine-tunes",
+                url="fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
@@ -303,7 +309,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="/fine-tunes",
+                url="fine-tunes",
             ),
             stream=False,
         )
@@ -330,7 +336,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"/fine-tunes/{id}",
+                url=f"fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -357,7 +363,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url=f"/fine-tunes/{id}/cancel",
+                url=f"fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -384,7 +390,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"/fine-tunes/{id}/events",
+                url=f"fine-tunes/{id}/events",
             ),
             stream=False,
         )

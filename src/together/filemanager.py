@@ -5,7 +5,6 @@ import shutil
 import stat
 import tempfile
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from pathlib import Path
 from typing import Tuple
@@ -15,15 +14,14 @@ from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
 
 from together.abstract import api_requestor
+
 from together.constants import (
     DISABLE_TQDM,
     DOWNLOAD_BLOCK_SIZE,
-    DOWNLOAD_CONCURRENCY,
-    MAX_CONNECTION_RETRIES,
 )
+
 from together.error import DownloadError, FileTypeError
 from together.types import TogetherClient, TogetherRequest
-from together.utils import log_warn
 
 
 def chmod_and_replace(src: Path, dst: Path) -> None:
@@ -47,53 +45,6 @@ def chmod_and_replace(src: Path, dst: Path) -> None:
         tmp_file.unlink()
 
     shutil.move(src, dst)
-
-
-def download_part(
-    requestor: api_requestor.APIRequestor,
-    url: str,
-    start_byte: int,
-    end_byte: int,
-    local_file: str = "",
-    first_chunk: bool = False,
-) -> CaseInsensitiveDict[str] | None:
-    """
-    Multi-part download helper - downloads part of a remote file
-    """
-
-    retries = MAX_CONNECTION_RETRIES
-
-    while retries > 0:
-        try:
-            response, _, _ = requestor.request(
-                options=TogetherRequest(
-                    method="GET",
-                    url=url,
-                    headers={"Range": f"bytes={start_byte}-{end_byte}"},
-                ),
-                stream=False,
-                return_raw=True,
-            )
-
-            if first_chunk:
-                return response.headers
-
-            with open(local_file, "rb+") as f:
-                f.seek(start_byte)
-                f.write(response.content)
-
-            return None
-
-        except Exception:
-            log_warn(
-                f"Error downloading part {start_byte}-{end_byte} of {url}. Retries left: {retries}"
-            )
-
-            retries -= 1
-
-    raise Exception(
-        f"Error downloading part {start_byte}-{end_byte} of {url}. Tried {retries} times."
-    )
 
 
 class DownloadManager:
@@ -125,14 +76,14 @@ class DownloadManager:
         self,
         headers: CaseInsensitiveDict[str],
         step: int = -1,
-        output: str | None = None,
+        output: Path | None = None,
         remote_name: str | None = None,
     ) -> Path:
         """
         Generates output file name from remote name and headers
         """
         if output:
-            return Path(output)
+            return output
 
         content_type = str(headers.get("content-type"))
 
@@ -141,26 +92,24 @@ class DownloadManager:
             "Please specify an `output` file name."
         )
 
-        output = remote_name.split("/")[1]
-
         if step > 0:
-            output += f"-checkpoint-{step}"
+            remote_name += f"-checkpoint-{step}"
 
         if "x-tar" in content_type.lower():
-            output += ".tar.gz"
+            remote_name += ".tar.gz"
 
         elif "zstd" in content_type.lower() or step != -1:
-            output += ".tar.zst"
+            remote_name += ".tar.zst"
 
         else:
             raise FileTypeError(
                 f"Unknown file type {content_type} found. Aborting download."
             )
 
-        return Path(output)
+        return Path(remote_name)
 
     def get_file_metadata(
-        self, url: str, output: str | None = None, remote_name: str | None = None
+        self, url: str, output: Path | None = None, remote_name: str | None = None
     ) -> Tuple[Path, int]:
         """
         gets remote file head and parses out file name and file size
@@ -170,13 +119,15 @@ class DownloadManager:
             client=self._client,
         )
 
-        headers = download_part(
-            requestor=requestor,
-            url=url,
-            start_byte=0,
-            end_byte=1,
-            first_chunk=True,
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET", url=url, headers={"Range": "bytes=0-1"}, return_raw=True
+            ),
+            stream=False,
+            return_raw=True,
         )
+
+        headers = response.headers
 
         assert isinstance(headers, CaseInsensitiveDict)
 
@@ -191,14 +142,8 @@ class DownloadManager:
         return file_path, file_size
 
     def download(
-        self, url: str, output: str | None = None, remote_name: str | None = None
+        self, url: str, output: Path | None = None, remote_name: str | None = None
     ) -> Tuple[Path, int]:
-        """
-        Multi-part download method from remote HTTP endpoint.
-        Downloads data to a temp file with a lock with concurrency and
-        chunk size defined in together.constants.
-        """
-
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -210,49 +155,41 @@ class DownloadManager:
         )
 
         # Prevent parallel downloads of the same file with a lock.
-        lock_path = file_path.with_suffix(".lock")
+        lock_path = Path(file_path.name + ".lock")
 
-        # layered with-as statements instead of using grouping parentheses for python<3.10
-        # https://docs.python.org/3/reference/compound_stmts.html#the-with-statement
-        with ThreadPoolExecutor(max_workers=DOWNLOAD_CONCURRENCY) as executor:
-            with FileLock(lock_path):
-                with temp_file_manager() as temp_file:
-                    futures = []
+        lock = FileLock(lock_path)
 
-                    start_byte = 0
+        lock.acquire()
 
-                    while start_byte < file_size:
-                        end_byte = min(
-                            start_byte + DOWNLOAD_BLOCK_SIZE - 1, file_size - 1
-                        )
+        file_size = 0
 
-                        futures.append(
-                            executor.submit(
-                                download_part,
-                                requestor,
-                                url,
-                                start_byte,
-                                end_byte,
-                                temp_file.name,
-                            )
-                        )
+        with temp_file_manager() as temp_file:
+            response, _, _ = requestor.request(
+                options=TogetherRequest(
+                    method="GET",
+                    url=url,
+                ),
+                stream=True,
+                return_raw=True,
+            )
 
-                        start_byte = end_byte + 1
+            file_size = int(response.headers.get("content-length", 0))
 
-                    with tqdm(
-                        total=file_size,
-                        unit="B",
-                        unit_scale=True,
-                        desc=f"Downloading file {file_path.name}",
-                        disable=bool(DISABLE_TQDM),
-                    ) as pbar:
-                        for future in as_completed(futures):
-                            pbar.update(DOWNLOAD_BLOCK_SIZE)
+            assert file_size != 0, "Unable to retrieve remote file."
 
-        executor.shutdown()
+            with tqdm(
+                total=file_size,
+                unit="B",
+                unit_scale=True,
+                desc=f"Downloading file {file_path.name}",
+                disable=bool(DISABLE_TQDM),
+            ) as pbar:
+                for chunk in response.iter_content(DOWNLOAD_BLOCK_SIZE):
+                    pbar.update(len(chunk))
+                    temp_file.write(chunk)
 
         # Raise exception if remote file size does not match downloaded file size
-        if os.stat(temp_file).st_size != file_size:
+        if os.stat(temp_file.name).st_size != file_size:
             DownloadError(
                 f"Downloaded file size `{pbar.n}` bytes does not match "
                 f"remote file size `{file_size}` bytes."
@@ -261,4 +198,16 @@ class DownloadManager:
         # Moves temp file to output file path
         chmod_and_replace(Path(temp_file.name), file_path)
 
+        lock.release()
+
+        os.remove(lock_path)
+
         return file_path, file_size
+
+
+class UploadManager:
+    def __init__(self) -> None:
+        pass
+
+    def upload(self) -> None:
+        raise NotImplementedError()
