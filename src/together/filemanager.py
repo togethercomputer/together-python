@@ -142,13 +142,25 @@ class DownloadManager:
         return file_path, file_size
 
     def download(
-        self, url: str, output: Path | None = None, remote_name: str | None = None
+        self,
+        url: str,
+        output: Path | None = None,
+        remote_name: str | None = None,
+        fetch_metadata: bool = False,
     ) -> Tuple[Path, int]:
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        file_path, file_size = self.get_file_metadata(url, output, remote_name)
+        # pre-fetch remote file name and file size
+        if fetch_metadata:
+            file_path, file_size = self.get_file_metadata(url, output, remote_name)
+        else:
+            if isinstance(output, Path):
+                file_path = output
+            else:
+                assert isinstance(remote_name, str)
+                file_path = Path(remote_name)
 
         temp_file_manager = partial(
             tempfile.NamedTemporaryFile, mode="wb", dir=file_path.parent, delete=False
@@ -161,8 +173,6 @@ class DownloadManager:
 
         lock.acquire()
 
-        file_size = 0
-
         with temp_file_manager() as temp_file:
             response, _, _ = requestor.request(
                 options=TogetherRequest(
@@ -173,7 +183,8 @@ class DownloadManager:
                 return_raw=True,
             )
 
-            file_size = int(response.headers.get("content-length", 0))
+            if not fetch_metadata:
+                file_size = int(response.headers.get("content-length", 0))
 
             assert file_size != 0, "Unable to retrieve remote file."
 

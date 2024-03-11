@@ -7,6 +7,14 @@ from together.types import CompletionResponse
 from together.types.common import ObjectType, UsageData
 from together.types.completions import CompletionChoicesData
 
+from generate_hyperparameters import (
+    random_max_tokens,
+    random_repetition_penalty,
+    random_temperature,
+    random_top_k,
+    random_top_p,
+)
+
 
 class TestTogetherCompletion:
     @pytest.fixture
