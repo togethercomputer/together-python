@@ -23,5 +23,5 @@ repos:
     hooks:
       - id: mypy
         args: [--strict]
-        additional_dependencies: [types-requests, types-tqdm, pydantic, filelock, aiohttp]
+        additional_dependencies: [types-requests, types-tqdm, pydantic, filelock, aiohttp, click]
         exclude: ^tests/

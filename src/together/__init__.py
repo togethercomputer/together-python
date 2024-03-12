@@ -19,7 +19,7 @@ from together.version import VERSION
 
 version = VERSION
 
-log = None  # Set to either 'debug' or 'info', controls console logging
+log: str | None = None  # Set to either 'debug' or 'info', controls console logging
 
 if TYPE_CHECKING:
     import requests
