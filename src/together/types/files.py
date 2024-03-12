@@ -78,7 +78,7 @@ class FileDeleteResponse(BaseModel):
     deleted: bool
 
 
-class FileDownloadResult(BaseModel):
+class FileObject(BaseModel):
     # object type
     object: Literal["local"] | None = None
     # fine-tune job id

@@ -13,10 +13,11 @@ from together.types.completions import (
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 from together.types.files import (
     FileDeleteResponse,
-    FileDownloadResult,
+    FileObject,
     FileList,
     FileRequest,
     FileResponse,
+    FilePurpose,
 )
 from together.types.finetune import (
     FinetuneDownloadResult,
@@ -47,5 +48,6 @@ __all__ = [
     "FileResponse",
     "FileList",
     "FileDeleteResponse",
-    "FileDownloadResult",
+    "FileObject",
+    "FilePurpose",
 ]

@@ -3,13 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 
 from together.abstract import api_requestor
-from together.filemanager import DownloadManager
+from together.filemanager import UploadManager, DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
     FileDeleteResponse,
-    FileDownloadResult,
+    FileObject,
     FileList,
     FileResponse,
+    FilePurpose,
     TogetherClient,
     TogetherRequest,
 )
@@ -20,8 +21,20 @@ class Files:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
-    def upload(self) -> None:
-        raise NotImplementedError()
+    def upload(
+        self, file: Path | str, purpose: FilePurpose | str = FilePurpose.FineTune
+    ) -> FileResponse:
+        upload_manager = UploadManager(self._client)
+
+        if isinstance(file, str):
+            file = Path(file)
+
+        if isinstance(purpose, str):
+            purpose = FilePurpose(purpose)
+
+        assert isinstance(purpose, FilePurpose)
+
+        return upload_manager.upload("files", file, purpose=purpose, redirect=True)
 
     def list(self) -> FileList:
         requestor = api_requestor.APIRequestor(
@@ -59,9 +72,7 @@ class Files:
 
         return FileResponse(**response.data)
 
-    def retrieve_content(
-        self, id: str, output: Path | str | None = None
-    ) -> FileDownloadResult:
+    def retrieve_content(self, id: str, output: Path | str | None = None) -> FileObject:
         download_manager = DownloadManager(self._client)
 
         if isinstance(output, str):
@@ -71,7 +82,7 @@ class Files:
             f"files/{id}/content", output, normalize_key(f"{id}.jsonl")
         )
 
-        return FileDownloadResult(
+        return FileObject(
             object="local",
             id=id,
             filename=downloaded_filename,

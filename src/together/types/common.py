@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
+from pydantic import ConfigDict
 from typing import Any, Dict, List
+from tqdm.utils import CallbackIOWrapper
 
 from together.types.abstract import BaseModel
 
@@ -49,8 +51,12 @@ class DeltaContent(BaseModel):
 
 
 class TogetherRequest(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     method: str
     url: str
     headers: Dict[str, str] | None = None
-    params: Dict[str, Any] | None = None
+    params: Dict[str, Any] | CallbackIOWrapper | None = None
     files: Dict[str, Any] | None = None
+    allow_redirects: bool = True
+    override_headers: bool = False

@@ -6,6 +6,8 @@ import json
 import sys
 import threading
 import time
+
+from tqdm.utils import CallbackIOWrapper
 from json import JSONDecodeError
 from random import random
 from typing import (
@@ -201,22 +203,9 @@ class APIRequestor:
     def request(
         self,
         options: TogetherRequest,
-        *,
         stream: Literal[True],
         remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
-        return_raw: Literal[False] = ...,
-    ) -> Tuple[Iterator[TogetherResponse], bool, str]:
-        pass
-
-    @overload
-    def request(
-        self,
-        options: TogetherRequest,
-        stream: Literal[True],
-        remaining_retries: int | None = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-        return_raw: Literal[False] = ...,
     ) -> Tuple[Iterator[TogetherResponse], bool, str]:
         pass
 
@@ -227,7 +216,6 @@ class APIRequestor:
         stream: Literal[False] = ...,
         remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
-        return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
@@ -238,20 +226,7 @@ class APIRequestor:
         stream: bool = ...,
         remaining_retries: int | None = ...,
         request_timeout: float | Tuple[float, float] | None = ...,
-        return_raw: Literal[False] = ...,
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
-        pass
-
-    @overload
-    def request(
-        self,
-        options: TogetherRequest,
-        stream: bool = ...,
-        remaining_retries: int | None = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-        *,
-        return_raw: Literal[True],
-    ) -> Tuple[requests.Response, bool, str]:
         pass
 
     def request(
@@ -260,9 +235,8 @@ class APIRequestor:
         stream: bool = False,
         remaining_retries: int | None = None,
         request_timeout: float | Tuple[float, float] | None = None,
-        return_raw: bool = False,
     ) -> Tuple[
-        TogetherResponse | Iterator[TogetherResponse] | requests.Response,
+        TogetherResponse | Iterator[TogetherResponse],
         bool,
         str | None,
     ]:
@@ -273,11 +247,8 @@ class APIRequestor:
             request_timeout=request_timeout,
         )
 
-        if not return_raw:
-            resp, got_stream = self._interpret_response(result, stream)
-            return resp, got_stream, self.api_key
-        else:
-            return result, stream, self.api_key
+        resp, got_stream = self._interpret_response(result, stream)
+        return resp, got_stream, self.api_key
 
     @overload
     async def arequest(
@@ -452,12 +423,12 @@ class APIRequestor:
     def _prepare_request_raw(
         self,
         options: TogetherRequest,
-    ) -> Tuple[str, Dict[str, str], Dict[str, str] | bytes | None]:
-        abs_url = "%s%s" % (self.api_base, options.url)
+        absolute: bool = False,
+    ) -> Tuple[str, Dict[str, str], Dict[str, str] | CallbackIOWrapper | None]:
+        abs_url = options.url if absolute else "%s%s" % (self.api_base, options.url)
         headers = self._validate_headers(options.headers or self.supplied_headers)
 
         data = None
-        data_bytes = None
         if options.method.lower() == "get" or options.method.lower() == "delete":
             if options.params:
                 encoded_params = urlencode(
@@ -465,10 +436,8 @@ class APIRequestor:
                 )
                 abs_url = _build_api_url(abs_url, encoded_params)
         elif options.method.lower() in {"post", "put"}:
-            if options.params and options.files:
-                data = options.params
-            if options.params and not options.files:
-                data_bytes = json.dumps(options.params).encode()
+            data = options.params
+            if options.params and not options.files and not options.override_headers:
                 headers["Content-Type"] = "application/json"
         else:
             raise error.APIConnectionError(
@@ -477,16 +446,18 @@ class APIRequestor:
                 "assistance." % (options.method,)
             )
 
-        headers = utils.get_headers(options.method, self.api_key, headers)
+        if not options.override_headers:
+            headers = utils.get_headers(options.method, self.api_key, headers)
 
         utils.log_debug(
             "Request to Together API",
             method=options.method,
             path=abs_url,
-            post_data=(data or data_bytes),
+            post_data=data,
+            headers=json.dumps(headers),
         )
 
-        return abs_url, headers, (data or data_bytes)
+        return abs_url, headers, data
 
     def request_raw(
         self,
@@ -495,8 +466,9 @@ class APIRequestor:
         *,
         stream: bool = False,
         request_timeout: float | Tuple[float, float] | None = None,
+        absolute: bool = False,
     ) -> requests.Response:
-        abs_url, headers, data = self._prepare_request_raw(options)
+        abs_url, headers, data = self._prepare_request_raw(options, absolute)
 
         if not hasattr(_thread_context, "session"):
             _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
@@ -518,6 +490,7 @@ class APIRequestor:
                 stream=stream,
                 timeout=request_timeout or self.timeout,
                 proxies=_thread_context.session.proxies,
+                allow_redirects=options.allow_redirects,
             )
         except requests.exceptions.Timeout as e:
             utils.log_debug("Encountered requests.exceptions.Timeout")
@@ -550,7 +523,7 @@ class APIRequestor:
 
         # retry on 5XX error or rate-limit
         if 500 <= result.status_code < 600 or result.status_code == 429:
-            utils.log_info(
+            utils.log_debug(
                 f"Encountered requests.exceptions.HTTPError. Error code: {result.status_code}"
             )
 
@@ -579,8 +552,9 @@ class APIRequestor:
         session: aiohttp.ClientSession,
         *,
         request_timeout: float | Tuple[float, float] | None = None,
+        absolute: bool = False,
     ) -> aiohttp.ClientResponse:
-        abs_url, headers, data = self._prepare_request_raw(options)
+        abs_url, headers, data = self._prepare_request_raw(options, absolute)
 
         if isinstance(request_timeout, tuple):
             timeout = aiohttp.ClientTimeout(
@@ -591,17 +565,18 @@ class APIRequestor:
             timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
 
         if options.files:
-            # TODO: Use `aiohttp.MultipartWriter` to create the multipart form data here.
-            # For now we use the private `requests` method that is known to have worked so far.
             data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
                 options.files, data
             )
             headers["Content-Type"] = content_type
+
         request_kwargs = {
             "headers": headers,
             "data": data,
             "timeout": timeout,
+            "allow_redirects": options.allow_redirects,
         }
+
         try:
             result = await session.request(
                 method=options.method, url=abs_url, **request_kwargs
