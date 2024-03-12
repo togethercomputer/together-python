@@ -84,6 +84,6 @@ class FileObject(BaseModel):
     # fine-tune job id
     id: str | None = None
     # local path filename
-    filename: Path | None = None
+    filename: str | None = None
     # size in bytes
     size: int | None = None

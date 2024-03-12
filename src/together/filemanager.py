@@ -23,7 +23,7 @@ from together.constants import DISABLE_TQDM, DOWNLOAD_BLOCK_SIZE, MAX_RETRIES
 from together.error import (
     DownloadError,
     FileTypeError,
-    ResponseError,
+    APIError,
     AuthenticationError,
 )
 from together.types import TogetherClient, TogetherRequest, FileResponse, FilePurpose
@@ -148,6 +148,13 @@ class DownloadManager:
             stream=False,
         )
 
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            raise APIError(
+                "Error fetching file metadata", http_status=response.status_code
+            ) from e
+
         headers = response.headers
 
         assert isinstance(headers, CaseInsensitiveDict)
@@ -168,7 +175,7 @@ class DownloadManager:
         output: Path | None = None,
         remote_name: str | None = None,
         fetch_metadata: bool = False,
-    ) -> Tuple[Path, int]:
+    ) -> Tuple[str, int]:
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -195,6 +202,14 @@ class DownloadManager:
                     remaining_retries=MAX_RETRIES,
                     stream=True,
                 )
+
+                try:
+                    response.raise_for_status()
+                except Exception as e:
+                    os.remove(lock_path)
+                    raise APIError(
+                        "Error downloading file", http_status=response.status_code
+                    ) from e
 
                 if not fetch_metadata:
                     file_size = int(response.headers.get("content-length", 0))
@@ -224,7 +239,7 @@ class DownloadManager:
 
         os.remove(lock_path)
 
-        return file_path, file_size
+        return file_path.as_posix(), file_size
 
 
 class UploadManager:
@@ -242,7 +257,7 @@ class UploadManager:
                 "Settings -> Billing on api.together.ai to continue.",
             )
         elif response.status_code != 302:
-            raise ResponseError(
+            raise APIError(
                 f"Unexpected error raised by endpoint: {response.content.decode()}, headers: {response.headers}",
                 http_status=response.status_code,
             )
@@ -349,7 +364,7 @@ class UploadManager:
             assert isinstance(callback_response, requests.Response)
 
             if not callback_response.status_code == 200:
-                raise ResponseError(
+                raise APIError(
                     f"Error code: {callback_response.status_code} - Failed to process uploaded file"
                 )
 

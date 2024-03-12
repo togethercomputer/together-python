@@ -27,8 +27,8 @@ class Together:
         *,
         api_key: str | None = None,
         base_url: str | None = None,
-        timeout: float | None = TIMEOUT_SECS,
-        max_retries: int = MAX_RETRIES,
+        timeout: float | None = None,
+        max_retries: int | None = None,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new synchronous together client instance.
@@ -54,6 +54,12 @@ class Together:
 
         if base_url is None:
             base_url = BASE_URL
+
+        if timeout is None:
+            timeout = TIMEOUT_SECS
+
+        if max_retries is None:
+            max_retries = MAX_RETRIES
 
         # TogetherClient object
         self.client = TogetherClient(
@@ -90,8 +96,8 @@ class AsyncTogether:
         *,
         api_key: str | None = None,
         base_url: str | None = None,
-        timeout: float | None = TIMEOUT_SECS,
-        max_retries: int = MAX_RETRIES,
+        timeout: float | None = None,
+        max_retries: int | None = None,
         supplied_headers: Dict[str, str] | None = None,
     ) -> None:
         """Construct a new async together client instance.
@@ -117,6 +123,12 @@ class AsyncTogether:
 
         if base_url is None:
             base_url = BASE_URL
+
+        if timeout is None:
+            timeout = TIMEOUT_SECS
+
+        if max_retries is None:
+            max_retries = MAX_RETRIES
 
         # TogetherClient object
         self.client = TogetherClient(

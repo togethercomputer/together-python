@@ -48,7 +48,7 @@ class CompletionChoicesData(BaseModel):
 
 
 class CompletionChoicesChunk(BaseModel):
-    index: int
+    index: int | None = None
     logprobs: float | None = None
     finish_reason: FinishReason | None = None
     delta: DeltaContent | None = None
