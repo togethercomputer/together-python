@@ -424,11 +424,12 @@ class APIRequestor:
         self,
         options: TogetherRequest,
         absolute: bool = False,
-    ) -> Tuple[str, Dict[str, str], Dict[str, str] | CallbackIOWrapper | None]:
+    ) -> Tuple[str, Dict[str, str], Dict[str, str] | CallbackIOWrapper | bytes | None]:
         abs_url = options.url if absolute else "%s%s" % (self.api_base, options.url)
         headers = self._validate_headers(options.headers or self.supplied_headers)
 
         data = None
+        data_bytes = None
         if options.method.lower() == "get" or options.method.lower() == "delete":
             if options.params:
                 encoded_params = urlencode(
@@ -436,9 +437,12 @@ class APIRequestor:
                 )
                 abs_url = _build_api_url(abs_url, encoded_params)
         elif options.method.lower() in {"post", "put"}:
-            data = options.params
-            if options.params and not options.files and not options.override_headers:
+            if options.params and (options.files or options.override_headers):
+                data = options.params
+            elif options.params and not options.files:
+                data_bytes = json.dumps(options.params).encode()
                 headers["Content-Type"] = "application/json"
+
         else:
             raise error.APIConnectionError(
                 "Unrecognized HTTP method %r. This may indicate a bug in the "
@@ -453,11 +457,11 @@ class APIRequestor:
             "Request to Together API",
             method=options.method,
             path=abs_url,
-            post_data=data,
+            post_data=(data or data_bytes),
             headers=json.dumps(headers),
         )
 
-        return abs_url, headers, data
+        return abs_url, headers, (data or data_bytes)
 
     def request_raw(
         self,
