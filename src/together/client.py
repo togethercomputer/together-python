@@ -39,20 +39,20 @@ class Together:
         """
 
         # get api key
-        if api_key is None:
+        if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
-        if api_key is None:
+        if not api_key:
             raise AuthenticationError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
 
         # get base url
-        if base_url is None:
+        if not base_url:
             base_url = os.environ.get("TOGETHER_BASE_URL")
 
-        if base_url is None:
+        if not base_url:
             base_url = BASE_URL
 
         if timeout is None:
@@ -108,20 +108,20 @@ class AsyncTogether:
         """
 
         # get api key
-        if api_key is None:
+        if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
-        if api_key is None:
+        if not api_key:
             raise AuthenticationError(
                 "The api_key client option must be set either by passing api_key to the client or by setting the "
                 "TOGETHER_API_KEY environment variable"
             )
 
         # get base url
-        if base_url is None:
+        if not base_url:
             base_url = os.environ.get("TOGETHER_BASE_URL")
 
-        if base_url is None:
+        if not base_url:
             base_url = BASE_URL
 
         if timeout is None:
