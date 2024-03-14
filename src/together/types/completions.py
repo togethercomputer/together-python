@@ -19,7 +19,7 @@ class CompletionRequest(BaseModel):
     # query model
     model: str
     # stopping criteria: max tokens to generate
-    max_tokens: int | None = 512
+    max_tokens: int | None = None
     # stopping criteria: list of strings to stop generation
     stop: List[str] | None = None
     # sampling hyperparameters

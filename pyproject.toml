@@ -49,6 +49,7 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.4.2"
 pytest-watch = "^4.2.0"
+tox = "^4.14.1"
 
 
 [tool.poetry.urls]

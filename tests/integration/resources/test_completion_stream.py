@@ -7,7 +7,8 @@ from together.types import CompletionResponse
 from together.types.common import ObjectType, UsageData
 from together.types.completions import CompletionChoicesData
 
-from generate_hyperparameters import (
+from ..constants import completion_test_model_list
+from .generate_hyperparameters import (
     random_max_tokens,  # noqa
     random_repetition_penalty,  # noqa
     random_temperature,  # noqa
@@ -16,7 +17,7 @@ from generate_hyperparameters import (
 )
 
 
-class TestTogetherCompletion:
+class TestTogetherCompletionStream:
     @pytest.fixture
     def sync_together_client(self) -> Together:
         """
@@ -80,3 +81,51 @@ class TestTogetherCompletion:
             response.usage.prompt_tokens + response.usage.completion_tokens
             == response.usage.total_tokens
         )
+
+    def test_prompt(self):
+        pass
+
+    def test_no_prompt(self):
+        pass
+
+    def test_model(self):
+        pass
+
+    def test_no_model(self):
+        pass
+
+    def test_max_tokens(self):
+        pass
+
+    def test_no_max_tokens(self):
+        pass
+
+    def test_high_max_tokens(self):
+        pass
+
+    def test_stop(self):
+        pass
+
+    def test_no_stop(self):
+        pass
+
+    def test_temperature(self):
+        pass
+
+    def test_top_p(self):
+        pass
+
+    def test_top_k(self):
+        pass
+
+    def test_repetition_penalty(self):
+        pass
+
+    def test_echo(self):
+        pass
+
+    def test_n(self):
+        pass
+
+    def test_safety_model(self):
+        pass

@@ -4,7 +4,7 @@
 all: help
 
 # Define a variable for the test file path.
-TEST_FILE ?= tests/unit_tests/
+TEST_FILE ?= tests/unit/
 
 test:
 	poetry run pytest $(TEST_FILE)
@@ -13,13 +13,13 @@ tests:
 	poetry run pytest $(TEST_FILE)
 
 test_watch:
-	poetry run ptw --ignore ./tests/integration_tests . -- ./tests/unit_tests
+	poetry run ptw --ignore ./tests/integration . -- ./tests/unit
 
 extended_tests:
-	poetry run pytest --only-extended ./tests/unit_tests
+	poetry run pytest --only-extended ./tests/unit
 
 integration_tests:
-	poetry run pytest tests/integration_tests
+	poetry run pytest tests/integration
 
 
 # Linting & Formatting
