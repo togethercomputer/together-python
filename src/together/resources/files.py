@@ -68,8 +68,6 @@ class Files:
 
         assert isinstance(response, TogetherResponse)
 
-        print(response.data)
-
         return FileResponse(**response.data)
 
     def retrieve_content(self, id: str, output: Path | str | None = None) -> FileObject:
@@ -145,8 +143,6 @@ class AsyncFiles:
         )
 
         assert isinstance(response, TogetherResponse)
-
-        print(response.data)
 
         return FileResponse(**response.data)
 

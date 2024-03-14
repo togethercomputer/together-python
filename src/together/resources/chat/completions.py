@@ -123,7 +123,6 @@ class ChatCompletions:
             assert not isinstance(response, TogetherResponse)
             return (ChatCompletionChunk(**line.data) for line in response)
         assert isinstance(response, TogetherResponse)
-        print(response.data)
         return ChatCompletionResponse(**response.data)
 
 
