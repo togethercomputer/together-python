@@ -22,7 +22,7 @@ class Files:
         self._client = client
 
     def upload(
-        self, file: Path | str, purpose: FilePurpose | str = FilePurpose.FineTune
+        self, file: Path | str, *, purpose: FilePurpose | str = FilePurpose.FineTune
     ) -> FileResponse:
         upload_manager = UploadManager(self._client)
 
@@ -70,7 +70,9 @@ class Files:
 
         return FileResponse(**response.data)
 
-    def retrieve_content(self, id: str, output: Path | str | None = None) -> FileObject:
+    def retrieve_content(
+        self, id: str, *, output: Path | str | None = None
+    ) -> FileObject:
         download_manager = DownloadManager(self._client)
 
         if isinstance(output, str):
@@ -109,7 +111,9 @@ class AsyncFiles:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
-    async def upload(self) -> None:
+    async def upload(
+        self, file: Path | str, *, purpose: FilePurpose | str = FilePurpose.FineTune
+    ) -> None:
         raise NotImplementedError()
 
     async def list(self) -> FileList:
@@ -146,7 +150,9 @@ class AsyncFiles:
 
         return FileResponse(**response.data)
 
-    async def retrieve_content(self) -> None:
+    async def retrieve_content(
+        self, id: str, *, output: Path | str | None = None
+    ) -> FileObject:
         raise NotImplementedError()
 
     async def delete(self, id: str) -> FileDeleteResponse:

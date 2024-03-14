@@ -18,6 +18,7 @@ class Embeddings:
 
     def create(
         self,
+        *,
         input: str | List[str],
         model: str,
     ) -> EmbeddingResponse:
@@ -61,6 +62,7 @@ class AsyncEmbeddings:
 
     async def create(
         self,
+        *,
         input: str | List[str],
         model: str,
     ) -> EmbeddingResponse:

@@ -19,6 +19,7 @@ class Completions:
 
     def create(
         self,
+        *,
         prompt: str,
         model: str,
         max_tokens: int | None = 512,
@@ -114,6 +115,7 @@ class AsyncCompletions:
 
     async def create(
         self,
+        *,
         prompt: str,
         model: str,
         max_tokens: int | None = 512,

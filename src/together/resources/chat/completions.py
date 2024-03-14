@@ -19,6 +19,7 @@ class ChatCompletions:
 
     def create(
         self,
+        *,
         messages: List[Dict[str, str]],
         model: str,
         max_tokens: int | None = None,
@@ -132,6 +133,7 @@ class AsyncChatCompletions:
 
     async def create(
         self,
+        *,
         messages: List[Dict[str, str]],
         model: str,
         max_tokens: int | None = None,

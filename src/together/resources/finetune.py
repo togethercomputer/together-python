@@ -23,6 +23,7 @@ class FineTuning:
 
     def create(
         self,
+        *,
         training_file: str,
         model: str,
         n_epochs: int = 1,
@@ -187,7 +188,7 @@ class FineTuning:
         return FinetuneListEvents(**response.data)
 
     def download(
-        self, id: str, output: Path | str | None = None, checkpoint_step: int = -1
+        self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -236,6 +237,7 @@ class AsyncFineTuning:
 
     async def create(
         self,
+        *,
         training_file: str,
         model: str,
         n_epochs: int = 1,
@@ -400,7 +402,7 @@ class AsyncFineTuning:
         return FinetuneListEvents(**response.data)
 
     async def download(
-        self, id: str, output: str | None = None, checkpoint_step: int = -1
+        self, id: str, *, output: str | None = None, checkpoint_step: int = -1
     ) -> str:
         """
         TODO: Implement async download method
