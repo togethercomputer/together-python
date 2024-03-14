@@ -30,6 +30,7 @@ from together.types.images import (
     ImageRequest,
     ImageResponse,
 )
+from together.types.models import ModelObject
 
 
 __all__ = [
@@ -56,4 +57,5 @@ __all__ = [
     "FilePurpose",
     "ImageRequest",
     "ImageResponse",
+    "ModelObject",
 ]

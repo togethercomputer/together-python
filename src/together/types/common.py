@@ -30,6 +30,7 @@ class ObjectType(str, Enum):
     Embedding = "embedding"
     FinetuneEvent = "fine-tune-event"
     File = "file"
+    Model = "model"
 
 
 class LogprobsPart(BaseModel):

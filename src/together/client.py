@@ -16,7 +16,7 @@ class Together:
     embeddings: resources.Embeddings
     files: resources.Files
     images: resources.Images
-    # models: resources.Models
+    models: resources.Models
     fine_tuning: resources.FineTuning
 
     # client options
@@ -75,7 +75,7 @@ class Together:
         self.embeddings = resources.Embeddings(self.client)
         self.files = resources.Files(self.client)
         self.images = resources.Images(self.client)
-        # self.models = resources.Models(self)
+        self.models = resources.Models(self.client)
         self.fine_tuning = resources.FineTuning(self.client)
 
 
@@ -85,7 +85,7 @@ class AsyncTogether:
     embeddings: resources.AsyncEmbeddings
     files: resources.AsyncFiles
     images: resources.AsyncImages
-    # models: resources.AsyncModels
+    models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
 
     # client options
@@ -144,7 +144,7 @@ class AsyncTogether:
         self.embeddings = resources.AsyncEmbeddings(self.client)
         self.files = resources.AsyncFiles(self.client)
         self.images = resources.AsyncImages(self.client)
-        # self.models = resources.AsyncModels(self)
+        self.models = resources.AsyncModels(self.client)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
 
 
