@@ -26,6 +26,10 @@ from together.types.finetune import (
     FinetuneRequest,
     FinetuneResponse,
 )
+from together.types.images import (
+    ImageRequest,
+    ImageResponse,
+)
 
 
 __all__ = [
@@ -50,4 +54,6 @@ __all__ = [
     "FileDeleteResponse",
     "FileObject",
     "FilePurpose",
+    "ImageRequest",
+    "ImageResponse",
 ]

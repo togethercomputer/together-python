@@ -3,6 +3,7 @@ from together.resources.completions import AsyncCompletions, Completions
 from together.resources.embeddings import AsyncEmbeddings, Embeddings
 from together.resources.files import AsyncFiles, Files
 from together.resources.finetune import AsyncFineTuning, FineTuning
+from together.resources.images import AsyncImages, Images
 
 
 __all__ = [
@@ -16,4 +17,6 @@ __all__ = [
     "AsyncFineTuning",
     "Files",
     "AsyncFiles",
+    "AsyncImages",
+    "Images",
 ]

@@ -15,7 +15,7 @@ class Together:
     chat: resources.Chat
     embeddings: resources.Embeddings
     files: resources.Files
-    # images: resources.Images
+    images: resources.Images
     # models: resources.Models
     fine_tuning: resources.FineTuning
 
@@ -74,7 +74,7 @@ class Together:
         self.chat = resources.Chat(self.client)
         self.embeddings = resources.Embeddings(self.client)
         self.files = resources.Files(self.client)
-        # self.images = resources.Images(self)
+        self.images = resources.Images(self.client)
         # self.models = resources.Models(self)
         self.fine_tuning = resources.FineTuning(self.client)
 
@@ -84,7 +84,7 @@ class AsyncTogether:
     chat: resources.AsyncChat
     embeddings: resources.AsyncEmbeddings
     files: resources.AsyncFiles
-    # images: resources.AsyncImages
+    images: resources.AsyncImages
     # models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
 
@@ -143,7 +143,7 @@ class AsyncTogether:
         self.chat = resources.AsyncChat(self.client)
         self.embeddings = resources.AsyncEmbeddings(self.client)
         self.files = resources.AsyncFiles(self.client)
-        # self.images = resources.AsyncImages(self)
+        self.images = resources.AsyncImages(self.client)
         # self.models = resources.AsyncModels(self)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
 
