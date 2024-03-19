@@ -10,18 +10,20 @@ from typing import List
 @click.command()
 @click.pass_context
 @click.argument("prompt", type=str, required=True)
-@click.option("--model", type=str, required=True)
-@click.option("--no-stream", is_flag=True)
-@click.option("--max-tokens", type=int)
-@click.option("--stop", type=str, multiple=True)
-@click.option("--temperature", type=float)
-@click.option("--top-p", type=int)
-@click.option("--top-k", type=float)
-@click.option("--logprobs", type=int)
-@click.option("--echo", is_flag=True)
-@click.option("--n", type=int)
-@click.option("--safety-model", type=str)
-@click.option("--raw", is_flag=True)
+@click.option("--model", type=str, required=True, help="Model name")
+@click.option("--no-stream", is_flag=True, help="Disable streaming")
+@click.option("--max-tokens", type=int, help="Max tokens to generate")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
+@click.option("--temperature", type=float, help="Sampling temperature")
+@click.option("--top-p", type=int, help="Top p sampling")
+@click.option("--top-k", type=float, help="Top k sampling")
+@click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
+@click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
+@click.option("--n", type=int, help="Number of output generations")
+@click.option("--safety-model", type=str, help="Moderation model")
+@click.option("--raw", is_flag=True, help="Return raw JSON response")
 def completions(
     ctx: click.Context,
     prompt: str,
@@ -39,7 +41,7 @@ def completions(
     safety_model: str | None = None,
     raw: bool = False,
 ) -> None:
-    """Convert utilities."""
+    """Generate text completions"""
     client: Together = ctx.obj
 
     response = client.completions.create(

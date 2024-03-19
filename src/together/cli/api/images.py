@@ -11,25 +11,26 @@ from together.types.images import ImageChoicesData
 @click.group()
 @click.pass_context
 def images(ctx: click.Context) -> None:
-    """Convert utilities."""
+    """Images generations API commands"""
     pass
 
 
 @images.command()
 @click.pass_context
 @click.argument("prompt", type=str, required=True)
-@click.option("--model", type=str, required=True)
-@click.option("--steps", type=int, default=20)
-@click.option("--seed", type=int)
-@click.option("--n", type=int, default=1)
-@click.option("--height", type=int, default=1024)
-@click.option("--width", type=int, default=1024)
-@click.option("--negative-prompt", type=str)
+@click.option("--model", type=str, required=True, help="Model name")
+@click.option("--steps", type=int, default=20, help="Number of steps to run generation")
+@click.option("--seed", type=int, default=None, help="Random seed")
+@click.option("--n", type=int, default=1, help="Number of images to generate")
+@click.option("--height", type=int, default=1024, help="Image height")
+@click.option("--width", type=int, default=1024, help="Image width")
+@click.option("--negative-prompt", type=str, default=None, help="Negative prompt")
 @click.option(
     "--output",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=pathlib.Path("."),
+    help="Output directory",
 )
 @click.option("--prefix", type=str, required=False, default="image-")
 def generate(

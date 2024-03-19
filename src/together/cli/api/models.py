@@ -1,7 +1,6 @@
 import click
 from tabulate import tabulate
 
-from typing import List
 from textwrap import wrap
 
 from together import Together
@@ -11,7 +10,7 @@ from together.types.models import ModelObject
 @click.group()
 @click.pass_context
 def models(ctx: click.Context) -> None:
-    """Convert utilities."""
+    """Models API commands"""
     pass
 
 

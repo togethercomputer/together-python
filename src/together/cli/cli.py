@@ -41,7 +41,12 @@ def print_version(ctx: click.Context, params: Any, value: Any) -> None:
     help=f"Maximum number of HTTP retries. Defaults to {MAX_RETRIES}.",
 )
 @click.option(
-    "--version", is_flag=True, callback=print_version, expose_value=False, is_eager=True
+    "--version",
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+    help="Print version",
 )
 @click.option("--debug", help="Debug mode", is_flag=True)
 def main(
@@ -63,9 +68,9 @@ main.add_command(chat)
 main.add_command(interactive)
 main.add_command(completions)
 main.add_command(images)
-main.add_command(models)
 main.add_command(files)
 main.add_command(fine_tune)
+main.add_command(models)
 
 if __name__ == "__main__":
     main()

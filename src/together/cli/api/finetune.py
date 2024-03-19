@@ -2,6 +2,8 @@ import click
 import json
 
 from tabulate import tabulate
+from textwrap import wrap
+
 
 from together import Together
 from together.utils import parse_timestamp, finetune_price_to_dollars
@@ -10,20 +12,26 @@ from together.utils import parse_timestamp, finetune_price_to_dollars
 @click.group(name="fine-tune")
 @click.pass_context
 def fine_tune(ctx: click.Context) -> None:
-    """Convert utilities."""
+    """Fine-tunes API commands"""
     pass
 
 
 @fine_tune.command()
 @click.pass_context
-@click.option("--training_file", type=str, required=True)
-@click.option("--model", type=str, required=True)
-@click.option("--n-epochs", type=int, default=1)
-@click.option("--n-checkpoints", type=int, default=1)
-@click.option("--batch-size", type=int, default=32)
-@click.option("--learning-rate", type=float, default=3e-5)
-@click.option("--suffix", type=str, default=None)
-@click.option("--wandb-api-key", prompt=True, hide_input=True)
+@click.option(
+    "--training_file", type=str, required=True, help="Training file ID from Files API"
+)
+@click.option("--model", type=str, required=True, help="Base model name")
+@click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option(
+    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
+)
+@click.option("--batch-size", type=int, default=32, help="Train batch size")
+@click.option("--learning-rate", type=float, default=3e-5, help="Learning rate")
+@click.option(
+    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
+)
+@click.option("--wandb-api-key", prompt=True, hide_input=True, help="Wandb API key")
 def create(
     ctx: click.Context,
     training_file: str,
@@ -60,7 +68,7 @@ def list(ctx: click.Context) -> None:
 
     response = client.fine_tuning.list()
 
-    assert response.data
+    response.data = response.data or []
 
     response.data.sort(key=lambda x: parse_timestamp(x.created_at or ""))
 
@@ -69,12 +77,12 @@ def list(ctx: click.Context) -> None:
         display_list.append(
             {
                 "Fine-tune ID": i.id,
-                "Model Output Name": i.output_name,
+                "Model Output Name": "\n".join(wrap(i.output_name or "", width=30)),
                 "Status": i.status,
                 "Created At": i.created_at,
-                "Price": finetune_price_to_dollars(
+                "Price": f"""${finetune_price_to_dollars(
                     float(str(i.total_price))
-                ),  # convert to string for mypy typing
+                )}""",  # convert to string for mypy typing
             }
         )
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
@@ -122,7 +130,7 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 
     response = client.fine_tuning.list_events(fine_tune_id)
 
-    assert response.data
+    response.data = response.data or []
 
     display_list = []
     for i in response.data:
@@ -147,10 +155,20 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=".",
+    help="Output directory",
 )
-@click.option("--checkpoint-step", type=int, required=False, default=-1)
+@click.option(
+    "--checkpoint-step",
+    type=int,
+    required=False,
+    default=-1,
+    help="Download fine-tuning checkpoint. Defaults to latest.",
+)
 def download(
-    ctx: click.Context, fine_tune_id: str, output_dir: str, checkpoint_step: int
+    ctx: click.Context,
+    fine_tune_id: str,
+    output_dir: str,
+    checkpoint_step: int,
 ) -> None:
     """Download fine-tuning checkpoint"""
     client: Together = ctx.obj

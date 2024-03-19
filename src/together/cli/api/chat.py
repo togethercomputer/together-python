@@ -98,14 +98,16 @@ class ChatShell(cmd.Cmd):
 
 @click.command(name="chat.interactive")
 @click.pass_context
-@click.option("--model", type=str, required=True)
-@click.option("--max-tokens", type=int)
-@click.option("--stop", type=str, multiple=True)
-@click.option("--temperature", type=float)
-@click.option("--top-p", type=int)
-@click.option("--top-k", type=float)
-@click.option("--safety-model", type=str)
-@click.option("--system-message", type=str)
+@click.option("--model", type=str, required=True, help="Model name")
+@click.option("--max-tokens", type=int, help="Max tokens to generate")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
+@click.option("--temperature", type=float, help="Sampling temperature")
+@click.option("--top-p", type=int, help="Top p sampling")
+@click.option("--top-k", type=float, help="Top k sampling")
+@click.option("--safety-model", type=str, help="Moderation model")
+@click.option("--system-message", type=str, help="System message to use for the chat")
 def interactive(
     ctx: click.Context,
     model: str,
@@ -118,6 +120,7 @@ def interactive(
     safety_model: str | None = None,
     system_message: str | None = None,
 ) -> None:
+    """Interactive chat shell"""
     client: Together = ctx.obj
 
     ChatShell(
@@ -136,20 +139,28 @@ def interactive(
 
 @click.command(name="chat.completions")
 @click.pass_context
-@click.option("--message", type=(str, str), multiple=True)
-@click.option("--model", type=str, required=True)
-@click.option("--max-tokens", type=int)
-@click.option("--stop", type=str, multiple=True)
-@click.option("--temperature", type=float)
-@click.option("--top-p", type=int)
-@click.option("--top-k", type=float)
-@click.option("--repetition-penalty", type=float)
-@click.option("--no-stream", is_flag=True)
-@click.option("--logprobs", type=int)
-@click.option("--echo", is_flag=True)
-@click.option("--n", type=int)
-@click.option("--safety-model", type=str)
-@click.option("--raw", is_flag=True)
+@click.option(
+    "--message",
+    type=(str, str),
+    multiple=True,
+    required=True,
+    help="Message to generate chat completions from",
+)
+@click.option("--model", type=str, required=True, help="Model name")
+@click.option("--max-tokens", type=int, help="Max tokens to generate")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
+@click.option("--temperature", type=float, help="Sampling temperature")
+@click.option("--top-p", type=int, help="Top p sampling")
+@click.option("--top-k", type=float, help="Top k sampling")
+@click.option("--repetition-penalty", type=float, help="Repetition penalty")
+@click.option("--no-stream", is_flag=True, help="Disable streaming")
+@click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
+@click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
+@click.option("--n", type=int, help="Number of output generations")
+@click.option("--safety-model", type=str, help="Moderation model")
+@click.option("--raw", is_flag=True, help="Output raw JSON")
 def chat(
     ctx: click.Context,
     message: List[Tuple[str, str]],
@@ -167,7 +178,7 @@ def chat(
     safety_model: str | None = None,
     raw: bool = False,
 ) -> None:
-    """Convert utilities."""
+    """Generate chat completions from messages"""
     client: Together = ctx.obj
 
     messages = [{"role": msg[0], "content": msg[1]} for msg in message]

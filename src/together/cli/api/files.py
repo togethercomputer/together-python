@@ -2,14 +2,18 @@ import click
 import json
 import pathlib
 
+from tabulate import tabulate
+from textwrap import wrap
+
 from together import Together
 from together.types import FilePurpose
+from together.utils import convert_bytes, convert_unix_timestamp
 
 
 @click.group()
 @click.pass_context
 def files(ctx: click.Context) -> None:
-    """Convert utilities."""
+    """File API commands"""
     pass
 
 
@@ -46,7 +50,22 @@ def list(ctx: click.Context) -> None:
 
     response = client.files.list()
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    display_list = []
+    for i in response.data or []:
+        display_list.append(
+            {
+                "File name": "\n".join(wrap(i.filename or "", width=30)),
+                "File ID": i.id,
+                "Size": convert_bytes(
+                    float(str(i.bytes))
+                ),  # convert to string for mypy typing
+                "Created At": convert_unix_timestamp(i.created_at or 0),
+                "Line Count": i.line_count,
+            }
+        )
+    table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+
+    click.echo(table)
 
 
 @files.command()
