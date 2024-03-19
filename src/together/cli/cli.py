@@ -1,11 +1,24 @@
 import click
 import os
 
+from typing import Any
+
 import together
 from together.constants import TIMEOUT_SECS, MAX_RETRIES
 
 from together.cli.api.files import files
 from together.cli.api.completions import completions
+from together.cli.api.chat import chat, interactive
+from together.cli.api.images import images
+from together.cli.api.models import models
+from together.cli.api.finetune import fine_tune
+
+
+def print_version(ctx: click.Context, params: Any, value: Any) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"Version {together.version}")
+    ctx.exit()
 
 
 @click.group()
@@ -27,6 +40,9 @@ from together.cli.api.completions import completions
     type=int,
     help=f"Maximum number of HTTP retries. Defaults to {MAX_RETRIES}.",
 )
+@click.option(
+    "--version", is_flag=True, callback=print_version, expose_value=False, is_eager=True
+)
 @click.option("--debug", help="Debug mode", is_flag=True)
 def main(
     ctx: click.Context,
@@ -43,8 +59,13 @@ def main(
     )
 
 
+main.add_command(chat)
+main.add_command(interactive)
 main.add_command(completions)
+main.add_command(images)
+main.add_command(models)
 main.add_command(files)
+main.add_command(fine_tune)
 
 if __name__ == "__main__":
     main()

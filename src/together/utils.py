@@ -6,6 +6,8 @@ import os
 import platform
 import re
 import sys
+
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict
 
 
@@ -19,6 +21,8 @@ from together import error
 logger = logging.getLogger("together")
 
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")
+
+NANODOLLAR = 1_000_000_000
 
 
 def get_headers(
@@ -147,3 +151,18 @@ def enforce_trailing_slash(url: str) -> str:
 
 def normalize_key(key: str) -> str:
     return key.replace("/", "--").replace("_", "-").replace(" ", "-").lower()
+
+
+def parse_timestamp(timestamp: str) -> datetime:
+    formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
+    for fmt in formats:
+        try:
+            return datetime.strptime(timestamp, fmt)
+        except ValueError:
+            continue
+    raise ValueError("Timestamp does not match any expected format")
+
+
+# Convert fine-tune nano-dollar price to dollars
+def finetune_price_to_dollars(price: float) -> float:
+    return price / NANODOLLAR

@@ -192,7 +192,7 @@ class DownloadManager:
         # Prevent parallel downloads of the same file with a lock.
         lock_path = Path(file_path.as_posix() + ".lock")
 
-        with FileLock(lock_path):
+        with FileLock(lock_path.as_posix()):
             with temp_file_manager() as temp_file:
                 response = requestor.request_raw(
                     options=TogetherRequest(

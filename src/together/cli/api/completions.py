@@ -11,7 +11,7 @@ from typing import List
 @click.pass_context
 @click.argument("prompt", type=str, required=True)
 @click.option("--model", type=str, required=True)
-@click.option("--stream", is_flag=True)
+@click.option("--no-stream", is_flag=True)
 @click.option("--max-tokens", type=int)
 @click.option("--stop", type=str, multiple=True)
 @click.option("--temperature", type=float)
@@ -32,7 +32,7 @@ def completions(
     top_p: float | None = None,
     top_k: int | None = None,
     repetition_penalty: float | None = None,
-    stream: bool = False,
+    no_stream: bool = False,
     logprobs: int | None = None,
     echo: bool | None = None,
     n: int | None = None,
@@ -51,41 +51,52 @@ def completions(
         max_tokens=max_tokens,
         stop=stop,
         repetition_penalty=repetition_penalty,
-        stream=stream,
+        stream=not no_stream,
         logprobs=logprobs,
         echo=echo,
         n=n,
         safety_model=safety_model,
     )
 
-    if stream:
+    if not no_stream:
         for chunk in response:
+            # assertions for type checking
             assert isinstance(chunk, CompletionChunk)
-            assert isinstance(chunk.choices, list)
+            assert chunk.choices
+
+            if raw:
+                click.echo(f"{json.dumps(chunk.model_dump())}")
+                continue
+
             should_print_header = len(chunk.choices) > 1
             for stream_choice in sorted(chunk.choices, key=lambda c: c.index):  # type: ignore
+                # assertions for type checking
                 assert isinstance(stream_choice, CompletionChoicesChunk)
-                if raw:
-                    click.echo(f"{json.dumps(stream_choice.model_dump())}\n")
-                    continue
+                assert stream_choice.delta
+                assert stream_choice.delta.content
 
                 if should_print_header:
-                    click.echo(f"===== Completion {stream_choice.index} =====\n")
-                click.echo(f"{stream_choice.delta}")
+                    click.echo(f"\n===== Completion {stream_choice.index} =====\n")
+                click.echo(f"{stream_choice.delta.content}", nl=False)
 
                 if should_print_header:
                     click.echo("\n")
+
+        # new line after stream ends
+        click.echo("\n")
     else:
+        # assertions for type checking
         assert isinstance(response, CompletionResponse)
         assert isinstance(response.choices, list)
+
+        if raw:
+            click.echo(f"{json.dumps(response.model_dump(), indent=4)}")
+            return
+
         should_print_header = len(response.choices) > 1
         for i, choice in enumerate(response.choices):
-            if raw:
-                click.echo(f"{json.dumps(choice.model_dump())}\n")
-                continue
-
             if should_print_header:
-                click.echo(f"===== Completion {i} =====\n")
+                click.echo(f"===== Completion {i} =====")
             click.echo(choice.text)
 
             if should_print_header or not choice.text.endswith("\n"):

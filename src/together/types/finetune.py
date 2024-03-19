@@ -176,8 +176,8 @@ class FinetuneResponse(BaseModel):
     # weights & biases job url
     wandb_url: str | None = None
     # training file metadata
-    TrainingFileNumLines: int | None = None
-    TrainingFileSize: int | None = None
+    training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
+    training_file_size: int | None = Field(None, alias="TrainingFileSize")
 
 
 class FinetuneList(BaseModel):

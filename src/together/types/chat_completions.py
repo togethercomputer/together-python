@@ -127,18 +127,25 @@ class ChatCompletionResponse(BaseModel):
     usage: UsageData | None = None
 
 
+class ChatCompletionChoicesChunk(BaseModel):
+    index: int | None = None
+    logprobs: float | None = None
+    finish_reason: FinishReason | None = None
+    delta: DeltaContent | None = None
+
+
 class ChatCompletionChunk(BaseModel):
     # request id
     id: str | None = None
     # object type
-    object: ObjectType
+    object: ObjectType | None = None
     # created timestamp
-    created: int
+    created: int | None = None
     # model name
-    model: str
+    model: str | None = None
     # delta content
-    delta: DeltaContent
+    choices: List[ChatCompletionChoicesChunk] | None = None
     # finish reason
-    finish_reason: FinishReason
+    finish_reason: FinishReason | None = None
     # token usage data
-    usage: UsageData
+    usage: UsageData | None = None

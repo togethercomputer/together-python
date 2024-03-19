@@ -16,7 +16,11 @@ def files(ctx: click.Context) -> None:
 @files.command()
 @click.pass_context
 @click.argument(
-    "file", type=click.Path(exists=True, path_type=pathlib.Path), required=True
+    "file",
+    type=click.Path(
+        exists=True, file_okay=True, resolve_path=True, readable=True, dir_okay=False
+    ),
+    required=True,
 )
 @click.option(
     "--purpose",

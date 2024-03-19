@@ -33,9 +33,12 @@ class ModelObject(BaseModel):
     created: int | None = None
     # model type
     type: ModelType | None = None
+    # pretty name
+    display_name: str | None = None
     # model creator organization
     organization: str | None = None
     # link to model resource
     link: str | None = None
     license: str | None = None
-    pricing: PricingObject | None = None
+    context_length: int | None = None
+    pricing: PricingObject
