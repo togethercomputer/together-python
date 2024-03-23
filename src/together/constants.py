@@ -17,3 +17,12 @@ DISABLE_TQDM = False
 MISSING_API_KEY_MESSAGE = """TOGETHER_API_KEY not found.
 Please set it as an environment variable or set it as together.api_key
 Find your TOGETHER_API_KEY at https://api.together.xyz/settings/api-keys"""
+
+# Minimum number of samples required for fine-tuning file
+MIN_SAMPLES = 100
+
+# the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
+NUM_BYTES_IN_GB = 2**30
+
+# maximum number of GB sized files we support finetuning for
+MAX_FILE_SIZE_GB = 4.9
