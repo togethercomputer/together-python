@@ -6,8 +6,6 @@ import json
 import sys
 import threading
 import time
-
-from tqdm.utils import CallbackIOWrapper
 from json import JSONDecodeError
 from random import random
 from typing import (
@@ -23,6 +21,7 @@ from urllib.parse import urlencode, urlsplit, urlunsplit
 
 import aiohttp
 import requests
+from tqdm.utils import CallbackIOWrapper
 
 
 if sys.version_info >= (3, 8):

@@ -7,7 +7,6 @@ from together.types import CompletionResponse
 from together.types.common import ObjectType, UsageData
 from together.types.completions import CompletionChoicesData
 
-from ..constants import completion_test_model_list
 from .generate_hyperparameters import (
     random_max_tokens,  # noqa
     random_repetition_penalty,  # noqa

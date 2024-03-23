@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from pydantic import ConfigDict
 from typing import Any, Dict, List
+
+from pydantic import ConfigDict
 from tqdm.utils import CallbackIOWrapper
 
 from together.types.abstract import BaseModel

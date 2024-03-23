@@ -1,17 +1,16 @@
-import click
 import os
-
 from typing import Any
 
-import together
-from together.constants import TIMEOUT_SECS, MAX_RETRIES
+import click
 
-from together.cli.api.files import files
-from together.cli.api.completions import completions
+import together
 from together.cli.api.chat import chat, interactive
+from together.cli.api.completions import completions
+from together.cli.api.files import files
+from together.cli.api.finetune import fine_tune
 from together.cli.api.images import images
 from together.cli.api.models import models
-from together.cli.api.finetune import fine_tune
+from together.constants import MAX_RETRIES, TIMEOUT_SECS
 
 
 def print_version(ctx: click.Context, params: Any, value: Any) -> None:

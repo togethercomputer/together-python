@@ -1,14 +1,15 @@
-import click
 import cmd
 import json
+from typing import List, Tuple
+
+import click
 
 from together import Together
 from together.types.chat_completions import (
-    ChatCompletionResponse,
-    ChatCompletionChunk,
     ChatCompletionChoicesChunk,
+    ChatCompletionChunk,
+    ChatCompletionResponse,
 )
-from typing import List, Tuple
 
 
 class ChatShell(cmd.Cmd):

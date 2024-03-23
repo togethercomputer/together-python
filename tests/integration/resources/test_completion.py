@@ -1,14 +1,13 @@
 import os
+from itertools import product
 
 import pytest
 
-from itertools import product
-
 from together.client import Together
+from together.error import InvalidRequestError
 from together.types import CompletionResponse
 from together.types.common import ObjectType, UsageData
 from together.types.completions import CompletionChoicesData
-from together.error import InvalidRequestError
 
 from ..constants import completion_test_model_list, moderation_test_model_list
 from .generate_hyperparameters import (
@@ -18,6 +17,7 @@ from .generate_hyperparameters import (
     random_top_k,  # noqa
     random_top_p,  # noqa
 )
+
 
 STOP = ["</s>"]
 
@@ -123,7 +123,7 @@ class TestTogetherCompletion:
         sync_together_client,
     ):
         with pytest.raises(TypeError):
-            response = sync_together_client.completions.create(
+            response = sync_together_client.completions.create(  # noqa
                 model=model,
                 stop=STOP,
                 max_tokens=10,
@@ -163,7 +163,7 @@ class TestTogetherCompletion:
         sync_together_client,
     ):
         with pytest.raises(TypeError):
-            response = sync_together_client.completions.create(
+            response = sync_together_client.completions.create(  # noqa
                 prompt=prompt,
                 stop=STOP,
                 max_tokens=10,
@@ -207,7 +207,7 @@ class TestTogetherCompletion:
         sync_together_client,
     ):
         with pytest.raises(InvalidRequestError):
-            response = sync_together_client.completions.create(
+            response = sync_together_client.completions.create(  # noqa
                 prompt=prompt,
                 model=model,
                 stop=STOP,
@@ -272,7 +272,7 @@ class TestTogetherCompletion:
         n = MAX_N + 1
 
         with pytest.raises(InvalidRequestError):
-            response = sync_together_client.completions.create(
+            response = sync_together_client.completions.create(  # noqa
                 prompt=prompt,
                 model=model,
                 stop=STOP,
@@ -298,7 +298,7 @@ class TestTogetherCompletion:
         n = MAX_N + 1
 
         with pytest.raises(InvalidRequestError):
-            response = sync_together_client.completions.create(
+            response = sync_together_client.completions.create(  # noqa
                 prompt=prompt,
                 model=model,
                 stop=STOP,

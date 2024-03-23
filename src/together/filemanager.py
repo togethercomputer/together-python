@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import requests
 import shutil
 import stat
 import tempfile
@@ -9,25 +8,24 @@ import uuid
 from functools import partial
 from pathlib import Path
 from typing import Tuple
-from tqdm.utils import CallbackIOWrapper
 
+import requests
 from filelock import FileLock
 from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
+from tqdm.utils import CallbackIOWrapper
 
 import together.utils
 from together.abstract import api_requestor
-
 from together.constants import DISABLE_TQDM, DOWNLOAD_BLOCK_SIZE, MAX_RETRIES
-
 from together.error import (
-    DownloadError,
-    FileTypeError,
     APIError,
     AuthenticationError,
+    DownloadError,
+    FileTypeError,
 )
-from together.types import TogetherClient, TogetherRequest, FileResponse, FilePurpose
 from together.together_response import TogetherResponse
+from together.types import FilePurpose, FileResponse, TogetherClient, TogetherRequest
 
 
 def chmod_and_replace(src: Path, dst: Path) -> None:

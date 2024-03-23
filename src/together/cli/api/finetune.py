@@ -1,12 +1,11 @@
-import click
 import json
-
-from tabulate import tabulate
 from textwrap import wrap
 
+import click
+from tabulate import tabulate
 
 from together import Together
-from together.utils import parse_timestamp, finetune_price_to_dollars
+from together.utils import finetune_price_to_dollars, parse_timestamp
 
 
 @click.group(name="fine-tune")

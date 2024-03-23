@@ -3,14 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 
 from together.abstract import api_requestor
-from together.filemanager import UploadManager, DownloadManager
+from together.filemanager import DownloadManager, UploadManager
 from together.together_response import TogetherResponse
 from together.types import (
     FileDeleteResponse,
-    FileObject,
     FileList,
-    FileResponse,
+    FileObject,
     FilePurpose,
+    FileResponse,
     TogetherClient,
     TogetherRequest,
 )

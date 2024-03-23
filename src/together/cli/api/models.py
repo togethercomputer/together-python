@@ -1,7 +1,7 @@
+from textwrap import wrap
+
 import click
 from tabulate import tabulate
-
-from textwrap import wrap
 
 from together import Together
 from together.types.models import ModelObject

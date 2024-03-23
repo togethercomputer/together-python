@@ -1,10 +1,11 @@
-import click
 import json
+from typing import List
+
+import click
 
 from together import Together
 from together.types import CompletionChunk
-from together.types.completions import CompletionResponse, CompletionChoicesChunk
-from typing import List
+from together.types.completions import CompletionChoicesChunk, CompletionResponse
 
 
 @click.command()

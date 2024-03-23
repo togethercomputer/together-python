@@ -13,11 +13,11 @@ from together.types.completions import (
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 from together.types.files import (
     FileDeleteResponse,
-    FileObject,
     FileList,
+    FileObject,
+    FilePurpose,
     FileRequest,
     FileResponse,
-    FilePurpose,
 )
 from together.types.finetune import (
     FinetuneDownloadResult,

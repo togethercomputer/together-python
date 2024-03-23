@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import List, Literal
-
 from enum import Enum
+from typing import Literal
 
 from together.types.abstract import BaseModel
 from together.types.common import ObjectType

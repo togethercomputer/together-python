@@ -1,9 +1,9 @@
-import click
 import json
 import pathlib
-
-from tabulate import tabulate
 from textwrap import wrap
+
+import click
+from tabulate import tabulate
 
 from together import Together
 from together.types import FilePurpose

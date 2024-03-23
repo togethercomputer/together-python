@@ -1,9 +1,9 @@
 import base64
-import click
 import pathlib
 
-from together import Together
+import click
 
+from together import Together
 from together.types import ImageResponse
 from together.types.images import ImageChoicesData
 
