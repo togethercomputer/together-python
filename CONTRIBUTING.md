@@ -25,7 +25,7 @@ Please do not try to push directly to this repo unless you are a maintainer.
 Please follow the checked-in pull request template when opening pull requests. Note related issues and tag relevant
 maintainers.
 
-Pull requests cannot land without passing the formatting, linting, and testing checks first. See [Testing](#testing) and
+Pull requests cannot land without passing the formatting, linting, and testing checks first. See [Testing](#running-tests) and
 [Formatting and Linting](#formatting-and-linting) for how to run these checks locally.
 
 ### Dependency Management: Poetry and other env/dependency managers
@@ -44,12 +44,12 @@ tell Poetry to use the virtualenv python environment (`poetry config virtualenvs
 Install Together development requirements (for running Together, running examples, linting, formatting, and tests):
 
 ```bash
-$ poetry install --with quality,tests
+poetry install --with quality,tests
 ```
 
 And set up pre-commit for auto-formatting and linting
 ```bash
-$ pre-commit install
+pre-commit install
 ```
 
 ### Formatting and Linting
@@ -57,7 +57,22 @@ $ pre-commit install
 Run these locally before submitting a PR; the CI system will check also.
 
 ```
-$ pre-commit run --all-files
+$ make format
+```
+
+### Running tests
+
+#### Unit Tests
+
+```bash
+make tests
+```
+
+#### Integration Tests
+> 🚧 Warning: Integration Tests requires an API key to be exported and you will be charged for usage. It is recommended to let the CI system handle integration tests.
+
+```bash
+make integration_tests
 ```
 
 ### Working with Optional Dependencies
@@ -83,12 +98,6 @@ To introduce the dependency to the pyproject.toml file correctly, please do the 
 test makes use of lightweight fixtures to test the logic of the code.
 5. Please use the `@pytest.mark.requires(package_name)` decorator for any tests that require the dependency.
 
-### Updating Documentation
-
-Documentation under `docs/together` are auto-generated with `pdoc3`. To update documentation, run:
-```bash
-pdoc -o docs src/together/ --html --force
-```
 
 ## :repeat: Submitting Pull Requests
 
@@ -106,15 +115,11 @@ For most contributions, after your first pull request is accepted and merged, yo
 
 - **Follow existing coding style and conventions.** Keep your code consistent with the style, formatting, and conventions in the rest of the code base. When possible, these will be enforced with a linter. Consistency makes it easier to review and modify in the future.
 
-- **Include test coverage.** Add unit tests or UI tests when possible. Follow existing patterns for implementing tests.
+- **Include test coverage.** Add unit tests or integration tests when possible. Follow existing patterns for implementing tests.
 
-- **Update the example project** if one exists to exercise any new functionality you have added.
+- **Update the examples** if one exists to exercise any new functionality you have added.
 
 - **Add documentation.** Document your changes with code doc comments or in existing guides.
-
-- **Update the CHANGELOG** for all enhancements and bug fixes. Include the corresponding issue number if one exists, and your GitHub username. (example: "- Fixed crash in profile view. #123 @orangetin")
-
-- **Use the repo's default branch.** Branch from and [submit your pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) to the repo's default branch. Usually this is `main`, but it could be `dev`, `develop`, or `master`.
 
 - **[Resolve any merge conflicts](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/resolving-a-merge-conflict-on-github)** that occur.
 
