@@ -12,7 +12,6 @@ repos:
     rev: 24.3.0
     hooks:
       - id: black
-        language_version: python3.11
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.3.2
