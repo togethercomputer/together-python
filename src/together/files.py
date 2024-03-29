@@ -2,9 +2,11 @@ import json
 import os
 import posixpath
 import urllib.parse
+from traceback import format_exc
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
+from pyarrow import ArrowInvalid, parquet
 from requests.adapters import HTTPAdapter
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
@@ -24,6 +26,8 @@ NUM_BYTES_IN_GB = 2**30
 # maximum number of GB sized files we support finetuning for
 MAX_FT_GB = 4.9
 
+PARQUET_EXPECTED_COLUMNS = ["input_ids", "attention_mask", "loss_mask"]
+
 logger = get_logger(str(__name__))
 
 
@@ -37,7 +41,25 @@ class Files:
 
     @classmethod
     def check(self, file: str) -> Dict[str, object]:
-        return check_json(file)
+        report_dict = common_check(file)
+        if not report_dict["is_check_passed"]:
+            return report_dict
+
+        if file.endswith(".jsonl"):
+            report_dict["filetype"] = "jsonl"
+            data_report_dict = check_jsonl(file)
+        elif file.endswith(".parquet"):
+            report_dict["filetype"] = "parquet"
+            data_report_dict = check_parquet(file)
+        else:
+            report_dict["filetype"] = (
+                f"Unknown extension of file {file}. "
+                "Only files with extensions .jsonl and .parquet are supported."
+            )
+            report_dict["is_check_passed"] = False
+
+        report_dict.update(data_report_dict)
+        return report_dict
 
     @classmethod
     def upload(
@@ -53,8 +75,18 @@ class Files:
             "User-Agent": together.user_agent,
         }
 
+        if file.endswith(".jsonl"):
+            headers["filetype"] = "jsonl"
+        elif file.endswith(".parquet"):
+            headers["filetype"] = "parquet"
+        else:
+            raise together.FileTypeError(
+                f"Unknown extension of file {file}. "
+                "Only files with extensions .jsonl and .parquet are supported."
+            )
+
         if check:
-            report_dict = check_json(file)
+            report_dict = self.check(file)
             if not report_dict["is_check_passed"]:
                 raise together.FileTypeError(
                     f"Invalid file supplied. Failed to upload.\nReport:\n {report_dict}"
@@ -248,13 +280,8 @@ class Files:
         return data
 
 
-def check_json(
-    file: str,
-) -> Dict[str, object]:
-    report_dict = {
-        "is_check_passed": True,
-        "model_special_tokens": "we are not yet checking end of sentence tokens for this model",
-    }
+def common_check(file: str) -> Dict[str, Union[bool, str]]:
+    report_dict = {}
 
     if not os.path.isfile(file):
         report_dict["file_present"] = f"File not found at given file path {file}"
@@ -268,14 +295,24 @@ def check_json(
     if file_size > MAX_FT_GB * NUM_BYTES_IN_GB:
         report_dict[
             "file_size"
-        ] = f"File size {round(file_size / NUM_BYTES_IN_GB ,3)} GB is greater than our limit of 4.9 GB"
+        ] = f"File size {round(file_size / NUM_BYTES_IN_GB, 3)} GB is greater than our limit of 4.9 GB"
         report_dict["is_check_passed"] = False
+        return report_dict
     elif file_size == 0:
         report_dict["file_size"] = "File is empty"
         report_dict["is_check_passed"] = False
         return report_dict
     else:
-        report_dict["file_size"] = f"File size {round(file_size / (2**30) ,3)} GB"
+        report_dict["file_size"] = f"File size {round(file_size / (2 ** 30), 3)} GB"
+
+    report_dict["is_check_passed"] = True
+    return report_dict
+
+
+def check_jsonl(
+    file: str,
+) -> Dict[str, Union[bool, str]]:
+    report_dict = {}
 
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
@@ -301,14 +338,14 @@ def check_json(
                         "Valid json not found in one or more lines in JSONL file."
                         'Example of valid json: {"text":"my sample string"}.'
                         "see https://docs.together.ai/docs/fine-tuning."
-                        f"The first line where this occur is line {idx+1}, where 1 is the first line."
+                        f"The first line where this occurs is line {idx + 1}, where 1 is the first line."
                         f"{str(line)}"
                     )
                     report_dict["is_check_passed"] = False
 
                 if "text" not in json_line:
                     report_dict["text_field"] = (
-                        f'No "text" field was found on line {idx+1} of the the input file.'
+                        f'No "text" field was found on line {idx + 1} of the the input file.'
                         'Expected format: {"text":"my sample string"}.'
                         "see https://docs.together.ai/docs/fine-tuning for more information."
                         f"{str(line)}"
@@ -318,7 +355,7 @@ def check_json(
                     # check to make sure the value of the "text" key is a string
                     if not isinstance(json_line["text"], str):
                         report_dict["key_value"] = (
-                            f'Unexpected, value type for "text" key on line {idx+1} of the input file.'
+                            f'Unexpected, value type for "text" key on line {idx + 1} of the input file.'
                             'The value type of the "text" key must be a string.'
                             'Expected format: {"text":"my sample string"}'
                             "See https://docs.together.ai/docs/fine-tuning for more information."
@@ -330,7 +367,7 @@ def check_json(
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < together.min_samples:
                 report_dict["min_samples"] = (
-                    f"Processing {file} resulted in only {idx+1} samples. "
+                    f"Processing {file} resulted in only {idx + 1} samples. "
                     f"Our minimum is {together.min_samples} samples. "
                 )
                 report_dict["is_check_passed"] = False
@@ -349,9 +386,55 @@ def check_json(
                     'Example of valid json: {"text":"my sample string"}'
                     "Valid json not found in one or more lines in file."
                     "see https://docs.together.ai/docs/fine-tuning."
-                    f"The first line where this occur is line {idx+1}, where 1 is the first line."
+                    f"The first line where this occur is line {idx + 1}, where 1 is the first line."
                     f"{str(line)}"
                 )
             report_dict["is_check_passed"] = False
+
+    return report_dict
+
+
+def check_parquet(file: str) -> Dict[str, Union[bool, str]]:
+    report_dict = {}
+
+    try:
+        table = parquet.read_table(file, memory_map=True)
+    except ArrowInvalid:
+        report_dict["load_parquet"] = (
+            f"An exception has occurred when loading the Parquet file {file}. Please check the file for corruption. "
+            f"Exception trace:\n{format_exc()}"
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
+
+    column_names = table.schema.names
+    if "input_ids" not in column_names:
+        report_dict[
+            "load_parquet"
+        ] = f"Parquet file {file} does not contain the `input_ids` column."
+        report_dict["is_check_passed"] = False
+        return report_dict
+
+    for column_name in column_names:
+        if column_name not in PARQUET_EXPECTED_COLUMNS:
+            report_dict["load_parquet"] = (
+                f"Parquet file {file} contains an unexpected column {column_name}. "
+                f"Only columns {PARQUET_EXPECTED_COLUMNS} are supported."
+            )
+            report_dict["is_check_passed"] = False
+            return report_dict
+
+    num_samples = len(table)
+    if num_samples < together.min_samples:
+        report_dict["min_samples"] = (
+            f"Processing {file} resulted in only {num_samples} samples. "
+            f"Our minimum is {together.min_samples} samples. "
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
+    else:
+        report_dict["num_samples"] = num_samples
+
+    report_dict["is_check_passed"] = True
 
     return report_dict
