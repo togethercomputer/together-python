@@ -6,7 +6,7 @@ from traceback import format_exc
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 import requests
-from pyarrow import ArrowInvalid, parquet
+from pyarrow import ArrowInvalid, parquet  # type:ignore
 from requests.adapters import HTTPAdapter
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
@@ -40,7 +40,7 @@ class Files:
         return response_to_dict(response)
 
     @classmethod
-    def check(self, file: str) -> Dict[str, object]:
+    def check(self, file: str) -> Dict[str, Union[bool, str, int]]:
         report_dict = common_check(file)
         if not report_dict["is_check_passed"]:
             return report_dict
@@ -280,8 +280,8 @@ class Files:
         return data
 
 
-def common_check(file: str) -> Dict[str, Union[bool, str]]:
-    report_dict = {}
+def common_check(file: str) -> Dict[str, Union[bool, str, int]]:
+    report_dict: Dict[str, Union[bool, str, int]] = {}
 
     if not os.path.isfile(file):
         report_dict["file_present"] = f"File not found at given file path {file}"
@@ -311,8 +311,8 @@ def common_check(file: str) -> Dict[str, Union[bool, str]]:
 
 def check_jsonl(
     file: str,
-) -> Dict[str, Union[bool, str]]:
-    report_dict = {}
+) -> Dict[str, Union[bool, str, int]]:
+    report_dict: Dict[str, Union[bool, str, int]] = {}
 
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
@@ -394,8 +394,8 @@ def check_jsonl(
     return report_dict
 
 
-def check_parquet(file: str) -> Dict[str, Union[bool, str]]:
-    report_dict = {}
+def check_parquet(file: str) -> Dict[str, Union[bool, str, int]]:
+    report_dict: Dict[str, Union[bool, str, int]] = {}
 
     try:
         table = parquet.read_table(file, memory_map=True)
