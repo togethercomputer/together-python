@@ -1,69 +1,75 @@
-#! python
-import argparse
+import os
+from typing import Any
+
+import click
 
 import together
-from together.commands import chat, complete, embeddings, files, finetune, image, models
-from together.utils import get_logger
+from together.cli.api.chat import chat, interactive
+from together.cli.api.completions import completions
+from together.cli.api.files import files
+from together.cli.api.finetune import fine_tune
+from together.cli.api.images import images
+from together.cli.api.models import models
+from together.constants import MAX_RETRIES, TIMEOUT_SECS
 
 
-logger = get_logger(str(__name__))
+def print_version(ctx: click.Context, params: Any, value: Any) -> None:
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo(f"Version {together.version}")
+    ctx.exit()
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Together CLI",
-        prog="together",
+@click.group()
+@click.pass_context
+@click.option(
+    "--api-key",
+    type=str,
+    help="API Key. Defaults to environment variable `TOGETHER_API_KEY`",
+    default=os.getenv("TOGETHER_API_KEY"),
+)
+@click.option(
+    "--base-url", type=str, help="API Base URL. Defaults to Together AI endpoint."
+)
+@click.option(
+    "--timeout", type=int, help=f"Request timeout. Defaults to {TIMEOUT_SECS} seconds"
+)
+@click.option(
+    "--max-retries",
+    type=int,
+    help=f"Maximum number of HTTP retries. Defaults to {MAX_RETRIES}.",
+)
+@click.option(
+    "--version",
+    is_flag=True,
+    callback=print_version,
+    expose_value=False,
+    is_eager=True,
+    help="Print version",
+)
+@click.option("--debug", help="Debug mode", is_flag=True)
+def main(
+    ctx: click.Context,
+    api_key: str | None,
+    base_url: str | None,
+    timeout: int | None,
+    max_retries: int | None,
+    debug: bool | None,
+) -> None:
+    """This is a sample CLI tool."""
+    together.log = "debug" if debug else None
+    ctx.obj = together.Together(
+        api_key=api_key, base_url=base_url, timeout=timeout, max_retries=max_retries
     )
 
-    parser.add_argument(
-        "-V",
-        "--version",
-        action="version",
-        version="%(prog)s " + together.version,
-    )
 
-    parser.add_argument(
-        "--endpoint",
-        "-e",
-        help="[Optional] Together API Endpoint URL",
-        type=str,
-        required=False,
-        default=None,
-    )
-
-    parser.add_argument(
-        "--verbose",
-        "-v",
-        default=together.log_level,
-        choices=["CRITICAL", "ERROR", "WARNING", "SUCCESS", "INFO", "DEBUG", "TRACE"],
-        type=str,
-        help="Set logging level. Defaults to WARNING. DEBUG will show all logs.",
-        required=False,
-    )
-
-    subparser = parser.add_subparsers(dest="base")
-
-    models.add_parser(subparser)
-    chat.add_parser(subparser)
-    complete.add_parser(subparser)
-    image.add_parser(subparser)
-    files.add_parser(subparser)
-    finetune.add_parser(subparser)
-    embeddings.add_parser(subparser)
-
-    args = parser.parse_args()
-
-    # Setup logging
-    together.log_level = args.verbose
-
-    try:
-        args.func(args)
-    except AttributeError as e:
-        # print error, but ignore if `together` is run.
-        if str(e) != "'Namespace' object has no attribute 'func'":
-            raise together.AttributeError(e)
-        parser.print_help()
-
+main.add_command(chat)
+main.add_command(interactive)
+main.add_command(completions)
+main.add_command(images)
+main.add_command(files)
+main.add_command(fine_tune)
+main.add_command(models)
 
 if __name__ == "__main__":
     main()

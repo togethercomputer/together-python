@@ -25,7 +25,7 @@ Please do not try to push directly to this repo unless you are a maintainer.
 Please follow the checked-in pull request template when opening pull requests. Note related issues and tag relevant
 maintainers.
 
-Pull requests cannot land without passing the formatting, linting, and testing checks first. See [Testing](#testing) and
+Pull requests cannot land without passing the formatting, linting, and testing checks first. See [Testing](#running-tests) and
 [Formatting and Linting](#formatting-and-linting) for how to run these checks locally.
 
 ### Dependency Management: Poetry and other env/dependency managers
@@ -44,7 +44,12 @@ tell Poetry to use the virtualenv python environment (`poetry config virtualenvs
 Install Together development requirements (for running Together, running examples, linting, formatting, and tests):
 
 ```bash
-poetry install --with --with quality,tests
+poetry install --with quality,tests
+```
+
+And set up pre-commit for auto-formatting and linting
+```bash
+pre-commit install
 ```
 
 ### Formatting and Linting
@@ -52,9 +57,22 @@ poetry install --with --with quality,tests
 Run these locally before submitting a PR; the CI system will check also.
 
 ```
-$ black .
-$ ruff --fix .
-$ mypy --strict .
+$ make format
+```
+
+### Running tests
+
+#### Unit Tests
+
+```bash
+make tests
+```
+
+#### Integration Tests
+> 🚧 Warning: Integration Tests requires an API key to be exported and you will be charged for usage. It is recommended to let the CI system handle integration tests.
+
+```bash
+make integration_tests
 ```
 
 ### Working with Optional Dependencies
@@ -89,7 +107,7 @@ For most contributions, after your first pull request is accepted and merged, yo
 
 *Note: All contributions will be licensed under the project's license.*
 
-- **Smaller is better.** Submit **one** pull request per bug fix or feature. A pull request should contain isolated changes pertaining to a single bug fix or feature implementation. **Do not** refactor or reformat code that is unrelated to your change. It is better to **submit many small pull requests** rather than a single large one. Enormous pull requests will take enormous amounts of time to review, or may be rejected altogether. 
+- **Smaller is better.** Submit **one** pull request per bug fix or feature. A pull request should contain isolated changes pertaining to a single bug fix or feature implementation. **Do not** refactor or reformat code that is unrelated to your change. It is better to **submit many small pull requests** rather than a single large one. Enormous pull requests will take enormous amounts of time to review, or may be rejected altogether.
 
 - **Coordinate bigger changes.** For large and non-trivial changes, open an issue to discuss a strategy with the maintainers. Otherwise, you risk doing a lot of work for nothing!
 
@@ -97,19 +115,15 @@ For most contributions, after your first pull request is accepted and merged, yo
 
 - **Follow existing coding style and conventions.** Keep your code consistent with the style, formatting, and conventions in the rest of the code base. When possible, these will be enforced with a linter. Consistency makes it easier to review and modify in the future.
 
-- **Include test coverage.** Add unit tests or UI tests when possible. Follow existing patterns for implementing tests.
+- **Include test coverage.** Add unit tests or integration tests when possible. Follow existing patterns for implementing tests.
 
-- **Update the example project** if one exists to exercise any new functionality you have added.
+- **Update the examples** if one exists to exercise any new functionality you have added.
 
 - **Add documentation.** Document your changes with code doc comments or in existing guides.
 
-- **Update the CHANGELOG** for all enhancements and bug fixes. Include the corresponding issue number if one exists, and your GitHub username. (example: "- Fixed crash in profile view. #123 @orangetin")
-
-- **Use the repo's default branch.** Branch from and [submit your pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork) to the repo's default branch. Usually this is `main`, but it could be `dev`, `develop`, or `master`.
-
 - **[Resolve any merge conflicts](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/resolving-a-merge-conflict-on-github)** that occur.
 
-- **Promptly address any CI failures**. If your pull request fails to build or pass tests, please push another commit to fix it. 
+- **Promptly address any CI failures**. If your pull request fails to build or pass tests, please push another commit to fix it.
 
 - When writing comments, use properly constructed sentences, including punctuation.
 
