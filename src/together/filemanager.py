@@ -36,19 +36,19 @@ def chmod_and_replace(src: Path, dst: Path) -> None:
     """
 
     # Get umask by creating a temporary file in the cache folder.
-    tmp_file = dst.parent.parent / f"tmp_{uuid.uuid4()}"
+    tmp_file = dst.parent / f"tmp_{uuid.uuid4()}"
 
     try:
         tmp_file.touch()
 
         cache_dir_mode = Path(tmp_file).stat().st_mode
 
-        os.chmod(src, stat.S_IMODE(cache_dir_mode))
+        os.chmod(src.as_posix(), stat.S_IMODE(cache_dir_mode))
 
     finally:
         tmp_file.unlink()
 
-    shutil.move(src, dst)
+    shutil.move(src.as_posix(), dst.as_posix())
 
 
 def _get_file_size(
@@ -237,7 +237,7 @@ class DownloadManager:
 
         os.remove(lock_path)
 
-        return file_path.as_posix(), file_size
+        return str(file_path.resolve()), file_size
 
 
 class UploadManager:

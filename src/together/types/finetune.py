@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from pathlib import Path
 from typing import List, Literal
 
 from pydantic import Field
@@ -202,6 +201,6 @@ class FinetuneDownloadResult(BaseModel):
     # checkpoint step number
     checkpoint_step: int | None = None
     # local path filename
-    filename: Path | None = None
+    filename: str | None = None
     # size in bytes
     size: int | None = None

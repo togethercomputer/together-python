@@ -219,7 +219,7 @@ class FineTuning:
             output = Path(output)
 
         downloaded_filename, file_size = download_manager.download(
-            url, output, normalize_key(remote_name or ""), fetch_metadata=True
+            url, output, normalize_key(remote_name or id), fetch_metadata=True
         )
 
         return FinetuneDownloadResult(
