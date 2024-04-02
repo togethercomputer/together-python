@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+version: 2.1
+contact_links:
+  - name: Together Support
+    url: https://www.together.ai/contact
+    about: Issues not directly pertaining to the Python Library
+  - name: API Documentation
+    url: https://docs.together.ai/
+    about: Documentation for the Together API
+  - name: Discord
+    url: https://discord.gg/9Rk6sSeWEG
+    about: Chat with the Together community
