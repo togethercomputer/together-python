@@ -3,18 +3,12 @@ The [Together Python Library](https://pypi.org/project/together/) is the officia
 # Installation
 
 > 🚧
-> The library was rewritten in v1.0.0 released in March of 2024. There were significant changes made. Find the complete migration guide [here](docs/MIGRATION_GUIDE_v1.md).
+> The library was rewritten in v1.0.0 released in April of 2024. There were significant changes made. Find the complete migration guide [here](docs/MIGRATION_GUIDE_v1.md).
 
 To install Together Python Library from PyPi, simply run:
 
 ```shell Shell
 pip install --upgrade together
-```
-
-To install the Library from source, run:
-
-```shell Shell
-pip install git+https://github.com/togethercomputer/together.git
 ```
 
 ## Setting up API Key
@@ -23,81 +17,174 @@ pip install git+https://github.com/togethercomputer/together.git
 
 Once logged in to the Together Playground, you can find available API keys in [this settings page](https://api.together.xyz/settings/api-keys).
 
-### python-dotenv
-
-The recommended way to set the API key is using [python-dotenv](https://pypi.org/project/python-dotenv/). Simply add `TOGETHER_API_KEY=xxxxx` to the `.env` file.
-
 ### Setting environment variable
 
 ```shell
 export TOGETHER_API_KEY=xxxxx
 ```
 
-### Using the Client
+### Using the client
 
 ```python
 from together import Together
 
-client = Together(
-    api_key="xxxxx"
-)
+client = Together(api_key="xxxxx")
 ```
 
-# Usage
+This library contains both a python library and a CLI. We'll demonstrate how to use both below.
+
+# Usage – Python Client
 
 ## Chat Completions
 
-// sync example
+```python
+import os
+from together import Together
 
-### Async usage
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+response = client.chat.completions.create(
+    model="togethercomputer/llama-2-7b-chat",
+    messages=[{"role": "user", "content": "tell me about new york"}],
+)
+print(response.choices[0].message.content)
+```
 
 ### Streaming
 
-### CLI
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+response = client.chat.completions.create(
+    model="togethercomputer/llama-2-7b-chat",
+    messages=[{"role": "user", "content": "tell me about new york"}],
+    stream=True,
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="")
+```
+
+### Async usage
+
+```python
+import os
+from together import AsyncTogether
+
+async_client = AsyncTogether(api_key=TOGETHER_API_KEY)
+messages = ["What are the top things to do in San Francisco?", "What country is Paris in?"]
+
+
+tasks = [async_client.chat.completions.create(
+                model="togethercomputer/llama-2-7b-chat",
+                messages=[{"role": "user", "content": message}]
+             ) for message in messages]
+
+responses = await asyncio.gather(*tasks)
+
+for response in responses:
+    print(response.choices[0].message.content)
+```
 
 ## Completions
 
-// sync example
+Completions are for code and language models shown [here](https://docs.together.ai/docs/inference-models). Below, a code model example is shown.
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+response = client.completions.create(
+    model="codellama/CodeLlama-34b-Python-hf",
+    prompt="Write a Next.js component with TailwindCSS for a header component.",
+)
+print(response.choices[0].message.content)
+```
 
 ### Async usage
 
 ### Streaming
 
-### CLI
+## Image generation
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+response = client.images.generate(
+    prompt="space robots",
+    model="stabilityai/stable-diffusion-xl-base-1.0",
+    steps=10,
+    n=4,
+)
+print(response.data[0].b64_json)
+```
 
 ## Embeddings
 
-// sync example
+```python
+from typing import List
+from together import Together
 
-### Async usage
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
-### CLI
+def get_embeddings(texts: List[str], model: str) -> List[List[float]]:
+    texts = [text.replace("\n", " ") for text in texts]
+    outputs = client.embeddings.create(model=model, input = texts)
+    return [outputs.data[i].embedding for i in range(len(texts))]
 
-## Image Generations
+input_texts = ['Our solar system orbits the Milky Way galaxy at about 515,000 mph']
+embeddings = get_embeddings(input_texts, model='togethercomputer/m2-bert-80M-8k-retrieval')
 
-// sync example
-
-### Async usage
-
-### CLI
+print(embeddings)
+```
 
 ## Files
 
 // examples for upload, list, etc.
 
-### CLI
-
 ## Fine-tunes
 
 // examples for create, list, etc.
-
-### CLI
 
 ## Models
 
 // listing models
 
-### CLI
+# Usage – CLI
+
+## Chat Completions
+
+### Async usage
+
+### Streaming
+
+## Completions
+
+### Streaming
+
+## Embeddings
+
+## Image Generations
+
+## Files
+
+// examples for upload, list, etc.
+
+## Fine-tunes
+
+// examples for create, list, etc.
+
+## Models
+
+// listing models
 
 ## Contributing
+
 Refer to the [Contributing Guide](CONTRIBUTING.md)
