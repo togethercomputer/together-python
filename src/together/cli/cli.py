@@ -9,7 +9,7 @@ import together
 from together.cli.api.chat import chat, interactive
 from together.cli.api.completions import completions
 from together.cli.api.files import files
-from together.cli.api.finetune import fine_tune
+from together.cli.api.finetune import fine_tuning
 from together.cli.api.images import images
 from together.cli.api.models import models
 from together.constants import MAX_RETRIES, TIMEOUT_SECS
@@ -70,7 +70,7 @@ main.add_command(interactive)
 main.add_command(completions)
 main.add_command(images)
 main.add_command(files)
-main.add_command(fine_tune)
+main.add_command(fine_tuning)
 main.add_command(models)
 
 if __name__ == "__main__":

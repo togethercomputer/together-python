@@ -338,7 +338,9 @@ class APIRequestor:
         try:
             assert isinstance(resp.data, dict)
             error_resp = resp.data.get("error")
-            assert isinstance(error_resp, dict)
+            assert isinstance(
+                error_resp, dict
+            ), f"Unexpected error response {error_resp}"
             error_data = TogetherErrorResponse(**(error_resp))
         except (KeyError, TypeError):
             raise error.JSONError(
