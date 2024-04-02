@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import cmd
 import json
 from typing import List, Tuple
