@@ -197,11 +197,47 @@ print(embeddings)
 
 ## Files
 
-// examples for upload, list, etc.
+The files API is used for fine-tuning and allows developers to upload data to fine-tune on. It also has several methods to list all files, retrive files, and delete files. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+together.Files.upload(file="somedata.jsonl") # uploads a file
+together.Files.list() # lists all uploaded files
+together.Files.retrieve(id=id) # retrieves a specific file
+together.Files.retrieve_content(id=id) # retrieves content of a specific file
+together.Files.delete(id=id) # deletes a file
+```
 
 ## Fine-tunes
 
-// examples for create, list, etc.
+The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+together.Finetune.create(
+  training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
+  model = 'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+  n_epochs = 3,
+  n_checkpoints = 1,
+  batch_size = 4,
+  learning_rate = 1e-5,
+  suffix = 'my-demo-finetune',
+  wandb_api_key = '1a2b3c4d5e.......',
+)
+together.Finetune.list() # lists all fine-tuned jobs
+together.Finetune.retrieve(id=id) # retrieves information on finetune event
+together.Finetune.cancel(id=id) # Cancels a fine-tuning job
+together.Finetune.list_events(id=id) #  Lists events of a fine-tune job
+together.Finetune.download(id='ft-...') # downloads compressed fine-tuned model or checkpoint to local disk
+```
 
 ## Models
 
