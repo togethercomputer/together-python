@@ -44,7 +44,7 @@ from together import Together
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
 response = client.chat.completions.create(
-    model="togethercomputer/llama-2-7b-chat",
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     messages=[{"role": "user", "content": "tell me about new york"}],
 )
 print(response.choices[0].message.content)
@@ -57,35 +57,43 @@ import os
 from together import Together
 
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
-response = client.chat.completions.create(
-    model="togethercomputer/llama-2-7b-chat",
+stream = client.chat.completions.create(
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     messages=[{"role": "user", "content": "tell me about new york"}],
     stream=True,
 )
 
 for chunk in stream:
-    print(chunk.choices[0].delta.content or "", end="")
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
 ### Async usage
 
 ```python
-import os
+import os, asyncio
 from together import AsyncTogether
 
-async_client = AsyncTogether(api_key=TOGETHER_API_KEY)
-messages = ["What are the top things to do in San Francisco?", "What country is Paris in?"]
+async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+messages = [
+    "What are the top things to do in San Francisco?",
+    "What country is Paris in?",
+]
 
+async def async_chat_completion(messages):
+    async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+    tasks = [
+        async_client.chat.completions.create(
+            model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+            messages=[{"role": "user", "content": message}],
+        )
+        for message in messages
+    ]
+    responses = await asyncio.gather(*tasks)
 
-tasks = [async_client.chat.completions.create(
-                model="togethercomputer/llama-2-7b-chat",
-                messages=[{"role": "user", "content": message}]
-             ) for message in messages]
+    for response in responses:
+        print(response.choices[0].message.content)
 
-responses = await asyncio.gather(*tasks)
-
-for response in responses:
-    print(response.choices[0].message.content)
+asyncio.run(async_chat_completion(messages))
 ```
 
 ## Completions
@@ -102,12 +110,54 @@ response = client.completions.create(
     model="codellama/CodeLlama-34b-Python-hf",
     prompt="Write a Next.js component with TailwindCSS for a header component.",
 )
-print(response.choices[0].message.content)
+print(response.choices[0].text)
+```
+
+### Streaming
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+stream = client.completions.create(
+    model="codellama/CodeLlama-34b-Python-hf",
+    prompt="Write a Next.js component with TailwindCSS for a header component.",
+    stream=True,
+)
+
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
 ### Async usage
 
-### Streaming
+```python
+import os, asyncio
+from together import AsyncTogether
+
+async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+prompts = [
+    "Write a Next.js component with TailwindCSS for a header component.",
+    "Write a python function for the fibonacci sequence",
+]
+
+async def async_chat_completion(prompts):
+    async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+    tasks = [
+        async_client.completions.create(
+            model="codellama/CodeLlama-34b-Python-hf",
+            prompt=prompt,
+        )
+        for prompt in prompts
+    ]
+    responses = await asyncio.gather(*tasks)
+
+    for response in responses:
+        print(response.choices[0].text)
+
+asyncio.run(async_chat_completion(prompts))
+```
 
 ## Image generation
 
@@ -155,7 +205,19 @@ print(embeddings)
 
 ## Models
 
-// listing models
+This lists all the models that Together supports.
+
+```python
+import os
+from together import Together
+
+client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+
+models = client.models.list()
+
+for model in models:
+    print(model)
+```
 
 # Usage – CLI
 
@@ -168,8 +230,6 @@ print(embeddings)
 ## Completions
 
 ### Streaming
-
-## Embeddings
 
 ## Image Generations
 
