@@ -259,27 +259,99 @@ for model in models:
 
 ## Chat Completions
 
-### Async usage
+```bash
+together chat.completions \
+  --message "system" "You are a helpful assistant named Together" \
+  --message "user" "What is your name?" \
+  --model mistralai/Mixtral-8x7B-Instruct-v0.1
+```
 
-### Streaming
+The Chat Completions CLI enables streaming tokens to stdout by default. To disable streaming, use `--no-stream`.
 
 ## Completions
 
-### Streaming
+```bash
+together completions \
+  "Large language models are " \
+  --model mistralai/Mixtral-8x7B-v0.1 \
+  --max-tokens 512 \
+  --stop "."
+```
+
+The Completions CLI enables streaming tokens to stdout by default. To disable streaming, use `--no-stream`.
 
 ## Image Generations
 
+```bash
+together images generate \
+  "space robots" \
+  --model stabilityai/stable-diffusion-xl-base-1.0 \
+  --n 4
+```
+
+The image is opened in the default image viewer by default. To disable this, use `--no-show`.
+
 ## Files
 
-// examples for upload, list, etc.
+```bash
+# Help
+together files --help
 
-## Fine-tunes
+# Check file
+together files check example.jsonl
 
-// examples for create, list, etc.
+# Upload file
+together files upload example.jsonl
+
+# List files
+together files list
+
+# Retrieve file metadata
+together files retrieve file-6f50f9d1-5b95-416c-9040-0799b2b4b894
+
+# Retrieve file content
+together files retrieve-content file-6f50f9d1-5b95-416c-9040-0799b2b4b894
+
+# Delete remote file
+together files delete file-6f50f9d1-5b95-416c-9040-0799b2b4b894
+```
+
+## Fine-tuning
+
+```bash
+# Help
+together fine-tuning --help
+
+# Create fine-tune job
+together fine-tuning create \
+  --model togethercomputer/llama-2-7b-chat \
+  --training-file file-711d8724-b3e3-4ae2-b516-94841958117d
+
+# List fine-tune jobs
+together fine-tuning list
+
+# Retrieve fine-tune job details
+together fine-tuning retrieve ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
+
+# List fine-tune job events
+together fine-tuning list-events ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
+
+# Cancel running job
+together fine-tuning cancel ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
+
+# Download fine-tuned model weights
+together fine-tuning download ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
+```
 
 ## Models
 
-// listing models
+```bash
+# Help
+together models --help
+
+# List models
+together models list
+```
 
 ## Contributing
 
