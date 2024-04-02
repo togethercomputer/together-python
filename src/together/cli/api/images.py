@@ -2,6 +2,7 @@ import base64
 import pathlib
 
 import click
+from PIL import Image
 
 from together import Together
 from together.types import ImageResponse
@@ -33,6 +34,7 @@ def images(ctx: click.Context) -> None:
     help="Output directory",
 )
 @click.option("--prefix", type=str, required=False, default="image-")
+@click.option("--no-show", is_flag=True, help="Do not open images in viewer")
 def generate(
     ctx: click.Context,
     prompt: str,
@@ -45,6 +47,7 @@ def generate(
     negative_prompt: str,
     output: pathlib.Path,
     prefix: str,
+    no_show: bool,
 ) -> None:
     """Generate image"""
 
@@ -63,8 +66,17 @@ def generate(
 
     assert isinstance(response, ImageResponse)
     assert isinstance(response.data, list)
-    for choice in response.data:
+
+    for i, choice in enumerate(response.data):
         assert isinstance(choice, ImageChoicesData)
 
         with open(f"{output}/{prefix}{choice.index}.png", "wb") as f:
             f.write(base64.b64decode(choice.b64_json))
+
+        click.echo(
+            f"Image [{i + 1}/{len(response.data)}] saved to {output}/{prefix}{choice.index}.png"
+        )
+
+        if not no_show:
+            image = Image.open(f"{output}/{prefix}{choice.index}.png")
+            image.show()
