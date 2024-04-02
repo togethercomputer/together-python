@@ -78,7 +78,6 @@ def completions(
                 # assertions for type checking
                 assert isinstance(stream_choice, CompletionChoicesChunk)
                 assert stream_choice.delta
-                assert stream_choice.delta.content
 
                 if should_print_header:
                     click.echo(f"\n===== Completion {stream_choice.index} =====\n")

@@ -8,17 +8,17 @@ from together import Together
 from together.utils import finetune_price_to_dollars, parse_timestamp
 
 
-@click.group(name="fine-tune")
+@click.group(name="fine-tuning")
 @click.pass_context
-def fine_tune(ctx: click.Context) -> None:
+def fine_tuning(ctx: click.Context) -> None:
     """Fine-tunes API commands"""
     pass
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 @click.option(
-    "--training_file", type=str, required=True, help="Training file ID from Files API"
+    "--training-file", type=str, required=True, help="Training file ID from Files API"
 )
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
@@ -30,7 +30,7 @@ def fine_tune(ctx: click.Context) -> None:
 @click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
-@click.option("--wandb-api-key", prompt=True, hide_input=True, help="Wandb API key")
+@click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 def create(
     ctx: click.Context,
     training_file: str,
@@ -59,10 +59,10 @@ def create(
     click.echo(json.dumps(response.model_dump(), indent=4))
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 def list(ctx: click.Context) -> None:
-    """List fine-tuning tasks"""
+    """List fine-tuning jobs"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.list()
@@ -89,30 +89,26 @@ def list(ctx: click.Context) -> None:
     click.echo(table)
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
 def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
-    """Retrieve fine-tuning task"""
+    """Retrieve fine-tuning job details"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.retrieve(fine_tune_id)
 
-    table_data = [
-        {"Key": key, "Value": value}
-        for key, value in response.model_dump().items()
-        if key not in ["events"]
-    ]
-    table = tabulate(table_data, tablefmt="grid")
+    # remove events from response for cleaner output
+    response.events = None
 
-    click.echo(table)
+    click.echo(json.dumps(response.model_dump(), indent=4))
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
 def cancel(ctx: click.Context, fine_tune_id: str) -> None:
-    """Cancel fine-tuning task"""
+    """Cancel fine-tuning job"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.cancel(fine_tune_id)
@@ -120,7 +116,7 @@ def cancel(ctx: click.Context, fine_tune_id: str) -> None:
     click.echo(json.dumps(response.model_dump(), indent=4))
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
 def list_events(ctx: click.Context, fine_tune_id: str) -> None:
@@ -135,7 +131,7 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     for i in response.data:
         display_list.append(
             {
-                "Message": i.message,
+                "Message": "\n".join(wrap(i.message or "", width=50)),
                 "Type": i.type,
                 "Created At": parse_timestamp(i.created_at or ""),
                 "Hash": i.hash,
@@ -146,14 +142,14 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     click.echo(table)
 
 
-@fine_tune.command()
+@fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
-    default=".",
+    default=None,
     help="Output directory",
 )
 @click.option(

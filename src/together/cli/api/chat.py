@@ -80,11 +80,11 @@ class ChatShell(cmd.Cmd):
 
             token = chunk.choices[0].delta.content
 
-            print(token, end="", flush=True)
+            click.echo(token, nl=False)
 
             output += token
 
-        print("\n")
+        click.echo("\n")
 
         self.messages.append({"role": "assistant", "content": output})
 
@@ -239,7 +239,7 @@ def chat(
         for i, choice in enumerate(response.choices):
             if should_print_header:
                 click.echo(f"===== Completion {i} =====")
-            click.echo(json.dumps(choice.message, indent=4))
+            click.echo(choice.message.content)  # type: ignore
 
             if should_print_header:
                 click.echo("\n")
