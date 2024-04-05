@@ -19,7 +19,7 @@ Once logged in to the Together Playground, you can find available API keys in [t
 
 ### Setting your environment variable
 
-The recommended way to set the API key is using [python-dotenv](https://pypi.org/project/python-dotenv/). Simply add `TOGETHER_API_KEY=xxxxx` to the `.env` file. Alternatively, you can export your environment variable via the shell as seen below:
+The recommended way to set the API key in Python is using [python-dotenv](https://pypi.org/project/python-dotenv/). Alternatively, you can use `os` and export your API key as an env variable:
 
 ```shell
 export TOGETHER_API_KEY=xxxxx
