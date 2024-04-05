@@ -205,11 +205,11 @@ from together import Together
 
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
-together.Files.upload(file="somedata.jsonl") # uploads a file
-together.Files.list() # lists all uploaded files
-together.Files.retrieve(id=id) # retrieves a specific file
-together.Files.retrieve_content(id=id) # retrieves content of a specific file
-together.Files.delete(id=id) # deletes a file
+client.files.upload(file="somedata.jsonl") # uploads a file
+client.files.list() # lists all uploaded files
+client.files.retrieve(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # retrieves a specific file
+client.files.retrieve_content(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # retrieves content of a specific file
+client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a file
 ```
 
 ## Fine-tunes
@@ -222,9 +222,9 @@ from together import Together
 
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
-together.Finetune.create(
+client.fine_tuning.create(
   training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
-  model = 'togethercomputer/RedPajama-INCITE-Chat-3B-v1',
+  model = 'mistralai/Mixtral-8x7B-Instruct-v0.1',
   n_epochs = 3,
   n_checkpoints = 1,
   batch_size = 4,
@@ -232,11 +232,11 @@ together.Finetune.create(
   suffix = 'my-demo-finetune',
   wandb_api_key = '1a2b3c4d5e.......',
 )
-together.Finetune.list() # lists all fine-tuned jobs
-together.Finetune.retrieve(id=id) # retrieves information on finetune event
-together.Finetune.cancel(id=id) # Cancels a fine-tuning job
-together.Finetune.list_events(id=id) #  Lists events of a fine-tune job
-together.Finetune.download(id='ft-...') # downloads compressed fine-tuned model or checkpoint to local disk
+client.fine_tuning.list() # lists all fine-tuned jobs
+client.fine_tuning.retrieve(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") # retrieves information on finetune event
+client.fine_tuning.cancel(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") # Cancels a fine-tuning job
+client.fine_tuning.list_events(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") #  Lists events of a fine-tune job
+client.fine_tuning.download(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") # downloads compressed fine-tuned model or checkpoint to local disk
 ```
 
 ## Models
