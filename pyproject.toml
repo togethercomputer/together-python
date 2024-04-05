@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "together"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   "Together AI <support@together.ai>"
 ]
@@ -16,8 +16,8 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
 ]
-repository = "https://github.com/togethercomputer/together"
-homepage = "https://github.com/togethercomputer/together"
+repository = "https://github.com/togethercomputer/together-python"
+homepage = "https://github.com/togethercomputer/together-python"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -54,8 +54,8 @@ tox = "^4.14.1"
 
 
 [tool.poetry.urls]
-"Homepage" = "https://github.com/togethercomputer/together"
-"Bug Tracker" = "https://github.com/togethercomputer/together/issues"
+"Homepage" = "https://github.com/togethercomputer/together-python"
+"Bug Tracker" = "https://github.com/togethercomputer/together-python/issues"
 
 [tool.poetry.scripts]
 together = "together.cli.cli:main"

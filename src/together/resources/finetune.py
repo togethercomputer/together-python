@@ -29,7 +29,7 @@ class FineTuning:
         n_epochs: int = 1,
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
-        learning_rate: float = 0.00001,
+        learning_rate: float | None = 0.00001,
         suffix: str | None = None,
         wandb_api_key: str | None = None,
     ) -> FinetuneResponse:
