@@ -34,6 +34,17 @@ aiosession: ContextVar["ClientSession" | None] = ContextVar(
 from together.client import AsyncClient, AsyncTogether, Client, Together
 
 
+api_key: str | None = None  # To be deprecated in the next major release
+
+# Legacy functions
+from together.legacy.complete import AsyncComplete, Complete, Completion
+from together.legacy.embeddings import Embeddings
+from together.legacy.files import Files
+from together.legacy.finetune import Finetune
+from together.legacy.images import Image
+from together.legacy.models import Models
+
+
 __all__ = [
     "aiosession",
     "constants",
