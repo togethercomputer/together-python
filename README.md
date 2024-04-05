@@ -17,7 +17,9 @@ pip install --upgrade together
 
 Once logged in to the Together Playground, you can find available API keys in [this settings page](https://api.together.xyz/settings/api-keys).
 
-### Setting environment variable
+### Setting your environment variable
+
+The recommended way to set the API key is using [python-dotenv](https://pypi.org/project/python-dotenv/). Simply add `TOGETHER_API_KEY=xxxxx` to the `.env` file. Alternatively, you can export your environment variable via the shell as seen below:
 
 ```shell
 export TOGETHER_API_KEY=xxxxx
