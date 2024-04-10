@@ -25,7 +25,13 @@ from together.error import (
     FileTypeError,
 )
 from together.together_response import TogetherResponse
-from together.types import FilePurpose, FileResponse, TogetherClient, TogetherRequest
+from together.types import (
+    FilePurpose,
+    FileResponse,
+    FileType,
+    TogetherClient,
+    TogetherRequest,
+)
 
 
 def chmod_and_replace(src: Path, dst: Path) -> None:
@@ -260,12 +266,17 @@ class UploadManager:
                 http_status=response.status_code,
             )
 
-    def redirect_policy(
-        self, url: str, file: Path, purpose: FilePurpose
+    def get_upload_url(
+        self,
+        url: str,
+        file: Path,
+        purpose: FilePurpose,
+        filetype: FileType,
     ) -> Tuple[str, str]:
         data = {
             "purpose": purpose.value,
             "file_name": file.name,
+            "file_type": filetype.value,
         }
 
         requestor = api_requestor.APIRequestor(
@@ -324,7 +335,16 @@ class UploadManager:
 
         redirect_url = None
         if redirect:
-            redirect_url, file_id = self.redirect_policy(url, file, purpose)
+            if file.suffix == ".jsonl":
+                filetype = FileType.jsonl
+            elif file.suffix == ".parquet":
+                filetype = FileType.parquet
+            else:
+                raise FileTypeError(
+                    f"Unknown extension of file {file}. "
+                    "Only files with extensions .jsonl and .parquet are supported."
+                )
+            redirect_url, file_id = self.get_upload_url(url, file, purpose, filetype)
 
         file_size = os.stat(file.as_posix()).st_size
 

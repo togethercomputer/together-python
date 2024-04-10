@@ -3,9 +3,17 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from traceback import format_exc
 from typing import Any, Dict
 
-from together.constants import MAX_FILE_SIZE_GB, MIN_SAMPLES, NUM_BYTES_IN_GB
+from pyarrow import ArrowInvalid, parquet
+
+from together.constants import (
+    MAX_FILE_SIZE_GB,
+    MIN_SAMPLES,
+    NUM_BYTES_IN_GB,
+    PARQUET_EXPECTED_COLUMNS,
+)
 
 
 def check_file(
@@ -50,6 +58,25 @@ def check_file(
     else:
         report_dict["file_size"] = file_size
 
+    if file.suffix == ".jsonl":
+        report_dict["filetype"] = "jsonl"
+        data_report_dict = _check_jsonl(file)
+    elif file.suffix == ".parquet":
+        report_dict["filetype"] = "parquet"
+        data_report_dict = _check_parquet(file)
+    else:
+        report_dict["filetype"] = (
+            f"Unknown extension of file {file}. "
+            "Only files with extensions .jsonl and .parquet are supported."
+        )
+        report_dict["is_check_passed"] = False
+
+    report_dict.update(data_report_dict)
+    return report_dict
+
+
+def _check_jsonl(file: Path) -> Dict[str, Any]:
+    report_dict: Dict[str, Any] = {}
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
         with file.open(encoding="utf-8") as f:
@@ -71,7 +98,7 @@ def check_file(
                 if not isinstance(json_line, dict):
                     report_dict["line_type"] = False
                     report_dict["message"] = (
-                        f"Error parsing file. Invalid format on line {idx+1} of the input file. "
+                        f"Error parsing file. Invalid format on line {idx + 1} of the input file. "
                         'Example of valid json: {"text": "my sample string"}. '
                     )
 
@@ -80,7 +107,7 @@ def check_file(
                 if "text" not in json_line.keys():
                     report_dict["text_field"] = False
                     report_dict["message"] = (
-                        f"Missing 'text' field was found on line {idx+1} of the the input file. "
+                        f"Missing 'text' field was found on line {idx + 1} of the the input file. "
                         "Expected format: {'text': 'my sample string'}. "
                     )
                     report_dict["is_check_passed"] = False
@@ -89,7 +116,7 @@ def check_file(
                     if not isinstance(json_line["text"], str):
                         report_dict["key_value"] = False
                         report_dict["message"] = (
-                            f'Invalid value type for "text" key on line {idx+1}. '
+                            f'Invalid value type for "text" key on line {idx + 1}. '
                             f'Expected string. Found {type(json_line["text"])}.'
                         )
 
@@ -99,7 +126,7 @@ def check_file(
             if idx + 1 < MIN_SAMPLES:
                 report_dict["min_samples"] = False
                 report_dict["message"] = (
-                    f"Processing {file} resulted in only {idx+1} samples. "
+                    f"Processing {file} resulted in only {idx + 1} samples. "
                     f"Our minimum is {MIN_SAMPLES} samples. "
                 )
                 report_dict["is_check_passed"] = False
@@ -118,7 +145,7 @@ def check_file(
                 )
             else:
                 report_dict["message"] = (
-                    f"Error parsing json payload. Unexpected format on line {idx+1}."
+                    f"Error parsing json payload. Unexpected format on line {idx + 1}."
                 )
             report_dict["is_check_passed"] = False
 
@@ -128,5 +155,50 @@ def check_file(
         report_dict["line_type"] = True
     if report_dict["key_value"] is not False:
         report_dict["key_value"] = True
+    return report_dict
+
+
+def _check_parquet(file: Path) -> Dict[str, Any]:
+    report_dict: Dict[str, Any] = {}
+
+    try:
+        table = parquet.read_table(str(file), memory_map=True)
+    except ArrowInvalid:
+        report_dict["load_parquet"] = (
+            f"An exception has occurred when loading the Parquet file {file}. Please check the file for corruption. "
+            f"Exception trace:\n{format_exc()}"
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
+
+    column_names = table.schema.names
+    if "input_ids" not in column_names:
+        report_dict["load_parquet"] = (
+            f"Parquet file {file} does not contain the `input_ids` column."
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
+
+    for column_name in column_names:
+        if column_name not in PARQUET_EXPECTED_COLUMNS:
+            report_dict["load_parquet"] = (
+                f"Parquet file {file} contains an unexpected column {column_name}. "
+                f"Only columns {PARQUET_EXPECTED_COLUMNS} are supported."
+            )
+            report_dict["is_check_passed"] = False
+            return report_dict
+
+    num_samples = len(table)
+    if num_samples < MIN_SAMPLES:
+        report_dict["min_samples"] = (
+            f"Processing {file} resulted in only {num_samples} samples. "
+            f"Our minimum is {MIN_SAMPLES} samples. "
+        )
+        report_dict["is_check_passed"] = False
+        return report_dict
+    else:
+        report_dict["num_samples"] = num_samples
+
+    report_dict["is_check_passed"] = True
 
     return report_dict

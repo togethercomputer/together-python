@@ -18,6 +18,7 @@ from together.types.files import (
     FilePurpose,
     FileRequest,
     FileResponse,
+    FileType,
 )
 from together.types.finetune import (
     FinetuneDownloadResult,
@@ -55,6 +56,7 @@ __all__ = [
     "FileDeleteResponse",
     "FileObject",
     "FilePurpose",
+    "FileType",
     "ImageRequest",
     "ImageResponse",
     "ModelObject",
