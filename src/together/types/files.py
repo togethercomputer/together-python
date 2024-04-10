@@ -50,11 +50,14 @@ class FileResponse(BaseModel):
 
     id: str
     object: Literal[ObjectType.File]
+    # created timestamp
     created_at: int | None = None
     type: FileType | None = None
     purpose: FilePurpose | None = None
     filename: str | None = None
+    # file byte size
     bytes: int | None = None
+    # JSONL line count
     line_count: int | None = Field(None, alias="LineCount")
     processed: bool | None = Field(None, alias="Processed")
 
