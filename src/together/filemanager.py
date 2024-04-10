@@ -322,7 +322,7 @@ class UploadManager:
 
     def upload(
         self,
-        url_base: str,
+        url: str,
         file: Path,
         purpose: FilePurpose,
         redirect: bool = False,
@@ -346,7 +346,7 @@ class UploadManager:
         redirect_url = None
         if redirect:
             redirect_url, file_id = self.get_upload_url(
-                url_base, file, purpose, filetype
+                url, file, purpose, filetype
             )
 
         file_size = os.stat(file.as_posix()).st_size
@@ -376,7 +376,7 @@ class UploadManager:
                     response, _, _ = requestor.request(
                         options=TogetherRequest(
                             method="PUT",
-                            url=url_base,
+                            url=url,
                             params=wrapped_file,
                         ),
                     )
@@ -389,7 +389,7 @@ class UploadManager:
                     f"Error code: {callback_response.status_code} - Failed to process uploaded file"
                 )
 
-            response = self.callback(f"{url_base}/{file_id}/preprocess")
+            response = self.callback(f"{url}/{file_id}/preprocess")
 
         assert isinstance(response, TogetherResponse)
 
