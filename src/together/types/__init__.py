@@ -56,6 +56,7 @@ __all__ = [
     "FileDeleteResponse",
     "FileObject",
     "FilePurpose",
+    "FileType",
     "ImageRequest",
     "ImageResponse",
     "ModelObject",

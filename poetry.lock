@@ -1003,6 +1003,16 @@ files = [
 numpy = ">=1.16.6,<2"
 
 [[package]]
+name = "pyarrow-stubs"
+version = "10.0.1.7"
+description = "Type annotations for pyarrow"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "pyarrow_stubs-10.0.1.7-py3-none-any.whl", hash = "sha256:cccc7a46eddeea4e3cb85330eb8972c116a615da6188b8ae1f7a44cb724b21ac"},
+]
+
+[[package]]
 name = "pydantic"
 version = "2.6.4"
 description = "Data validation using Python type hints"
@@ -1657,4 +1667,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "aa8f45cd842da5f33f97fca5981b3f4fedc42bc5a333150f36f5dd807b30f08f"
+content-hash = "29cc3234b016ebd2d79c1ef87ca8fabee6de863281891c87c5acd2996bdf0e50"

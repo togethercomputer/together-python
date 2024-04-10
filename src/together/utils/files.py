@@ -76,7 +76,7 @@ def check_file(
 
 
 def _check_jsonl(file: Path) -> Dict[str, Any]:
-    report_dict = {}
+    report_dict: Dict[str, Any] = {}
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
         with file.open(encoding="utf-8") as f:
@@ -159,10 +159,10 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
 
 def _check_parquet(file: Path) -> Dict[str, Any]:
-    report_dict = {}
+    report_dict: Dict[str, Any] = {}
 
     try:
-        table = parquet.read_table(file, memory_map=True)
+        table = parquet.read_table(str(file), memory_map=True)
     except ArrowInvalid:
         report_dict["load_parquet"] = (
             f"An exception has occurred when loading the Parquet file {file}. Please check the file for corruption. "
