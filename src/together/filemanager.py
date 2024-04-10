@@ -25,7 +25,13 @@ from together.error import (
     FileTypeError,
 )
 from together.together_response import TogetherResponse
-from together.types import FilePurpose, FileResponse, TogetherClient, TogetherRequest
+from together.types import (
+    FilePurpose,
+    FileResponse,
+    FileType,
+    TogetherClient,
+    TogetherRequest,
+)
 
 
 def chmod_and_replace(src: Path, dst: Path) -> None:
@@ -260,12 +266,17 @@ class UploadManager:
                 http_status=response.status_code,
             )
 
-    def redirect_policy(
-        self, url: str, file: Path, purpose: FilePurpose
+    def get_upload_url(
+        self,
+        url: str,
+        file: Path,
+        purpose: FilePurpose,
+        filetype: FileType,
     ) -> Tuple[str, str]:
         data = {
             "purpose": purpose.value,
             "file_name": file.name,
+            "file_type": filetype.value,
         }
 
         requestor = api_requestor.APIRequestor(
@@ -311,11 +322,21 @@ class UploadManager:
 
     def upload(
         self,
-        url: str,
+        url_base: str,
         file: Path,
         purpose: FilePurpose,
         redirect: bool = False,
     ) -> FileResponse:
+        if file.suffix == ".jsonl":
+            filetype = FileType.jsonl
+        elif file.suffix == ".parquet":
+            filetype = FileType.parquet
+        else:
+            raise FileTypeError(
+                f"Unknown extension of file {file}. "
+                "Only files with extensions .jsonl and .parquet are supported."
+            )
+
         file_id = None
 
         requestor = api_requestor.APIRequestor(
@@ -324,7 +345,9 @@ class UploadManager:
 
         redirect_url = None
         if redirect:
-            redirect_url, file_id = self.redirect_policy(url, file, purpose)
+            redirect_url, file_id = self.get_upload_url(
+                url_base, file, purpose, filetype
+            )
 
         file_size = os.stat(file.as_posix()).st_size
 
@@ -353,7 +376,7 @@ class UploadManager:
                     response, _, _ = requestor.request(
                         options=TogetherRequest(
                             method="PUT",
-                            url=url,
+                            url=url_base,
                             params=wrapped_file,
                         ),
                     )
@@ -366,7 +389,7 @@ class UploadManager:
                     f"Error code: {callback_response.status_code} - Failed to process uploaded file"
                 )
 
-            response = self.callback(f"{url}/{file_id}/preprocess")
+            response = self.callback(f"{url_base}/{file_id}/preprocess")
 
         assert isinstance(response, TogetherResponse)
 

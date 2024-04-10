@@ -15,6 +15,11 @@ class FilePurpose(str, Enum):
     FineTune = "fine-tune"
 
 
+class FileType(str, Enum):
+    jsonl = "jsonl"
+    parquet = "parquet"
+
+
 class FileRequest(BaseModel):
     """
     Files request type
@@ -43,21 +48,14 @@ class FileResponse(BaseModel):
     Files API response type
     """
 
-    # file id
     id: str
-    # object type
     object: Literal[ObjectType.File]
-    # created timestamp
     created_at: int | None = None
-    # file purpose
+    type: FileType | None = None
     purpose: FilePurpose | None = None
-    # file-name
     filename: str | None = None
-    # file byte size
     bytes: int | None = None
-    # JSONL line count
     line_count: int | None = Field(None, alias="LineCount")
-    # is processed
     processed: bool | None = Field(None, alias="Processed")
 
 

@@ -293,9 +293,9 @@ def common_check(file: str) -> Dict[str, Union[bool, str, int]]:
     file_size = os.stat(file).st_size
 
     if file_size > MAX_FT_GB * NUM_BYTES_IN_GB:
-        report_dict[
-            "file_size"
-        ] = f"File size {round(file_size / NUM_BYTES_IN_GB, 3)} GB is greater than our limit of 4.9 GB"
+        report_dict["file_size"] = (
+            f"File size {round(file_size / NUM_BYTES_IN_GB, 3)} GB is greater than our limit of 4.9 GB"
+        )
         report_dict["is_check_passed"] = False
         return report_dict
     elif file_size == 0:
@@ -409,9 +409,9 @@ def check_parquet(file: str) -> Dict[str, Union[bool, str, int]]:
 
     column_names = table.schema.names
     if "input_ids" not in column_names:
-        report_dict[
-            "load_parquet"
-        ] = f"Parquet file {file} does not contain the `input_ids` column."
+        report_dict["load_parquet"] = (
+            f"Parquet file {file} does not contain the `input_ids` column."
+        )
         report_dict["is_check_passed"] = False
         return report_dict
 

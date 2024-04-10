@@ -18,6 +18,7 @@ from together.types.files import (
     FilePurpose,
     FileRequest,
     FileResponse,
+    FileType,
 )
 from together.types.finetune import (
     FinetuneDownloadResult,
