@@ -327,16 +327,6 @@ class UploadManager:
         purpose: FilePurpose,
         redirect: bool = False,
     ) -> FileResponse:
-        if file.suffix == ".jsonl":
-            filetype = FileType.jsonl
-        elif file.suffix == ".parquet":
-            filetype = FileType.parquet
-        else:
-            raise FileTypeError(
-                f"Unknown extension of file {file}. "
-                "Only files with extensions .jsonl and .parquet are supported."
-            )
-
         file_id = None
 
         requestor = api_requestor.APIRequestor(
@@ -345,9 +335,16 @@ class UploadManager:
 
         redirect_url = None
         if redirect:
-            redirect_url, file_id = self.get_upload_url(
-                url, file, purpose, filetype
-            )
+            if file.suffix == ".jsonl":
+                filetype = FileType.jsonl
+            elif file.suffix == ".parquet":
+                filetype = FileType.parquet
+            else:
+                raise FileTypeError(
+                    f"Unknown extension of file {file}. "
+                    "Only files with extensions .jsonl and .parquet are supported."
+                )
+            redirect_url, file_id = self.get_upload_url(url, file, purpose, filetype)
 
         file_size = os.stat(file.as_posix()).st_size
 
