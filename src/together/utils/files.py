@@ -149,11 +149,11 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                 )
             report_dict["is_check_passed"] = False
 
-    if report_dict["text_field"] is not False:
+    if "text_field" not in report_dict:
         report_dict["text_field"] = True
-    if report_dict["line_type"] is not False:
+    if "line_type" not in report_dict:
         report_dict["line_type"] = True
-    if report_dict["key_value"] is not False:
+    if "key_value" not in report_dict:
         report_dict["key_value"] = True
     return report_dict
 
