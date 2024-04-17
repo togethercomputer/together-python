@@ -107,10 +107,22 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
-def cancel(ctx: click.Context, fine_tune_id: str) -> None:
+@click.option(
+    "--quiet",
+    is_flag=True,
+    help="Do not prompt for confirmation before cancelling job"
+)
+def cancel(ctx: click.Context, fine_tune_id: str, quiet: bool = False) -> None:
     """Cancel fine-tuning job"""
     client: Together = ctx.obj
-
+    if not quiet:
+        confirm_response = input(
+            "You will be billed for any completed training steps upon cancellation. "
+            f"Do you want to cancel job {fine_tune_id}? [y/N]"
+        )
+        if "y" not in confirm_response.lower():
+            click.echo({"status": "Cancel not submitted"})
+            return
     response = client.fine_tuning.cancel(fine_tune_id)
 
     click.echo(json.dumps(response.model_dump(), indent=4))
