@@ -4,23 +4,13 @@ import asyncio
 import email.utils
 import json
 import sys
-import threading
 import time
 from json import JSONDecodeError
 from random import random
-from typing import (
-    Any,
-    AsyncContextManager,
-    AsyncGenerator,
-    Dict,
-    Iterator,
-    Tuple,
-    overload,
-)
+from typing import Any, AsyncGenerator, AsyncIterator, Dict, Iterator, Tuple, overload
 from urllib.parse import urlencode, urlsplit, urlunsplit
 
-import aiohttp
-import requests
+import httpx
 from tqdm.utils import CallbackIOWrapper
 
 
@@ -29,24 +19,17 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-import together
 from together import error, utils
 from together.constants import (
     BASE_URL,
     INITIAL_RETRY_DELAY,
-    MAX_CONNECTION_RETRIES,
     MAX_RETRIES,
     MAX_RETRY_DELAY,
-    MAX_SESSION_LIFETIME_SECS,
     TIMEOUT_SECS,
 )
 from together.together_response import TogetherResponse
 from together.types import TogetherClient, TogetherRequest
 from together.types.error import TogetherErrorResponse
-
-
-# Has one attribute per thread, 'session'.
-_thread_context = threading.local()
 
 
 def _build_api_url(url: str, query: str) -> str:
@@ -58,43 +41,32 @@ def _build_api_url(url: str, query: str) -> str:
     return str(urlunsplit((scheme, netloc, path, query, fragment)))
 
 
-def _make_session(max_retries: int | None = None) -> requests.Session:
-    if together.requestssession:
-        if isinstance(together.requestssession, requests.Session):
-            return together.requestssession
-        return together.requestssession()
-    s = requests.Session()
-    s.mount(
-        "https://",
-        requests.adapters.HTTPAdapter(max_retries=max_retries),
-    )
-    return s
-
-
-def parse_stream_helper(line: bytes) -> str | None:
-    if line and line.startswith(b"data:"):
-        if line.startswith(b"data: "):
+def parse_stream_helper(line: str) -> str | None:
+    if line and line.startswith("data:"):
+        if line.startswith("data: "):
             # SSE event may be valid when it contains whitespace
-            line = line[len(b"data: ") :]
+            line = line[len("data: ") :]
         else:
-            line = line[len(b"data:") :]
-        if line.strip() == b"[DONE]":
+            line = line[len("data:") :]
+        if line.strip() == "[DONE]":
             # return here will cause GeneratorExit exception in urllib3
             # and it will close http connection with TCP Reset
             return None
         else:
-            return line.decode("utf-8")
+            return line
     return None
 
 
-def parse_stream(rbody: Iterator[bytes]) -> Iterator[str]:
+def parse_stream(rbody: Iterator[str]) -> Iterator[str]:
     for line in rbody:
         _line = parse_stream_helper(line)
         if _line is not None:
             yield _line
 
 
-async def parse_stream_async(rbody: aiohttp.StreamReader) -> AsyncGenerator[str, Any]:
+async def parse_stream_async(
+    rbody: AsyncIterator[str],
+) -> AsyncGenerator[str, Any]:
     async for line in rbody:
         _line = parse_stream_helper(line)
         if _line is not None:
@@ -108,6 +80,8 @@ class APIRequestor:
         self.retries = MAX_RETRIES if client.max_retries is None else client.max_retries
         self.supplied_headers = client.supplied_headers
         self.timeout = client.timeout or TIMEOUT_SECS
+        self.client = httpx.Client(http2=client.http2)
+        self.async_client = httpx.AsyncClient(http2=client.http2)
 
     def _parse_retry_after_header(
         self, response_headers: Dict[str, Any] | None = None
@@ -176,8 +150,8 @@ class APIRequestor:
         response_headers: Dict[str, Any] | None,
         *,
         stream: bool,
-        request_timeout: float | Tuple[float, float] | None = None,
-    ) -> requests.Response:
+        request_timeout: float | None = None,
+    ) -> httpx.Response:
         remaining = remaining_retries - 1
         if remaining == 1:
             utils.log_debug("1 retry left")
@@ -198,14 +172,41 @@ class APIRequestor:
             remaining_retries=remaining,
         )
 
+    async def _retry_async_request(
+        self,
+        options: TogetherRequest,
+        remaining_retries: int,
+        response_headers: Dict[str, Any] | None,
+        *,
+        stream: bool,
+        request_timeout: float | None = None,
+    ) -> httpx.Response:
+        remaining = remaining_retries - 1
+        if remaining == 1:
+            utils.log_debug("1 retry left")
+        else:
+            utils.log_debug(f"{remaining} retries left")
+
+        timeout = self._calculate_retry_timeout(remaining, response_headers)
+        utils.log_debug(f"Retrying request to {options.url} in {timeout} seconds")
+
+        await asyncio.sleep(timeout)
+
+        return await self.arequest_raw(
+            options=options,
+            stream=stream,
+            request_timeout=request_timeout,
+            remaining_retries=remaining,
+        )
+
     @overload
     def request(
         self,
         options: TogetherRequest,
         stream: Literal[True],
         remaining_retries: int | None = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[Iterator[TogetherResponse], bool, str]:
+        request_timeout: float | None = ...,
+    ) -> Tuple[Iterator[TogetherResponse], bool, str | None]:
         pass
 
     @overload
@@ -214,8 +215,8 @@ class APIRequestor:
         options: TogetherRequest,
         stream: Literal[False] = ...,
         remaining_retries: int | None = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[TogetherResponse, bool, str]:
+        request_timeout: float | None = ...,
+    ) -> Tuple[TogetherResponse, bool, str | None]:
         pass
 
     @overload
@@ -224,8 +225,8 @@ class APIRequestor:
         options: TogetherRequest,
         stream: bool = ...,
         remaining_retries: int | None = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str]:
+        request_timeout: float | None = ...,
+    ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool, str | None]:
         pass
 
     def request(
@@ -233,7 +234,7 @@ class APIRequestor:
         options: TogetherRequest,
         stream: bool = False,
         remaining_retries: int | None = None,
-        request_timeout: float | Tuple[float, float] | None = None,
+        request_timeout: float | None = None,
     ) -> Tuple[
         TogetherResponse | Iterator[TogetherResponse],
         bool,
@@ -254,8 +255,9 @@ class APIRequestor:
         self,
         options: TogetherRequest,
         stream: Literal[True],
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        remaining_retries: int | None = ...,
+        request_timeout: float | None = ...,
+    ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str | None]:
         pass
 
     @overload
@@ -264,8 +266,9 @@ class APIRequestor:
         options: TogetherRequest,
         *,
         stream: Literal[True],
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str]:
+        remaining_retries: int | None = ...,
+        request_timeout: float | None = ...,
+    ) -> Tuple[AsyncGenerator[TogetherResponse, None], bool, str | None]:
         pass
 
     @overload
@@ -273,7 +276,8 @@ class APIRequestor:
         self,
         options: TogetherRequest,
         stream: Literal[False] = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
+        remaining_retries: int | None = ...,
+        request_timeout: float | None = ...,
     ) -> Tuple[TogetherResponse, bool, str]:
         pass
 
@@ -282,51 +286,31 @@ class APIRequestor:
         self,
         options: TogetherRequest,
         stream: bool = ...,
-        request_timeout: float | Tuple[float, float] | None = ...,
-    ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
+        remaining_retries: int | None = ...,
+        request_timeout: float | None = ...,
+    ) -> Tuple[
+        TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str | None
+    ]:
         pass
 
     async def arequest(
         self,
         options: TogetherRequest,
         stream: bool = False,
-        request_timeout: float | Tuple[float, float] | None = None,
-    ) -> Tuple[TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str]:
-        ctx = AioHTTPSession()
-        session = await ctx.__aenter__()
-        result = None
-        try:
-            result = await self.arequest_raw(
-                options,
-                session,
-                request_timeout=request_timeout,
-            )
-            resp, got_stream = await self._interpret_async_response(result, stream)
-        except Exception:
-            # Close the request before exiting session context.
-            if result is not None:
-                result.release()
-            await ctx.__aexit__(None, None, None)
-            raise
-        if got_stream:
+        remaining_retries: int | None = None,
+        request_timeout: float | None = None,
+    ) -> Tuple[
+        TogetherResponse | AsyncGenerator[TogetherResponse, None], bool, str | None
+    ]:
+        result = await self.arequest_raw(
+            options=options,
+            remaining_retries=remaining_retries or self.retries,
+            stream=stream,
+            request_timeout=request_timeout,
+        )
 
-            async def wrap_resp() -> AsyncGenerator[TogetherResponse, None]:
-                assert isinstance(resp, AsyncGenerator)
-                try:
-                    async for r in resp:
-                        yield r
-                finally:
-                    # Close the request before exiting session context. Important to do it here
-                    # as if stream is not fully exhausted, we need to close the request nevertheless.
-                    result.release()
-                    await ctx.__aexit__(None, None, None)
-
-            return wrap_resp(), got_stream, self.api_key  # type: ignore
-        else:
-            # Close the request before exiting session context.
-            result.release()
-            await ctx.__aexit__(None, None, None)
-            return resp, got_stream, self.api_key  # type: ignore
+        resp, got_stream = await self._interpret_async_response(result, stream)
+        return resp, got_stream, self.api_key
 
     @classmethod
     def handle_error_response(
@@ -470,54 +454,56 @@ class APIRequestor:
         remaining_retries: int,
         *,
         stream: bool = False,
-        request_timeout: float | Tuple[float, float] | None = None,
+        request_timeout: float | None = None,
         absolute: bool = False,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         abs_url, headers, data = self._prepare_request_raw(options, absolute)
 
-        if not hasattr(_thread_context, "session"):
-            _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
-            _thread_context.session_create_time = time.time()
-        elif (
-            time.time() - getattr(_thread_context, "session_create_time", 0)
-            >= MAX_SESSION_LIFETIME_SECS
-        ):
-            _thread_context.session.close()
-            _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
-            _thread_context.session_create_time = time.time()
         try:
-            result = _thread_context.session.request(
+            req = self.client.build_request(
                 options.method,
                 abs_url,
                 headers=headers,
-                data=data,
+                content=data,
                 files=options.files,
-                stream=stream,
                 timeout=request_timeout or self.timeout,
-                proxies=_thread_context.session.proxies,
-                allow_redirects=options.allow_redirects,
             )
-        except requests.exceptions.Timeout as e:
-            utils.log_debug("Encountered requests.exceptions.Timeout")
+
+            result = self.client.send(
+                req, stream=stream, follow_redirects=options.allow_redirects
+            )
+
+        except httpx.TimeoutException as e:
+            utils.log_debug("Encountered httpx.TimeoutException")
+
+            try:
+                resp_headers = dict(result.headers)
+            except AttributeError:
+                resp_headers = {}
 
             if remaining_retries > 0:
                 return self._retry_request(
                     options,
                     remaining_retries=remaining_retries,
-                    response_headers=dict(result.headers),
+                    response_headers=resp_headers,
                     stream=stream,
                     request_timeout=request_timeout,
                 )
 
             raise error.Timeout("Request timed out: {}".format(e)) from e
-        except requests.exceptions.RequestException as e:
-            utils.log_debug("Encountered requests.exceptions.RequestException")
+        except httpx.RequestError as e:
+            utils.log_debug("Encountered httpx.RequestError")
+
+            try:
+                resp_headers = dict(result.headers)
+            except AttributeError:
+                resp_headers = {}
 
             if remaining_retries > 0:
                 return self._retry_request(
                     options,
                     remaining_retries=remaining_retries,
-                    response_headers=dict(result.headers),
+                    response_headers=resp_headers,
                     stream=stream,
                     request_timeout=request_timeout,
                 )
@@ -529,7 +515,7 @@ class APIRequestor:
         # retry on 5XX error or rate-limit
         if 500 <= result.status_code < 600 or result.status_code == 429:
             utils.log_debug(
-                f"Encountered requests.exceptions.HTTPError. Error code: {result.status_code}"
+                f"Encountered status error. Error code: {result.status_code}"
             )
 
             if remaining_retries > 0:
@@ -549,63 +535,99 @@ class APIRequestor:
             request_id=result.headers.get("CF-RAY"),
         )
 
-        return result  # type: ignore
+        return result
 
     async def arequest_raw(
         self,
         options: TogetherRequest,
-        session: aiohttp.ClientSession,
+        remaining_retries: int,
         *,
-        request_timeout: float | Tuple[float, float] | None = None,
+        stream: bool = False,
+        request_timeout: float | None = None,
         absolute: bool = False,
-    ) -> aiohttp.ClientResponse:
+    ) -> httpx.Response:
         abs_url, headers, data = self._prepare_request_raw(options, absolute)
 
-        if isinstance(request_timeout, tuple):
-            timeout = aiohttp.ClientTimeout(
-                connect=request_timeout[0],
-                total=request_timeout[1],
-            )
-        else:
-            timeout = aiohttp.ClientTimeout(total=request_timeout or self.timeout)
-
-        if options.files:
-            data, content_type = requests.models.RequestEncodingMixin._encode_files(  # type: ignore
-                options.files, data
-            )
-            headers["Content-Type"] = content_type
-
-        request_kwargs = {
-            "headers": headers,
-            "data": data,
-            "timeout": timeout,
-            "allow_redirects": options.allow_redirects,
-        }
-
         try:
-            result = await session.request(
-                method=options.method, url=abs_url, **request_kwargs
+            req = self.async_client.build_request(
+                options.method,
+                abs_url,
+                headers=headers,
+                content=data,
+                files=options.files,
+                timeout=request_timeout or self.timeout,
             )
-            utils.log_debug(
-                "Together API response",
-                path=abs_url,
-                response_code=result.status,
-                processing_ms=result.headers.get("x-total-time"),
-                request_id=result.headers.get("CF-RAY"),
+
+            result = await self.async_client.send(
+                req, stream=stream, follow_redirects=options.allow_redirects
             )
-            # Don't read the whole stream for debug logging unless necessary.
-            if together.log == "debug":
-                utils.log_debug(
-                    "API response body", body=result.content, headers=result.headers
+
+        except httpx.TimeoutException as e:
+            utils.log_debug("Encountered httpx.TimeoutException")
+
+            try:
+                resp_headers = dict(result.headers)
+            except AttributeError:
+                resp_headers = {}
+
+            if remaining_retries > 0:
+                return await self._retry_async_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=resp_headers,
+                    stream=stream,
+                    request_timeout=request_timeout,
                 )
-            return result
-        except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
-            raise error.Timeout("Request timed out") from e
-        except aiohttp.ClientError as e:
-            raise error.APIConnectionError("Error communicating with Together") from e
+
+            raise error.Timeout("Request timed out: {}".format(e)) from e
+        except httpx.RequestError as e:
+            utils.log_debug("Encountered httpx.RequestError")
+
+            try:
+                resp_headers = dict(result.headers)
+            except AttributeError:
+                resp_headers = {}
+
+            if remaining_retries > 0:
+                return await self._retry_async_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=resp_headers,
+                    stream=stream,
+                    request_timeout=request_timeout,
+                )
+
+            raise error.APIConnectionError(
+                "Error communicating with API: {}".format(e)
+            ) from e
+
+        # retry on 5XX error or rate-limit
+        if 500 <= result.status_code < 600 or result.status_code == 429:
+            utils.log_debug(
+                f"Encountered status error. Error code: {result.status_code}"
+            )
+
+            if remaining_retries > 0:
+                return await self._retry_async_request(
+                    options,
+                    remaining_retries=remaining_retries,
+                    response_headers=dict(result.headers),
+                    stream=stream,
+                    request_timeout=request_timeout,
+                )
+
+        utils.log_debug(
+            "Together API response",
+            path=abs_url,
+            response_code=result.status_code,
+            processing_ms=result.headers.get("x-total-time"),
+            request_id=result.headers.get("CF-RAY"),
+        )
+
+        return result
 
     def _interpret_response(
-        self, result: requests.Response, stream: bool
+        self, result: httpx.Response, stream: bool
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
@@ -627,7 +649,7 @@ class APIRequestor:
             )
 
     async def _interpret_async_response(
-        self, result: aiohttp.ClientResponse, stream: bool
+        self, result: httpx.Response, stream: bool
     ) -> (
         tuple[AsyncGenerator[TogetherResponse, None], bool]
         | tuple[TogetherResponse, bool]
@@ -636,21 +658,21 @@ class APIRequestor:
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (
                 self._interpret_response_line(
-                    line, result.status, result.headers, stream=True
+                    line, result.status_code, result.headers, stream=True
                 )
-                async for line in parse_stream_async(result.content)
+                async for line in parse_stream_async(result.aiter_lines())
             ), True
         else:
             try:
-                await result.read()
-            except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
+                await result.aread()
+            except (httpx.TimeoutException, asyncio.TimeoutError) as e:
                 raise error.Timeout("Request timed out") from e
-            except aiohttp.ClientError as e:
+            except httpx.RequestError as e:
                 utils.log_warn(e, body=result.content)
             return (
                 self._interpret_response_line(
-                    (await result.read()).decode("utf-8"),
-                    result.status,
+                    (await result.read()).decode("utf-8"),  # type: ignore
+                    result.status_code,
                     result.headers,
                     stream=False,
                 ),
@@ -688,24 +710,3 @@ class APIRequestor:
         if not 200 <= rcode < 300:
             raise self.handle_error_response(resp, rcode, stream_error=stream)
         return resp
-
-
-class AioHTTPSession(AsyncContextManager[aiohttp.ClientSession]):
-    def __init__(self) -> None:
-        self._session: aiohttp.ClientSession | None = None
-        self._should_close_session: bool = False
-
-    async def __aenter__(self) -> aiohttp.ClientSession:
-        self._session = together.aiosession.get()
-        if self._session is None:
-            self._session = await aiohttp.ClientSession().__aenter__()
-            self._should_close_session = True
-
-        return self._session
-
-    async def __aexit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        if self._session is None:
-            raise RuntimeError("Session is not initialized")
-
-        if self._should_close_session:
-            await self._session.__aexit__(exc_type, exc_value, traceback)

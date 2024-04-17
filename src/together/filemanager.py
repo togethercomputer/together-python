@@ -9,9 +9,8 @@ from functools import partial
 from pathlib import Path
 from typing import Tuple
 
-import requests
+import httpx
 from filelock import FileLock
-from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
@@ -58,7 +57,7 @@ def chmod_and_replace(src: Path, dst: Path) -> None:
 
 
 def _get_file_size(
-    headers: CaseInsensitiveDict[str],
+    headers: httpx.Headers,
 ) -> int:
     """
     Extracts file size from header
@@ -79,7 +78,7 @@ def _get_file_size(
 
 
 def _prepare_output(
-    headers: CaseInsensitiveDict[str],
+    headers: httpx.Headers,
     step: int = -1,
     output: Path | None = None,
     remote_name: str | None = None,
@@ -154,14 +153,12 @@ class DownloadManager:
 
         try:
             response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except httpx.HTTPError as e:
             raise APIError(
                 "Error fetching file metadata", http_status=response.status_code
             ) from e
 
         headers = response.headers
-
-        assert isinstance(headers, CaseInsensitiveDict)
 
         file_path = _prepare_output(
             headers=headers,
@@ -227,9 +224,9 @@ class DownloadManager:
                     desc=f"Downloading file {file_path.name}",
                     disable=bool(DISABLE_TQDM),
                 ) as pbar:
-                    for chunk in response.iter_content(DOWNLOAD_BLOCK_SIZE):
+                    for chunk in response.iter_bytes(DOWNLOAD_BLOCK_SIZE):
                         pbar.update(len(chunk))
-                        temp_file.write(chunk)
+                        temp_file.write(chunk)  # type: ignore
 
             # Raise exception if remote file size does not match downloaded file size
             if os.stat(temp_file.name).st_size != file_size:
@@ -252,7 +249,7 @@ class UploadManager:
 
     @classmethod
     def _redirect_error_handler(
-        cls, requestor: api_requestor.APIRequestor, response: requests.Response
+        cls, requestor: api_requestor.APIRequestor, response: httpx.Response
     ) -> None:
         if response.status_code == 401:
             raise AuthenticationError(
@@ -379,7 +376,7 @@ class UploadManager:
                     )
 
         if redirect:
-            assert isinstance(callback_response, requests.Response)
+            assert isinstance(callback_response, httpx.Response)
 
             if not callback_response.status_code == 200:
                 raise APIError(
