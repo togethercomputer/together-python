@@ -464,7 +464,7 @@ class APIRequestor:
                 options.method,
                 abs_url,
                 headers=headers,
-                content=data,
+                data=data,  # type: ignore
                 files=options.files,
                 timeout=request_timeout or self.timeout,
             )
@@ -553,7 +553,7 @@ class APIRequestor:
                 options.method,
                 abs_url,
                 headers=headers,
-                content=data,
+                data=data,  # type: ignore
                 files=options.files,
                 timeout=request_timeout or self.timeout,
             )
@@ -671,7 +671,7 @@ class APIRequestor:
                 utils.log_warn(e, body=result.content)
             return (
                 self._interpret_response_line(
-                    (await result.read()).decode("utf-8"),  # type: ignore
+                    (await result.aread()).decode("utf-8"),
                     result.status_code,
                     result.headers,
                     stream=False,
