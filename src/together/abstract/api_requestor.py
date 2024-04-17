@@ -478,7 +478,7 @@ class APIRequestor:
 
             try:
                 resp_headers = dict(result.headers)
-            except AttributeError:
+            except Exception as _:
                 resp_headers = {}
 
             if remaining_retries > 0:
@@ -496,7 +496,7 @@ class APIRequestor:
 
             try:
                 resp_headers = dict(result.headers)
-            except AttributeError:
+            except Exception as _:
                 resp_headers = {}
 
             if remaining_retries > 0:
@@ -567,7 +567,7 @@ class APIRequestor:
 
             try:
                 resp_headers = dict(result.headers)
-            except AttributeError:
+            except Exception as _:
                 resp_headers = {}
 
             if remaining_retries > 0:
@@ -585,7 +585,7 @@ class APIRequestor:
 
             try:
                 resp_headers = dict(result.headers)
-            except AttributeError:
+            except Exception as _:
                 resp_headers = {}
 
             if remaining_retries > 0:
