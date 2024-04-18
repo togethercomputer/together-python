@@ -66,6 +66,13 @@ pytest = ">=7.4.2,<9.0.0"
 pytest-watch = "^4.2.0"
 tox = "^4.14.1"
 
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+datasets = "^2.18.0"
+transformers = "^4.39.3"
+
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/togethercomputer/together-python"
