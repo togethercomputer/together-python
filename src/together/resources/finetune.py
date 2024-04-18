@@ -66,7 +66,7 @@ class FineTuning:
             batch_size=batch_size,
             learning_rate=learning_rate,
             suffix=suffix,
-            wandb_api_key=wandb_api_key,
+            wandb_key=wandb_api_key,
         ).model_dump()
 
         response, _, _ = requestor.request(
@@ -280,7 +280,7 @@ class AsyncFineTuning:
             batch_size=batch_size,
             learning_rate=learning_rate,
             suffix=suffix,
-            wandb_api_key=wandb_api_key,
+            wandb_key=wandb_api_key,
         ).model_dump()
 
         response, _, _ = await requestor.arequest(

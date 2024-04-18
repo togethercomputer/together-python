@@ -118,7 +118,7 @@ class FinetuneRequest(BaseModel):
     # up to 40 character suffix for output model name
     suffix: str | None = None
     # weights & biases api key
-    wandb_api_key: str | None = None
+    wandb_key: str | None = None
 
 
 class FinetuneResponse(BaseModel):
