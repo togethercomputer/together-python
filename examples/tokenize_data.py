@@ -95,7 +95,7 @@ if __name__ == "__main__":
         "--max-seq-length", type=int, default=2048, help="Maximum sequence length"
     )
     parser.add_argument(
-        "--add_labels",
+        "--add-labels",
         action="store_true",
         help="Whether to add loss labels from padding tokens",
     )
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         help="Tokenizer name (for example, togethercomputer/LLaMA-2-7B-32K)",
     )
     parser.add_argument(
-        "--out_filename",
+        "--out-filename",
         default="processed_dataset.parquet",
         help="Name of the Parquet file to save (should have .parquet extension)",
     )
