@@ -8,6 +8,7 @@ from together.together_response import TogetherResponse
 from together.types import (
     FinetuneDownloadResult,
     FinetuneList,
+    FinetuneListCheckpoints,
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
@@ -186,6 +187,33 @@ class FineTuning:
         assert isinstance(response, TogetherResponse)
 
         return FinetuneListEvents(**response.data)
+
+    def checkpoints(self, id: str) -> FinetuneListCheckpoints:
+        """
+        Lists events of a fine-tune checkpoints
+
+        Args:
+            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+
+        Returns:
+            FinetuneListCheckpoints: Object containing list of fine-tune checkpoints
+        """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url=f"fine-tunes/{id}/checkpoints",
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneListCheckpoints(**response.data)
 
     def download(
         self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1

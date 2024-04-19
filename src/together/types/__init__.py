@@ -23,6 +23,7 @@ from together.types.files import (
 from together.types.finetune import (
     FinetuneDownloadResult,
     FinetuneList,
+    FinetuneListCheckpoints,
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
@@ -49,6 +50,7 @@ __all__ = [
     "FinetuneResponse",
     "FinetuneList",
     "FinetuneListEvents",
+    "FinetuneListCheckpoints",
     "FinetuneDownloadResult",
     "FileRequest",
     "FileResponse",

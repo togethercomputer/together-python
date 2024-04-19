@@ -98,6 +98,21 @@ class FinetuneEvent(BaseModel):
     hash: str | None = None
 
 
+class FinetuneCheckpoint(BaseModel):
+    """
+    Fine-tune checkpoint type
+    """
+
+    # checkpoint step number
+    step: int | None = None
+    # checkpoint file path
+    path: str | None = None
+    # created at datetime stamp
+    created_at: str | None = None
+    # is deleted boolean
+    is_deleted: bool | None = None
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -191,6 +206,13 @@ class FinetuneListEvents(BaseModel):
     object: Literal["list"] | None = None
     # list of fine-tune events
     data: List[FinetuneEvent] | None = None
+
+
+class FinetuneListCheckpoints(BaseModel):
+    # object type
+    object: Literal["list"] | None = None
+    # list of fine-tune checkpoints
+    data: List[FinetuneCheckpoint] | None = None
 
 
 class FinetuneDownloadResult(BaseModel):

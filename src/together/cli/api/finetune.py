@@ -145,6 +145,31 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
+def checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
+    """List fine-tuning checkpoints"""
+    client: Together = ctx.obj
+
+    response = client.fine_tuning.checkpoints(fine_tune_id)
+
+    response.data = response.data or []
+
+    display_list = []
+    for i in response.data:
+        display_list.append(
+            {
+                "Step": i.step,
+                "Created At": parse_timestamp(i.created_at or ""),
+                "Deleted": i.is_deleted,
+            }
+        )
+    table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+
+    click.echo(table)
+
+
+@fine_tuning.command()
+@click.pass_context
+@click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
