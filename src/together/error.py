@@ -35,7 +35,7 @@ class TogetherException(Exception):
                 "response": self._message,
                 "status": self.http_status,
                 "request_id": self.request_id,
-                "headers": self.headers,
+                # "headers": self.headers,
             }
         )
         return "%s(%r)" % (self.__class__.__name__, repr_message)
