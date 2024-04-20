@@ -22,14 +22,11 @@ version = VERSION
 log: str | None = None  # Set to either 'debug' or 'info', controls console logging
 
 if TYPE_CHECKING:
-    import requests
-    from aiohttp import ClientSession
+    import httpx
 
-requestssession: "requests.Session" | Callable[[], "requests.Session"] | None = None
+http_client: "httpx.Client" | Callable[[], "httpx.Client"] | None = None
 
-aiosession: ContextVar["ClientSession" | None] = ContextVar(
-    "aiohttp-session", default=None
-)
+async_http_client: "httpx.AsyncClient" | Callable[[], "httpx.AsyncClient"] | None = None
 
 from together.client import AsyncClient, AsyncTogether, Client, Together
 
@@ -46,7 +43,8 @@ from together.legacy.models import Models
 
 
 __all__ = [
-    "aiosession",
+    "http_client",
+    "async_http_client",
     "constants",
     "version",
     "Together",

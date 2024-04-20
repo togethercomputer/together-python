@@ -20,6 +20,7 @@ class TogetherClient:
     timeout: float | None = TIMEOUT_SECS
     max_retries: int | None = MAX_RETRIES
     supplied_headers: Dict[str, str] | None = None
+    http2: bool = True
 
 
 class BaseModel(pydantic.BaseModel):
