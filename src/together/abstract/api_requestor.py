@@ -655,7 +655,7 @@ class APIRequestor:
         | tuple[TogetherResponse, bool]
     ):
         """Returns the response(s) and a bool indicating whether it is a stream."""
-        if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
+        if stream:
             return (
                 self._interpret_response_line(
                     line, result.status_code, result.headers, stream=True
@@ -694,16 +694,18 @@ class APIRequestor:
             )
 
         try:
-            if "text/plain" in rheaders.get("Content-Type", ""):
-                data: Dict[str, Any] = {"message": rbody}
-            else:
+            if stream:
                 data = json.loads(rbody)
+            else:
+                data: Dict[str, Any] = {"message": rbody}
+                
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
                 f"Error code: {rcode} -{rbody}",
                 http_status=rcode,
                 headers=rheaders,
             ) from e
+
         resp = TogetherResponse(data, rheaders)
 
         # Handle streaming errors
