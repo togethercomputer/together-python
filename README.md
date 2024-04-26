@@ -109,6 +109,7 @@ client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 response = client.completions.create(
     model="codellama/CodeLlama-34b-Python-hf",
     prompt="Write a Next.js component with TailwindCSS for a header component.",
+    max_tokens=200,
 )
 print(response.choices[0].text)
 ```
