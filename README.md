@@ -1,4 +1,13 @@
+<div align="center">
+  <img alt="together.ai" height="100px" src="https://assets-global.website-files.com/64f6f2c0e3f4c5a91c1e823a/654693d569494912cfc0c0d4_favicon.svg">
+</div>
+
+
 The [Together Python Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.8+ applications with easy to use synchronous and asynchronous clients.
+
+[![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
+[![Discord](https://dcbadge.vercel.app/api/server/9Rk6sSeWEG?style=flat&compact=true)](https://discord.com/invite/9Rk6sSeWEG)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/togethercompute.svg?style=social&label=Follow%20%40togethercompute)](https://twitter.com/togethercompute)
 
 # Installation
 
