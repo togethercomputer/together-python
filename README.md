@@ -5,7 +5,7 @@ The [Together Python Library](https://pypi.org/project/together/) is the officia
 > 🚧
 > The library was rewritten in v1.0.0 released in April of 2024. There were significant changes made.
 
-To install Together Python Library from PyPi, simply run:
+To install Together Python Library from PyPI, simply run:
 
 ```shell Shell
 pip install --upgrade together
