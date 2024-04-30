@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import AsyncGenerator, Iterator, List
+from typing import AsyncGenerator, Dict, Iterator, List
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -28,6 +28,10 @@ class Completions:
         top_p: float | None = None,
         top_k: int | None = None,
         repetition_penalty: float | None = None,
+        presence_penalty: float | None = None,
+        frequency_penalty: float | None = None,
+        min_p: float | None = None,
+        logit_bias: Dict[str, float] | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -54,6 +58,21 @@ class Completions:
                 Defaults to None.
             repetition_penalty (float, optional): A number that controls the diversity of generated text
                     by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+                Defaults to None.
+            presence_penalty (float, optional): A number that controls the likelihood of tokens based on if they have
+                    appeared in the text. Positive values decrease the likelihood of repeated tokens or phrases.
+                    Must be in the range [-2, 2].
+                Defaults to None.
+            frequency_penalty (float, optional): A number that controls the likelihood of tokens based on the frequency
+                    of their appearance in the text. Positive decrease the likelihood of repeated tokens or phrases.
+                    Must be in the range [-2, 2].
+                Defaults to None.
+            min_p (float, optional): A number that controls the minimum percentage value that a token must reach to
+                be considered during sampling.
+                Must be in the range [0, 1].
+                Defaults to None.
+            logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
+                likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
@@ -85,6 +104,10 @@ class Completions:
             max_tokens=max_tokens,
             stop=stop,
             repetition_penalty=repetition_penalty,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
+            min_p=min_p,
+            logit_bias=logit_bias,
             stream=stream,
             logprobs=logprobs,
             echo=echo,
@@ -124,6 +147,10 @@ class AsyncCompletions:
         top_p: float | None = None,
         top_k: int | None = None,
         repetition_penalty: float | None = None,
+        presence_penalty: float | None = None,
+        frequency_penalty: float | None = None,
+        min_p: float | None = None,
+        logit_bias: Dict[str, float] | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -150,6 +177,21 @@ class AsyncCompletions:
                 Defaults to None.
             repetition_penalty (float, optional): A number that controls the diversity of generated text
                     by reducing the likelihood of repeated sequences. Higher values decrease repetition.
+                Defaults to None.
+            presence_penalty (float, optional): A number that controls the likelihood of tokens based on if they have
+                    appeared in the text. Positive values decrease the likelihood of repeated tokens or phrases.
+                    Must be in the range [-2, 2].
+                Defaults to None.
+            frequency_penalty (float, optional): A number that controls the likelihood of tokens based on the frequency
+                    of their appearance in the text. Positive decrease the likelihood of repeated tokens or phrases.
+                    Must be in the range [-2, 2].
+                Defaults to None.
+            min_p (float, optional): A number that controls the minimum percentage value that a token must reach to
+                be considered during sampling.
+                Must be in the range [0, 1].
+                Defaults to None.
+            logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
+                likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
@@ -181,6 +223,10 @@ class AsyncCompletions:
             max_tokens=max_tokens,
             stop=stop,
             repetition_penalty=repetition_penalty,
+            presence_penalty=presence_penalty,
+            frequency_penalty=frequency_penalty,
+            min_p=min_p,
+            logit_bias=logit_bias,
             stream=stream,
             logprobs=logprobs,
             echo=echo,

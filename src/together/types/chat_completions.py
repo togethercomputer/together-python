@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import warnings
 from enum import Enum
 from typing import Any, Dict, List
 
-from pydantic import Field
+from pydantic import Field, model_validator
+from typing_extensions import Self
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -87,6 +89,10 @@ class ChatCompletionRequest(BaseModel):
     top_p: float | None = None
     top_k: int | None = None
     repetition_penalty: float | None = None
+    presence_penalty: float | None = None
+    frequency_penalty: float | None = None
+    min_p: float | None = None
+    logit_bias: Dict[str, float] | None = None
     # stream SSE token chunks
     stream: bool = False
     # return logprobs
@@ -102,6 +108,16 @@ class ChatCompletionRequest(BaseModel):
     response_format: ResponseFormat | None = None
     tools: List[Tools] | None = None
     tool_choice: ToolChoice | ToolChoiceEnum | None = None
+
+    # Raise warning if repetition_penalty is used with presence_penalty or frequency_penalty
+    @model_validator(mode="after")
+    def verify_square(self) -> Self:
+        if self.repetition_penalty:
+            if self.presence_penalty or self.frequency_penalty:
+                warnings.warn(
+                    "repetition_penalty is not advisable to be used alongside presence_penalty or frequency_penalty"
+                )
+        return self
 
 
 class ChatCompletionChoicesData(BaseModel):
