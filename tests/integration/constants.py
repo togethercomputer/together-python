@@ -5,4 +5,4 @@ completion_test_model_list = [
 chat_test_model_list = []
 embedding_test_model_list = []
 image_test_model_list = []
-moderation_test_model_list = ["Meta-Llama/Llama-Guard-7b"]
+moderation_test_model_list = []
