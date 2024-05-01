@@ -49,7 +49,7 @@ class CompletionRequest(BaseModel):
 
     # Raise warning if repetition_penalty is used with presence_penalty or frequency_penalty
     @model_validator(mode="after")
-    def verify_square(self) -> Self:
+    def verify_parameters(self) -> Self:
         if self.repetition_penalty:
             if self.presence_penalty or self.frequency_penalty:
                 warnings.warn(
