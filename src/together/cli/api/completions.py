@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import List
+from typing import Dict, List
 
 import click
 
@@ -14,7 +14,6 @@ from together.types.completions import CompletionChoicesChunk, CompletionRespons
 @click.pass_context
 @click.argument("prompt", type=str, required=True)
 @click.option("--model", type=str, required=True, help="Model name")
-@click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--max-tokens", type=int, help="Max tokens to generate")
 @click.option(
     "--stop", type=str, multiple=True, help="List of strings to stop generation"
@@ -22,6 +21,17 @@ from together.types.completions import CompletionChoicesChunk, CompletionRespons
 @click.option("--temperature", type=float, help="Sampling temperature")
 @click.option("--top-p", type=int, help="Top p sampling")
 @click.option("--top-k", type=float, help="Top k sampling")
+@click.option("--repetition-penalty", type=float, help="Repetition penalty")
+@click.option("--presence-penalty", type=float, help="Presence penalty")
+@click.option("--frequency-penalty", type=float, help="Frequency penalty")
+@click.option("--min-p", type=float, help="Minimum p")
+@click.option(
+    "--logit-bias",
+    type=(str, float),
+    multiple=True,
+    help="Logit bias for tokens",
+)
+@click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
 @click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
 @click.option("--n", type=int, help="Number of output generations")
@@ -37,6 +47,10 @@ def completions(
     top_p: float | None = None,
     top_k: int | None = None,
     repetition_penalty: float | None = None,
+    presence_penalty: float | None = None,
+    frequency_penalty: float | None = None,
+    min_p: float | None = None,
+    logit_bias: Dict[str, float] | None = None,
     no_stream: bool = False,
     logprobs: int | None = None,
     echo: bool | None = None,
@@ -56,6 +70,10 @@ def completions(
         max_tokens=max_tokens,
         stop=stop,
         repetition_penalty=repetition_penalty,
+        presence_penalty=presence_penalty,
+        frequency_penalty=frequency_penalty,
+        min_p=min_p,
+        logit_bias=logit_bias,
         stream=not no_stream,
         logprobs=logprobs,
         echo=echo,
