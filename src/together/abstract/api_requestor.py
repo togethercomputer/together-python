@@ -694,10 +694,7 @@ class APIRequestor:
             )
 
         try:
-            if stream:
-                data = json.loads(rbody)
-            else:
-                data: Dict[str, Any] = rbody
+            data = json.loads(rbody)
                 
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
