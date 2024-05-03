@@ -3,9 +3,9 @@ import os
 import pytest
 
 from together.client import Together
-from together.types import CompletionResponse
-from together.types.common import ObjectType, UsageData
-from together.types.completions import CompletionChoicesData
+from together.types import CompletionChunk
+from together.types.common import DeltaContent, ObjectType, UsageData
+from together.types.completions import CompletionChoicesChunk
 
 from .generate_hyperparameters import (
     random_max_tokens,  # noqa
@@ -58,28 +58,30 @@ class TestTogetherCompletionStream:
             top_p=random_top_p,
             top_k=random_top_k,
             repetition_penalty=random_repetition_penalty,
-            echo=True,
+            stream=True,
         )
 
-        assert isinstance(response, CompletionResponse)
+        usage = None
 
-        assert isinstance(response.id, str)
-        assert isinstance(response.created, int)
-        assert isinstance(response.object, ObjectType)
-        assert response.model == model
-        assert isinstance(response.choices, list)
-        assert isinstance(response.choices[0], CompletionChoicesData)
-        assert isinstance(response.choices[0].text, str)
-        assert isinstance(response.prompt, list)
-        assert isinstance(response.prompt[0].text, str)
-        assert isinstance(response.usage, UsageData)
-        assert isinstance(response.usage.prompt_tokens, int)
-        assert isinstance(response.usage.completion_tokens, int)
-        assert isinstance(response.usage.total_tokens, int)
-        assert (
-            response.usage.prompt_tokens + response.usage.completion_tokens
-            == response.usage.total_tokens
-        )
+        for chunk in response:
+            assert isinstance(chunk, CompletionChunk)
+
+            assert isinstance(chunk.id, str)
+            assert isinstance(chunk.created, int)
+            assert isinstance(chunk.object, ObjectType)
+            assert chunk.model == model
+            assert isinstance(chunk.choices[0], CompletionChoicesChunk)
+            assert isinstance(chunk.choices[0].index, int)
+            assert isinstance(chunk.choices[0].delta, DeltaContent)
+            assert isinstance(chunk.choices[0].delta.content, str)
+
+            usage = chunk.usage
+
+        assert isinstance(usage, UsageData)
+        assert isinstance(usage.prompt_tokens, int)
+        assert isinstance(usage.completion_tokens, int)
+        assert isinstance(usage.total_tokens, int)
+        assert usage.prompt_tokens + usage.completion_tokens == usage.total_tokens
 
     def test_prompt(self):
         pass

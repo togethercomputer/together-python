@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from typing import List
+import warnings
+from typing import Dict, List
+
+from pydantic import model_validator
+from typing_extensions import Self
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -27,6 +31,10 @@ class CompletionRequest(BaseModel):
     top_p: float | None = None
     top_k: int | None = None
     repetition_penalty: float | None = None
+    presence_penalty: float | None = None
+    frequency_penalty: float | None = None
+    min_p: float | None = None
+    logit_bias: Dict[str, float] | None = None
     # stream SSE token chunks
     stream: bool = False
     # return logprobs
@@ -38,6 +46,16 @@ class CompletionRequest(BaseModel):
     n: int | None = None
     # moderation model
     safety_model: str | None = None
+
+    # Raise warning if repetition_penalty is used with presence_penalty or frequency_penalty
+    @model_validator(mode="after")
+    def verify_parameters(self) -> Self:
+        if self.repetition_penalty:
+            if self.presence_penalty or self.frequency_penalty:
+                warnings.warn(
+                    "repetition_penalty is not advisable to be used alongside presence_penalty or frequency_penalty"
+                )
+        return self
 
 
 class CompletionChoicesData(BaseModel):

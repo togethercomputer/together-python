@@ -1,29 +1,43 @@
-The [Together Python Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.8+ applications with easy to use synchronous and asynchronous clients.
+<div align="center">
+  <a href="https://www.together.ai/">
+    <img alt="together.ai" height="100px" src="https://assets-global.website-files.com/64f6f2c0e3f4c5a91c1e823a/654693d569494912cfc0c0d4_favicon.svg">
+  </a>
+</div>
 
-# Installation
+# Together Python API library
+
+[![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
+[![Discord](https://dcbadge.vercel.app/api/server/9Rk6sSeWEG?style=flat&compact=true)](https://discord.com/invite/9Rk6sSeWEG)
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/togethercompute.svg?style=social&label=Follow%20%40togethercompute)](https://twitter.com/togethercompute)
+
+The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.8+ applications with easy to use synchronous and asynchronous clients.
+
+
+
+## Installation
 
 > 🚧
-> The library was rewritten in v1.0.0 released in April of 2024. There were significant changes made.
+> The Library was rewritten in v1.0.0 released in April of 2024. There were significant changes made.
 
-To install Together Python Library from PyPi, simply run:
+To install Together Python Library from PyPI, simply run:
 
 ```shell Shell
 pip install --upgrade together
 ```
 
-## Setting up API Key
+### Setting up API Key
 
 > 🚧 You will need to create an account with [Together.ai](https://api.together.xyz/) to obtain a Together API Key.
 
 Once logged in to the Together Playground, you can find available API keys in [this settings page](https://api.together.xyz/settings/api-keys).
 
-### Setting environment variable
+#### Setting environment variable
 
 ```shell
 export TOGETHER_API_KEY=xxxxx
 ```
 
-### Using the client
+#### Using the client
 
 ```python
 from together import Together
@@ -31,11 +45,11 @@ from together import Together
 client = Together(api_key="xxxxx")
 ```
 
-This library contains both a python library and a CLI. We'll demonstrate how to use both below.
+This repo contains both a Python Library and a CLI. We'll demonstrate how to use both below.
 
-# Usage – Python Client
+## Usage – Python Client
 
-## Chat Completions
+### Chat Completions
 
 ```python
 import os
@@ -50,7 +64,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-### Streaming
+#### Streaming
 
 ```python
 import os
@@ -67,7 +81,7 @@ for chunk in stream:
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-### Async usage
+#### Async usage
 
 ```python
 import os, asyncio
@@ -96,7 +110,7 @@ async def async_chat_completion(messages):
 asyncio.run(async_chat_completion(messages))
 ```
 
-## Completions
+### Completions
 
 Completions are for code and language models shown [here](https://docs.together.ai/docs/inference-models). Below, a code model example is shown.
 
@@ -109,11 +123,12 @@ client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 response = client.completions.create(
     model="codellama/CodeLlama-34b-Python-hf",
     prompt="Write a Next.js component with TailwindCSS for a header component.",
+    max_tokens=200,
 )
 print(response.choices[0].text)
 ```
 
-### Streaming
+#### Streaming
 
 ```python
 import os
@@ -130,7 +145,7 @@ for chunk in stream:
     print(chunk.choices[0].delta.content or "", end="", flush=True)
 ```
 
-### Async usage
+#### Async usage
 
 ```python
 import os, asyncio
@@ -159,7 +174,7 @@ async def async_chat_completion(prompts):
 asyncio.run(async_chat_completion(prompts))
 ```
 
-## Image generation
+### Image generation
 
 ```python
 import os
@@ -176,7 +191,7 @@ response = client.images.generate(
 print(response.data[0].b64_json)
 ```
 
-## Embeddings
+### Embeddings
 
 ```python
 from typing import List
@@ -195,7 +210,7 @@ embeddings = get_embeddings(input_texts, model='togethercomputer/m2-bert-80M-8k-
 print(embeddings)
 ```
 
-## Files
+### Files
 
 The files API is used for fine-tuning and allows developers to upload data to fine-tune on. It also has several methods to list all files, retrive files, and delete files. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
 
@@ -212,7 +227,7 @@ client.files.retrieve_content(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # 
 client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a file
 ```
 
-## Fine-tunes
+### Fine-tunes
 
 The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
 
@@ -239,7 +254,7 @@ client.fine_tuning.list_events(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") #  
 client.fine_tuning.download(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") # downloads compressed fine-tuned model or checkpoint to local disk
 ```
 
-## Models
+### Models
 
 This lists all the models that Together supports.
 
@@ -255,9 +270,9 @@ for model in models:
     print(model)
 ```
 
-# Usage – CLI
+## Usage – CLI
 
-## Chat Completions
+### Chat Completions
 
 ```bash
 together chat.completions \
@@ -268,7 +283,7 @@ together chat.completions \
 
 The Chat Completions CLI enables streaming tokens to stdout by default. To disable streaming, use `--no-stream`.
 
-## Completions
+### Completions
 
 ```bash
 together completions \
@@ -280,7 +295,7 @@ together completions \
 
 The Completions CLI enables streaming tokens to stdout by default. To disable streaming, use `--no-stream`.
 
-## Image Generations
+### Image Generations
 
 ```bash
 together images generate \
@@ -291,7 +306,7 @@ together images generate \
 
 The image is opened in the default image viewer by default. To disable this, use `--no-show`.
 
-## Files
+### Files
 
 ```bash
 # Help
@@ -316,7 +331,7 @@ together files retrieve-content file-6f50f9d1-5b95-416c-9040-0799b2b4b894
 together files delete file-6f50f9d1-5b95-416c-9040-0799b2b4b894
 ```
 
-## Fine-tuning
+### Fine-tuning
 
 ```bash
 # Help
@@ -343,7 +358,7 @@ together fine-tuning cancel ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
 together fine-tuning download ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b
 ```
 
-## Models
+### Models
 
 ```bash
 # Help
