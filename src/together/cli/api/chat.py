@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import cmd
 import json
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 import click
 
@@ -31,7 +31,6 @@ class ChatShell(cmd.Cmd):
         presence_penalty: float | None = None,
         frequency_penalty: float | None = None,
         min_p: float | None = None,
-        logit_bias: Dict[str, float] | None = None,
         safety_model: str | None = None,
         system_message: str | None = None,
     ) -> None:
@@ -47,7 +46,6 @@ class ChatShell(cmd.Cmd):
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
         self.min_p = min_p
-        self.logit_bias = logit_bias
         self.safety_model = safety_model
         self.system_message = system_message
 
@@ -80,7 +78,6 @@ class ChatShell(cmd.Cmd):
             presence_penalty=self.presence_penalty,
             frequency_penalty=self.frequency_penalty,
             min_p=self.min_p,
-            logit_bias=self.logit_bias,
             safety_model=self.safety_model,
             stream=True,
         ):
@@ -88,13 +85,12 @@ class ChatShell(cmd.Cmd):
             assert isinstance(chunk, ChatCompletionChunk)
             assert chunk.choices
             assert chunk.choices[0].delta
-            assert chunk.choices[0].delta.content
 
             token = chunk.choices[0].delta.content
 
             click.echo(token, nl=False)
 
-            output += token
+            output += token or ""
 
         click.echo("\n")
 
@@ -125,12 +121,6 @@ class ChatShell(cmd.Cmd):
 @click.option("--presence-penalty", type=float, help="Presence penalty")
 @click.option("--frequency-penalty", type=float, help="Frequency penalty")
 @click.option("--min-p", type=float, help="Minimum p")
-@click.option(
-    "--logit-bias",
-    type=(str, float),
-    multiple=True,
-    help="Logit bias for tokens",
-)
 @click.option("--safety-model", type=str, help="Moderation model")
 @click.option("--system-message", type=str, help="System message to use for the chat")
 def interactive(
@@ -145,7 +135,6 @@ def interactive(
     presence_penalty: float | None = None,
     frequency_penalty: float | None = None,
     min_p: float | None = None,
-    logit_bias: Dict[str, float] | None = None,
     safety_model: str | None = None,
     system_message: str | None = None,
 ) -> None:
@@ -164,7 +153,6 @@ def interactive(
         presence_penalty=presence_penalty,
         frequency_penalty=frequency_penalty,
         min_p=min_p,
-        logit_bias=logit_bias,
         safety_model=safety_model,
         system_message=system_message,
     ).cmdloop()
@@ -193,12 +181,6 @@ def interactive(
     "--frequency-penalty", type=float, help="Frequency penalty sampling method"
 )
 @click.option("--min-p", type=float, help="Min p sampling")
-@click.option(
-    "--logit-bias",
-    type=(str, float),
-    multiple=True,
-    help="Logit bias for tokens",
-)
 @click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
 @click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
@@ -218,7 +200,6 @@ def chat(
     presence_penalty: float | None = None,
     frequency_penalty: float | None = None,
     min_p: float | None = None,
-    logit_bias: Dict[str, float] | None = None,
     no_stream: bool = False,
     logprobs: int | None = None,
     echo: bool | None = None,
@@ -243,7 +224,6 @@ def chat(
         presence_penalty=presence_penalty,
         frequency_penalty=frequency_penalty,
         min_p=min_p,
-        logit_bias=logit_bias,
         stream=not no_stream,
         logprobs=logprobs,
         echo=echo,

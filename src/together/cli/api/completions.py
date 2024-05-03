@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, List
+from typing import List
 
 import click
 
@@ -25,12 +25,6 @@ from together.types.completions import CompletionChoicesChunk, CompletionRespons
 @click.option("--presence-penalty", type=float, help="Presence penalty")
 @click.option("--frequency-penalty", type=float, help="Frequency penalty")
 @click.option("--min-p", type=float, help="Minimum p")
-@click.option(
-    "--logit-bias",
-    type=(str, float),
-    multiple=True,
-    help="Logit bias for tokens",
-)
 @click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
 @click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
@@ -50,7 +44,6 @@ def completions(
     presence_penalty: float | None = None,
     frequency_penalty: float | None = None,
     min_p: float | None = None,
-    logit_bias: Dict[str, float] | None = None,
     no_stream: bool = False,
     logprobs: int | None = None,
     echo: bool | None = None,
@@ -73,7 +66,6 @@ def completions(
         presence_penalty=presence_penalty,
         frequency_penalty=frequency_penalty,
         min_p=min_p,
-        logit_bias=logit_bias,
         stream=not no_stream,
         logprobs=logprobs,
         echo=echo,
