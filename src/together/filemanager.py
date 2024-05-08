@@ -103,13 +103,8 @@ def _prepare_output(
     if "x-tar" in content_type.lower():
         remote_name += ".tar.gz"
 
-    elif "zstd" in content_type.lower() or step != -1:
-        remote_name += ".tar.zst"
-
     else:
-        raise FileTypeError(
-            f"Unknown file type {content_type} found. Aborting download."
-        )
+        remote_name += ".tar.zst"
 
     return Path(remote_name)
 
