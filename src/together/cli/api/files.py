@@ -32,12 +32,17 @@ def files(ctx: click.Context) -> None:
     default=FilePurpose.FineTune.value,
     help="Purpose of file upload. Acceptable values in enum `together.types.FilePurpose`. Defaults to `fine-tunes`.",
 )
-def upload(ctx: click.Context, file: pathlib.Path, purpose: str) -> None:
+@click.option(
+    "--check/--no-check",
+    default=True,
+    help="Whether to check the file before uploading.",
+)
+def upload(ctx: click.Context, file: pathlib.Path, purpose: str, check: bool) -> None:
     """Upload file"""
 
     client: Together = ctx.obj
 
-    response = client.files.upload(file=file, purpose=purpose)
+    response = client.files.upload(file=file, purpose=purpose, check=check)
 
     click.echo(json.dumps(response.model_dump(), indent=4))
 

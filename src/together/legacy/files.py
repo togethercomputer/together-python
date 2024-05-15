@@ -53,9 +53,11 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        response = client.files.upload(file=file).model_dump()
+        # disabling the check, because it was run previously
+        response = client.files.upload(file=file, check=False).model_dump()
 
-        response["report_dict"] = report_dict
+        if check:
+            response["report_dict"] = report_dict
 
         return response
 
