@@ -23,9 +23,12 @@ class TogetherException(Exception):
             if isinstance(message, TogetherErrorResponse)
             else message
         )
-        self._message = f"Error code: {http_status} - {_message}"
+        if http_status is not None:
+            self._message = f"Error code: {http_status} - {_message}"
+        else:
+            self._message = str(_message)
 
-        super(TogetherException, self).__init__(self._message)
+        super().__init__(self._message)
 
         self.http_status = http_status
         self.headers = headers or {}

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from pprint import pformat
 
 from together.abstract import api_requestor
+from together.error import FileTypeError
 from together.filemanager import DownloadManager, UploadManager
 from together.together_response import TogetherResponse
 from together.types import (
@@ -14,7 +16,7 @@ from together.types import (
     TogetherClient,
     TogetherRequest,
 )
-from together.utils import normalize_key
+from together.utils import check_file, normalize_key
 
 
 class Files:
@@ -22,9 +24,20 @@ class Files:
         self._client = client
 
     def upload(
-        self, file: Path | str, *, purpose: FilePurpose | str = FilePurpose.FineTune
+        self,
+        file: Path | str,
+        *,
+        purpose: FilePurpose | str = FilePurpose.FineTune,
+        check: bool = True,
     ) -> FileResponse:
         upload_manager = UploadManager(self._client)
+
+        if check:
+            report_dict = check_file(file)
+            if not report_dict["is_check_passed"]:
+                raise FileTypeError(
+                    f"Invalid file supplied, failed to upload. Report:\n{pformat(report_dict)}"
+                )
 
         if isinstance(file, str):
             file = Path(file)
