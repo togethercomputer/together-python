@@ -32,6 +32,7 @@ class Completions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -74,6 +75,7 @@ class Completions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            seed (int, optional): Seed value for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
             logprobs (int, optional): Number of top-k logprobs to return
@@ -106,6 +108,7 @@ class Completions:
             repetition_penalty=repetition_penalty,
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
+            seed=seed,
             min_p=min_p,
             logit_bias=logit_bias,
             stream=stream,
@@ -151,6 +154,7 @@ class AsyncCompletions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -193,6 +197,7 @@ class AsyncCompletions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            seed (int, optional): Seed value for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
             logprobs (int, optional): Number of top-k logprobs to return
@@ -227,6 +232,7 @@ class AsyncCompletions:
             frequency_penalty=frequency_penalty,
             min_p=min_p,
             logit_bias=logit_bias,
+            seed=seed,
             stream=stream,
             logprobs=logprobs,
             echo=echo,

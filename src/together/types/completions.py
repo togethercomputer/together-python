@@ -35,6 +35,7 @@ class CompletionRequest(BaseModel):
     frequency_penalty: float | None = None
     min_p: float | None = None
     logit_bias: Dict[str, float] | None = None
+    seed: int | None = None
     # stream SSE token chunks
     stream: bool = False
     # return logprobs
@@ -61,6 +62,7 @@ class CompletionRequest(BaseModel):
 class CompletionChoicesData(BaseModel):
     index: int
     logprobs: LogprobsPart | None = None
+    seed: int | None = None
     finish_reason: FinishReason
     text: str
 
@@ -68,6 +70,7 @@ class CompletionChoicesData(BaseModel):
 class CompletionChoicesChunk(BaseModel):
     index: int | None = None
     logprobs: float | None = None
+    seed: int | None = None
     finish_reason: FinishReason | None = None
     delta: DeltaContent | None = None
 
