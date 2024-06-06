@@ -61,7 +61,7 @@ class CompletionRequest(BaseModel):
 class CompletionChoicesData(BaseModel):
     index: int
     logprobs: LogprobsPart | None = None
-    finish_reason: FinishReason
+    finish_reason: FinishReason | None = None
     text: str
 
 
