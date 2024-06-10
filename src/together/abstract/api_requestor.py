@@ -80,8 +80,9 @@ class APIRequestor:
         self.retries = MAX_RETRIES if client.max_retries is None else client.max_retries
         self.supplied_headers = client.supplied_headers
         self.timeout = client.timeout or TIMEOUT_SECS
-        self.client = httpx.Client(http2=client.http2)
-        self.async_client = httpx.AsyncClient(http2=client.http2)
+        limits = httpx.Limits(max_keepalive_connections=None, max_connections=None)
+        self.client = httpx.Client(http2=client.http2, limits=limits)
+        self.async_client = httpx.AsyncClient(http2=client.http2, limits=limits)
 
     def _parse_retry_after_header(
         self, response_headers: Dict[str, Any] | None = None
