@@ -24,6 +24,7 @@ class FinetuneJobStatus(str, Enum):
     STATUS_CANCEL_REQUESTED = "cancel_requested"
     STATUS_CANCELLED = "cancelled"
     STATUS_ERROR = "error"
+    STATUS_USER_ERROR = "user_error"
     STATUS_COMPLETED = "completed"
 
 
@@ -67,6 +68,7 @@ class FinetuneEventType(str, Enum):
     MODEL_UPLOAD_COMPLETE = "MODEL_UPLOAD_COMPLETE"
     JOB_COMPLETE = "JOB_COMPLETE"
     JOB_ERROR = "JOB_ERROR"
+    JOB_USER_ERROR = "JOB_USER_ERROR"
     CANCEL_REQUESTED = "CANCEL_REQUESTED"
     JOB_RESTARTED = "JOB_RESTARTED"
     REFUND = "REFUND"
