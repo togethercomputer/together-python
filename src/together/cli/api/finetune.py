@@ -2,6 +2,7 @@ import json
 from textwrap import wrap
 
 import click
+from click.core import ParameterSource
 from tabulate import tabulate
 
 from together import Together
@@ -26,7 +27,17 @@ def fine_tuning(ctx: click.Context) -> None:
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
 @click.option("--batch-size", type=int, default=32, help="Train batch size")
-@click.option("--learning-rate", type=float, default=3e-5, help="Learning rate")
+@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option("--lora/--no-lora", type=bool, default=False, help="LoRA mode")
+@click.option("--lora-r", type=int, default=8, help="LoRA adapters' rank")
+@click.option("--lora-dropout", type=float, default=0, help="LoRA adapters' dropout")
+@click.option("--lora-alpha", type=float, default=8, help="LoRA adapters' alpha")
+@click.option(
+    "--lora-trainable-modules",
+    type=str,
+    default="all-linear",
+    help="LoRA adapters' trainable modules. For example, 'all-linear', 'q_proj,v_proj'",
+)
 @click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
@@ -39,11 +50,29 @@ def create(
     n_checkpoints: int,
     batch_size: int,
     learning_rate: float,
+    lora: bool,
+    lora_r: int,
+    lora_dropout: float,
+    lora_alpha: float,
+    lora_trainable_modules: str,
     suffix: str,
     wandb_api_key: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
+
+    if lora:
+        learning_rate_source = click.get_current_context().get_parameter_source('learning_rate')
+        if learning_rate_source == ParameterSource.DEFAULT:
+            learning_rate = 1e-3
+    else:
+        for param in ["lora_r", "lora_dropout", "lora_alpha", "lora_trainable_modules"]:
+            param_source = click.get_current_context().get_parameter_source(param)
+            if param_source != ParameterSource.DEFAULT:
+                raise click.BadParameter(
+                    f"You set LoRA parameter {param} for a Full finetune job. "
+                    f"Please, change the job type with --lora or remove {param} from the arguments"
+                )
 
     response = client.fine_tuning.create(
         training_file=training_file,
@@ -52,6 +81,11 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lora=lora,
+        lora_r=lora_r,
+        lora_dropout=lora_dropout,
+        lora_alpha=lora_alpha,
+        lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
     )

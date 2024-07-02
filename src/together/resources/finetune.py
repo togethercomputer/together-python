@@ -6,6 +6,8 @@ from together.abstract import api_requestor
 from together.filemanager import DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
+    FullTrainingType,
+    LoRATrainingType,
     FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
@@ -30,6 +32,11 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
         learning_rate: float | None = 0.00001,
+        lora: bool = True,
+        lora_r: int | None = 8,
+        lora_dropout: float | None = 0,
+        lora_alpha: float | None = 8,
+        lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
     ) -> FinetuneResponse:
@@ -45,6 +52,11 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
+            lora_r (int, optional): Whether to use LoRA R. Defaults to 8.
+            lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
+            lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
+            lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
@@ -57,6 +69,16 @@ class FineTuning:
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
+        
+        training_type = FullTrainingType()
+
+        if lora:
+            training_type = LoRATrainingType(
+                lora_r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                lora_trainable_modules=lora_trainable_modules,
+            )
 
         parameter_payload = FinetuneRequest(
             model=model,
@@ -65,6 +87,7 @@ class FineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            training_type=training_type,
             suffix=suffix,
             wandb_key=wandb_api_key,
         ).model_dump()
