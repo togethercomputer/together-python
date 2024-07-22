@@ -93,6 +93,7 @@ class ChatCompletionRequest(BaseModel):
     frequency_penalty: float | None = None
     min_p: float | None = None
     logit_bias: Dict[str, float] | None = None
+    seed: int | None = None
     # stream SSE token chunks
     stream: bool = False
     # return logprobs
@@ -123,6 +124,7 @@ class ChatCompletionRequest(BaseModel):
 class ChatCompletionChoicesData(BaseModel):
     index: int | None = None
     logprobs: LogprobsPart | None = None
+    seed: int | None = None
     finish_reason: FinishReason | None = None
     message: ChatCompletionMessage | None = None
 
@@ -147,6 +149,7 @@ class ChatCompletionResponse(BaseModel):
 class ChatCompletionChoicesChunk(BaseModel):
     index: int | None = None
     logprobs: float | None = None
+    seed: int | None = None
     finish_reason: FinishReason | None = None
     delta: DeltaContent | None = None
 
