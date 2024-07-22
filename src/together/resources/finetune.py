@@ -6,15 +6,16 @@ from together.abstract import api_requestor
 from together.filemanager import DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
-    FullTrainingType,
-    LoRATrainingType,
     FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
+    FullTrainingType,
+    LoRATrainingType,
     TogetherClient,
     TogetherRequest,
+    TrainingType,
 )
 from together.utils import normalize_key
 
@@ -69,9 +70,8 @@ class FineTuning:
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
-        
-        training_type = FullTrainingType()
 
+        training_type: TrainingType = FullTrainingType()
         if lora:
             training_type = LoRATrainingType(
                 lora_r=lora_r,

@@ -98,26 +98,29 @@ class FinetuneEvent(BaseModel):
     wandb_url: str | None = None
     # event hash
     hash: str | None = None
-    
-    
+
+
 class TrainingType(BaseModel):
     """
     Abstract training type
     """
-    type: Literal["Full", "Lora"]
-    
-    
+
+    type: str
+
+
 class FullTrainingType(TrainingType):
     """
     Training type for full fine-tuning
     """
+
     type: str = "Full"
-    
-    
+
+
 class LoRATrainingType(TrainingType):
     """
     Training type for LoRA adapters training
     """
+
     lora_r: int
     lora_alpha: int
     lora_dropout: float

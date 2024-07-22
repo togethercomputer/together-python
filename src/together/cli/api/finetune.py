@@ -28,7 +28,12 @@ def fine_tuning(ctx: click.Context) -> None:
 )
 @click.option("--batch-size", type=int, default=32, help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
-@click.option("--lora/--no-lora", type=bool, default=False, help="Whether to use LoRA adapters for fine-tuning")
+@click.option(
+    "--lora/--no-lora",
+    type=bool,
+    default=False,
+    help="Whether to use LoRA adapters for fine-tuning",
+)
 @click.option("--lora-r", type=int, default=8, help="LoRA adapters' rank")
 @click.option("--lora-dropout", type=float, default=0, help="LoRA adapters' dropout")
 @click.option("--lora-alpha", type=float, default=8, help="LoRA adapters' alpha")
@@ -62,7 +67,9 @@ def create(
     client: Together = ctx.obj
 
     if lora:
-        learning_rate_source = click.get_current_context().get_parameter_source('learning_rate')
+        learning_rate_source = click.get_current_context().get_parameter_source(
+            "learning_rate"
+        )
         if learning_rate_source == ParameterSource.DEFAULT:
             learning_rate = 1e-3
     else:

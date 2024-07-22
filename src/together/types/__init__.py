@@ -28,6 +28,7 @@ from together.types.finetune import (
     FinetuneResponse,
     FullTrainingType,
     LoRATrainingType,
+    TrainingType,
 )
 from together.types.images import (
     ImageRequest,
@@ -62,6 +63,7 @@ __all__ = [
     "ImageRequest",
     "ImageResponse",
     "ModelObject",
+    "TrainingType",
     "FullTrainingType",
     "LoRATrainingType",
 ]
