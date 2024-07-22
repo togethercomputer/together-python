@@ -28,7 +28,7 @@ def fine_tuning(ctx: click.Context) -> None:
 )
 @click.option("--batch-size", type=int, default=32, help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
-@click.option("--lora/--no-lora", type=bool, default=False, help="LoRA mode")
+@click.option("--lora/--no-lora", type=bool, default=False, help="Whether to use LoRA adapters for fine-tuning")
 @click.option("--lora-r", type=int, default=8, help="LoRA adapters' rank")
 @click.option("--lora-dropout", type=float, default=0, help="LoRA adapters' dropout")
 @click.option("--lora-alpha", type=float, default=8, help="LoRA adapters' alpha")
@@ -36,7 +36,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--lora-trainable-modules",
     type=str,
     default="all-linear",
-    help="LoRA adapters' trainable modules. For example, 'all-linear', 'q_proj,v_proj'",
+    help="Trainable modules for LoRA adapters. For example, 'all-linear', 'q_proj,v_proj'",
 )
 @click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
@@ -70,8 +70,8 @@ def create(
             param_source = click.get_current_context().get_parameter_source(param)
             if param_source != ParameterSource.DEFAULT:
                 raise click.BadParameter(
-                    f"You set LoRA parameter {param} for a Full finetune job. "
-                    f"Please, change the job type with --lora or remove {param} from the arguments"
+                    f"You set LoRA parameter `{param}` for a full fine-tuning job. "
+                    f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
 
     response = client.fine_tuning.create(

@@ -53,7 +53,7 @@ class FineTuning:
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
-            lora_r (int, optional): Whether to use LoRA R. Defaults to 8.
+            lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
             lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
             lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".

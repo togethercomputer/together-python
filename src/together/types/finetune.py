@@ -116,7 +116,7 @@ class FullTrainingType(TrainingType):
     
 class LoRATrainingType(TrainingType):
     """
-    Training type for LoRa adapters training
+    Training type for LoRA adapters training
     """
     lora_r: int
     lora_alpha: int
