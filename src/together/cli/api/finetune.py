@@ -2,7 +2,7 @@ import json
 from textwrap import wrap
 
 import click
-from click.core import ParameterSource
+from click.core import ParameterSource  # type: ignore[attr-defined]
 from tabulate import tabulate
 
 from together import Together
@@ -67,14 +67,14 @@ def create(
     client: Together = ctx.obj
 
     if lora:
-        learning_rate_source = click.get_current_context().get_parameter_source(
+        learning_rate_source = click.get_current_context().get_parameter_source(  # type: ignore[attr-defined]
             "learning_rate"
         )
         if learning_rate_source == ParameterSource.DEFAULT:
             learning_rate = 1e-3
     else:
         for param in ["lora_r", "lora_dropout", "lora_alpha", "lora_trainable_modules"]:
-            param_source = click.get_current_context().get_parameter_source(param)
+            param_source = click.get_current_context().get_parameter_source(param)  # type: ignore[attr-defined]
             if param_source != ParameterSource.DEFAULT:
                 raise click.BadParameter(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
