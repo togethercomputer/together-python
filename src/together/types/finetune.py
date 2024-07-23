@@ -100,6 +100,34 @@ class FinetuneEvent(BaseModel):
     hash: str | None = None
 
 
+class TrainingType(BaseModel):
+    """
+    Abstract training type
+    """
+
+    type: str
+
+
+class FullTrainingType(TrainingType):
+    """
+    Training type for full fine-tuning
+    """
+
+    type: str = "Full"
+
+
+class LoRATrainingType(TrainingType):
+    """
+    Training type for LoRA adapters training
+    """
+
+    lora_r: int
+    lora_alpha: int
+    lora_dropout: float
+    lora_trainable_modules: str
+    type: str = "Lora"
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -121,6 +149,7 @@ class FinetuneRequest(BaseModel):
     suffix: str | None = None
     # weights & biases api key
     wandb_key: str | None = None
+    training_type: FullTrainingType | LoRATrainingType | None = None
 
 
 class FinetuneResponse(BaseModel):
@@ -138,6 +167,8 @@ class FinetuneResponse(BaseModel):
     model: str | None = None
     # output model name
     output_name: str | None = Field(None, alias="model_output_name")
+    # adapter output name
+    adapter_output_name: str | None = None
     # number of epochs
     n_epochs: int | None = None
     # number of checkpoints to save
@@ -148,11 +179,8 @@ class FinetuneResponse(BaseModel):
     learning_rate: float | None = None
     # number of steps between evals
     eval_steps: int | None = None
-    # is LoRA finetune boolean
-    lora: bool | None = None
-    lora_r: int | None = None
-    lora_alpha: int | None = None
-    lora_dropout: int | None = None
+    # training type
+    training_type: FullTrainingType | LoRATrainingType | None = None
     # created/updated datetime stamps
     created_at: str | None = None
     updated_at: str | None = None
