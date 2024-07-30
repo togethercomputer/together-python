@@ -67,7 +67,7 @@ class Images:
             height=height,
             width=width,
             negative_prompt=negative_prompt,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -140,7 +140,7 @@ class AsyncImages:
             height=height,
             width=width,
             negative_prompt=negative_prompt,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

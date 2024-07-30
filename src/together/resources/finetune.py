@@ -90,7 +90,7 @@ class FineTuning:
             training_type=training_type,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -304,7 +304,7 @@ class AsyncFineTuning:
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

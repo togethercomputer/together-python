@@ -24,7 +24,7 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        return client.files.list().model_dump()
+        return client.files.list().model_dump(exclude_none=True)
 
     @classmethod
     def check(self, file: str) -> Dict[str, object]:
@@ -54,7 +54,9 @@ class Files:
         client = together.Together(api_key=api_key)
 
         # disabling the check, because it was run previously
-        response = client.files.upload(file=file, check=False).model_dump()
+        response = client.files.upload(file=file, check=False).model_dump(
+            exclude_none=True
+        )
 
         if check:
             response["report_dict"] = report_dict
@@ -76,7 +78,7 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        return client.files.delete(id=file_id).model_dump()
+        return client.files.delete(id=file_id).model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
@@ -93,7 +95,7 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        return client.files.retrieve(id=file_id).model_dump()
+        return client.files.retrieve(id=file_id).model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
@@ -111,7 +113,9 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        return client.files.retrieve_content(id=file_id, output=output).model_dump()
+        return client.files.retrieve_content(id=file_id, output=output).dict(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore

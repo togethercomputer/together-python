@@ -4,7 +4,7 @@ import warnings
 from enum import Enum
 from typing import Any, Dict, List
 
-from pydantic import Field, model_validator
+from pydantic import model_validator
 from typing_extensions import Self
 
 from together.types.abstract import BaseModel
@@ -48,7 +48,10 @@ class ChatCompletionMessage(BaseModel):
 
 class ResponseFormat(BaseModel):
     type: ResponseFormatType
-    schema_: Dict[str, Any] | None = Field(None, alias="schema")
+    schema_: Dict[str, Any] | None = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"schema": self.schema_, "type": self.type}
 
 
 class FunctionTool(BaseModel):

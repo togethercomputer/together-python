@@ -47,7 +47,7 @@ class Finetune:
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
@@ -63,7 +63,7 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.list().model_dump()
+        return client.fine_tuning.list().model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
@@ -80,7 +80,9 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.retrieve(id=fine_tune_id).model_dump()
+        return client.fine_tuning.retrieve(id=fine_tune_id).model_dump(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore
@@ -97,7 +99,7 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.cancel(id=fine_tune_id).model_dump()
+        return client.fine_tuning.cancel(id=fine_tune_id).model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
@@ -114,7 +116,9 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.list_events(id=fine_tune_id).model_dump()
+        return client.fine_tuning.list_events(id=fine_tune_id).model_dump(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore
@@ -170,4 +174,4 @@ class Finetune:
 
         return client.fine_tuning.download(
             id=fine_tune_id, output=output, checkpoint_step=step
-        ).model_dump()
+        ).model_dump(exclude_none=True)

@@ -22,4 +22,6 @@ class Embeddings:
 
         client = together.Together(api_key=api_key)
 
-        return client.embeddings.create(input=input, **kwargs).model_dump()
+        return client.embeddings.create(input=input, **kwargs).model_dump(
+            exclude_none=True
+        )

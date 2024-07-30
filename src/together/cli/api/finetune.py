@@ -97,7 +97,7 @@ def create(
         wandb_api_key=wandb_api_key,
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -142,7 +142,7 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     # remove events from response for cleaner output
     response.events = None
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -164,7 +164,7 @@ def cancel(ctx: click.Context, fine_tune_id: str, quiet: bool = False) -> None:
             return
     response = client.fine_tuning.cancel(fine_tune_id)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -223,4 +223,4 @@ def download(
         fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))

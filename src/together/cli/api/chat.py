@@ -238,7 +238,7 @@ def chat(
             assert chunk.choices
 
             if raw:
-                click.echo(f"{json.dumps(chunk.model_dump())}")
+                click.echo(f"{json.dumps(chunk.model_dump(exclude_none=True))}")
                 continue
 
             should_print_header = len(chunk.choices) > 1
@@ -261,7 +261,9 @@ def chat(
         assert isinstance(response.choices, list)
 
         if raw:
-            click.echo(f"{json.dumps(response.model_dump(), indent=4)}")
+            click.echo(
+                f"{json.dumps(response.model_dump(exclude_none=True), indent=4)}"
+            )
             return
 
         should_print_header = len(response.choices) > 1
