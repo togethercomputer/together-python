@@ -113,7 +113,7 @@ class Completions:
             echo=echo,
             n=n,
             safety_model=safety_model,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -232,7 +232,7 @@ class AsyncCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

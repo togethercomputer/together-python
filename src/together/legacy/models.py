@@ -20,7 +20,7 @@ class Models:
 
         client = together.Together(api_key=api_key)
 
-        return [item.model_dump() for item in client.models.list()]
+        return [item.model_dump(exclude_none=True) for item in client.models.list()]
 
     @classmethod
     @deprecated  # type: ignore
@@ -41,4 +41,4 @@ class Models:
 
         for item in model_list:
             if item.id == model:
-                return item.model_dump()
+                return item.model_dump(exclude_none=True)
