@@ -485,7 +485,7 @@ class APIRequestor:
             _thread_context.session.close()
             _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
             _thread_context.session_create_time = time.time()
-        
+
         result = None
         try:
             result = _thread_context.session.request(
@@ -503,7 +503,7 @@ class APIRequestor:
             utils.log_debug("Encountered requests.exceptions.Timeout")
 
             result_headers = dict(result.headers) if result is not None else {}
-                
+
             if remaining_retries > 0:
                 return self._retry_request(
                     options,
@@ -549,7 +549,7 @@ class APIRequestor:
                         stream=stream,
                         request_timeout=request_timeout,
                     )
-        
+
         status_code = result.status_code if result is not None else 0
         result_headers = dict(result.headers) if result is not None else {}
 
