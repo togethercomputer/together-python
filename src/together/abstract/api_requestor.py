@@ -121,7 +121,7 @@ class APIRequestor:
         See also
             https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After#syntax
         """
-        if response_headers is None:
+        if not response_headers:
             return None
 
         # First, try the non-standard `retry-after-ms` header for milliseconds,
@@ -485,6 +485,8 @@ class APIRequestor:
             _thread_context.session.close()
             _thread_context.session = _make_session(MAX_CONNECTION_RETRIES)
             _thread_context.session_create_time = time.time()
+        
+        result = None
         try:
             result = _thread_context.session.request(
                 options.method,
@@ -500,11 +502,13 @@ class APIRequestor:
         except requests.exceptions.Timeout as e:
             utils.log_debug("Encountered requests.exceptions.Timeout")
 
+            result_headers = dict(result.headers) if result is not None else {}
+                
             if remaining_retries > 0:
                 return self._retry_request(
                     options,
                     remaining_retries=remaining_retries,
-                    response_headers=dict(result.headers),
+                    response_headers=result_headers,
                     stream=stream,
                     request_timeout=request_timeout,
                 )
@@ -513,11 +517,13 @@ class APIRequestor:
         except requests.exceptions.RequestException as e:
             utils.log_debug("Encountered requests.exceptions.RequestException")
 
+            result_headers = dict(result.headers) if result is not None else {}
+
             if remaining_retries > 0:
                 return self._retry_request(
                     options,
                     remaining_retries=remaining_retries,
-                    response_headers=dict(result.headers),
+                    response_headers=result_headers,
                     stream=stream,
                     request_timeout=request_timeout,
                 )
@@ -527,26 +533,32 @@ class APIRequestor:
             ) from e
 
         # retry on 5XX error or rate-limit
-        if 500 <= result.status_code < 600 or result.status_code == 429:
-            utils.log_debug(
-                f"Encountered requests.exceptions.HTTPError. Error code: {result.status_code}"
-            )
-
-            if remaining_retries > 0:
-                return self._retry_request(
-                    options,
-                    remaining_retries=remaining_retries,
-                    response_headers=dict(result.headers),
-                    stream=stream,
-                    request_timeout=request_timeout,
+        if result is not None:
+            if 500 <= result.status_code < 600 or result.status_code == 429:
+                utils.log_debug(
+                    f"Encountered requests.exceptions.HTTPError. Error code: {result.status_code}"
                 )
+
+                result_headers = dict(result.headers) if result is not None else {}
+
+                if remaining_retries > 0:
+                    return self._retry_request(
+                        options,
+                        remaining_retries=remaining_retries,
+                        response_headers=result_headers,
+                        stream=stream,
+                        request_timeout=request_timeout,
+                    )
+        
+        status_code = result.status_code if result is not None else 0
+        result_headers = dict(result.headers) if result is not None else {}
 
         utils.log_debug(
             "Together API response",
             path=abs_url,
-            response_code=result.status_code,
-            processing_ms=result.headers.get("x-total-time"),
-            request_id=result.headers.get("CF-RAY"),
+            response_code=status_code,
+            processing_ms=result_headers.get("x-total-time"),
+            request_id=result_headers.get("CF-RAY"),
         )
 
         return result  # type: ignore
