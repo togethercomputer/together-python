@@ -23,7 +23,10 @@ def fine_tuning(ctx: click.Context) -> None:
 )
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
-@click.option("--n-evals", type=int, default=1, help="Number of epochs to train for")
+@click.option(
+    "--validation-file", type=str, default="", help="Validation file ID from Files API"
+)
+@click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
 @click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
@@ -51,6 +54,7 @@ def fine_tuning(ctx: click.Context) -> None:
 def create(
     ctx: click.Context,
     training_file: str,
+    validation_file: str,
     model: str,
     n_epochs: int,
     n_evals: int,
@@ -87,6 +91,7 @@ def create(
         training_file=training_file,
         model=model,
         n_epochs=n_epochs,
+        validation_file=validation_file,
         n_evals=n_evals,
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
