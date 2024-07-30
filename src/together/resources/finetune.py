@@ -30,6 +30,8 @@ class FineTuning:
         training_file: str,
         model: str,
         n_epochs: int = 1,
+        validation_file: str | None = "",
+        n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
         learning_rate: float | None = 0.00001,
@@ -48,6 +50,8 @@ class FineTuning:
             training_file (str): File-ID of a file uploaded to the Together API
             model (str): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            validation file (str, optional): File-ID of a file uploaded to the Together API for validation.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
@@ -83,7 +87,9 @@ class FineTuning:
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
+            validation_file=validation_file,
             n_epochs=n_epochs,
+            n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
@@ -264,6 +270,8 @@ class AsyncFineTuning:
         training_file: str,
         model: str,
         n_epochs: int = 1,
+        validation_file: str | None = "",
+        n_evals: int = 0,
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
         learning_rate: float = 0.00001,
@@ -277,6 +285,8 @@ class AsyncFineTuning:
             training_file (str): File-ID of a file uploaded to the Together API
             model (str): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            validation file (str, optional): File-ID of a file uploaded to the Together API for validation.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
@@ -298,7 +308,9 @@ class AsyncFineTuning:
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
+            validation_file=validation_file,
             n_epochs=n_epochs,
+            n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,

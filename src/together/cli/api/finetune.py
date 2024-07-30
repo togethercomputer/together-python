@@ -23,6 +23,7 @@ def fine_tuning(ctx: click.Context) -> None:
 )
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option("--n-evals", type=int, default=1, help="Number of epochs to train for")
 @click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
@@ -52,6 +53,7 @@ def create(
     training_file: str,
     model: str,
     n_epochs: int,
+    n_evals: int,
     n_checkpoints: int,
     batch_size: int,
     learning_rate: float,
@@ -85,6 +87,7 @@ def create(
         training_file=training_file,
         model=model,
         n_epochs=n_epochs,
+        n_evals=n_evals,
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
