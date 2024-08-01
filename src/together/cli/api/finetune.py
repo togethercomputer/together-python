@@ -86,6 +86,14 @@ def create(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
+    if n_evals <= 0 and validation_file:
+        click.echo(
+            "Warning: You have specified a validation file but the number of evaluation loops is set to 0. No evaluations will be performed."
+        )
+    elif n_evals > 0 and not validation_file:
+        raise click.BadParameter(
+            "You have specified a number of evaluation loops but no validation file."
+        )
 
     response = client.fine_tuning.create(
         training_file=training_file,
