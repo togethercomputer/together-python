@@ -50,7 +50,7 @@ class FineTuning:
             training_file (str): File-ID of a file uploaded to the Together API
             model (str): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
-            validation file (str, optional): File-ID of a file uploaded to the Together API for validation.
+            validation file (str, optional): File ID of a file uploaded to the Together API for validation.
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
