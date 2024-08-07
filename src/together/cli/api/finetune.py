@@ -100,7 +100,9 @@ def create(
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
     # TODO: Remove it after the 21st of August
-    log_warn("The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6")
+    log_warn(
+        "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+    )
 
 
 @fine_tuning.command()
