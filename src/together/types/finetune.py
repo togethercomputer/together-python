@@ -61,6 +61,7 @@ class FinetuneEventType(str, Enum):
     CHECKPOINT_SAVE = "CHECKPOINT_SAVE"
     BILLING_LIMIT = "BILLING_LIMIT"
     EPOCH_COMPLETE = "EPOCH_COMPLETE"
+    EVAL_COMPLETE = "EVAL_COMPLETE"
     TRAINING_COMPLETE = "TRAINING_COMPLETE"
     MODEL_COMPRESSING = "COMPRESSING_MODEL"
     MODEL_COMPRESSION_COMPLETE = "MODEL_COMPRESSION_COMPLETE"
@@ -135,6 +136,8 @@ class FinetuneRequest(BaseModel):
 
     # training file ID
     training_file: str
+    # validation file id
+    validation_file: str | None = None
     # base model string
     model: str
     # number of epochs to train for
@@ -143,6 +146,8 @@ class FinetuneRequest(BaseModel):
     learning_rate: float
     # number of checkpoints to save
     n_checkpoints: int | None = None
+    # number of evaluation loops to run
+    n_evals: int | None = None
     # training batch size
     batch_size: int | None = None
     # up to 40 character suffix for output model name
@@ -173,6 +178,8 @@ class FinetuneResponse(BaseModel):
     n_epochs: int | None = None
     # number of checkpoints to save
     n_checkpoints: int | None = None
+    # number of evaluation loops
+    n_evals: int | None = None
     # training batch size
     batch_size: int | None = None
     # training learning rate
@@ -196,8 +203,14 @@ class FinetuneResponse(BaseModel):
     param_count: int | None = None
     # fine-tune job price
     total_price: int | None = None
+    # total number of training steps
+    total_steps: int | None = None
+    # number of steps completed (incrementing counter)
+    steps_completed: int | None = None
     # number of epochs completed (incrementing counter)
     epochs_completed: int | None = None
+    # number of evaluation loops completed (incrementing counter)
+    evals_completed: int | None = None
     # place in job queue (decrementing counter)
     queue_depth: int | None = None
     # weights & biases project name
