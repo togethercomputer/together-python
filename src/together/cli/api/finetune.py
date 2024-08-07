@@ -87,7 +87,7 @@ def create(
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
     if n_evals <= 0 and validation_file:
-        click.echo(
+        log_warn(
             "Warning: You have specified a validation file but the number of evaluation loops is set to 0. No evaluations will be performed."
         )
     elif n_evals > 0 and not validation_file:
