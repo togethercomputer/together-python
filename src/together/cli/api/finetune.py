@@ -26,7 +26,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=int, default=32, help="Train batch size")
+@click.option("--batch-size", type=int, default=16, help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
     "--lora/--no-lora",

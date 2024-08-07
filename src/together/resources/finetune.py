@@ -31,7 +31,7 @@ class FineTuning:
         model: str,
         n_epochs: int = 1,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 32,
+        batch_size: int | None = 16,
         learning_rate: float | None = 0.00001,
         lora: bool = True,
         lora_r: int | None = 8,
