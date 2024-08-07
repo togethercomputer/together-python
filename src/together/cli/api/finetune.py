@@ -6,7 +6,7 @@ from click.core import ParameterSource  # type: ignore[attr-defined]
 from tabulate import tabulate
 
 from together import Together
-from together.utils import finetune_price_to_dollars, parse_timestamp
+from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 
 
 @click.group(name="fine-tuning")
@@ -98,6 +98,11 @@ def create(
     )
 
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
+
+    # TODO: Remove it after the 21st of August
+    log_warn(
+        "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+    )
 
 
 @fine_tuning.command()
