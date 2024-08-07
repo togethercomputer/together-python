@@ -6,7 +6,7 @@ from click.core import ParameterSource  # type: ignore[attr-defined]
 from tabulate import tabulate
 
 from together import Together
-from together.utils import finetune_price_to_dollars, parse_timestamp
+from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 
 
 @click.group(name="fine-tuning")
@@ -30,7 +30,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=int, default=32, help="Train batch size")
+@click.option("--batch-size", type=int, default=16, help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
     "--lora/--no-lora",
@@ -113,7 +113,12 @@ def create(
         wandb_api_key=wandb_api_key,
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
+
+    # TODO: Remove it after the 21st of August
+    log_warn(
+        "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+    )
 
 
 @fine_tuning.command()
@@ -158,7 +163,7 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     # remove events from response for cleaner output
     response.events = None
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -180,7 +185,7 @@ def cancel(ctx: click.Context, fine_tune_id: str, quiet: bool = False) -> None:
             return
     response = client.fine_tuning.cancel(fine_tune_id)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -239,4 +244,4 @@ def download(
         fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))

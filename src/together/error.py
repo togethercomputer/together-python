@@ -19,7 +19,7 @@ class TogetherException(Exception):
         http_status: int | None = None,
     ) -> None:
         _message = (
-            json.dumps(message.model_dump())
+            json.dumps(message.model_dump(exclude_none=True))
             if isinstance(message, TogetherErrorResponse)
             else message
         )

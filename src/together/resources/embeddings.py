@@ -40,7 +40,7 @@ class Embeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -84,7 +84,7 @@ class AsyncEmbeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

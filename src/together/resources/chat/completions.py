@@ -131,7 +131,7 @@ class ChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -268,7 +268,7 @@ class AsyncChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

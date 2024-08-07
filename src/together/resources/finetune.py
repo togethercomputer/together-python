@@ -17,7 +17,7 @@ from together.types import (
     TogetherRequest,
     TrainingType,
 )
-from together.utils import normalize_key
+from together.utils import log_warn, normalize_key
 
 
 class FineTuning:
@@ -33,7 +33,7 @@ class FineTuning:
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 32,
+        batch_size: int | None = 16,
         learning_rate: float | None = 0.00001,
         lora: bool = True,
         lora_r: int | None = 8,
@@ -96,7 +96,7 @@ class FineTuning:
             training_type=training_type,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -108,6 +108,11 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
+        # TODO: Remove it after the 21st of August
+        log_warn(
+            "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+        )
 
         return FinetuneResponse(**response.data)
 
@@ -316,7 +321,7 @@ class AsyncFineTuning:
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
