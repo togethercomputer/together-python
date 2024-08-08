@@ -33,7 +33,7 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | None = 16,
         learning_rate: float | None = 0.00001,
-        lora: bool = True,
+        lora: bool = False,
         lora_r: int | None = 8,
         lora_dropout: float | None = 0,
         lora_alpha: float | None = 8,
@@ -106,6 +106,12 @@ class FineTuning:
         # TODO: Remove it after the 21st of August
         log_warn(
             "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+        )
+
+        # TODO: Remove after next LoRA default change
+        log_warn(
+            "Some of the jobs run _directly_ from the together-python library might be trained using LoRA adapters. "
+            "The version range when this change occurred is from 1.2.3 to 1.2.6."
         )
 
         return FinetuneResponse(**response.data)
