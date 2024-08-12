@@ -24,6 +24,10 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
 @click.option(
+    "--validation-file", type=str, default="", help="Validation file ID from Files API"
+)
+@click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
+@click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
 @click.option("--batch-size", type=int, default=16, help="Train batch size")
@@ -50,8 +54,10 @@ def fine_tuning(ctx: click.Context) -> None:
 def create(
     ctx: click.Context,
     training_file: str,
+    validation_file: str,
     model: str,
     n_epochs: int,
+    n_evals: int,
     n_checkpoints: int,
     batch_size: int,
     learning_rate: float,
@@ -80,11 +86,21 @@ def create(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
+    if n_evals <= 0 and validation_file:
+        log_warn(
+            "Warning: You have specified a validation file but the number of evaluation loops is set to 0. No evaluations will be performed."
+        )
+    elif n_evals > 0 and not validation_file:
+        raise click.BadParameter(
+            "You have specified a number of evaluation loops but no validation file."
+        )
 
     response = client.fine_tuning.create(
         training_file=training_file,
         model=model,
         n_epochs=n_epochs,
+        validation_file=validation_file,
+        n_evals=n_evals,
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
