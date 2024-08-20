@@ -92,6 +92,8 @@ class FineTuning:
             wandb_key=wandb_api_key,
         ).model_dump(exclude_none=True)
 
+        print(parameter_payload)
+
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
@@ -100,6 +102,8 @@ class FineTuning:
             ),
             stream=False,
         )
+
+        print(response)
 
         assert isinstance(response, TogetherResponse)
 
@@ -216,7 +220,7 @@ class FineTuning:
         return FinetuneListEvents(**response.data)
 
     def download(
-        self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1
+        self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1, adapter_checkpoint: bool = False
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -229,6 +233,8 @@ class FineTuning:
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
+            adapter_checkpoint (bool, optional): Specifies whether to download adapter checkpoint or not.
+                Working with LoRA jobs only. Defaults to False.
 
         Returns:
             FinetuneDownloadResult: Object containing downloaded model metadata
@@ -238,6 +244,11 @@ class FineTuning:
 
         if checkpoint_step > 0:
             url += f"&checkpoint_step={checkpoint_step}"
+
+        if adapter_checkpoint:
+            url += f"&checkpoint=adapter"
+        else:
+            url += f"&checkpoint=modelOutputPath"
 
         remote_name = self.retrieve(id).output_name
 

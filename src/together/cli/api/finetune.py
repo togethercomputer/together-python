@@ -215,17 +215,25 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     default=-1,
     help="Download fine-tuning checkpoint. Defaults to latest.",
 )
+@click.option(
+    "--adapter-checkpoint",
+    type=bool,
+    required=False,
+    default=False,
+    help="Download adapter-checkpoint for LoRA jobs. Defaults to false.",
+)
 def download(
     ctx: click.Context,
     fine_tune_id: str,
     output_dir: str,
     checkpoint_step: int,
+    adapter_checkpoint: bool = False,
 ) -> None:
     """Download fine-tuning checkpoint"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.download(
-        fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step
+        fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step, adapter_checkpoint=adapter_checkpoint,
     )
 
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
