@@ -217,7 +217,7 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--adapter-checkpoint",
-    type=bool,
+    is_flag=True,
     required=False,
     default=False,
     help="Download adapter-checkpoint for LoRA jobs. Defaults to false.",
