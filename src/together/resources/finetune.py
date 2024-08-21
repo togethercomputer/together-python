@@ -256,8 +256,10 @@ class FineTuning:
 
         if isinstance(ft_job.training_type, FullTrainingType):
             if checkpoint_type != DownloadCheckpointType.DEFAULT:
-                raise ValueError("Only DEFAULT checkpoint type is allowed for FullTrainingType")
-            url += f"&checkpoint={DownloadCheckpointType.MODEL_OUTPUT_PATH.value}"
+                raise ValueError(
+                    "Only DEFAULT checkpoint type is allowed for FullTrainingType"
+                )
+            url += f"&checkpoint=modelOutputPath"
         elif isinstance(ft_job.training_type, LoRATrainingType):
             if checkpoint_type == DownloadCheckpointType.DEFAULT:
                 checkpoint_type = DownloadCheckpointType.MERGED
@@ -267,7 +269,9 @@ class FineTuning:
             elif checkpoint_type == DownloadCheckpointType.ADAPTER:
                 url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
             else:
-                raise ValueError(f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}")
+                raise ValueError(
+                    f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}"
+                )
 
         remote_name = ft_job.output_name
 

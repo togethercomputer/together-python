@@ -11,10 +11,12 @@ from together.types.finetune import DownloadCheckpointType
 
 
 class DownloadCheckpointTypeChoice(click.Choice):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__([ct.value for ct in DownloadCheckpointType])
 
-    def convert(self, value, param, ctx):
+    def convert(
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
+    ) -> DownloadCheckpointType:
         value = super().convert(value, param, ctx)
         return DownloadCheckpointType(value)
 
