@@ -72,15 +72,14 @@ class FineTuning:
             client=self._client,
         )
 
+        training_type: TrainingType = FullTrainingType()
         if lora:
-            training_type: TrainingType = LoRATrainingType(
+            training_type = LoRATrainingType(
                 lora_r=lora_r,
                 lora_alpha=lora_alpha,
                 lora_dropout=lora_dropout,
                 lora_trainable_modules=lora_trainable_modules,
             )
-        else:
-            training_type = FullTrainingType()
 
         parameter_payload = FinetuneRequest(
             model=model,
