@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Literal
 
-from pydantic import Field
+from pydantic import Field, validator, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -73,6 +73,12 @@ class FinetuneEventType(str, Enum):
     JOB_RESTARTED = "JOB_RESTARTED"
     REFUND = "REFUND"
     WARNING = "WARNING"
+
+
+class DownloadCheckpointType(Enum):
+    DEFAULT = "default"
+    MERGED = "merged"
+    ADAPTER = "adapter"
 
 
 class FinetuneEvent(BaseModel):
@@ -180,7 +186,7 @@ class FinetuneResponse(BaseModel):
     # number of steps between evals
     eval_steps: int | None = None
     # training type
-    training_type: FullTrainingType | LoRATrainingType | None = None
+    training_type: TrainingType | None = None
     # created/updated datetime stamps
     created_at: str | None = None
     updated_at: str | None = None
@@ -207,6 +213,23 @@ class FinetuneResponse(BaseModel):
     # training file metadata
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
+
+    @field_validator("training_type")
+    @classmethod
+    def validate_training_type(cls, v: TrainingType) -> TrainingType:
+        data = v.model_dump()
+        if v.type == "Full":
+            return FullTrainingType(type="Full")
+        elif v.type == "Lora":
+            return LoRATrainingType(
+                lora_r=data["lora_r"],
+                lora_alpha=data["lora_alpha"],
+                lora_dropout=data.get("lora_dropout", 0.0),
+                lora_trainable_modules=data["lora_trainable_modules"],
+                type="Lora",
+            )
+        else:
+            raise ValueError("Unknown training type")
 
 
 class FinetuneList(BaseModel):

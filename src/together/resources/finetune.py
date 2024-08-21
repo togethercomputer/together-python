@@ -17,6 +17,7 @@ from together.types import (
     TogetherRequest,
     TrainingType,
 )
+from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn, normalize_key
 
 
@@ -50,7 +51,7 @@ class FineTuning:
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 16.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -71,14 +72,15 @@ class FineTuning:
             client=self._client,
         )
 
-        training_type: TrainingType = FullTrainingType()
         if lora:
-            training_type = LoRATrainingType(
+            training_type: TrainingType = LoRATrainingType(
                 lora_r=lora_r,
                 lora_alpha=lora_alpha,
                 lora_dropout=lora_dropout,
                 lora_trainable_modules=lora_trainable_modules,
             )
+        else:
+            training_type = FullTrainingType()
 
         parameter_payload = FinetuneRequest(
             model=model,
@@ -220,7 +222,12 @@ class FineTuning:
         return FinetuneListEvents(**response.data)
 
     def download(
-        self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1, adapter_checkpoint: bool = False
+        self,
+        id: str,
+        *,
+        output: Path | str | None = None,
+        checkpoint_step: int = -1,
+        checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -233,8 +240,8 @@ class FineTuning:
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
-            adapter_checkpoint (bool, optional): Specifies whether to download adapter checkpoint or not.
-                Working with LoRA jobs only. Defaults to False.
+            checkpoint_type (CheckpointType, optional): Specifies which checkpoint to download.
+                Defaults to CheckpointType.DEFAULT.
 
         Returns:
             FinetuneDownloadResult: Object containing downloaded model metadata
@@ -245,12 +252,24 @@ class FineTuning:
         if checkpoint_step > 0:
             url += f"&checkpoint_step={checkpoint_step}"
 
-        if adapter_checkpoint:
-            url += f"&checkpoint=adapter"
-        else:
-            url += f"&checkpoint=modelOutputPath"
+        ft_job = self.retrieve(id)
 
-        remote_name = self.retrieve(id).output_name
+        if isinstance(ft_job.training_type, FullTrainingType):
+            if checkpoint_type != DownloadCheckpointType.DEFAULT:
+                raise ValueError("Only DEFAULT checkpoint type is allowed for FullTrainingType")
+            url += f"&checkpoint={DownloadCheckpointType.MODEL_OUTPUT_PATH.value}"
+        elif isinstance(ft_job.training_type, LoRATrainingType):
+            if checkpoint_type == DownloadCheckpointType.DEFAULT:
+                checkpoint_type = DownloadCheckpointType.MERGED
+
+            if checkpoint_type == DownloadCheckpointType.MERGED:
+                url += f"&checkpoint={DownloadCheckpointType.MERGED.value}"
+            elif checkpoint_type == DownloadCheckpointType.ADAPTER:
+                url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
+            else:
+                raise ValueError(f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}")
+
+        remote_name = ft_job.output_name
 
         download_manager = DownloadManager(self._client)
 

@@ -7,6 +7,16 @@ from tabulate import tabulate
 
 from together import Together
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
+from together.types.finetune import DownloadCheckpointType
+
+
+class DownloadCheckpointTypeChoice(click.Choice):
+    def __init__(self):
+        super().__init__([ct.value for ct in DownloadCheckpointType])
+
+    def convert(self, value, param, ctx):
+        value = super().convert(value, param, ctx)
+        return DownloadCheckpointType(value)
 
 
 @click.group(name="fine-tuning")
@@ -216,24 +226,27 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     help="Download fine-tuning checkpoint. Defaults to latest.",
 )
 @click.option(
-    "--adapter-checkpoint",
-    is_flag=True,
+    "--checkpoint-type",
+    type=DownloadCheckpointTypeChoice(),
     required=False,
-    default=False,
-    help="Download adapter-checkpoint for LoRA jobs. Defaults to false.",
+    default=DownloadCheckpointType.DEFAULT.value,
+    help="Specifies checkpoint type. 'merged' and 'adapter' options work only for LoRA jobs.",
 )
 def download(
     ctx: click.Context,
     fine_tune_id: str,
     output_dir: str,
     checkpoint_step: int,
-    adapter_checkpoint: bool = False,
+    checkpoint_type: DownloadCheckpointType,
 ) -> None:
     """Download fine-tuning checkpoint"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.download(
-        fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step, adapter_checkpoint=adapter_checkpoint,
+        fine_tune_id,
+        output=output_dir,
+        checkpoint_step=checkpoint_step,
+        checkpoint_type=checkpoint_type,
     )
 
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
