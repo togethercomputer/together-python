@@ -129,8 +129,8 @@ class LoRATrainingType(TrainingType):
 
     lora_r: int
     lora_alpha: int
-    lora_dropout: float
-    lora_trainable_modules: str
+    lora_dropout: float = 0.0
+    lora_trainable_modules: str = "all-linear"
     type: str = "Lora"
 
 
@@ -217,17 +217,10 @@ class FinetuneResponse(BaseModel):
     @field_validator("training_type")
     @classmethod
     def validate_training_type(cls, v: TrainingType) -> TrainingType:
-        data = v.model_dump()
         if v.type == "Full":
-            return FullTrainingType(type="Full")
+            return FullTrainingType(**v.model_dump())
         elif v.type == "Lora":
-            return LoRATrainingType(
-                lora_r=data["lora_r"],
-                lora_alpha=data["lora_alpha"],
-                lora_dropout=data.get("lora_dropout", 0.0),
-                lora_trainable_modules=data["lora_trainable_modules"],
-                type="Lora",
-            )
+            return LoRATrainingType(**v.model_dump())
         else:
             raise ValueError("Unknown training type")
 
