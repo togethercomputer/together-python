@@ -51,7 +51,7 @@ class FineTuning:
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to 16.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -94,8 +94,6 @@ class FineTuning:
             wandb_key=wandb_api_key,
         ).model_dump(exclude_none=True)
 
-        print(parameter_payload)
-
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
@@ -104,8 +102,6 @@ class FineTuning:
             ),
             stream=False,
         )
-
-        print(response)
 
         assert isinstance(response, TogetherResponse)
 
