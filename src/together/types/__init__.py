@@ -35,7 +35,10 @@ from together.types.images import (
     ImageResponse,
 )
 from together.types.models import ModelObject
-
+from together.types.rerank import (
+    RerankRequest,
+    RerankResponse,
+)
 
 __all__ = [
     "TogetherClient",
@@ -66,4 +69,6 @@ __all__ = [
     "TrainingType",
     "FullTrainingType",
     "LoRATrainingType",
+    "RerankRequest",
+    "RerankResponse",
 ]

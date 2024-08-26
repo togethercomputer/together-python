@@ -5,6 +5,7 @@ from together.resources.files import AsyncFiles, Files
 from together.resources.finetune import AsyncFineTuning, FineTuning
 from together.resources.images import AsyncImages, Images
 from together.resources.models import AsyncModels, Models
+from together.resources.rerank import AsyncRerank, Rerank
 
 
 __all__ = [
@@ -22,4 +23,6 @@ __all__ = [
     "Images",
     "AsyncModels",
     "Models",
+    "AsyncRerank",
+    "Rerank",
 ]
