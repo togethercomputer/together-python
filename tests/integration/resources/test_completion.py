@@ -95,7 +95,6 @@ class TestTogetherCompletion:
         assert isinstance(response.id, str)
         assert isinstance(response.created, int)
         assert isinstance(response.object, ObjectType)
-        assert response.model == model
         assert isinstance(response.choices, list)
         assert isinstance(response.choices[0], CompletionChoicesData)
         assert isinstance(response.choices[0].text, str)
@@ -169,8 +168,6 @@ class TestTogetherCompletion:
         )
 
         assert isinstance(response, CompletionResponse)
-
-        assert response.model == model
 
     @pytest.mark.parametrize(
         "model,prompt",

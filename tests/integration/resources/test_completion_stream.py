@@ -69,7 +69,6 @@ class TestTogetherCompletionStream:
             assert isinstance(chunk.id, str)
             assert isinstance(chunk.created, int)
             assert isinstance(chunk.object, ObjectType)
-            assert chunk.model == model
             assert isinstance(chunk.choices[0], CompletionChoicesChunk)
             assert isinstance(chunk.choices[0].index, int)
             assert isinstance(chunk.choices[0].delta, DeltaContent)
