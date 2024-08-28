@@ -230,7 +230,7 @@ class FinetuneResponse(BaseModel):
     @field_validator("training_type")
     @classmethod
     def validate_training_type(cls, v: TrainingType) -> TrainingType:
-        if v.type == "Full":
+        if v.type == "Full" or v.type == "":
             return FullTrainingType(**v.model_dump())
         elif v.type == "Lora":
             return LoRATrainingType(**v.model_dump())
