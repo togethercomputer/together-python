@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from textwrap import wrap
 
@@ -9,18 +11,13 @@ from together import Together
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 from together.types.finetune import DownloadCheckpointType
 
-from typing import Union
-
 
 class DownloadCheckpointTypeChoice(click.Choice):
     def __init__(self) -> None:
         super().__init__([ct.value for ct in DownloadCheckpointType])
 
     def convert(
-        self,
-        value: str,
-        param: Union[click.Parameter, None],
-        ctx: Union[click.Context, None],
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
     ) -> DownloadCheckpointType:
         value = super().convert(value, param, ctx)
         return DownloadCheckpointType(value)
