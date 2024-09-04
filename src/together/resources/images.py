@@ -25,6 +25,7 @@ class Images:
         height: int | None = 1024,
         width: int | None = 1024,
         negative_prompt: str | None = None,
+        **kwargs,
     ) -> ImageResponse:
         """
         Method to generate images based on a given prompt using a specified model.
@@ -67,6 +68,7 @@ class Images:
             height=height,
             width=width,
             negative_prompt=negative_prompt,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
@@ -98,6 +100,7 @@ class AsyncImages:
         height: int | None = 1024,
         width: int | None = 1024,
         negative_prompt: str | None = None,
+        **kwargs,
     ) -> ImageResponse:
         """
         Async method to generate images based on a given prompt using a specified model.
@@ -140,6 +143,7 @@ class AsyncImages:
             height=height,
             width=width,
             negative_prompt=negative_prompt,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(

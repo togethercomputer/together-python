@@ -37,6 +37,7 @@ class Completions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
+        **kwargs,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -113,6 +114,7 @@ class Completions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
@@ -156,6 +158,7 @@ class AsyncCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
+        **kwargs,
     ) -> AsyncGenerator[CompletionChunk, None] | CompletionResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.
@@ -232,6 +235,7 @@ class AsyncCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(

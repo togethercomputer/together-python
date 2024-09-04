@@ -21,6 +21,7 @@ class Embeddings:
         *,
         input: str | List[str],
         model: str,
+        **kwargs,
     ) -> EmbeddingResponse:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -40,6 +41,7 @@ class Embeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
@@ -65,6 +67,7 @@ class AsyncEmbeddings:
         *,
         input: str | List[str],
         model: str,
+        **kwargs,
     ) -> EmbeddingResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.
@@ -84,6 +87,7 @@ class AsyncEmbeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
+            **kwargs,
         ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
