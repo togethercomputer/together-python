@@ -11,7 +11,7 @@ class Embeddings:
     def create(
         cls,
         input: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy embeddings function."""
 

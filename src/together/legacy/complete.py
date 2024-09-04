@@ -14,7 +14,7 @@ class Complete:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy completion function."""
 
@@ -36,7 +36,7 @@ class Complete:
     def create_streaming(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Iterator[Dict[str, Any]]:
         """Legacy streaming completion function."""
 
@@ -59,7 +59,7 @@ class Completion:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
         """Completion function."""
 
@@ -79,7 +79,7 @@ class AsyncComplete:
     async def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> CompletionResponse | AsyncGenerator[CompletionChunk, None]:
         """Async completion function."""
 

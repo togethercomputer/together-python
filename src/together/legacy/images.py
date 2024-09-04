@@ -11,7 +11,7 @@ class Image:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy image function."""
 
