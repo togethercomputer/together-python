@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
 from together.types import (
@@ -25,7 +27,7 @@ class Images:
         height: int | None = 1024,
         width: int | None = 1024,
         negative_prompt: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> ImageResponse:
         """
         Method to generate images based on a given prompt using a specified model.
@@ -100,7 +102,7 @@ class AsyncImages:
         height: int | None = 1024,
         width: int | None = 1024,
         negative_prompt: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> ImageResponse:
         """
         Async method to generate images based on a given prompt using a specified model.

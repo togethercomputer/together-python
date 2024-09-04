@@ -40,7 +40,7 @@ class ChatCompletions:
         response_format: Dict[str, str | Dict[str, Any]] | None = None,
         tools: Dict[str, str | Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -179,7 +179,7 @@ class AsyncChatCompletions:
         response_format: Dict[str, Any] | None = None,
         tools: Dict[str, str | Dict[str, str | Dict[str, Any]]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.

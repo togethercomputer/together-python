@@ -25,7 +25,7 @@ class Rerank:
         top_n: int | None = None,
         return_documents: bool = False,
         rank_fields: List[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> RerankResponse:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -83,7 +83,7 @@ class AsyncRerank:
         top_n: int | None = None,
         return_documents: bool = False,
         rank_fields: List[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> RerankResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.

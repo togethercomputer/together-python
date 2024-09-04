@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Any
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -21,7 +21,7 @@ class Embeddings:
         *,
         input: str | List[str],
         model: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> EmbeddingResponse:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -67,7 +67,7 @@ class AsyncEmbeddings:
         *,
         input: str | List[str],
         model: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> EmbeddingResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.
