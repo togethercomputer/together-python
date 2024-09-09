@@ -1,11 +1,26 @@
+from __future__ import annotations
+
 import json
 from textwrap import wrap
 
 import click
+from click.core import ParameterSource  # type: ignore[attr-defined]
 from tabulate import tabulate
 
 from together import Together
-from together.utils import finetune_price_to_dollars, parse_timestamp
+from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
+from together.types.finetune import DownloadCheckpointType
+
+
+class DownloadCheckpointTypeChoice(click.Choice):
+    def __init__(self) -> None:
+        super().__init__([ct.value for ct in DownloadCheckpointType])
+
+    def convert(
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
+    ) -> DownloadCheckpointType:
+        value = super().convert(value, param, ctx)
+        return DownloadCheckpointType(value)
 
 
 @click.group(name="fine-tuning")
@@ -23,10 +38,29 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
 @click.option(
+    "--validation-file", type=str, default="", help="Validation file ID from Files API"
+)
+@click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
+@click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=int, default=32, help="Train batch size")
-@click.option("--learning-rate", type=float, default=3e-5, help="Learning rate")
+@click.option("--batch-size", type=int, default=16, help="Train batch size")
+@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--lora/--no-lora",
+    type=bool,
+    default=False,
+    help="Whether to use LoRA adapters for fine-tuning",
+)
+@click.option("--lora-r", type=int, default=8, help="LoRA adapters' rank")
+@click.option("--lora-dropout", type=float, default=0, help="LoRA adapters' dropout")
+@click.option("--lora-alpha", type=float, default=8, help="LoRA adapters' alpha")
+@click.option(
+    "--lora-trainable-modules",
+    type=str,
+    default="all-linear",
+    help="Trainable modules for LoRA adapters. For example, 'all-linear', 'q_proj,v_proj'",
+)
 @click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
@@ -34,29 +68,71 @@ def fine_tuning(ctx: click.Context) -> None:
 def create(
     ctx: click.Context,
     training_file: str,
+    validation_file: str,
     model: str,
     n_epochs: int,
+    n_evals: int,
     n_checkpoints: int,
     batch_size: int,
     learning_rate: float,
+    lora: bool,
+    lora_r: int,
+    lora_dropout: float,
+    lora_alpha: float,
+    lora_trainable_modules: str,
     suffix: str,
     wandb_api_key: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
 
+    if lora:
+        learning_rate_source = click.get_current_context().get_parameter_source(  # type: ignore[attr-defined]
+            "learning_rate"
+        )
+        if learning_rate_source == ParameterSource.DEFAULT:
+            learning_rate = 1e-3
+    else:
+        for param in ["lora_r", "lora_dropout", "lora_alpha", "lora_trainable_modules"]:
+            param_source = click.get_current_context().get_parameter_source(param)  # type: ignore[attr-defined]
+            if param_source != ParameterSource.DEFAULT:
+                raise click.BadParameter(
+                    f"You set LoRA parameter `{param}` for a full fine-tuning job. "
+                    f"Please change the job type with --lora or remove `{param}` from the arguments"
+                )
+    if n_evals <= 0 and validation_file:
+        log_warn(
+            "Warning: You have specified a validation file but the number of evaluation loops is set to 0. No evaluations will be performed."
+        )
+    elif n_evals > 0 and not validation_file:
+        raise click.BadParameter(
+            "You have specified a number of evaluation loops but no validation file."
+        )
+
     response = client.fine_tuning.create(
         training_file=training_file,
         model=model,
         n_epochs=n_epochs,
+        validation_file=validation_file,
+        n_evals=n_evals,
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lora=lora,
+        lora_r=lora_r,
+        lora_dropout=lora_dropout,
+        lora_alpha=lora_alpha,
+        lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
+
+    # TODO: Remove it after the 21st of August
+    log_warn(
+        "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+    )
 
 
 @fine_tuning.command()
@@ -101,7 +177,7 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     # remove events from response for cleaner output
     response.events = None
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -123,7 +199,7 @@ def cancel(ctx: click.Context, fine_tune_id: str, quiet: bool = False) -> None:
             return
     response = client.fine_tuning.cancel(fine_tune_id)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @fine_tuning.command()
@@ -169,17 +245,28 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     default=-1,
     help="Download fine-tuning checkpoint. Defaults to latest.",
 )
+@click.option(
+    "--checkpoint-type",
+    type=DownloadCheckpointTypeChoice(),
+    required=False,
+    default=DownloadCheckpointType.DEFAULT.value,
+    help="Specifies checkpoint type. 'merged' and 'adapter' options work only for LoRA jobs.",
+)
 def download(
     ctx: click.Context,
     fine_tune_id: str,
     output_dir: str,
     checkpoint_step: int,
+    checkpoint_type: DownloadCheckpointType,
 ) -> None:
     """Download fine-tuning checkpoint"""
     client: Together = ctx.obj
 
     response = client.fine_tuning.download(
-        fine_tune_id, output=output_dir, checkpoint_step=checkpoint_step
+        fine_tune_id,
+        output=output_dir,
+        checkpoint_step=checkpoint_step,
+        checkpoint_type=checkpoint_type,
     )
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))

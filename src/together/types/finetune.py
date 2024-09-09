@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Literal
 
-from pydantic import Field
+from pydantic import Field, validator, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -61,6 +61,7 @@ class FinetuneEventType(str, Enum):
     CHECKPOINT_SAVE = "CHECKPOINT_SAVE"
     BILLING_LIMIT = "BILLING_LIMIT"
     EPOCH_COMPLETE = "EPOCH_COMPLETE"
+    EVAL_COMPLETE = "EVAL_COMPLETE"
     TRAINING_COMPLETE = "TRAINING_COMPLETE"
     MODEL_COMPRESSING = "COMPRESSING_MODEL"
     MODEL_COMPRESSION_COMPLETE = "MODEL_COMPRESSION_COMPLETE"
@@ -73,6 +74,12 @@ class FinetuneEventType(str, Enum):
     JOB_RESTARTED = "JOB_RESTARTED"
     REFUND = "REFUND"
     WARNING = "WARNING"
+
+
+class DownloadCheckpointType(Enum):
+    DEFAULT = "default"
+    MERGED = "merged"
+    ADAPTER = "adapter"
 
 
 class FinetuneEvent(BaseModel):
@@ -100,6 +107,34 @@ class FinetuneEvent(BaseModel):
     hash: str | None = None
 
 
+class TrainingType(BaseModel):
+    """
+    Abstract training type
+    """
+
+    type: str
+
+
+class FullTrainingType(TrainingType):
+    """
+    Training type for full fine-tuning
+    """
+
+    type: str = "Full"
+
+
+class LoRATrainingType(TrainingType):
+    """
+    Training type for LoRA adapters training
+    """
+
+    lora_r: int
+    lora_alpha: int
+    lora_dropout: float = 0.0
+    lora_trainable_modules: str = "all-linear"
+    type: str = "Lora"
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -107,6 +142,8 @@ class FinetuneRequest(BaseModel):
 
     # training file ID
     training_file: str
+    # validation file id
+    validation_file: str | None = None
     # base model string
     model: str
     # number of epochs to train for
@@ -115,12 +152,15 @@ class FinetuneRequest(BaseModel):
     learning_rate: float
     # number of checkpoints to save
     n_checkpoints: int | None = None
+    # number of evaluation loops to run
+    n_evals: int | None = None
     # training batch size
     batch_size: int | None = None
     # up to 40 character suffix for output model name
     suffix: str | None = None
     # weights & biases api key
     wandb_key: str | None = None
+    training_type: FullTrainingType | LoRATrainingType | None = None
 
 
 class FinetuneResponse(BaseModel):
@@ -138,21 +178,22 @@ class FinetuneResponse(BaseModel):
     model: str | None = None
     # output model name
     output_name: str | None = Field(None, alias="model_output_name")
+    # adapter output name
+    adapter_output_name: str | None = None
     # number of epochs
     n_epochs: int | None = None
     # number of checkpoints to save
     n_checkpoints: int | None = None
+    # number of evaluation loops
+    n_evals: int | None = None
     # training batch size
     batch_size: int | None = None
     # training learning rate
     learning_rate: float | None = None
     # number of steps between evals
     eval_steps: int | None = None
-    # is LoRA finetune boolean
-    lora: bool | None = None
-    lora_r: int | None = None
-    lora_alpha: int | None = None
-    lora_dropout: int | None = None
+    # training type
+    training_type: TrainingType | None = None
     # created/updated datetime stamps
     created_at: str | None = None
     updated_at: str | None = None
@@ -168,8 +209,14 @@ class FinetuneResponse(BaseModel):
     param_count: int | None = None
     # fine-tune job price
     total_price: int | None = None
+    # total number of training steps
+    total_steps: int | None = None
+    # number of steps completed (incrementing counter)
+    steps_completed: int | None = None
     # number of epochs completed (incrementing counter)
     epochs_completed: int | None = None
+    # number of evaluation loops completed (incrementing counter)
+    evals_completed: int | None = None
     # place in job queue (decrementing counter)
     queue_depth: int | None = None
     # weights & biases project name
@@ -179,6 +226,16 @@ class FinetuneResponse(BaseModel):
     # training file metadata
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
+
+    @field_validator("training_type")
+    @classmethod
+    def validate_training_type(cls, v: TrainingType) -> TrainingType:
+        if v.type == "Full" or v.type == "":
+            return FullTrainingType(**v.model_dump())
+        elif v.type == "Lora":
+            return LoRATrainingType(**v.model_dump())
+        else:
+            raise ValueError("Unknown training type")
 
 
 class FinetuneList(BaseModel):

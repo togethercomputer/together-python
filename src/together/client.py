@@ -18,6 +18,7 @@ class Together:
     images: resources.Images
     models: resources.Models
     fine_tuning: resources.FineTuning
+    rerank: resources.Rerank
 
     # client options
     client: TogetherClient
@@ -77,6 +78,7 @@ class Together:
         self.images = resources.Images(self.client)
         self.models = resources.Models(self.client)
         self.fine_tuning = resources.FineTuning(self.client)
+        self.rerank = resources.Rerank(self.client)
 
 
 class AsyncTogether:
@@ -87,6 +89,7 @@ class AsyncTogether:
     images: resources.AsyncImages
     models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
+    rerank: resources.AsyncRerank
 
     # client options
     client: TogetherClient
@@ -146,6 +149,7 @@ class AsyncTogether:
         self.images = resources.AsyncImages(self.client)
         self.models = resources.AsyncModels(self.client)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
+        self.rerank = resources.AsyncRerank(self.client)
 
 
 Client = Together

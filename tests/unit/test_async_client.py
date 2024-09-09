@@ -113,3 +113,12 @@ class TestAsyncTogether:
         assert async_together_instance.fine_tuning is not None
 
         assert isinstance(async_together_instance.fine_tuning._client, TogetherClient)
+
+    def test_rerank_initialized(self, async_together_instance):
+        """
+        Test initializing rerank
+        """
+
+        assert async_together_instance.rerank is not None
+
+        assert isinstance(async_together_instance.rerank._client, TogetherClient)

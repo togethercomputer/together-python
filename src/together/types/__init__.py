@@ -26,13 +26,19 @@ from together.types.finetune import (
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
+    FullTrainingType,
+    LoRATrainingType,
+    TrainingType,
 )
 from together.types.images import (
     ImageRequest,
     ImageResponse,
 )
 from together.types.models import ModelObject
-
+from together.types.rerank import (
+    RerankRequest,
+    RerankResponse,
+)
 
 __all__ = [
     "TogetherClient",
@@ -60,4 +66,9 @@ __all__ = [
     "ImageRequest",
     "ImageResponse",
     "ModelObject",
+    "TrainingType",
+    "FullTrainingType",
+    "LoRATrainingType",
+    "RerankRequest",
+    "RerankResponse",
 ]

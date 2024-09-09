@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Any
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -21,6 +21,7 @@ class Embeddings:
         *,
         input: str | List[str],
         model: str,
+        **kwargs: Any,
     ) -> EmbeddingResponse:
         """
         Method to generate completions based on a given prompt using a specified model.
@@ -40,7 +41,8 @@ class Embeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
-        ).model_dump()
+            **kwargs,
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -65,6 +67,7 @@ class AsyncEmbeddings:
         *,
         input: str | List[str],
         model: str,
+        **kwargs: Any,
     ) -> EmbeddingResponse:
         """
         Async method to generate completions based on a given prompt using a specified model.
@@ -84,7 +87,8 @@ class AsyncEmbeddings:
         parameter_payload = EmbeddingRequest(
             input=input,
             model=model,
-        ).model_dump()
+            **kwargs,
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

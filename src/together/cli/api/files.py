@@ -44,7 +44,7 @@ def upload(ctx: click.Context, file: pathlib.Path, purpose: str, check: bool) ->
 
     response = client.files.upload(file=file, purpose=purpose, check=check)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @files.command()
@@ -83,7 +83,7 @@ def retrieve(ctx: click.Context, id: str) -> None:
 
     response = client.files.retrieve(id=id)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @files.command()
@@ -97,7 +97,7 @@ def retrieve_content(ctx: click.Context, id: str, output: str) -> None:
 
     response = client.files.retrieve_content(id=id, output=output)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @files.command()
@@ -110,7 +110,7 @@ def delete(ctx: click.Context, id: str) -> None:
 
     response = client.files.delete(id=id)
 
-    click.echo(json.dumps(response.model_dump(), indent=4))
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
 @files.command()

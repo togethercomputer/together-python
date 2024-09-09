@@ -11,7 +11,7 @@ class Image:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy image function."""
 
@@ -22,4 +22,6 @@ class Image:
 
         client = together.Together(api_key=api_key)
 
-        return client.images.generate(prompt=prompt, **kwargs).model_dump()
+        return client.images.generate(prompt=prompt, **kwargs).model_dump(
+            exclude_none=True
+        )

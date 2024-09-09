@@ -15,6 +15,7 @@ class FinishReason(str, Enum):
     StopSequence = "stop"
     EOS = "eos"
     ToolCalls = "tool_calls"
+    Error = "error"
 
 
 class UsageData(BaseModel):

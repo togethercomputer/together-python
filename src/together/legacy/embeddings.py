@@ -11,7 +11,7 @@ class Embeddings:
     def create(
         cls,
         input: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy embeddings function."""
 
@@ -22,4 +22,6 @@ class Embeddings:
 
         client = together.Together(api_key=api_key)
 
-        return client.embeddings.create(input=input, **kwargs).model_dump()
+        return client.embeddings.create(input=input, **kwargs).model_dump(
+            exclude_none=True
+        )

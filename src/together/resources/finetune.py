@@ -11,10 +11,14 @@ from together.types import (
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
+    FullTrainingType,
+    LoRATrainingType,
     TogetherClient,
     TogetherRequest,
+    TrainingType,
 )
-from together.utils import normalize_key
+from together.types.finetune import DownloadCheckpointType
+from together.utils import log_warn, normalize_key
 
 
 class FineTuning:
@@ -27,9 +31,16 @@ class FineTuning:
         training_file: str,
         model: str,
         n_epochs: int = 1,
+        validation_file: str | None = "",
+        n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 32,
+        batch_size: int | None = 16,
         learning_rate: float | None = 0.00001,
+        lora: bool = False,
+        lora_r: int | None = 8,
+        lora_dropout: float | None = 0,
+        lora_alpha: float | None = 8,
+        lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
     ) -> FinetuneResponse:
@@ -40,11 +51,18 @@ class FineTuning:
             training_file (str): File-ID of a file uploaded to the Together API
             model (str): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            validation file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
+            lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
+            lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
+            lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
+            lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
@@ -58,16 +76,28 @@ class FineTuning:
             client=self._client,
         )
 
+        training_type: TrainingType = FullTrainingType()
+        if lora:
+            training_type = LoRATrainingType(
+                lora_r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                lora_trainable_modules=lora_trainable_modules,
+            )
+
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
+            validation_file=validation_file,
             n_epochs=n_epochs,
+            n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            training_type=training_type,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -79,6 +109,17 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
+
+        # TODO: Remove it after the 21st of August
+        log_warn(
+            "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
+        )
+
+        # TODO: Remove after next LoRA default change
+        log_warn(
+            "Some of the jobs run _directly_ from the together-python library might be trained using LoRA adapters. "
+            "The version range when this change occurred is from 1.2.3 to 1.2.6."
+        )
 
         return FinetuneResponse(**response.data)
 
@@ -188,7 +229,12 @@ class FineTuning:
         return FinetuneListEvents(**response.data)
 
     def download(
-        self, id: str, *, output: Path | str | None = None, checkpoint_step: int = -1
+        self,
+        id: str,
+        *,
+        output: Path | str | None = None,
+        checkpoint_step: int = -1,
+        checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -201,6 +247,8 @@ class FineTuning:
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
+            checkpoint_type (CheckpointType, optional): Specifies which checkpoint to download.
+                Defaults to CheckpointType.DEFAULT.
 
         Returns:
             FinetuneDownloadResult: Object containing downloaded model metadata
@@ -211,7 +259,28 @@ class FineTuning:
         if checkpoint_step > 0:
             url += f"&checkpoint_step={checkpoint_step}"
 
-        remote_name = self.retrieve(id).output_name
+        ft_job = self.retrieve(id)
+
+        if isinstance(ft_job.training_type, FullTrainingType):
+            if checkpoint_type != DownloadCheckpointType.DEFAULT:
+                raise ValueError(
+                    "Only DEFAULT checkpoint type is allowed for FullTrainingType"
+                )
+            url += f"&checkpoint=modelOutputPath"
+        elif isinstance(ft_job.training_type, LoRATrainingType):
+            if checkpoint_type == DownloadCheckpointType.DEFAULT:
+                checkpoint_type = DownloadCheckpointType.MERGED
+
+            if checkpoint_type == DownloadCheckpointType.MERGED:
+                url += f"&checkpoint={DownloadCheckpointType.MERGED.value}"
+            elif checkpoint_type == DownloadCheckpointType.ADAPTER:
+                url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
+            else:
+                raise ValueError(
+                    f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}"
+                )
+
+        remote_name = ft_job.output_name
 
         download_manager = DownloadManager(self._client)
 
@@ -241,6 +310,8 @@ class AsyncFineTuning:
         training_file: str,
         model: str,
         n_epochs: int = 1,
+        validation_file: str | None = "",
+        n_evals: int = 0,
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
         learning_rate: float = 0.00001,
@@ -254,6 +325,8 @@ class AsyncFineTuning:
             training_file (str): File-ID of a file uploaded to the Together API
             model (str): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            validation file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
@@ -275,13 +348,15 @@ class AsyncFineTuning:
         parameter_payload = FinetuneRequest(
             model=model,
             training_file=training_file,
+            validation_file=validation_file,
             n_epochs=n_epochs,
+            n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump()
+        ).model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(

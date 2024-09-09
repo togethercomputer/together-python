@@ -14,7 +14,7 @@ class Complete:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Legacy completion function."""
 
@@ -25,16 +25,18 @@ class Complete:
 
         client = together.Together(api_key=api_key)
 
-        return client.completions.create(
-            prompt=prompt, stream=False, **kwargs
-        ).model_dump()  # type: ignore
+        result = client.completions.create(prompt=prompt, stream=False, **kwargs)
+
+        assert isinstance(result, CompletionResponse)
+
+        return result.model_dump(exclude_none=True)
 
     @classmethod
     @deprecated  # type: ignore
     def create_streaming(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> Iterator[Dict[str, Any]]:
         """Legacy streaming completion function."""
 
@@ -46,7 +48,7 @@ class Complete:
         client = together.Together(api_key=api_key)
 
         return (
-            token.model_dump()  # type: ignore
+            token.model_dump(exclude_none=True)  # type: ignore
             for token in client.completions.create(prompt=prompt, stream=True, **kwargs)
         )
 
@@ -57,7 +59,7 @@ class Completion:
     def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
         """Completion function."""
 
@@ -77,7 +79,7 @@ class AsyncComplete:
     async def create(
         cls,
         prompt: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> CompletionResponse | AsyncGenerator[CompletionChunk, None]:
         """Async completion function."""
 
