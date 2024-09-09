@@ -32,6 +32,7 @@ class ChatCompletions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -79,6 +80,7 @@ class ChatCompletions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            seed (int, optional): A seed value to use for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
             logprobs (int, optional): Number of top-k logprobs to return
@@ -124,6 +126,7 @@ class ChatCompletions:
             frequency_penalty=frequency_penalty,
             min_p=min_p,
             logit_bias=logit_bias,
+            seed=seed,
             stream=stream,
             logprobs=logprobs,
             echo=echo,
@@ -171,6 +174,7 @@ class AsyncChatCompletions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
         echo: bool | None = None,
@@ -218,6 +222,7 @@ class AsyncChatCompletions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            seed (int, optional): A seed value to use for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
             logprobs (int, optional): Number of top-k logprobs to return
@@ -263,6 +268,7 @@ class AsyncChatCompletions:
             frequency_penalty=frequency_penalty,
             min_p=min_p,
             logit_bias=logit_bias,
+            seed=seed,
             stream=stream,
             logprobs=logprobs,
             echo=echo,

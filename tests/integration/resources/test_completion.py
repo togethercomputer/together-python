@@ -530,3 +530,27 @@ class TestTogetherCompletion:
         )
 
         assert isinstance(response, CompletionResponse)
+
+    @pytest.mark.parametrize(
+        "model,prompt",
+        product(
+            completion_test_model_list,
+            completion_prompt_list,
+        ),
+    )
+    def test_seed(
+        self,
+        model,
+        prompt,
+        sync_together_client,
+    ):
+        response = sync_together_client.completions.create(
+            prompt=prompt,
+            model=model,
+            stop=STOP,
+            max_tokens=1,
+            seed=4242,
+        )
+
+        assert isinstance(response, CompletionResponse)
+        assert response.choices[0].seed == 4242
