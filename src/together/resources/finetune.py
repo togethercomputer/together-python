@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from rich import print as rprint
 
@@ -37,7 +38,7 @@ class FineTuning:
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = None,
+        batch_size: int | Literal["auto"] = "auto",
         learning_rate: float | None = 0.00001,
         lora: bool = False,
         lora_r: int | None = None,
@@ -60,7 +61,7 @@ class FineTuning:
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to auto.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -107,7 +108,7 @@ class FineTuning:
 
             batch_size = (
                 batch_size
-                if batch_size is not None
+                if batch_size != "auto"
                 else model_limits.lora_training.max_batch_size
             )
         else:
@@ -117,7 +118,7 @@ class FineTuning:
                 )
             batch_size = (
                 batch_size
-                if batch_size is not None
+                if batch_size != "auto"
                 else model_limits.full_training.max_batch_size
             )
 
