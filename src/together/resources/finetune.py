@@ -355,7 +355,7 @@ class FineTuning:
         model_limits_response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="privlieged/fine-tunes/models/limits",
+                url="fine-tunes/models/limits",
                 params={"model_name": model},
             ),
             stream=False,
@@ -572,7 +572,7 @@ class AsyncFineTuning:
         model_limits_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="privlieged/fine-tunes/models/limits",
+                url="fine-tunes/models/limits",
                 params={"model": model},
             ),
             stream=False,
