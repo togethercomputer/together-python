@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from textwrap import wrap
+from typing import Any
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -10,8 +11,8 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.types.finetune import DownloadCheckpointType
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
+from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
 
 _CONFIRMATION_MESSAGE = (
@@ -107,20 +108,64 @@ def create(
     """Start fine-tuning"""
     client: Together = ctx.obj
 
+    training_args: dict[str, Any] = dict(
+        training_file=training_file,
+        model=model,
+        n_epochs=n_epochs,
+        validation_file=validation_file,
+        n_evals=n_evals,
+        n_checkpoints=n_checkpoints,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        lora=lora,
+        lora_r=lora_r,
+        lora_dropout=lora_dropout,
+        lora_alpha=lora_alpha,
+        lora_trainable_modules=lora_trainable_modules,
+        suffix=suffix,
+        wandb_api_key=wandb_api_key,
+    )
+
+    model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
+        model=model
+    )
+
     if lora:
-        learning_rate_source = click.get_current_context().get_parameter_source(  # type: ignore[attr-defined]
-            "learning_rate"
-        )
-        if learning_rate_source == ParameterSource.DEFAULT:
-            learning_rate = 1e-3
+        if model_limits.lora_training is None:
+            raise click.BadParameter(
+                f"LoRA fine-tuning is not supported for the model `{model}`"
+            )
+
+        default_values = {
+            "lora_r": model_limits.lora_training.max_rank,
+            "batch_size": model_limits.lora_training.max_batch_size,
+            "learning_rate": 1e-3,
+        }
+        for arg in default_values:
+            arg_source = ctx.get_parameter_source("arg")  # type: ignore[attr-defined]
+            if arg_source == ParameterSource.DEFAULT:
+                training_args[arg] = default_values[arg_source]
+
+        if ctx.get_parameter_source("lora_alpha") == ParameterSource.DEFAULT:  # type: ignore[attr-defined]
+            training_args["lora_alpha"] = training_args["lora_r"] * 2
     else:
+        if model_limits.full_training is None:
+            raise click.BadParameter(
+                f"Full fine-tuning is not supported for the model `{model}`"
+            )
+
         for param in ["lora_r", "lora_dropout", "lora_alpha", "lora_trainable_modules"]:
-            param_source = click.get_current_context().get_parameter_source(param)  # type: ignore[attr-defined]
+            param_source = ctx.get_parameter_source(param)  # type: ignore[attr-defined]
             if param_source != ParameterSource.DEFAULT:
                 raise click.BadParameter(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
+
+        batch_size_source = ctx.get_parameter_source("batch_size")  # type: ignore[attr-defined]
+        if batch_size_source == ParameterSource.DEFAULT:
+            training_args["batch_size"] = model_limits.full_training.max_batch_size
+
     if n_evals <= 0 and validation_file:
         log_warn(
             "Warning: You have specified a validation file but the number of evaluation loops is set to 0. No evaluations will be performed."
