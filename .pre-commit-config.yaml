@@ -17,5 +17,5 @@ repos:
     hooks:
       - id: mypy
         args: [--strict]
-        additional_dependencies: [types-requests, types-tqdm, types-tabulate, types-click, types-filelock, types-Pillow, pyarrow-stubs, pydantic, aiohttp]
+        additional_dependencies: [types-requests, types-tqdm, types-tabulate, types-click, types-filelock, types-Pillow, rich, pyarrow-stubs, pydantic, aiohttp]
         exclude: ^tests/

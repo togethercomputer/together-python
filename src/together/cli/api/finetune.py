@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from textwrap import wrap
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
+from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 from together.types.finetune import DownloadCheckpointType
+from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 
 
 class DownloadCheckpointTypeChoice(click.Choice):
@@ -125,14 +127,16 @@ def create(
         lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
+        verbose=True,
     )
 
-    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
-
-    # TODO: Remove it after the 21st of August
-    log_warn(
-        "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
-    )
+    report_string = f"Successfully submitted a fine-tuning job {response.id}"
+    if response.created_at is not None:
+        created_time = datetime.strptime(response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+        # created_at reports UTC time, we use .astimezone() to convert to local time
+        formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
+        report_string += f" at {formatted_time}"
+    rprint(report_string)
 
 
 @fine_tuning.command()
