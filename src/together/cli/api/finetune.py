@@ -11,7 +11,7 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.cli.api.utils import AUTO_INT
+from together.cli.api.utils import INT_WITH_MAX
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
@@ -58,7 +58,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=AUTO_INT, default="max", help="Train batch size")
+@click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
     "--lora/--no-lora",

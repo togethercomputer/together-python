@@ -18,4 +18,4 @@ class AutoIntParamType(click.ParamType):
         self.fail("Invalid integer value: {value}")
 
 
-AUTO_INT = AutoIntParamType()
+INT_WITH_MAX = AutoIntParamType()

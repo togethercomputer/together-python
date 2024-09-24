@@ -61,7 +61,7 @@ class FineTuning:
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to auto.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
