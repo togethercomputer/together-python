@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from rich import print
+from rich import print as rprint
 
 from together.abstract import api_requestor
 from together.filemanager import DownloadManager
@@ -104,7 +104,7 @@ class FineTuning:
             wandb_key=wandb_api_key,
         )
         if verbose:
-            print(
+            rprint(
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )

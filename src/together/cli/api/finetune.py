@@ -6,7 +6,7 @@ from textwrap import wrap
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
-from rich import print as rich_print
+from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
@@ -136,7 +136,7 @@ def create(
         # created_at reports UTC time, we use .astimezone() to convert to local time
         formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
         report_string += f" at {formatted_time}"
-    rich_print(report_string)
+    rprint(report_string)
 
 
 @fine_tuning.command()
