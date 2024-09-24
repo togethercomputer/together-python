@@ -14,6 +14,16 @@ from together.types.finetune import DownloadCheckpointType
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 
 
+_CONFIRMATION_MESSAGE = (
+    "You are about to launch a fine-tuning job. "
+    "The cost of your job will be determined by the model size, the number of tokens "
+    "in the training file, the number of tokens in the validation file, the number of epochs, and "
+    "the number of evaluations. Visit https://www.together.ai/pricing to get a price estimate.\n"
+    "You can add `-y` or `--confirm` to skip this message.\n\n"
+    "Do you want to proceed?"
+)
+
+
 class DownloadCheckpointTypeChoice(click.Choice):
     def __init__(self) -> None:
         super().__init__([ct.value for ct in DownloadCheckpointType])
@@ -67,6 +77,14 @@ def fine_tuning(ctx: click.Context) -> None:
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
+@click.option(
+    "--confirm",
+    "-y",
+    type=bool,
+    is_flag=True,
+    default=False,
+    help="Whether to skip the launch confirmation message",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -84,6 +102,7 @@ def create(
     lora_trainable_modules: str,
     suffix: str,
     wandb_api_key: str,
+    confirm: bool,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -111,32 +130,35 @@ def create(
             "You have specified a number of evaluation loops but no validation file."
         )
 
-    response = client.fine_tuning.create(
-        training_file=training_file,
-        model=model,
-        n_epochs=n_epochs,
-        validation_file=validation_file,
-        n_evals=n_evals,
-        n_checkpoints=n_checkpoints,
-        batch_size=batch_size,
-        learning_rate=learning_rate,
-        lora=lora,
-        lora_r=lora_r,
-        lora_dropout=lora_dropout,
-        lora_alpha=lora_alpha,
-        lora_trainable_modules=lora_trainable_modules,
-        suffix=suffix,
-        wandb_api_key=wandb_api_key,
-        verbose=True,
-    )
+    if confirm or click.confirm(_CONFIRMATION_MESSAGE, default=True, show_default=True):
+        response = client.fine_tuning.create(
+            training_file=training_file,
+            model=model,
+            n_epochs=n_epochs,
+            validation_file=validation_file,
+            n_evals=n_evals,
+            n_checkpoints=n_checkpoints,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            lora=lora,
+            lora_r=lora_r,
+            lora_dropout=lora_dropout,
+            lora_alpha=lora_alpha,
+            lora_trainable_modules=lora_trainable_modules,
+            suffix=suffix,
+            wandb_api_key=wandb_api_key,
+            verbose=True,
+        )
 
-    report_string = f"Successfully submitted a fine-tuning job {response.id}"
-    if response.created_at is not None:
-        created_time = datetime.strptime(response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
-        # created_at reports UTC time, we use .astimezone() to convert to local time
-        formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
-        report_string += f" at {formatted_time}"
-    rprint(report_string)
+        report_string = f"Successfully submitted a fine-tuning job {response.id}"
+        if response.created_at is not None:
+            created_time = datetime.strptime(response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+            # created_at reports UTC time, we use .astimezone() to convert to local time
+            formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
+            report_string += f" at {formatted_time}"
+        rprint(report_string)
+    else:
+        click.echo("No confirmation received, stopping job launch")
 
 
 @fine_tuning.command()
