@@ -15,11 +15,11 @@ from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 
 
 _CONFIRMATION_MESSAGE = (
-    "You are about to launch a fine-tuning job. "
+    "You are about to create a fine-tuning job. "
     "The cost of your job will be determined by the model size, the number of tokens "
     "in the training file, the number of tokens in the validation file, the number of epochs, and "
     "the number of evaluations. Visit https://www.together.ai/pricing to get a price estimate.\n"
-    "You can add `-y` or `--confirm` to skip this message.\n\n"
+    "You can pass `-y` or `--confirm` to your command to skip this message.\n\n"
     "Do you want to proceed?"
 )
 
