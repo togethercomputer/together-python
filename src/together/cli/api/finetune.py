@@ -152,7 +152,9 @@ def create(
 
         report_string = f"Successfully submitted a fine-tuning job {response.id}"
         if response.created_at is not None:
-            created_time = datetime.strptime(response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
+            created_time = datetime.strptime(
+                response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z"
+            )
             # created_at reports UTC time, we use .astimezone() to convert to local time
             formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
             report_string += f" at {formatted_time}"
