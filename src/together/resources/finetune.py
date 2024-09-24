@@ -22,7 +22,7 @@ from together.types import (
     TrainingType,
 )
 from together.types.finetune import DownloadCheckpointType
-from together.utils import log_warn, normalize_key
+from together.utils import log_warn_once, normalize_key
 
 
 class FineTuning:
@@ -81,6 +81,12 @@ class FineTuning:
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
+
+        if batch_size == "max":
+            log_warn_once(
+                "Since 1.3.0, batch size is automatically set to max. "
+                "This behavior can be disabled by setting the `batch_size` parameter to an integer value."
+            )
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
