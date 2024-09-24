@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from rich import print
+
 from together.abstract import api_requestor
 from together.filemanager import DownloadManager
 from together.together_response import TogetherResponse
@@ -43,6 +45,7 @@ class FineTuning:
         lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
+        verbose: bool = False,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -67,6 +70,8 @@ class FineTuning:
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
                 Defaults to None.
+            verbose (bool, optional): whether to print the job parameters before submitting a request.
+                Defaults to False.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -85,7 +90,7 @@ class FineTuning:
                 lora_trainable_modules=lora_trainable_modules,
             )
 
-        parameter_payload = FinetuneRequest(
+        finetune_request = FinetuneRequest(
             model=model,
             training_file=training_file,
             validation_file=validation_file,
@@ -97,7 +102,13 @@ class FineTuning:
             training_type=training_type,
             suffix=suffix,
             wandb_key=wandb_api_key,
-        ).model_dump(exclude_none=True)
+        )
+        if verbose:
+            print(
+                "Submitting a fine-tuning job with the following parameters:",
+                finetune_request,
+            )
+        parameter_payload = finetune_request.model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -109,11 +120,6 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
-
-        # TODO: Remove it after the 21st of August
-        log_warn(
-            "The default value of batch size has been changed from 32 to 16 since together version >= 1.2.6"
-        )
 
         # TODO: Remove after next LoRA default change
         log_warn(
@@ -266,7 +272,7 @@ class FineTuning:
                 raise ValueError(
                     "Only DEFAULT checkpoint type is allowed for FullTrainingType"
                 )
-            url += f"&checkpoint=modelOutputPath"
+            url += "&checkpoint=modelOutputPath"
         elif isinstance(ft_job.training_type, LoRATrainingType):
             if checkpoint_type == DownloadCheckpointType.DEFAULT:
                 checkpoint_type = DownloadCheckpointType.MERGED
