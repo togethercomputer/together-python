@@ -242,7 +242,7 @@ client.fine_tuning.create(
   model = 'mistralai/Mixtral-8x7B-Instruct-v0.1',
   n_epochs = 3,
   n_checkpoints = 1,
-  batch_size = "auto",
+  batch_size = "max",
   learning_rate = 1e-5,
   suffix = 'my-demo-finetune',
   wandb_api_key = '1a2b3c4d5e.......',

@@ -8,12 +8,12 @@ class AutoIntParamType(click.ParamType):
 
     def convert(
         self, value: str, param: click.Parameter | None, ctx: click.Context | None
-    ) -> int | Literal["auto"] | None:
+    ) -> int | Literal["max"] | None:
         if isinstance(value, int):
             return value
 
-        if value == "auto":
-            return "auto"
+        if value == "max":
+            return "max"
 
         self.fail("Invalid integer value: {value}")
 

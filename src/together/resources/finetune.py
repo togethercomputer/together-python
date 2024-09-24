@@ -38,7 +38,7 @@ class FineTuning:
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | Literal["auto"] = "auto",
+        batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
         lora: bool = False,
         lora_r: int | None = None,
@@ -108,7 +108,7 @@ class FineTuning:
 
             batch_size = (
                 batch_size
-                if batch_size != "auto"
+                if batch_size != "max"
                 else model_limits.lora_training.max_batch_size
             )
         else:
@@ -118,7 +118,7 @@ class FineTuning:
                 )
             batch_size = (
                 batch_size
-                if batch_size != "auto"
+                if batch_size != "max"
                 else model_limits.full_training.max_batch_size
             )
 
