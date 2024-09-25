@@ -596,7 +596,7 @@ class APIRequestor:
 
         try:
             result = await session.request(
-                method=options.method, url=abs_url, **request_kwargs  # type: ignore
+                method=options.method, url=abs_url, **request_kwargs
             )
             utils.log_debug(
                 "Together API response",
