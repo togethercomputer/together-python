@@ -1,4 +1,4 @@
-from together.utils._log import log_debug, log_info, log_warn, logfmt
+from together.utils._log import log_debug, log_info, log_warn, log_warn_once, logfmt
 from together.utils.api_helpers import default_api_key, get_headers
 from together.utils.files import check_file
 from together.utils.tools import (
@@ -18,6 +18,7 @@ __all__ = [
     "log_debug",
     "log_info",
     "log_warn",
+    "log_warn_once",
     "logfmt",
     "enforce_trailing_slash",
     "normalize_key",

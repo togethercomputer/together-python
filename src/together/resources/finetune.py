@@ -159,11 +159,6 @@ class FineTuning:
 
         assert isinstance(response, TogetherResponse)
 
-        # TODO: Remove after next LoRA default change
-        log_warn(
-            "Some of the jobs run _directly_ from the together-python library might be trained using LoRA adapters. "
-            "The version range when this change occurred is from 1.2.3 to 1.2.6."
-        )
 
         return FinetuneResponse(**response.data)
 
