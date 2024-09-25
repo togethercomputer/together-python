@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 from rich import print as rprint
 
@@ -13,6 +14,7 @@ from together.types import (
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
+    FinetuneTrainingLimits,
     FullTrainingType,
     LoRATrainingType,
     TogetherClient,
@@ -20,7 +22,7 @@ from together.types import (
     TrainingType,
 )
 from together.types.finetune import DownloadCheckpointType
-from together.utils import log_warn, normalize_key
+from together.utils import log_warn_once, normalize_key
 
 
 class FineTuning:
@@ -36,16 +38,17 @@ class FineTuning:
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 16,
+        batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
         lora: bool = False,
-        lora_r: int | None = 8,
+        lora_r: int | None = None,
         lora_dropout: float | None = 0,
-        lora_alpha: float | None = 8,
+        lora_alpha: float | None = None,
         lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
         verbose: bool = False,
+        model_limits: FinetuneTrainingLimits | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -58,7 +61,7 @@ class FineTuning:
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -72,22 +75,57 @@ class FineTuning:
                 Defaults to None.
             verbose (bool, optional): whether to print the job parameters before submitting a request.
                 Defaults to False.
+            model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
+                Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
+        if batch_size == "max":
+            log_warn_once(
+                "Starting from together>=1.3.0, "
+                "the default batch size is set to the maximum allowed value for each model."
+            )
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
+        if model_limits is None:
+            model_limits = self.get_model_limits(model=model)
+
         training_type: TrainingType = FullTrainingType()
         if lora:
+            if model_limits.lora_training is None:
+                raise ValueError(
+                    "LoRA adapters are not supported for the selected model."
+                )
+            lora_r = (
+                lora_r if lora_r is not None else model_limits.lora_training.max_rank
+            )
+            lora_alpha = lora_alpha if lora_alpha is not None else lora_r * 2
             training_type = LoRATrainingType(
                 lora_r=lora_r,
                 lora_alpha=lora_alpha,
                 lora_dropout=lora_dropout,
                 lora_trainable_modules=lora_trainable_modules,
+            )
+
+            batch_size = (
+                batch_size
+                if batch_size != "max"
+                else model_limits.lora_training.max_batch_size
+            )
+        else:
+            if model_limits.full_training is None:
+                raise ValueError(
+                    "Full training is not supported for the selected model."
+                )
+            batch_size = (
+                batch_size
+                if batch_size != "max"
+                else model_limits.full_training.max_batch_size
             )
 
         finetune_request = FinetuneRequest(
@@ -120,12 +158,6 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
-
-        # TODO: Remove after next LoRA default change
-        log_warn(
-            "Some of the jobs run _directly_ from the together-python library might be trained using LoRA adapters. "
-            "The version range when this change occurred is from 1.2.3 to 1.2.6."
-        )
 
         return FinetuneResponse(**response.data)
 
@@ -304,6 +336,34 @@ class FineTuning:
             filename=downloaded_filename,
             size=file_size,
         )
+
+    def get_model_limits(self, *, model: str) -> FinetuneTrainingLimits:
+        """
+        Requests training limits for a specific model
+
+        Args:
+            model_name (str): Name of the model to get limits for
+
+        Returns:
+            FinetuneTrainingLimits: Object containing training limits for the model
+        """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        model_limits_response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="fine-tunes/models/limits",
+                params={"model_name": model},
+            ),
+            stream=False,
+        )
+
+        model_limits = FinetuneTrainingLimits(**model_limits_response.data)
+
+        return model_limits
 
 
 class AsyncFineTuning:
@@ -493,3 +553,31 @@ class AsyncFineTuning:
             "AsyncFineTuning.download not implemented. "
             "Please use FineTuning.download function instead."
         )
+
+    async def get_model_limits(self, *, model: str) -> FinetuneTrainingLimits:
+        """
+        Requests training limits for a specific model
+
+        Args:
+            model_name (str): Name of the model to get limits for
+
+        Returns:
+            FinetuneTrainingLimits: Object containing training limits for the model
+        """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        model_limits_response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url="fine-tunes/models/limits",
+                params={"model": model},
+            ),
+            stream=False,
+        )
+
+        model_limits = FinetuneTrainingLimits(**model_limits_response.data)
+
+        return model_limits

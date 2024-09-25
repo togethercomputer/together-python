@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 import together
 from together.legacy.base import API_KEY_WARNING, deprecated
@@ -43,7 +43,7 @@ class Finetune:
             model=model,
             n_epochs=n_epochs,
             n_checkpoints=n_checkpoints,
-            batch_size=batch_size,
+            batch_size=batch_size if isinstance(batch_size, int) else "max",
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_api_key=wandb_api_key,

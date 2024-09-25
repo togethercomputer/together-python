@@ -263,3 +263,21 @@ class FinetuneDownloadResult(BaseModel):
     filename: str | None = None
     # size in bytes
     size: int | None = None
+
+
+class FinetuneFullTrainingLimits(BaseModel):
+    max_batch_size: int
+    min_batch_size: int
+
+
+class FinetuneLoraTrainingLimits(FinetuneFullTrainingLimits):
+    max_rank: int
+    target_modules: List[str]
+
+
+class FinetuneTrainingLimits(BaseModel):
+    max_num_epochs: int
+    max_learning_rate: float
+    min_learning_rate: float
+    full_training: FinetuneFullTrainingLimits | None = None
+    lora_training: FinetuneLoraTrainingLimits | None = None

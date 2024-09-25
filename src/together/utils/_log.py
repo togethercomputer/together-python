@@ -13,6 +13,8 @@ logger = logging.getLogger("together")
 
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")
 
+WARNING_MESSAGES_ONCE = set()
+
 
 def _console_log_level() -> str | None:
     if together.log in ["debug", "info"]:
@@ -59,3 +61,11 @@ def log_warn(message: str | Any, **params: Any) -> None:
     msg = logfmt(dict(message=message, **params))
     print(msg, file=sys.stderr)
     logger.warn(msg)
+
+
+def log_warn_once(message: str | Any, **params: Any) -> None:
+    msg = logfmt(dict(message=message, **params))
+    if msg not in WARNING_MESSAGES_ONCE:
+        print(msg, file=sys.stderr)
+        logger.warn(msg)
+        WARNING_MESSAGES_ONCE.add(msg)
