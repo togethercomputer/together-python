@@ -20,7 +20,7 @@ class ChatCompletions:
     def create(
         self,
         *,
-        messages: List[Dict[str, str]],
+        messages: List[Dict[str, Any]],
         model: str,
         max_tokens: int | None = None,
         stop: List[str] | None = None,
@@ -39,7 +39,7 @@ class ChatCompletions:
         n: int | None = None,
         safety_model: str | None = None,
         response_format: Dict[str, str | Dict[str, Any]] | None = None,
-        tools: Dict[str, str | Dict[str, Any]] | None = None,
+        tools: List[Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
         **kwargs: Any,
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
