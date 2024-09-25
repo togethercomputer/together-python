@@ -40,9 +40,24 @@ class ToolCalls(BaseModel):
     function: FunctionCall | None = None
 
 
+class ChatCompletionMessageContentType(str, Enum):
+    TEXT = "text"
+    IMAGE_URL = "image_url"
+
+
+class ChatCompletionMessageContentImageURL(BaseModel):
+    url: str
+
+
+class ChatCompletionMessageContent(BaseModel):
+    type: ChatCompletionMessageContentType
+    text: str | None = None
+    image_url: ChatCompletionMessageContentImageURL | None = None
+
+
 class ChatCompletionMessage(BaseModel):
     role: MessageRole
-    content: str | None = None
+    content: str | List[ChatCompletionMessageContent] | None = None
     tool_calls: List[ToolCalls] | None = None
 
 
