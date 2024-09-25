@@ -84,8 +84,8 @@ class FineTuning:
 
         if batch_size == "max":
             log_warn_once(
-                "Since 1.3.0, batch size is automatically set to max. "
-                "This behavior can be disabled by setting the `batch_size` parameter to an integer value."
+                "Starting from together>=1.3.0, "
+                "the default batch size is set to the maximum allowed value for each model."
             )
 
         requestor = api_requestor.APIRequestor(
@@ -158,7 +158,6 @@ class FineTuning:
         )
 
         assert isinstance(response, TogetherResponse)
-
 
         return FinetuneResponse(**response.data)
 
