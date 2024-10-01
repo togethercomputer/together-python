@@ -13,6 +13,10 @@ from together.constants import (
     MIN_SAMPLES,
     NUM_BYTES_IN_GB,
     PARQUET_EXPECTED_COLUMNS,
+    JSONL_REQUIRED_COLUMNS_MAP,
+    REQUIRED_COLUMNS_CONVERSATION,
+    POSSIBLE_ROLES_CONVERSATION,
+    DatasetFormat
 )
 
 
@@ -88,6 +92,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
         report_dict["is_check_passed"] = False
         return report_dict
 
+    dataset_format = None
     with file.open() as f:
         # idx must be instantiated so decode errors (e.g. file is a tar) or empty files are caught
         idx = -1
@@ -104,23 +109,68 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
                     report_dict["is_check_passed"] = False
 
-                if "text" not in json_line.keys():
-                    report_dict["text_field"] = False
-                    report_dict["message"] = (
-                        f"Missing 'text' field was found on line {idx + 1} of the the input file. "
-                        "Expected format: {'text': 'my sample string'}. "
-                    )
-                    report_dict["is_check_passed"] = False
-                else:
-                    # check to make sure the value of the "text" key is a string
-                    if not isinstance(json_line["text"], str):
+                if dataset_format is None:
+                    for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
+                        if all(column in json_line for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]):
+                            if dataset_format is not None:
+                                report_dict["message"] = (
+                                    "All samples in the dataset must have the same dataset format. "
+                                    f"Got {dataset_format} for the first line and {possible_format} "
+                                    f"for the {idx + 1} line."
+                                )
+                                raise KeyError
+                            dataset_format = possible_format
+                    if dataset_format is None:
+                        report_dict["message"] = (
+                            "Error parsing file. Could not detect a possible format for the line with the columns:\n"
+                            f"{json_line.keys()}"
+                        )
+                        raise KeyError
+
+                for column in JSONL_REQUIRED_COLUMNS_MAP[dataset_format]:
+                    if column not in json_line.keys():
+                        report_dict["text_field"] = False
+                        report_dict["message"] = (
+                            f"Missing '{column}' field was found on line {idx + 1} of the the input file."
+                        )
+                        report_dict["is_check_passed"] = False
+                        raise KeyError
+
+                if dataset_format == DatasetFormat.CONVERSATION:
+                    message_column = JSONL_REQUIRED_COLUMNS_MAP[DatasetFormat.CONVERSATION]
+                    if not isinstance(json_line[message_column], dict):
                         report_dict["key_value"] = False
                         report_dict["message"] = (
-                            f'Invalid value type for "text" key on line {idx + 1}. '
-                            f'Expected string. Found {type(json_line["text"])}.'
+                            f"Invalid format on line {idx + 1} of the input file. "
+                            f"Expected dict. Found {type(json_line[message_column])}"
                         )
+                        raise KeyError
+                    for column in REQUIRED_COLUMNS_CONVERSATION:
+                        if column not in json_line[message_column].keys():
+                            report_dict["key_value"] = False
+                            report_dict["message"] = (
+                                f"Missing '{column}' field was found on line {idx + 1} of the the input file."
+                            )
+                            raise KeyError
+                        else:
+                            if isinstance(json_line[message_column][column], str):
+                                report_dict["text_field"] = False
+                                report_dict["message"] = (
+                                    f"Invalid format on line {idx + 1} in the column {column} of the input file. "
+                                    f"Expected string. found {type(json_line[message_column][column])}"
+                                )
+                    pass
+                else:
+                    # check to make sure the value of the keys is a string
+                    for column in JSONL_REQUIRED_COLUMNS_MAP[dataset_format]:
+                        if not isinstance(json_line[column], str):
+                            report_dict["key_value"] = False
+                            report_dict["message"] = (
+                                f'Invalid value type for "{column}" key on line {idx + 1}. '
+                                f'Expected string. Found {type(json_line[column])}.'
+                            )
 
-                        report_dict["is_check_passed"] = False
+                            report_dict["is_check_passed"] = False
 
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < MIN_SAMPLES:
@@ -136,7 +186,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
             report_dict["load_json"] = True
 
-        except ValueError:
+        except ValueError as _:
             report_dict["load_json"] = False
             if idx < 0:
                 report_dict["message"] = (
@@ -147,6 +197,9 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                 report_dict["message"] = (
                     f"Error parsing json payload. Unexpected format on line {idx + 1}."
                 )
+            report_dict["is_check_passed"] = False
+        except KeyError as _:
+            report_dict["load_json"] = False
             report_dict["is_check_passed"] = False
 
     if "text_field" not in report_dict:
