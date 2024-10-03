@@ -109,21 +109,32 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
                     report_dict["is_check_passed"] = False
 
+                current_format = None
+                for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
+                    if all(column in json_line for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]):
+                        if current_format is None:
+                            current_format = possible_format
+                        elif current_format != possible_format:
+                            report_dict["message"] = (
+                                "Found multiple dataset formats in the input file. "
+                                f"Got {current_format} and {possible_format} on line {idx + 1}."
+                            )
+                            raise KeyError
+                if current_format is None and dataset_format is None:
+                    report_dict["message"] = (
+                        "Error parsing file. Could not detect a possible format for the line with the columns:\n"
+                        f"{json_line.keys()}"
+                    )
+                    raise KeyError
+
                 if dataset_format is None:
-                    for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
-                        if all(column in json_line for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]):
-                            if dataset_format is not None:
-                                report_dict["message"] = (
-                                    "All samples in the dataset must have the same dataset format. "
-                                    f"Got {dataset_format} for the first line and {possible_format} "
-                                    f"for the {idx + 1} line."
-                                )
-                                raise KeyError
-                            dataset_format = possible_format
-                    if dataset_format is None:
+                    dataset_format = current_format
+                elif current_format is not None:
+                    if current_format != dataset_format:
                         report_dict["message"] = (
-                            "Error parsing file. Could not detect a possible format for the line with the columns:\n"
-                            f"{json_line.keys()}"
+                            "All samples in the dataset must have the same dataset format. "
+                            f"Got {dataset_format} for the first line and {current_format} "
+                            f"for the {idx + 1} line."
                         )
                         raise KeyError
 
@@ -137,29 +148,49 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         raise KeyError
 
                 if dataset_format == DatasetFormat.CONVERSATION:
-                    message_column = JSONL_REQUIRED_COLUMNS_MAP[DatasetFormat.CONVERSATION]
-                    if not isinstance(json_line[message_column], dict):
+                    message_column = JSONL_REQUIRED_COLUMNS_MAP[DatasetFormat.CONVERSATION][0]
+                    if not isinstance(json_line[message_column], list):
                         report_dict["key_value"] = False
                         report_dict["message"] = (
                             f"Invalid format on line {idx + 1} of the input file. "
-                            f"Expected dict. Found {type(json_line[message_column])}"
+                            f"Expected list. Found {type(json_line[message_column])}"
                         )
                         raise KeyError
                     for column in REQUIRED_COLUMNS_CONVERSATION:
-                        if column not in json_line[message_column].keys():
+                        for turn in json_line[message_column]:
+                            if column not in turn.keys():
+                                report_dict["key_value"] = False
+                                report_dict["message"] = (
+                                    f"Missing '{column}' in a turn was found on line {idx + 1} of the the input file."
+                                )
+                                raise KeyError
+                            else:
+                                if not isinstance(turn[column], str):
+                                    report_dict["text_field"] = False
+                                    report_dict["message"] = (
+                                        f"Invalid format on line {idx + 1} in the column {column} of the input file. "
+                                        f"Expected string. found {type(turn[column])}"
+                                    )
+                                    raise KeyError
+
+                    roles = set(turn["role"] for turn in json_line["messages"])
+                    for role in roles:
+                        if role not in POSSIBLE_ROLES_CONVERSATION:
                             report_dict["key_value"] = False
                             report_dict["message"] = (
-                                f"Missing '{column}' field was found on line {idx + 1} of the the input file."
+                                f"Found invalid role '{role}' in the messages on the line {idx + 1}. "
+                                f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}"
                             )
                             raise KeyError
-                        else:
-                            if isinstance(json_line[message_column][column], str):
-                                report_dict["text_field"] = False
-                                report_dict["message"] = (
-                                    f"Invalid format on line {idx + 1} in the column {column} of the input file. "
-                                    f"Expected string. found {type(json_line[message_column][column])}"
-                                )
-                    pass
+
+                    is_user_turn = [turn["role"] == "user" for turn in json_line["messages"]]
+                    if any(i == j for i, j in zip(is_user_turn[1:], is_user_turn[:1])):
+                        report_dict["key_value"] = False
+                        report_dict["message"] = (
+                            f"Invalid role turns on line {idx + 1} of the input file. "
+                            "'user' and 'assistant' roles must alternate user/assistant/user/assistant/..."
+                        )
+                        raise KeyError
                 else:
                     # check to make sure the value of the keys is a string
                     for column in JSONL_REQUIRED_COLUMNS_MAP[dataset_format]:
@@ -169,8 +200,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 f'Invalid value type for "{column}" key on line {idx + 1}. '
                                 f'Expected string. Found {type(json_line[column])}.'
                             )
-
-                            report_dict["is_check_passed"] = False
+                            raise KeyError
 
             # make sure this is outside the for idx, line in enumerate(f): for loop
             if idx + 1 < MIN_SAMPLES:
@@ -183,6 +213,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
             else:
                 report_dict["num_samples"] = idx + 1
                 report_dict["min_samples"] = True
+                report_dict["is_check_passed"] = True
 
             report_dict["load_json"] = True
 
