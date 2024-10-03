@@ -1,5 +1,6 @@
 import base64
 import pathlib
+import requests
 
 import click
 from PIL import Image
@@ -70,8 +71,18 @@ def generate(
     for i, choice in enumerate(response.data):
         assert isinstance(choice, ImageChoicesData)
 
+        data = None
+        if choice.b64_json:
+            data = base64.b64decode(choice.b64_json)
+        elif choice.url:
+            data = requests.get(choice.url).content
+
+        if not data:
+            click.echo(f"Image [{i + 1}/{len(response.data)}] is empty")
+            continue
+
         with open(f"{output}/{prefix}{choice.index}.png", "wb") as f:
-            f.write(base64.b64decode(choice.b64_json))
+            f.write(data)
 
         click.echo(
             f"Image [{i + 1}/{len(response.data)}] saved to {output}/{prefix}{choice.index}.png"
