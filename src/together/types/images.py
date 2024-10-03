@@ -28,7 +28,9 @@ class ImageChoicesData(BaseModel):
     # response index
     index: int
     # base64 image response
-    b64_json: str
+    b64_json: str | None = None
+    # URL hosting image
+    url: str | None = None
 
 
 class ImageResponse(BaseModel):
