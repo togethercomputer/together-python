@@ -158,7 +158,6 @@ prompts = [
 ]
 
 async def async_chat_completion(prompts):
-    async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
     tasks = [
         async_client.completions.create(
             model="codellama/CodeLlama-34b-Python-hf",
