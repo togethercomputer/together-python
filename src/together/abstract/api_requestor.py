@@ -366,7 +366,7 @@ class APIRequestor:
                 headers=resp._headers,
                 request_id=resp.request_id,
             )
-        elif rcode in [400, 403, 404, 415]:
+        elif rcode in [400, 403, 404, 415, 422]:
             return error.InvalidRequestError(
                 error_data,
                 http_status=rcode,
