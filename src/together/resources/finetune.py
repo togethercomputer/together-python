@@ -25,6 +25,81 @@ from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
 
 
+def createFinetuneRequest(
+    model_limits: FinetuneTrainingLimits,
+    training_file: str,
+    model: str,
+    n_epochs: int = 1,
+    validation_file: str | None = "",
+    n_evals: int | None = 0,
+    n_checkpoints: int | None = 1,
+    batch_size: int | Literal["max"] = "max",
+    learning_rate: float | None = 0.00001,
+    warmup_ratio: float | None = 0.0,
+    lora: bool = False,
+    lora_r: int | None = None,
+    lora_dropout: float | None = 0,
+    lora_alpha: float | None = None,
+    lora_trainable_modules: str | None = "all-linear",
+    suffix: str | None = None,
+    wandb_api_key: str | None = None,
+) -> FinetuneRequest:
+    if batch_size == "max":
+        log_warn_once(
+            "Starting from together>=1.3.0, "
+            "the default batch size is set to the maximum allowed value for each model."
+        )
+    if warmup_ratio is None:
+        warmup_ratio = 0.0
+
+    training_type: TrainingType = FullTrainingType()
+    if lora:
+        if model_limits.lora_training is None:
+            raise ValueError("LoRA adapters are not supported for the selected model.")
+        lora_r = lora_r if lora_r is not None else model_limits.lora_training.max_rank
+        lora_alpha = lora_alpha if lora_alpha is not None else lora_r * 2
+        training_type = LoRATrainingType(
+            lora_r=lora_r,
+            lora_alpha=lora_alpha,
+            lora_dropout=lora_dropout,
+            lora_trainable_modules=lora_trainable_modules,
+        )
+
+        batch_size = (
+            batch_size
+            if batch_size != "max"
+            else model_limits.lora_training.max_batch_size
+        )
+    else:
+        if model_limits.full_training is None:
+            raise ValueError("Full training is not supported for the selected model.")
+        batch_size = (
+            batch_size
+            if batch_size != "max"
+            else model_limits.full_training.max_batch_size
+        )
+
+    if warmup_ratio > 1 or warmup_ratio < 0:
+        raise ValueError("Warmup ratio should be between 0 and 1")
+
+    finetune_request = FinetuneRequest(
+        model=model,
+        training_file=training_file,
+        validation_file=validation_file,
+        n_epochs=n_epochs,
+        n_evals=n_evals,
+        n_checkpoints=n_checkpoints,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        warmup_ratio=warmup_ratio,
+        training_type=training_type,
+        suffix=suffix,
+        wandb_key=wandb_api_key,
+    )
+
+    return finetune_request
+
+
 class FineTuning:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
@@ -40,6 +115,7 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        warmup_ratio: float | None = 0.0,
         lora: bool = False,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
@@ -64,6 +140,7 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
@@ -82,12 +159,6 @@ class FineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
-        if batch_size == "max":
-            log_warn_once(
-                "Starting from together>=1.3.0, "
-                "the default batch size is set to the maximum allowed value for each model."
-            )
-
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -95,52 +166,26 @@ class FineTuning:
         if model_limits is None:
             model_limits = self.get_model_limits(model=model)
 
-        training_type: TrainingType = FullTrainingType()
-        if lora:
-            if model_limits.lora_training is None:
-                raise ValueError(
-                    "LoRA adapters are not supported for the selected model."
-                )
-            lora_r = (
-                lora_r if lora_r is not None else model_limits.lora_training.max_rank
-            )
-            lora_alpha = lora_alpha if lora_alpha is not None else lora_r * 2
-            training_type = LoRATrainingType(
-                lora_r=lora_r,
-                lora_alpha=lora_alpha,
-                lora_dropout=lora_dropout,
-                lora_trainable_modules=lora_trainable_modules,
-            )
-
-            batch_size = (
-                batch_size
-                if batch_size != "max"
-                else model_limits.lora_training.max_batch_size
-            )
-        else:
-            if model_limits.full_training is None:
-                raise ValueError(
-                    "Full training is not supported for the selected model."
-                )
-            batch_size = (
-                batch_size
-                if batch_size != "max"
-                else model_limits.full_training.max_batch_size
-            )
-
-        finetune_request = FinetuneRequest(
-            model=model,
+        finetune_request = createFinetuneRequest(
+            model_limits=model_limits,
             training_file=training_file,
-            validation_file=validation_file,
+            model=model,
             n_epochs=n_epochs,
+            validation_file=validation_file,
             n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
-            training_type=training_type,
+            warmup_ratio=warmup_ratio,
+            lora=lora,
+            lora_r=lora_r,
+            lora_dropout=lora_dropout,
+            lora_alpha=lora_alpha,
+            lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
-            wandb_key=wandb_api_key,
+            wandb_api_key=wandb_api_key,
         )
+
         if verbose:
             rprint(
                 "Submitting a fine-tuning job with the following parameters:",
@@ -377,12 +422,20 @@ class AsyncFineTuning:
         model: str,
         n_epochs: int = 1,
         validation_file: str | None = "",
-        n_evals: int = 0,
+        n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 32,
-        learning_rate: float = 0.00001,
+        batch_size: int | Literal["max"] = "max",
+        learning_rate: float | None = 0.00001,
+        warmup_ratio: float | None = 0.0,
+        lora: bool = False,
+        lora_r: int | None = None,
+        lora_dropout: float | None = 0,
+        lora_alpha: float | None = None,
+        lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
+        verbose: bool = False,
+        model_limits: FinetuneTrainingLimits | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -395,12 +448,22 @@ class AsyncFineTuning:
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to 32.
+            batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
+            lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
+            lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
+            lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
+            lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
+                Defaults to None.
+            verbose (bool, optional): whether to print the job parameters before submitting a request.
+                Defaults to False.
+            model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
 
         Returns:
@@ -411,18 +474,35 @@ class AsyncFineTuning:
             client=self._client,
         )
 
-        parameter_payload = FinetuneRequest(
-            model=model,
+        if model_limits is None:
+            model_limits = await self.get_model_limits(model=model)
+
+        finetune_request = createFinetuneRequest(
+            model_limits=model_limits,
             training_file=training_file,
-            validation_file=validation_file,
+            model=model,
             n_epochs=n_epochs,
+            validation_file=validation_file,
             n_evals=n_evals,
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            warmup_ratio=warmup_ratio,
+            lora=lora,
+            lora_r=lora_r,
+            lora_dropout=lora_dropout,
+            lora_alpha=lora_alpha,
+            lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
-            wandb_key=wandb_api_key,
-        ).model_dump(exclude_none=True)
+            wandb_api_key=wandb_api_key,
+        )
+
+        if verbose:
+            rprint(
+                "Submitting a fine-tuning job with the following parameters:",
+                finetune_request,
+            )
+        parameter_payload = finetune_request.model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
