@@ -150,6 +150,8 @@ class FinetuneRequest(BaseModel):
     n_epochs: int
     # training learning rate
     learning_rate: float
+    # learning rate warmup ratio
+    warmup_ratio: float
     # number of checkpoints to save
     n_checkpoints: int | None = None
     # number of evaluation loops to run
@@ -190,6 +192,8 @@ class FinetuneResponse(BaseModel):
     batch_size: int | None = None
     # training learning rate
     learning_rate: float | None = None
+    # learning rate warmup ratio
+    warmup_ratio: float | None = None
     # number of steps between evals
     eval_steps: int | None = None
     # training type
