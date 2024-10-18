@@ -1,23 +1,30 @@
 from __future__ import annotations
 
-import click
-
+from gettext import gettext as _
 from typing import Literal
+
+import click
 
 
 class AutoIntParamType(click.ParamType):
-    name = "integer"
+    name = "integer_or_max"
+    _number_class = int
 
     def convert(
         self, value: str, param: click.Parameter | None, ctx: click.Context | None
     ) -> int | Literal["max"] | None:
-        if isinstance(value, int):
-            return value
-
         if value == "max":
             return "max"
-
-        self.fail("Invalid integer value: {value}")
+        try:
+            return int(value)
+        except ValueError:
+            self.fail(
+                _("{value!r} is not a valid {number_type}.").format(
+                    value=value, number_type=self.name
+                ),
+                param,
+                ctx,
+            )
 
 
 INT_WITH_MAX = AutoIntParamType()
