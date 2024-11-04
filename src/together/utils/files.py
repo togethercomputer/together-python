@@ -16,7 +16,7 @@ from together.constants import (
     JSONL_REQUIRED_COLUMNS_MAP,
     REQUIRED_COLUMNS_CONVERSATION,
     POSSIBLE_ROLES_CONVERSATION,
-    DatasetFormat
+    DatasetFormat,
 )
 
 
@@ -111,7 +111,10 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
                 current_format = None
                 for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
-                    if all(column in json_line for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]):
+                    if all(
+                        column in json_line
+                        for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                    ):
                         if current_format is None:
                             current_format = possible_format
                         elif current_format != possible_format:
@@ -148,7 +151,9 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         raise KeyError
 
                 if dataset_format == DatasetFormat.CONVERSATION:
-                    message_column = JSONL_REQUIRED_COLUMNS_MAP[DatasetFormat.CONVERSATION][0]
+                    message_column = JSONL_REQUIRED_COLUMNS_MAP[
+                        DatasetFormat.CONVERSATION
+                    ][0]
                     if not isinstance(json_line[message_column], list):
                         report_dict["key_value"] = False
                         report_dict["message"] = (
@@ -183,7 +188,9 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             )
                             raise KeyError
 
-                    is_user_turn = [turn["role"] == "user" for turn in json_line["messages"]]
+                    is_user_turn = [
+                        turn["role"] == "user" for turn in json_line["messages"]
+                    ]
                     if any(i == j for i, j in zip(is_user_turn[1:], is_user_turn[:1])):
                         report_dict["key_value"] = False
                         report_dict["message"] = (
@@ -198,7 +205,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             report_dict["key_value"] = False
                             report_dict["message"] = (
                                 f'Invalid value type for "{column}" key on line {idx + 1}. '
-                                f'Expected string. Found {type(json_line[column])}.'
+                                f"Expected string. Found {type(json_line[column])}."
                             )
                             raise KeyError
 

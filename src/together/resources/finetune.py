@@ -43,6 +43,7 @@ def createFinetuneRequest(
     lora_trainable_modules: str | None = "all-linear",
     suffix: str | None = None,
     wandb_api_key: str | None = None,
+    train_on_inputs: bool | Literal["auto"] = "auto",
 ) -> FinetuneRequest:
     if batch_size == "max":
         log_warn_once(
@@ -95,6 +96,7 @@ def createFinetuneRequest(
         training_type=training_type,
         suffix=suffix,
         wandb_key=wandb_api_key,
+        train_on_inputs=train_on_inputs,
     )
 
     return finetune_request
@@ -439,7 +441,7 @@ class AsyncFineTuning:
         wandb_api_key: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
-        train_on_inputs: bool | Literal["auto"] = "auto"
+        train_on_inputs: bool | Literal["auto"] = "auto",
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job

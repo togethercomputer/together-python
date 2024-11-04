@@ -31,7 +31,7 @@ class BooleanWithAutoParamType(click.ParamType):
     name = "boolean_or_auto"
 
     def convert(
-            self, value: str, param: click.Parameter | None, ctx: click.Context | None
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
     ) -> bool | Literal["auto"] | None:
         if value == "auto":
             return "auto"

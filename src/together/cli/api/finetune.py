@@ -93,7 +93,12 @@ def fine_tuning(ctx: click.Context) -> None:
     default=False,
     help="Whether to skip the launch confirmation message",
 )
-@click.option("--train-on-inputs", type=BOOL_WITH_AUTO, default=True, help="Whether to mask the inputs in conversational data")
+@click.option(
+    "--train-on-inputs",
+    type=BOOL_WITH_AUTO,
+    default=True,
+    help="Whether to mask the inputs in conversational data",
+)
 def create(
     ctx: click.Context,
     training_file: str,
