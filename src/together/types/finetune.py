@@ -163,6 +163,7 @@ class FinetuneRequest(BaseModel):
     # weights & biases api key
     wandb_key: str | None = None
     training_type: FullTrainingType | LoRATrainingType | None = None
+    train_on_inputs: bool | Literal["auto"] = "auto"
 
 
 class FinetuneResponse(BaseModel):
@@ -230,6 +231,7 @@ class FinetuneResponse(BaseModel):
     # training file metadata
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
+    train_on_inputs: bool | Literal["auto"] = "auto"
 
     @field_validator("training_type")
     @classmethod

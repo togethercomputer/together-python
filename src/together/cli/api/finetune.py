@@ -11,7 +11,7 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.cli.api.utils import INT_WITH_MAX
+from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
 from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
 from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
@@ -93,6 +93,7 @@ def fine_tuning(ctx: click.Context) -> None:
     default=False,
     help="Whether to skip the launch confirmation message",
 )
+@click.option("--train-on-inputs", type=BOOL_WITH_AUTO, default=True, help="Whether to mask the inputs in conversational data")
 def create(
     ctx: click.Context,
     training_file: str,
@@ -112,6 +113,7 @@ def create(
     suffix: str,
     wandb_api_key: str,
     confirm: bool,
+    train_on_inputs: bool | Literal["auto"],
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -133,6 +135,7 @@ def create(
         lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
+        train_on_inputs=train_on_inputs,
     )
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
@@ -186,22 +189,7 @@ def create(
 
     if confirm or click.confirm(_CONFIRMATION_MESSAGE, default=True, show_default=True):
         response = client.fine_tuning.create(
-            training_file=training_file,
-            model=model,
-            n_epochs=n_epochs,
-            validation_file=validation_file,
-            n_evals=n_evals,
-            n_checkpoints=n_checkpoints,
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            warmup_ratio=warmup_ratio,
-            lora=lora,
-            lora_r=lora_r,
-            lora_dropout=lora_dropout,
-            lora_alpha=lora_alpha,
-            lora_trainable_modules=lora_trainable_modules,
-            suffix=suffix,
-            wandb_api_key=wandb_api_key,
+            **training_args,
             verbose=True,
         )
 

@@ -125,6 +125,7 @@ class FineTuning:
         wandb_api_key: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
+        train_on_inputs: bool | Literal["auto"] = "auto",
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -154,6 +155,7 @@ class FineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
+            train_on_inputs (bool, optional): Whether to mask the inputs in conversational data. Defaults to "auto".
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -184,6 +186,7 @@ class FineTuning:
             lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
+            train_on_inputs=train_on_inputs,
         )
 
         if verbose:
@@ -436,6 +439,7 @@ class AsyncFineTuning:
         wandb_api_key: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
+        train_on_inputs: bool | Literal["auto"] = "auto"
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -465,6 +469,7 @@ class AsyncFineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
+            train_on_inputs (bool, optional): Whether to mask the inputs in conversational data. Defaults to "auto".
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -495,6 +500,7 @@ class AsyncFineTuning:
             lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
+            train_on_inputs=train_on_inputs,
         )
 
         if verbose:
