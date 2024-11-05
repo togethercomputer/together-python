@@ -61,9 +61,15 @@ def check_file(
     if file.suffix == ".jsonl":
         report_dict["filetype"] = "jsonl"
         data_report_dict = _check_jsonl(file)
+
+        report_dict.update(data_report_dict)
+
     elif file.suffix == ".parquet":
         report_dict["filetype"] = "parquet"
         data_report_dict = _check_parquet(file)
+
+        report_dict.update(data_report_dict)
+
     else:
         report_dict["filetype"] = (
             f"Unknown extension of file {file}. "
@@ -71,7 +77,6 @@ def check_file(
         )
         report_dict["is_check_passed"] = False
 
-    report_dict.update(data_report_dict)
     return report_dict
 
 
