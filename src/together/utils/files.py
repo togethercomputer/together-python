@@ -58,6 +58,7 @@ def check_file(
     else:
         report_dict["file_size"] = file_size
 
+    data_report_dict = {}
     if file.suffix == ".jsonl":
         report_dict["filetype"] = "jsonl"
         data_report_dict = _check_jsonl(file)
@@ -72,6 +73,7 @@ def check_file(
         report_dict["is_check_passed"] = False
 
     report_dict.update(data_report_dict)
+
     return report_dict
 
 
