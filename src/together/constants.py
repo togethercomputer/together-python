@@ -34,11 +34,7 @@ PARQUET_EXPECTED_COLUMNS = ["input_ids", "attention_mask", "labels"]
 
 
 class DatasetFormat(enum.Enum):
-    """Dataset format enum.
-
-    Args:
-        enum (enum.Enum): Enum class for dataset format.
-    """
+    """Dataset format enum."""
 
     GENERAL = "general"
     CONVERSATION = "conversation"
@@ -50,5 +46,5 @@ JSONL_REQUIRED_COLUMNS_MAP = {
     DatasetFormat.CONVERSATION: ["messages"],
     DatasetFormat.INSTRUCTION: ["prompt", "completion"],
 }
-REQUIRED_COLUMNS_CONVERSATION = ["role", "content"]
+REQUIRED_COLUMNS_MESSAGE = ["role", "content"]
 POSSIBLE_ROLES_CONVERSATION = ["system", "user", "assistant"]
