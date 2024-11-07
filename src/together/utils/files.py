@@ -227,7 +227,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
             report_dict["load_json"] = True
 
-        except ValueError as _:
+        except ValueError:
             report_dict["load_json"] = False
             if idx < 0:
                 report_dict["message"] = (

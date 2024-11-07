@@ -208,3 +208,33 @@ def test_check_jsonl_non_alternating_roles(tmp_path: Path):
 
     assert not report["is_check_passed"]
     assert "Invalid role turns" in report["message"]
+
+
+def test_check_jsonl_invalid_value_type(tmp_path: Path):
+    # Create a JSONL file with an invalid value type
+    file = tmp_path / "invalid_value_type.jsonl"
+    content = [{"text": 123}]
+    with file.open("w") as f:
+        f.write("\n".join([json.dumps(item) for item in content]))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert "Expected string" in report["message"]
+
+
+def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
+    file = tmp_path / "missing_field_in_conversation.jsonl"
+    content = [
+        {
+            "messages": [
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant"},
+            ]
+        }
+    ]
+    with file.open("w") as f:
+        f.write("\n".join([json.dumps(item) for item in content]))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert "Field 'content' is missing for a turn" in report["message"]
