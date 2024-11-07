@@ -201,13 +201,9 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                 else:
                     for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
                         if not isinstance(json_line[column], str):
-                            report_dict["key_value"] = False
-                            report_dict["message"] = (
-                                f'Invalid value type for "{column}" key on line {idx + 1}. '
-                                f"Expected string. Found {type(json_line[column])}."
-                            )
                             raise InvalidFileFormatError(
-                                message=report_dict["message"],
+                                message=f'Invalid value type for "{column}" key on line {idx + 1}. '
+                                f"Expected string. Found {type(json_line[column])}.",
                                 line_number=idx + 1,
                                 field="key_value",
                             )
@@ -216,13 +212,11 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     dataset_format = current_format
                 elif current_format is not None:
                     if current_format != dataset_format:
-                        report_dict["message"] = (
-                            "All samples in the dataset must have the same dataset format. "
-                            f"Got {dataset_format} for the first line and {current_format} "
-                            f"for the line {idx + 1}."
-                        )
                         raise InvalidFileFormatError(
-                            message=report_dict["message"], line_number=idx + 1
+                            message="All samples in the dataset must have the same dataset format. "
+                            f"Got {dataset_format} for the first line and {current_format} "
+                            f"for the line {idx + 1}.",
+                            line_number=idx + 1,
                         )
 
             if idx + 1 < MIN_SAMPLES:
