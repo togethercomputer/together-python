@@ -157,7 +157,8 @@ class FineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
-            train_on_inputs (bool, optional): Whether to mask the inputs in conversational data. Defaults to "auto".
+            train_on_inputs (bool, optional): Whether to mask the user messages in conversational data or prompts in instruction data.
+                Defaults to "auto".
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
