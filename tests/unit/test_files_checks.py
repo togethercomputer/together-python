@@ -26,7 +26,10 @@ def test_check_jsonl_valid_instruction(tmp_path: Path):
     file = tmp_path / "valid_instruction.jsonl"
     content = [
         {"prompt": "Translate the following sentence.", "completion": "Hello, world!"},
-        {"prompt": "Summarize the text.", "completion": "Weyland-Yutani Corporation creates advanced AI."},
+        {
+            "prompt": "Summarize the text.",
+            "completion": "Weyland-Yutani Corporation creates advanced AI.",
+        },
     ]
     with file.open("w") as f:
         f.write("\n".join(json.dumps(item) for item in content))
@@ -187,7 +190,7 @@ def test_check_jsonl_invalid_role(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "Found invalid role 'invalid_role'" in report["message"]
+    assert "Found invalid role `invalid_role`" in report["message"]
 
 
 def test_check_jsonl_non_alternating_roles(tmp_path: Path):
@@ -237,4 +240,4 @@ def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Field 'content' is missing for a turn" in report["message"]
+    assert "Field `content` is missing for a turn" in report["message"]

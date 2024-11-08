@@ -236,6 +236,14 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
             report_dict["load_json"] = True
 
+        except InvalidFileFormatError as e:
+            report_dict["load_json"] = False
+            report_dict["is_check_passed"] = False
+            report_dict["message"] = e.message
+            if e.line_number is not None:
+                report_dict["line_number"] = e.line_number
+            if e.error_source is not None:
+                report_dict[e.error_source] = False
         except ValueError:
             report_dict["load_json"] = False
             if idx < 0:
@@ -248,14 +256,6 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     f"Error parsing json payload. Unexpected format on line {idx + 1}."
                 )
             report_dict["is_check_passed"] = False
-        except InvalidFileFormatError as e:
-            report_dict["load_json"] = False
-            report_dict["is_check_passed"] = False
-            report_dict["message"] = e.message
-            if e.line_number is not None:
-                report_dict["line_number"] = e.line_number
-            if e.error_source is not None:
-                report_dict[e.error_source] = False
 
     if "text_field" not in report_dict:
         report_dict["text_field"] = True
