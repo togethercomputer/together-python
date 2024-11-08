@@ -11,14 +11,14 @@ def test_check_jsonl_valid_general(tmp_path: Path):
     file = tmp_path / "valid.jsonl"
     content = [{"text": "Hello, world!"}, {"text": "How are you?"}]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
     assert report["is_check_passed"]
     assert report["utf8"]
     assert report["num_samples"] == len(content)
-    assert report["min_samples"] >= MIN_SAMPLES
+    assert report["has_min_samples"]
 
 
 def test_check_jsonl_valid_instruction(tmp_path: Path):
@@ -26,17 +26,17 @@ def test_check_jsonl_valid_instruction(tmp_path: Path):
     file = tmp_path / "valid_instruction.jsonl"
     content = [
         {"prompt": "Translate the following sentence.", "completion": "Hello, world!"},
-        {"prompt": "Summarize the text.", "completion": "OpenAI creates advanced AI."},
+        {"prompt": "Summarize the text.", "completion": "Weyland-Yutani Corporation creates advanced AI."},
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
     assert report["is_check_passed"]
     assert report["utf8"]
     assert report["num_samples"] == len(content)
-    assert report["min_samples"] >= MIN_SAMPLES
+    assert report["has_min_samples"]
 
 
 def test_check_jsonl_valid_conversational_single_turn(tmp_path: Path):
@@ -57,14 +57,14 @@ def test_check_jsonl_valid_conversational_single_turn(tmp_path: Path):
         },
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
     assert report["is_check_passed"]
     assert report["utf8"]
     assert report["num_samples"] == len(content)
-    assert report["min_samples"] >= MIN_SAMPLES
+    assert report["has_min_samples"]
 
 
 def test_check_jsonl_valid_conversational_multiple_turns(tmp_path: Path):
@@ -92,14 +92,14 @@ def test_check_jsonl_valid_conversational_multiple_turns(tmp_path: Path):
         },
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
     assert report["is_check_passed"]
     assert report["utf8"]
     assert report["num_samples"] == len(content)
-    assert report["min_samples"] >= MIN_SAMPLES
+    assert report["has_min_samples"]
 
 
 def test_check_jsonl_empty_file(tmp_path: Path):
@@ -131,7 +131,7 @@ def test_check_jsonl_invalid_json(tmp_path: Path):
     file = tmp_path / "invalid_json.jsonl"
     content = [{"text": "Hello, world!"}, "Invalid JSON Line"]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
@@ -147,7 +147,7 @@ def test_check_jsonl_missing_required_field(tmp_path: Path):
         {"prompt": "Summarize the text."},
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
@@ -166,7 +166,7 @@ def test_check_jsonl_inconsistent_dataset_format(tmp_path: Path):
         {"text": "How are you?"},  # Missing 'messages'
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
@@ -182,7 +182,7 @@ def test_check_jsonl_invalid_role(tmp_path: Path):
     file = tmp_path / "invalid_role.jsonl"
     content = [{"messages": [{"role": "invalid_role", "content": "Hi"}]}]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
@@ -202,7 +202,7 @@ def test_check_jsonl_non_alternating_roles(tmp_path: Path):
         }
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
 
@@ -215,7 +215,7 @@ def test_check_jsonl_invalid_value_type(tmp_path: Path):
     file = tmp_path / "invalid_value_type.jsonl"
     content = [{"text": 123}]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
     assert not report["is_check_passed"]
@@ -233,7 +233,7 @@ def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
         }
     ]
     with file.open("w") as f:
-        f.write("\n".join([json.dumps(item) for item in content]))
+        f.write("\n".join(json.dumps(item) for item in content))
 
     report = check_file(file)
     assert not report["is_check_passed"]

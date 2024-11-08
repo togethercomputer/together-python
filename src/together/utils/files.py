@@ -20,19 +20,19 @@ from together.constants import (
 )
 
 
-class InvalidFileFormatError(Exception):
+class InvalidFileFormatError(ValueError):
     """Exception raised for invalid file formats during file checks."""
 
     def __init__(
         self,
         message: str = "",
         line_number: int | None = None,
-        field: str | None = None,
+        error_source: str | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
         self.line_number = line_number
-        self.field = field
+        self.error_source = error_source
 
 
 def check_file(
@@ -50,7 +50,7 @@ def check_file(
         "line_type": None,
         "text_field": None,
         "key_value": None,
-        "min_samples": None,
+        "has_min_samples": None,
         "num_samples": None,
         "load_json": None,
     }
@@ -121,7 +121,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             'Example of valid json: {"text": "my sample string"}. '
                         ),
                         line_number=idx + 1,
-                        field="line_type",
+                        error_source="line_type",
                     )
 
                 current_format = None
@@ -137,6 +137,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 message="Found multiple dataset formats in the input file. "
                                 f"Got {current_format} and {possible_format} on line {idx + 1}.",
                                 line_number=idx + 1,
+                                error_source="format",
                             )
 
                 if current_format is None:
@@ -146,6 +147,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             f"{json_line.keys()}"
                         ),
                         line_number=idx + 1,
+                        error_source="format",
                     )
 
                 if current_format == DatasetFormat.CONVERSATION:
@@ -157,7 +159,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             message=f"Invalid format on line {idx + 1} of the input file. "
                             f"Expected a list of messages. Found {type(json_line[message_column])}",
                             line_number=idx + 1,
-                            field="key_value",
+                            error_source="key_value",
                         )
 
                     previous_role = ""
@@ -165,10 +167,10 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         for column in REQUIRED_COLUMNS_MESSAGE:
                             if column not in turn:
                                 raise InvalidFileFormatError(
-                                    message=f"Field '{column}' is missing for a turn `{turn}` on line {idx + 1} "
+                                    message=f"Field `{column}` is missing for a turn `{turn}` on line {idx + 1} "
                                     "of the the input file.",
                                     line_number=idx + 1,
-                                    field="key_value",
+                                    error_source="key_value",
                                 )
                             else:
                                 if not isinstance(turn[column], str):
@@ -176,24 +178,24 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                         message=f"Invalid format on line {idx + 1} in the column {column} for turn `{turn}` "
                                         f"of the input file. Expected string. Found {type(turn[column])}",
                                         line_number=idx + 1,
-                                        field="text_field",
+                                        error_source="text_field",
                                     )
                         role = turn["role"]
 
                         if role not in POSSIBLE_ROLES_CONVERSATION:
                             raise InvalidFileFormatError(
-                                message=f"Found invalid role '{role}' in the messages on the line {idx + 1}. "
+                                message=f"Found invalid role `{role}` in the messages on the line {idx + 1}. "
                                 f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}",
                                 line_number=idx + 1,
-                                field="key_value",
+                                error_source="key_value",
                             )
 
                         if previous_role == role:
                             raise InvalidFileFormatError(
                                 message=f"Invalid role turns on line {idx + 1} of the input file. "
-                                "'user' and 'assistant' roles must alternate user/assistant/user/assistant/...",
+                                "`user` and `assistant` roles must alternate user/assistant/user/assistant/...",
                                 line_number=idx + 1,
-                                field="key_value",
+                                error_source="key_value",
                             )
 
                         previous_role = role
@@ -205,7 +207,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 message=f'Invalid value type for "{column}" key on line {idx + 1}. '
                                 f"Expected string. Found {type(json_line[column])}.",
                                 line_number=idx + 1,
-                                field="key_value",
+                                error_source="key_value",
                             )
 
                 if dataset_format is None:
@@ -217,10 +219,11 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             f"Got {dataset_format} for the first line and {current_format} "
                             f"for the line {idx + 1}.",
                             line_number=idx + 1,
+                            error_source="format",
                         )
 
             if idx + 1 < MIN_SAMPLES:
-                report_dict["min_samples"] = False
+                report_dict["has_min_samples"] = False
                 report_dict["message"] = (
                     f"Processing {file} resulted in only {idx + 1} samples. "
                     f"Our minimum is {MIN_SAMPLES} samples. "
@@ -228,7 +231,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                 report_dict["is_check_passed"] = False
             else:
                 report_dict["num_samples"] = idx + 1
-                report_dict["min_samples"] = True
+                report_dict["has_min_samples"] = True
                 report_dict["is_check_passed"] = True
 
             report_dict["load_json"] = True
@@ -251,8 +254,8 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
             report_dict["message"] = e.message
             if e.line_number is not None:
                 report_dict["line_number"] = e.line_number
-            if e.field is not None:
-                report_dict[e.field] = False
+            if e.error_source is not None:
+                report_dict[e.error_source] = False
 
     if "text_field" not in report_dict:
         report_dict["text_field"] = True
@@ -295,7 +298,8 @@ def _check_parquet(file: Path) -> Dict[str, Any]:
 
     num_samples = len(table)
     if num_samples < MIN_SAMPLES:
-        report_dict["min_samples"] = (
+        report_dict["has_min_samples"] = False
+        report_dict["message"] = (
             f"Processing {file} resulted in only {num_samples} samples. "
             f"Our minimum is {MIN_SAMPLES} samples. "
         )

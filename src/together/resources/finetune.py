@@ -140,7 +140,7 @@ class FineTuning:
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
-            batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
+            batch_size (int or "max"): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
@@ -157,7 +157,11 @@ class FineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
-            train_on_inputs (bool, optional): Whether to mask the user messages in conversational data or prompts in instruction data.
+            train_on_inputs (bool or "auto"): Whether to mask the user messages in conversational data or prompts in instruction data.
+                "auto" will automatically determine whether to mask the inputs based on the data format.
+                Dataset with "text" (General format) field will not mask the inputs by default.
+                Dataset with "messages" (Conversational format) or "prompt" and "completion" (Instruction format)
+                fields will mask the inputs by default.
                 Defaults to "auto".
 
         Returns:
@@ -472,7 +476,7 @@ class AsyncFineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
-            train_on_inputs (bool, optional): Whether to mask the inputs in conversational data. Defaults to "auto".
+            train_on_inputs (bool or "auto"): Whether to mask the user messages in conversational data or prompts in instruction data.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
