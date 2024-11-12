@@ -12,7 +12,12 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
-from together.utils import finetune_price_to_dollars, log_warn, log_warn_once, parse_timestamp
+from together.utils import (
+    finetune_price_to_dollars,
+    log_warn,
+    log_warn_once,
+    parse_timestamp,
+)
 from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
 
@@ -149,7 +154,9 @@ def create(
     )
 
     if lora:
-        log_warn_once("LoRA rank default has been changed from 8 to 64 as the maximum available for each model.")
+        log_warn_once(
+            "LoRA rank default has been changed from 8 to 64 as the maximum available for each model."
+        )
         if model_limits.lora_training is None:
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"
