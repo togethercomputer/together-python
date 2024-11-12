@@ -162,7 +162,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             error_source="key_value",
                         )
 
-                    previous_role = ""
+                    previous_role = None
                     for turn in json_line[message_column]:
                         for column in REQUIRED_COLUMNS_MESSAGE:
                             if column not in turn:

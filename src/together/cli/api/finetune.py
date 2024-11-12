@@ -12,7 +12,7 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
-from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
+from together.utils import finetune_price_to_dollars, log_warn, log_warn_once, parse_timestamp
 from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
 
@@ -97,7 +97,8 @@ def fine_tuning(ctx: click.Context) -> None:
     "--train-on-inputs",
     type=BOOL_WITH_AUTO,
     default="auto",
-    help="Whether to mask the user messages in conversational data or prompts in instruction data",
+    help="Whether to mask the user messages in conversational data or prompts in instruction data. "
+    "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
 def create(
     ctx: click.Context,
@@ -148,6 +149,7 @@ def create(
     )
 
     if lora:
+        log_warn_once("LoRA rank default has been changed from 8 to 64 as the maximum available for each model.")
         if model_limits.lora_training is None:
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"

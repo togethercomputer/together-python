@@ -159,9 +159,9 @@ class FineTuning:
                 Defaults to None.
             train_on_inputs (bool or "auto"): Whether to mask the user messages in conversational data or prompts in instruction data.
                 "auto" will automatically determine whether to mask the inputs based on the data format.
-                Dataset with "text" (General format) field will not mask the inputs by default.
-                Dataset with "messages" (Conversational format) or "prompt" and "completion" (Instruction format)
-                fields will mask the inputs by default.
+                For datasets with the "text" field (general format), inputs will not be masked.
+                For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
+                (Instruction format), inputs will be masked.
                 Defaults to "auto".
 
         Returns:
@@ -477,6 +477,11 @@ class AsyncFineTuning:
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
             train_on_inputs (bool or "auto"): Whether to mask the user messages in conversational data or prompts in instruction data.
+                "auto" will automatically determine whether to mask the inputs based on the data format.
+                For datasets with the "text" field (general format), inputs will not be masked.
+                For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
+                (Instruction format), inputs will be masked.
+                Defaults to "auto".
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
