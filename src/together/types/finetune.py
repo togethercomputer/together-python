@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Literal
 
-from pydantic import Field, validator, field_validator
+from pydantic import StrictBool, Field, validator, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -163,7 +163,7 @@ class FinetuneRequest(BaseModel):
     # weights & biases api key
     wandb_key: str | None = None
     training_type: FullTrainingType | LoRATrainingType | None = None
-    train_on_inputs: bool | None = None
+    train_on_inputs: StrictBool | None = None
 
 
 class FinetuneResponse(BaseModel):
