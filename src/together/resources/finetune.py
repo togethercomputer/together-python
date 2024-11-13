@@ -83,6 +83,9 @@ def createFinetuneRequest(
     if warmup_ratio > 1 or warmup_ratio < 0:
         raise ValueError("Warmup ratio should be between 0 and 1")
 
+    if train_on_inputs is None:
+        raise ValueError("train_on_inputs cannot be None")
+
     train_on_inputs_bool = train_on_inputs if train_on_inputs != "auto" else None
 
     finetune_request = FinetuneRequest(
