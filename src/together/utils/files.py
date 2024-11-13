@@ -162,6 +162,15 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             error_source="key_value",
                         )
 
+                    for turn_id, turn in enumerate(json_line[message_column]):
+                        if not isinstance(turn, dict):
+                            raise InvalidFileFormatError(
+                                message=f"Invalid format on line {idx + 1} of the input file. "
+                                f"Expected a dictionary in the {turn_id + 1} turn. Found {type(turn)}",
+                                line_number=idx + 1,
+                                error_source="key_value",
+                            )
+
                     previous_role = None
                     for turn in json_line[message_column]:
                         for column in REQUIRED_COLUMNS_MESSAGE:

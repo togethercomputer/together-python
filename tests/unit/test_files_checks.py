@@ -241,3 +241,25 @@ def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
     report = check_file(file)
     assert not report["is_check_passed"]
     assert "Field `content` is missing for a turn" in report["message"]
+
+
+def test_check_jsonl_wrong_turn_type(tmp_path: Path):
+    file = tmp_path / "wrong_turn_type.jsonl"
+    content = [
+        {
+            "messages": [
+                "Hi!",
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant"},
+            ]
+        }
+    ]
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert (
+        "Invalid format on line 1 of the input file. Expected a dictionary"
+        in report["message"]
+    )
