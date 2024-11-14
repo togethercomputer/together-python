@@ -154,9 +154,6 @@ def create(
     )
 
     if lora:
-        log_warn_once(
-            "LoRA rank default has been changed from 8 to 64 as the maximum available for each model."
-        )
         if model_limits.lora_training is None:
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"
@@ -167,6 +164,10 @@ def create(
             "batch_size": model_limits.lora_training.max_batch_size,
             "learning_rate": 1e-3,
         }
+        log_warn_once(
+            f"LoRA rank default has been changed to {default_values['lora_r']} as the max available for the model.\n"
+            f"Learning rate default for LoRA FT has been changed to {default_values['learning_rate']}."
+        )
         for arg in default_values:
             arg_source = ctx.get_parameter_source("arg")  # type: ignore[attr-defined]
             if arg_source == ParameterSource.DEFAULT:
