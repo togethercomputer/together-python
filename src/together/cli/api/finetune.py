@@ -165,8 +165,8 @@ def create(
             "learning_rate": 1e-3,
         }
         log_warn_once(
-            f"LoRA rank default has been changed to {default_values['lora_r']} as the max available for the model.\n"
-            f"Learning rate default for LoRA FT has been changed to {default_values['learning_rate']}."
+            f"The default LoRA rank for {model} has been changed to {default_values['lora_r']} as the max available.\n"
+            f"Also, the default learning rate for LoRA fine-tuning has been changed to {default_values['learning_rate']}."
         )
         for arg in default_values:
             arg_source = ctx.get_parameter_source("arg")  # type: ignore[attr-defined]
