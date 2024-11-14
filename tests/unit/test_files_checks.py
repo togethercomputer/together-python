@@ -58,6 +58,13 @@ def test_check_jsonl_valid_conversational_single_turn(tmp_path: Path):
                 {"role": "assistant", "content": "I am fine."},
             ]
         },
+        {
+            "messages": [
+                {"role": "system", "content": "You are a kind AI"},
+                {"role": "user", "content": "How are you?"},
+                {"role": "assistant", "content": "I am fine."},
+            ]
+        },
     ]
     with file.open("w") as f:
         f.write("\n".join(json.dumps(item) for item in content))
@@ -87,6 +94,15 @@ def test_check_jsonl_valid_conversational_multiple_turns(tmp_path: Path):
         },
         {
             "messages": [
+                {"role": "user", "content": "Who won the game last night?"},
+                {"role": "assistant", "content": "The home team won by two points."},
+                {"role": "user", "content": "What is the weather like in Amsterdam?"},
+                {"role": "assistant", "content": "It is cloudy with a chance of snow."},
+            ]
+        },
+        {
+            "messages": [
+                {"role": "system", "content": "You are a kind AI"},
                 {"role": "user", "content": "Who won the game last night?"},
                 {"role": "assistant", "content": "The home team won by two points."},
                 {"role": "user", "content": "What is the weather like in Amsterdam?"},
