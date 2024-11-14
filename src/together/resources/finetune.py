@@ -20,6 +20,8 @@ from together.types import (
     TogetherClient,
     TogetherRequest,
     TrainingType,
+    FinetuneLRScheduler,
+    FinetuneLinearLRSchedulerArgs,
 )
 from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
@@ -35,7 +37,10 @@ def createFinetuneRequest(
     n_checkpoints: int | None = 1,
     batch_size: int | Literal["max"] = "max",
     learning_rate: float | None = 0.00001,
+    ending_lr_ratio: float | None = 0.0,
     warmup_ratio: float | None = 0.0,
+    max_grad_norm: float | None = None,
+    weight_decay: float | None = None,
     lora: bool = False,
     lora_r: int | None = None,
     lora_dropout: float | None = 0,
@@ -82,6 +87,22 @@ def createFinetuneRequest(
     if warmup_ratio > 1 or warmup_ratio < 0:
         raise ValueError("Warmup ratio should be between 0 and 1")
 
+    if ending_lr_ratio is not None and (ending_lr_ratio > 1 or ending_lr_ratio < 0):
+        raise ValueError("Ending rate should be between 0 and 1")
+
+    if max_grad_norm is not None and (max_grad_norm < 0):
+        raise ValueError("Max gradient norm should be non-negative")
+
+    if weight_decay is not None and (weight_decay < 0):
+        raise ValueError("Weight decay should be non-negative")
+
+    lrScheduler = FinetuneLRScheduler(
+        lr_scheduler_type="linear",
+        lr_scheduler_args=FinetuneLinearLRSchedulerArgs(
+            ending_lr_ratio=ending_lr_ratio
+        ),
+    )
+
     finetune_request = FinetuneRequest(
         model=model,
         training_file=training_file,
@@ -91,7 +112,10 @@ def createFinetuneRequest(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler=lrScheduler,
         warmup_ratio=warmup_ratio,
+        max_grad_norm=max_grad_norm,
+        weight_decay=weight_decay,
         training_type=training_type,
         suffix=suffix,
         wandb_key=wandb_api_key,
@@ -115,7 +139,10 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        ending_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
+        max_grad_norm: float | None = None,
+        weight_decay: float | None = None,
         lora: bool = False,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
@@ -140,7 +167,11 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            ending_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
+                learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to None.
+            weight_decay (float, optional): Weight decay. Defaults to None.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
@@ -176,7 +207,10 @@ class FineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            ending_lr_ratio=ending_lr_ratio,
             warmup_ratio=warmup_ratio,
+            max_grad_norm=max_grad_norm,
+            weight_decay=weight_decay,
             lora=lora,
             lora_r=lora_r,
             lora_dropout=lora_dropout,
@@ -426,7 +460,10 @@ class AsyncFineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        ending_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
+        max_grad_norm: float | None = None,
+        weight_decay: float | None = None,
         lora: bool = False,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
@@ -449,9 +486,13 @@ class AsyncFineTuning:
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
-            learning_rate (float, optional): Learning rate multiplier to use for training
-                Defaults to 0.00001.
+            ending_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
+                learning rate scheduler. Defaults to 0.0.
+            ending_lr_ratio (float, optional): Ending learning rate for learning rate scheduler.
+                Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to None.
+            weight_decay (float, optional): Weight decay. Defaults to None.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
@@ -487,7 +528,10 @@ class AsyncFineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            ending_lr_ratio=ending_lr_ratio,
             warmup_ratio=warmup_ratio,
+            max_grad_norm=max_grad_norm,
+            weight_decay=weight_decay,
             lora=lora,
             lora_r=lora_r,
             lora_dropout=lora_dropout,

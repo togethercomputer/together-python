@@ -30,6 +30,8 @@ from together.types.finetune import (
     LoRATrainingType,
     TrainingType,
     FinetuneTrainingLimits,
+    FinetuneLRScheduler,
+    FinetuneLinearLRSchedulerArgs,
 )
 from together.types.images import (
     ImageRequest,
@@ -57,6 +59,8 @@ __all__ = [
     "FinetuneList",
     "FinetuneListEvents",
     "FinetuneDownloadResult",
+    "FinetuneLRScheduler",
+    "FinetuneLinearLRSchedulerArgs",
     "FileRequest",
     "FileResponse",
     "FileList",

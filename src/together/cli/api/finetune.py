@@ -61,10 +61,28 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
+    "--ending-lr-ratio",
+    type=float,
+    default=0.0,
+    help="Ending learning rate as a percentage of the initial learning rate",
+)
+@click.option(
     "--warmup-ratio",
     type=float,
     default=0.0,
     help="Warmup ratio for learning rate scheduler.",
+)
+@click.option(
+    "--max-grad-norm",
+    type=float,
+    default=None,
+    help="Max gradient norm",
+)
+@click.option(
+    "--weight-decay",
+    type=float,
+    default=None,
+    help="Weight decay",
 )
 @click.option(
     "--lora/--no-lora",
@@ -103,7 +121,10 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    ending_lr_ratio: float,
     warmup_ratio: float,
+    max_grad_norm: float,
+    weight_decay: float,
     lora: bool,
     lora_r: int,
     lora_dropout: float,
@@ -125,7 +146,10 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        ending_lr_ratio=ending_lr_ratio,
         warmup_ratio=warmup_ratio,
+        max_grad_norm=max_grad_norm,
+        weight_decay=weight_decay,
         lora=lora,
         lora_r=lora_r,
         lora_dropout=lora_dropout,
@@ -194,7 +218,10 @@ def create(
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            ending_lr_ratio=ending_lr_ratio,
             warmup_ratio=warmup_ratio,
+            max_grad_norm=max_grad_norm,
+            weight_decay=weight_decay,
             lora=lora,
             lora_r=lora_r,
             lora_dropout=lora_dropout,
