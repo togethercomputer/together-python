@@ -301,4 +301,4 @@ class FinetuneLRScheduler(BaseModel):
 
 
 class FinetuneLinearLRSchedulerArgs(BaseModel):
-    ending_lr_ratio: float
+    min_lr_ratio: float

@@ -37,7 +37,7 @@ def createFinetuneRequest(
     n_checkpoints: int | None = 1,
     batch_size: int | Literal["max"] = "max",
     learning_rate: float | None = 0.00001,
-    ending_lr_ratio: float | None = 0.0,
+    min_lr_ratio: float | None = 0.0,
     warmup_ratio: float | None = 0.0,
     max_grad_norm: float | None = None,
     weight_decay: float | None = None,
@@ -87,7 +87,7 @@ def createFinetuneRequest(
     if warmup_ratio > 1 or warmup_ratio < 0:
         raise ValueError("Warmup ratio should be between 0 and 1")
 
-    if ending_lr_ratio is not None and (ending_lr_ratio > 1 or ending_lr_ratio < 0):
+    if min_lr_ratio is not None and (min_lr_ratio > 1 or min_lr_ratio < 0):
         raise ValueError("Ending rate should be between 0 and 1")
 
     if max_grad_norm is not None and (max_grad_norm < 0):
@@ -98,9 +98,7 @@ def createFinetuneRequest(
 
     lrScheduler = FinetuneLRScheduler(
         lr_scheduler_type="linear",
-        lr_scheduler_args=FinetuneLinearLRSchedulerArgs(
-            ending_lr_ratio=ending_lr_ratio
-        ),
+        lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
 
     finetune_request = FinetuneRequest(
@@ -139,7 +137,7 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        ending_lr_ratio: float | None = 0.0,
+        min_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
         max_grad_norm: float | None = None,
         weight_decay: float | None = None,
@@ -167,7 +165,7 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            ending_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
+            min_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
                 learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to None.
@@ -207,7 +205,7 @@ class FineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
-            ending_lr_ratio=ending_lr_ratio,
+            min_lr_ratio=min_lr_ratio,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
@@ -460,7 +458,7 @@ class AsyncFineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        ending_lr_ratio: float | None = 0.0,
+        min_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
         max_grad_norm: float | None = None,
         weight_decay: float | None = None,
@@ -486,9 +484,9 @@ class AsyncFineTuning:
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
-            ending_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
+            min_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
                 learning rate scheduler. Defaults to 0.0.
-            ending_lr_ratio (float, optional): Ending learning rate for learning rate scheduler.
+            min_lr_ratio (float, optional): Ending learning rate for learning rate scheduler.
                 Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to None.
@@ -528,7 +526,7 @@ class AsyncFineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
-            ending_lr_ratio=ending_lr_ratio,
+            min_lr_ratio=min_lr_ratio,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
