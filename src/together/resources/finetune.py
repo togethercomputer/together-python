@@ -168,7 +168,7 @@ class FineTuning:
             min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
@@ -487,7 +487,7 @@ class AsyncFineTuning:
             min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
