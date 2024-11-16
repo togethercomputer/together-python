@@ -75,13 +75,13 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--max-grad-norm",
     type=float,
-    default=None,
+    default=1.0,
     help="Max gradient norm",
 )
 @click.option(
     "--weight-decay",
     type=float,
-    default=None,
+    default=0.0,
     help="Weight decay",
 )
 @click.option(

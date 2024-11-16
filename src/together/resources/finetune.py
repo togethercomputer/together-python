@@ -39,8 +39,8 @@ def createFinetuneRequest(
     learning_rate: float | None = 0.00001,
     min_lr_ratio: float | None = 0.0,
     warmup_ratio: float | None = 0.0,
-    max_grad_norm: float | None = None,
-    weight_decay: float | None = None,
+    max_grad_norm: float = 1.0,
+    weight_decay: float = 0.0,
     lora: bool = False,
     lora_r: int | None = None,
     lora_dropout: float | None = 0,
@@ -88,9 +88,9 @@ def createFinetuneRequest(
         raise ValueError("Warmup ratio should be between 0 and 1")
 
     if min_lr_ratio is not None and (min_lr_ratio > 1 or min_lr_ratio < 0):
-        raise ValueError("Ending rate should be between 0 and 1")
+        raise ValueError("Min learning rate ratio should be between 0 and 1")
 
-    if max_grad_norm is not None and (max_grad_norm < 0):
+    if max_grad_norm < 0:
         raise ValueError("Max gradient norm should be non-negative")
 
     if weight_decay is not None and (weight_decay < 0):
@@ -139,8 +139,8 @@ class FineTuning:
         learning_rate: float | None = 0.00001,
         min_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
-        max_grad_norm: float | None = None,
-        weight_decay: float | None = None,
+        max_grad_norm: float = 1.0,
+        weight_decay: float = 0.0,
         lora: bool = False,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
@@ -165,11 +165,11 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            min_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
-                learning rate scheduler. Defaults to 0.0.
+            min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
+                the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to None.
-            weight_decay (float, optional): Weight decay. Defaults to None.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0.
+            weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
@@ -460,8 +460,8 @@ class AsyncFineTuning:
         learning_rate: float | None = 0.00001,
         min_lr_ratio: float | None = 0.0,
         warmup_ratio: float | None = 0.0,
-        max_grad_norm: float | None = None,
-        weight_decay: float | None = None,
+        max_grad_norm: float = 1.0,
+        weight_decay: float = 0.0,
         lora: bool = False,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
@@ -484,13 +484,11 @@ class AsyncFineTuning:
             n_checkpoints (int, optional): Number of checkpoints to save during fine-tuning.
                 Defaults to 1.
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
-            min_lr_ratio (float, optional): Ending learning rate as a percentage of the initial learning rate for
-                learning rate scheduler. Defaults to 0.0.
-            min_lr_ratio (float, optional): Ending learning rate for learning rate scheduler.
-                Defaults to 0.0.
+            min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
+                the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to None.
-            weight_decay (float, optional): Weight decay. Defaults to None.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0.
+            weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
