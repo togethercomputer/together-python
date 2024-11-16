@@ -154,6 +154,10 @@ class FinetuneRequest(BaseModel):
     lr_scheduler: FinetuneLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
+    # max gradient norm
+    max_grad_norm: float | None = None
+    # weight decay
+    weight_decay: float | None = None
     # number of checkpoints to save
     n_checkpoints: int | None = None
     # number of evaluation loops to run
