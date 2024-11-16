@@ -165,7 +165,7 @@ class FineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
+            min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.
@@ -486,7 +486,7 @@ class AsyncFineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            min_lr_ratio (float, optional): Min learning rate ratio as a percentage of the initial learning rate for
+            min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.

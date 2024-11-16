@@ -64,7 +64,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--min-lr-ratio",
     type=float,
     default=0.0,
-    help="Final learning rate as a percentage of the initial learning rate",
+    help="Final learning rate ratio of the initial learning rate",
 )
 @click.option(
     "--warmup-ratio",
