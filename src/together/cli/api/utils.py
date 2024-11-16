@@ -27,4 +27,25 @@ class AutoIntParamType(click.ParamType):
             )
 
 
+class BooleanWithAutoParamType(click.ParamType):
+    name = "boolean_or_auto"
+
+    def convert(
+        self, value: str, param: click.Parameter | None, ctx: click.Context | None
+    ) -> bool | Literal["auto"] | None:
+        if value == "auto":
+            return "auto"
+        try:
+            return bool(value)
+        except ValueError:
+            self.fail(
+                _("{value!r} is not a valid {type}.").format(
+                    value=value, type=self.name
+                ),
+                param,
+                ctx,
+            )
+
+
 INT_WITH_MAX = AutoIntParamType()
+BOOL_WITH_AUTO = BooleanWithAutoParamType()

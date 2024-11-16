@@ -1,3 +1,5 @@
+import enum
+
 # Session constants
 TIMEOUT_SECS = 600
 MAX_SESSION_LIFETIME_SECS = 180
@@ -29,3 +31,20 @@ MAX_FILE_SIZE_GB = 4.9
 
 # expected columns for Parquet files
 PARQUET_EXPECTED_COLUMNS = ["input_ids", "attention_mask", "labels"]
+
+
+class DatasetFormat(enum.Enum):
+    """Dataset format enum."""
+
+    GENERAL = "general"
+    CONVERSATION = "conversation"
+    INSTRUCTION = "instruction"
+
+
+JSONL_REQUIRED_COLUMNS_MAP = {
+    DatasetFormat.GENERAL: ["text"],
+    DatasetFormat.CONVERSATION: ["messages"],
+    DatasetFormat.INSTRUCTION: ["prompt", "completion"],
+}
+REQUIRED_COLUMNS_MESSAGE = ["role", "content"]
+POSSIBLE_ROLES_CONVERSATION = ["system", "user", "assistant"]

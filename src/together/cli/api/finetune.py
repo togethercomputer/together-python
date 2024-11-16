@@ -11,8 +11,13 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.cli.api.utils import INT_WITH_MAX
-from together.utils import finetune_price_to_dollars, log_warn, parse_timestamp
+from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.utils import (
+    finetune_price_to_dollars,
+    log_warn,
+    log_warn_once,
+    parse_timestamp,
+)
 from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 
 
@@ -111,6 +116,13 @@ def fine_tuning(ctx: click.Context) -> None:
     default=False,
     help="Whether to skip the launch confirmation message",
 )
+@click.option(
+    "--train-on-inputs",
+    type=BOOL_WITH_AUTO,
+    default="auto",
+    help="Whether to mask the user messages in conversational data or prompts in instruction data. "
+    "`auto` will automatically determine whether to mask the inputs based on the data format.",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -133,6 +145,7 @@ def create(
     suffix: str,
     wandb_api_key: str,
     confirm: bool,
+    train_on_inputs: bool | Literal["auto"],
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -157,6 +170,7 @@ def create(
         lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
+        train_on_inputs=train_on_inputs,
     )
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
@@ -174,6 +188,10 @@ def create(
             "batch_size": model_limits.lora_training.max_batch_size,
             "learning_rate": 1e-3,
         }
+        log_warn_once(
+            f"The default LoRA rank for {model} has been changed to {default_values['lora_r']} as the max available.\n"
+            f"Also, the default learning rate for LoRA fine-tuning has been changed to {default_values['learning_rate']}."
+        )
         for arg in default_values:
             arg_source = ctx.get_parameter_source("arg")  # type: ignore[attr-defined]
             if arg_source == ParameterSource.DEFAULT:
@@ -210,25 +228,7 @@ def create(
 
     if confirm or click.confirm(_CONFIRMATION_MESSAGE, default=True, show_default=True):
         response = client.fine_tuning.create(
-            training_file=training_file,
-            model=model,
-            n_epochs=n_epochs,
-            validation_file=validation_file,
-            n_evals=n_evals,
-            n_checkpoints=n_checkpoints,
-            batch_size=batch_size,
-            learning_rate=learning_rate,
-            min_lr_ratio=min_lr_ratio,
-            warmup_ratio=warmup_ratio,
-            max_grad_norm=max_grad_norm,
-            weight_decay=weight_decay,
-            lora=lora,
-            lora_r=lora_r,
-            lora_dropout=lora_dropout,
-            lora_alpha=lora_alpha,
-            lora_trainable_modules=lora_trainable_modules,
-            suffix=suffix,
-            wandb_api_key=wandb_api_key,
+            **training_args,
             verbose=True,
         )
 
