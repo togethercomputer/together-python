@@ -139,7 +139,7 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        min_lr_ratio: float | None = 0.0,
+        min_lr_ratio: float = 0.0,
         warmup_ratio: float | None = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -171,7 +171,7 @@ class FineTuning:
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.
@@ -468,7 +468,7 @@ class AsyncFineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        min_lr_ratio: float | None = 0.0,
+        min_lr_ratio: float = 0.0,
         warmup_ratio: float | None = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -500,7 +500,7 @@ class AsyncFineTuning:
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
-            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0. Set to 0 to disable.
+            max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
             lora_r (int, optional): Rank of LoRA adapters. Defaults to 8.

@@ -69,7 +69,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--min-lr-ratio",
     type=float,
     default=0.0,
-    help="Final learning rate ratio of the initial learning rate",
+    help="The ratio of the final learning rate to the peak learning rate",
 )
 @click.option(
     "--warmup-ratio",
@@ -81,7 +81,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--max-grad-norm",
     type=float,
     default=1.0,
-    help="Max gradient norm. Set to 0 to disable.",
+    help="Max gradient norm to be used for gradient clipping. Set to 0 to disable.",
 )
 @click.option(
     "--weight-decay",

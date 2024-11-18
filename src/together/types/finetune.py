@@ -155,9 +155,9 @@ class FinetuneRequest(BaseModel):
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
-    max_grad_norm: float | None = None
+    max_grad_norm: float
     # weight decay
-    weight_decay: float | None = None
+    weight_decay: float
     # number of checkpoints to save
     n_checkpoints: int | None = None
     # number of evaluation loops to run
