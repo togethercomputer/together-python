@@ -150,8 +150,14 @@ class FinetuneRequest(BaseModel):
     n_epochs: int
     # training learning rate
     learning_rate: float
+    # learning rate scheduler type and args
+    lr_scheduler: FinetuneLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
+    # max gradient norm
+    max_grad_norm: float
+    # weight decay
+    weight_decay: float
     # number of checkpoints to save
     n_checkpoints: int | None = None
     # number of evaluation loops to run
@@ -193,8 +199,14 @@ class FinetuneResponse(BaseModel):
     batch_size: int | None = None
     # training learning rate
     learning_rate: float | None = None
+    # learning rate scheduler type and args
+    lr_scheduler: FinetuneLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
+    # max gradient norm
+    max_grad_norm: float | None = None
+    # weight decay
+    weight_decay: float | None = None
     # number of steps between evals
     eval_steps: int | None = None
     # training type
@@ -287,3 +299,12 @@ class FinetuneTrainingLimits(BaseModel):
     min_learning_rate: float
     full_training: FinetuneFullTrainingLimits | None = None
     lora_training: FinetuneLoraTrainingLimits | None = None
+
+
+class FinetuneLRScheduler(BaseModel):
+    lr_scheduler_type: str
+    lr_scheduler_args: FinetuneLinearLRSchedulerArgs | None = None
+
+
+class FinetuneLinearLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0

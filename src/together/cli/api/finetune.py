@@ -66,10 +66,28 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
+    "--min-lr-ratio",
+    type=float,
+    default=0.0,
+    help="The ratio of the final learning rate to the peak learning rate",
+)
+@click.option(
     "--warmup-ratio",
     type=float,
     default=0.0,
     help="Warmup ratio for learning rate scheduler.",
+)
+@click.option(
+    "--max-grad-norm",
+    type=float,
+    default=1.0,
+    help="Max gradient norm to be used for gradient clipping. Set to 0 to disable.",
+)
+@click.option(
+    "--weight-decay",
+    type=float,
+    default=0.0,
+    help="Weight decay",
 )
 @click.option(
     "--lora/--no-lora",
@@ -115,7 +133,10 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    min_lr_ratio: float,
     warmup_ratio: float,
+    max_grad_norm: float,
+    weight_decay: float,
     lora: bool,
     lora_r: int,
     lora_dropout: float,
@@ -138,7 +159,10 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        min_lr_ratio=min_lr_ratio,
         warmup_ratio=warmup_ratio,
+        max_grad_norm=max_grad_norm,
+        weight_decay=weight_decay,
         lora=lora,
         lora_r=lora_r,
         lora_dropout=lora_dropout,
