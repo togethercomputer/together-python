@@ -168,7 +168,15 @@ class FinetuneRequest(BaseModel):
     suffix: str | None = None
     # weights & biases api key
     wandb_key: str | None = None
+    # weights & biases base url
+    wandb_base_url: str | None = None
+    # wandb project name
+    wandb_project_name: str | None = None
+    # wandb run name
+    wandb_name: str | None = None
+    # training type
     training_type: FullTrainingType | LoRATrainingType | None = None
+    # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
 
 
@@ -236,8 +244,12 @@ class FinetuneResponse(BaseModel):
     evals_completed: int | None = None
     # place in job queue (decrementing counter)
     queue_depth: int | None = None
-    # weights & biases project name
+    # weights & biases base url
+    wandb_base_url: str | None = None
+    # wandb project name
     wandb_project_name: str | None = None
+    # wandb run name
+    wandb_name: str | None = None
     # weights & biases job url
     wandb_url: str | None = None
     # training file metadata

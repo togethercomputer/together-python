@@ -108,6 +108,9 @@ def fine_tuning(ctx: click.Context) -> None:
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
+@click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
+@click.option("--wandb-project-name", type=str, default=None, help="Wandb project name")
+@click.option("--wandb-name", type=str, default=None, help="Wandb run name")
 @click.option(
     "--confirm",
     "-y",
@@ -144,6 +147,9 @@ def create(
     lora_trainable_modules: str,
     suffix: str,
     wandb_api_key: str,
+    wandb_base_url: str,
+    wandb_project_name: str,
+    wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
 ) -> None:
@@ -170,6 +176,9 @@ def create(
         lora_trainable_modules=lora_trainable_modules,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
+        wandb_base_url=wandb_base_url,
+        wandb_project_name=wandb_project_name,
+        wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
     )
 

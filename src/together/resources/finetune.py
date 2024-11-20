@@ -48,6 +48,9 @@ def createFinetuneRequest(
     lora_trainable_modules: str | None = "all-linear",
     suffix: str | None = None,
     wandb_api_key: str | None = None,
+    wandb_base_url: str | None = None,
+    wandb_project_name: str | None = None,
+    wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
 ) -> FinetuneRequest:
     if batch_size == "max":
@@ -118,6 +121,9 @@ def createFinetuneRequest(
         training_type=training_type,
         suffix=suffix,
         wandb_key=wandb_api_key,
+        wandb_base_url=wandb_base_url,
+        wandb_project_name=wandb_project_name,
+        wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
     )
 
@@ -150,6 +156,9 @@ class FineTuning:
         lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
+        wandb_base_url: str | None = None,
+        wandb_project_name: str | None = None,
+        wandb_name: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
@@ -181,6 +190,12 @@ class FineTuning:
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
+                Defaults to None.
+            wandb_base_url (str, optional): Base URL for Weights & Biases integration.
+                Defaults to None.
+            wandb_project_name (str, optional): Project name for Weights & Biases integration.
+                Defaults to None.
+            wandb_name (str, optional): Run name for Weights & Biases integration.
                 Defaults to None.
             verbose (bool, optional): whether to print the job parameters before submitting a request.
                 Defaults to False.
@@ -225,6 +240,9 @@ class FineTuning:
             lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
+            wandb_base_url=wandb_base_url,
+            wandb_project_name=wandb_project_name,
+            wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
         )
 
@@ -479,6 +497,9 @@ class AsyncFineTuning:
         lora_trainable_modules: str | None = "all-linear",
         suffix: str | None = None,
         wandb_api_key: str | None = None,
+        wandb_base_url: str | None = None,
+        wandb_project_name: str | None = None,
+        wandb_name: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
@@ -510,6 +531,12 @@ class AsyncFineTuning:
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
+                Defaults to None.
+            wandb_base_url (str, optional): Base URL for Weights & Biases integration.
+                Defaults to None.
+            wandb_project_name (str, optional): Project name for Weights & Biases integration.
+                Defaults to None.
+            wandb_name (str, optional): Run name for Weights & Biases integration.
                 Defaults to None.
             verbose (bool, optional): whether to print the job parameters before submitting a request.
                 Defaults to False.
@@ -554,6 +581,9 @@ class AsyncFineTuning:
             lora_trainable_modules=lora_trainable_modules,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
+            wandb_base_url=wandb_base_url,
+            wandb_project_name=wandb_project_name,
+            wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
         )
 
