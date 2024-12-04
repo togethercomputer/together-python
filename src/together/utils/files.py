@@ -142,6 +142,18 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 error_source="format",
                             )
 
+                        # Check that there are not extra columns
+                        for column in json_line:
+                            if (
+                                column
+                                not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                            ):
+                                raise InvalidFileFormatError(
+                                    message=f"Found extra column {column} in the line {idx + 1}.",
+                                    line_number=idx + 1,
+                                    error_source="format",
+                                )
+
                 if current_format is None:
                     raise InvalidFileFormatError(
                         message=(
