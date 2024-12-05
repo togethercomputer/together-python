@@ -279,3 +279,14 @@ def test_check_jsonl_wrong_turn_type(tmp_path: Path):
         "Invalid format on line 1 of the input file. Expected a dictionary"
         in report["message"]
     )
+
+
+def test_check_jsonl_extra_column(tmp_path: Path):
+    file = tmp_path / "extra_column.jsonl"
+    content = [{"text": "Hello, world!", "extra_column": "extra"}]
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert "Found extra column" in report["message"]
