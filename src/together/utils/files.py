@@ -120,7 +120,8 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     raise InvalidFileFormatError(
                         message=(
                             f"Error parsing file. Invalid format on line {idx + 1} of the input file. "
-                            'Example of valid json: {"text": "my sample string"}. '
+                            "Datasets must follow text, conversational, or instruction format. For more"
+                            "information, see https://docs.together.ai/docs/fine-tuning-data-preparation"
                         ),
                         line_number=idx + 1,
                         error_source="line_type",
