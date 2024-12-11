@@ -142,7 +142,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 error_source="format",
                             )
 
-                        # Check that there are not extra columns
+                        # Check that there are no extra columns
                         for column in json_line:
                             if (
                                 column
