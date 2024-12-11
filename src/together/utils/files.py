@@ -120,7 +120,8 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     raise InvalidFileFormatError(
                         message=(
                             f"Error parsing file. Invalid format on line {idx + 1} of the input file. "
-                            'Example of valid json: {"text": "my sample string"}. '
+                            "Datasets must follow text, conversational, or instruction format. For more"
+                            "information, see https://docs.together.ai/docs/fine-tuning-data-preparation"
                         ),
                         line_number=idx + 1,
                         error_source="line_type",
@@ -141,6 +142,18 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                                 line_number=idx + 1,
                                 error_source="format",
                             )
+
+                        # Check that there are no extra columns
+                        for column in json_line:
+                            if (
+                                column
+                                not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                            ):
+                                raise InvalidFileFormatError(
+                                    message=f'Found extra column "{column}" in the line {idx + 1}.',
+                                    line_number=idx + 1,
+                                    error_source="format",
+                                )
 
                 if current_format is None:
                     raise InvalidFileFormatError(
