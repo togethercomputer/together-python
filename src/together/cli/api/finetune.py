@@ -92,7 +92,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--lora/--no-lora",
     type=bool,
-    default=False,
+    default=True,
     help="Whether to use LoRA adapters for fine-tuning",
 )
 @click.option("--lora-r", type=int, default=8, help="LoRA adapters' rank")
