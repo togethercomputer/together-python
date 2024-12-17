@@ -27,6 +27,7 @@ class MessageRole(str, Enum):
 
 class ResponseFormatType(str, Enum):
     JSON_OBJECT = "json_object"
+    JSON_SCHEMA = "json_schema"
 
 
 class FunctionCall(BaseModel):
