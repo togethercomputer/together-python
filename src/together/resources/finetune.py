@@ -149,7 +149,7 @@ class FineTuning:
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
-        lora: bool = TrueS,
+        lora: bool = True,
         lora_r: int | None = None,
         lora_dropout: float | None = 0,
         lora_alpha: float | None = None,
