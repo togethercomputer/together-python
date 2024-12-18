@@ -197,10 +197,7 @@ def create(
             "batch_size": model_limits.lora_training.max_batch_size,
             "learning_rate": 1e-3,
         }
-        log_warn_once(
-            f"The default LoRA rank for {model} has been changed to {default_values['lora_r']} as the max available.\n"
-            f"Also, the default learning rate for LoRA fine-tuning has been changed to {default_values['learning_rate']}."
-        )
+
         for arg in default_values:
             arg_source = ctx.get_parameter_source("arg")  # type: ignore[attr-defined]
             if arg_source == ParameterSource.DEFAULT:
