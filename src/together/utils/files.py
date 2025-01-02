@@ -177,6 +177,14 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                             error_source="key_value",
                         )
 
+                    if len(json_line[message_column]) == 0:
+                        raise InvalidFileFormatError(
+                            message=f"Invalid format on line {idx + 1} of the input file. "
+                            f"Expected a non-empty list of messages. Found empty list",
+                            line_number=idx + 1,
+                            error_source="key_value",
+                        )
+
                     for turn_id, turn in enumerate(json_line[message_column]):
                         if not isinstance(turn, dict):
                             raise InvalidFileFormatError(
