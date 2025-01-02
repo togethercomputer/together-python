@@ -41,6 +41,7 @@ class ChatCompletions:
         response_format: Dict[str, str | Dict[str, Any]] | None = None,
         tools: List[Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
+        turboboost_tps: float | None = None,
         **kwargs: Any,
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
         """
@@ -103,6 +104,13 @@ class ChatCompletions:
                     via {"type": "function", "function": {"name": "my_function"}} forces the model to call that function.
                     Sets to `auto` if None.
                 Defaults to None.
+            turboboost_tps (float, optional): A parameter that controls the speed-quality tradeoff between 
+                    the draft model (faster, lower quality) and target model (slower, higher quality). 
+                    Values range from 0.0 (regular speculative decoding with target model quality) to 
+                    1.0 (draft model speed with 100% acceptance rate). Higher values increase speed 
+                    while potentially reducing quality.
+                Defaults to 0.0.
+
 
         Returns:
             ChatCompletionResponse | Iterator[ChatCompletionChunk]: Object containing the completions
@@ -135,6 +143,7 @@ class ChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
+            turboboost_tps=turboboost_tps,
             **kwargs,
         ).model_dump(exclude_none=True)
 
@@ -183,6 +192,7 @@ class AsyncChatCompletions:
         response_format: Dict[str, Any] | None = None,
         tools: Dict[str, str | Dict[str, str | Dict[str, Any]]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
+        turboboost_tps: float | None = None,
         **kwargs: Any,
     ) -> AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse:
         """
@@ -245,6 +255,12 @@ class AsyncChatCompletions:
                     via {"type": "function", "function": {"name": "my_function"}} forces the model to call that function.
                     Sets to `auto` if None.
                 Defaults to None.
+            turboboost_tps (float, optional): A parameter that controls the speed-quality tradeoff between 
+                    the draft model (faster, lower quality) and target model (slower, higher quality). 
+                    Values range from 0.0 (regular speculative decoding with target model quality) to 
+                    1.0 (draft model speed with 100% acceptance rate). Higher values increase speed 
+                    while potentially reducing quality.
+                Defaults to 0.0.
 
         Returns:
             AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse: Object containing the completions
@@ -277,6 +293,7 @@ class AsyncChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
+            turboboost_tps=turboboost_tps,
             **kwargs,
         ).model_dump(exclude_none=True)
 

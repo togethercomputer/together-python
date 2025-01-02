@@ -38,6 +38,7 @@ class Completions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
+        turboboost_tps: float | None = None,
         **kwargs: Any,
     ) -> CompletionResponse | Iterator[CompletionChunk]:
         """
@@ -88,6 +89,12 @@ class Completions:
             safety_model (str, optional): A moderation model to validate tokens. Choice between available moderation
                     models found [here](https://docs.together.ai/docs/inference-models#moderation-models).
                 Defaults to None.
+            turboboost_tps (float, optional): A parameter that controls the speed-quality tradeoff between 
+                    the draft model (faster, lower quality) and target model (slower, higher quality). 
+                    Values range from 0.0 (regular speculative decoding with target model quality) to 
+                    1.0 (draft model speed with 100% acceptance rate). Higher values increase speed 
+                    while potentially reducing quality.
+                Defaults to 0.0.
 
         Returns:
             CompletionResponse | Iterator[CompletionChunk]: Object containing the completions
@@ -117,6 +124,7 @@ class Completions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            turboboost_tps=turboboost_tps,
             **kwargs,
         ).model_dump(exclude_none=True)
 
@@ -162,6 +170,7 @@ class AsyncCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
+        turboboost_tps: float | None = None,
         **kwargs: Any,
     ) -> AsyncGenerator[CompletionChunk, None] | CompletionResponse:
         """
@@ -212,6 +221,12 @@ class AsyncCompletions:
             safety_model (str, optional): A moderation model to validate tokens. Choice between available moderation
                     models found [here](https://docs.together.ai/docs/inference-models#moderation-models).
                 Defaults to None.
+            turboboost_tps (float, optional): A parameter that controls the speed-quality tradeoff between 
+                    the draft model (faster, lower quality) and target model (slower, higher quality). 
+                    Values range from 0.0 (regular speculative decoding with target model quality) to 
+                    1.0 (draft model speed with 100% acceptance rate). Higher values increase speed 
+                    while potentially reducing quality.
+                Defaults to 0.0.
 
         Returns:
             AsyncGenerator[CompletionChunk, None] | CompletionResponse: Object containing the completions
@@ -241,6 +256,7 @@ class AsyncCompletions:
             echo=echo,
             n=n,
             safety_model=safety_model,
+            turboboost_tps=turboboost_tps,
             **kwargs,
         ).model_dump(exclude_none=True)
 
