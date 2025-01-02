@@ -290,3 +290,16 @@ def test_check_jsonl_extra_column(tmp_path: Path):
     report = check_file(file)
     assert not report["is_check_passed"]
     assert "Found extra column" in report["message"]
+
+
+def test_check_jsonl_empty_messages(tmp_path: Path):
+    file = tmp_path / "empty_messages.jsonl"
+    content = [{"messages": []}]
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert (
+        "Expected a non-empty list of messages. Found empty list" in report["message"]
+    )
