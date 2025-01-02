@@ -300,4 +300,6 @@ def test_check_jsonl_empty_messages(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Expected a non-empty list of messages. Found empty list" in report["message"]
+    assert (
+        "Expected a non-empty list of messages. Found empty list" in report["message"]
+    )
