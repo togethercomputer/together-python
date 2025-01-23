@@ -16,6 +16,7 @@ class FinishReason(str, Enum):
     EOS = "eos"
     ToolCalls = "tool_calls"
     Error = "error"
+    Null = ""
 
 
 class UsageData(BaseModel):
