@@ -6,6 +6,7 @@ from together.resources.finetune import AsyncFineTuning, FineTuning
 from together.resources.images import AsyncImages, Images
 from together.resources.models import AsyncModels, Models
 from together.resources.rerank import AsyncRerank, Rerank
+from together.resources.audio import AsyncAudio, Audio
 
 
 __all__ = [
@@ -25,4 +26,6 @@ __all__ = [
     "Models",
     "AsyncRerank",
     "Rerank",
+    "AsyncAudio",
+    "Audio",
 ]

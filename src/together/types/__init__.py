@@ -42,6 +42,15 @@ from together.types.rerank import (
     RerankRequest,
     RerankResponse,
 )
+from together.types.audio_speech import (
+    AudioSpeechRequest,
+    AudioResponseFormat,
+    AudioLanguage,
+    AudioResponseEncoding,
+    AudioSpeechStreamChunk,
+    AudioSpeechStreamEvent,
+    AudioSpeechStreamResponse,
+)
 
 __all__ = [
     "TogetherClient",
@@ -77,4 +86,11 @@ __all__ = [
     "RerankRequest",
     "RerankResponse",
     "FinetuneTrainingLimits",
+    "AudioSpeechRequest",
+    "AudioResponseFormat",
+    "AudioLanguage",
+    "AudioResponseEncoding",
+    "AudioSpeechStreamChunk",
+    "AudioSpeechStreamEvent",
+    "AudioSpeechStreamResponse",
 ]
