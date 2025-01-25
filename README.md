@@ -217,15 +217,15 @@ from together import Together
 
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
-def get_reranked_documents(query: str, documents: List[str], model: str) -> List[str]:
-    outputs = client.rerank.create(model=model, query=query, documents=documents)
+def get_reranked_documents(query: str, documents: List[str], model: str, top_n: int = 3) -> List[str]:
+    outputs = client.rerank.create(model=model, query=query, documents=documents, top_n=top_n)
     # sort by relevance score and returns the original docs
     return [documents[i] for i in [x.index for x in sorted(outputs.results, key=lambda x: x.relevance_score, reverse=True)]]
 
 query = "What is the capital of the United States?"
 documents = ["New York","Washington, D.C.", "Los Angeles"]
 
-reranked_documents = get_reranked_documents(query, documents, model='Salesforce/Llama-Rank-V1')
+reranked_documents = get_reranked_documents(query, documents, model='Salesforce/Llama-Rank-V1', top_n=1)
 
 print(reranked_documents)
 ```
