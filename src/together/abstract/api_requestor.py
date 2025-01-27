@@ -691,7 +691,7 @@ class APIRequestor:
         try:
             content_type = rheaders.get("Content-Type", "")
             if isinstance(rbody, bytes):
-                data = rbody
+                data: Dict[str, Any] | bytes = rbody
             elif "text/plain" in content_type:
                 data = {"message": rbody}
             else:
