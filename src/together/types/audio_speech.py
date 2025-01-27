@@ -65,14 +65,18 @@ class AudioSpeechStreamChunk(BaseModel):
     model: str
     b64: str
 
+
 class AudioSpeechStreamEvent(BaseModel):
     data: AudioSpeechStreamChunk
+
 
 class StreamSentinel(BaseModel):
     data: StreamSentinelType = StreamSentinelType.DONE
 
+
 class AudioSpeechStreamEventResponse(BaseModel):
     response: AudioSpeechStreamEvent | StreamSentinel
+
 
 class AudioSpeechStreamResponse(BaseModel):
 
@@ -93,7 +97,9 @@ class AudioSpeechStreamResponse(BaseModel):
                 for chunk in self.response:
 
                     # Try to parse as stream chunk
-                    stream_event_response = AudioSpeechStreamEventResponse(response={"data": chunk.data})
+                    stream_event_response = AudioSpeechStreamEventResponse(
+                        response={"data": chunk.data}
+                    )
 
                     if isinstance(stream_event_response.response, StreamSentinel):
                         break
