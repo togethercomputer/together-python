@@ -698,7 +698,7 @@ class APIRequestor:
                 data = json.loads(rbody)
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
-                f"Error code: {rcode} -{rbody}",
+                f"Error code: {rcode} -{rbody if isinstance(rbody, str) else rbody.decode()}",
                 http_status=rcode,
                 headers=rheaders,
             ) from e
