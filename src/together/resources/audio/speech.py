@@ -150,4 +150,4 @@ class AsyncSpeech:
             stream=stream,
         )
 
-        # return AudioSpeechStreamResponse(response=response)
+        return AudioSpeechStreamResponse(response=response)
