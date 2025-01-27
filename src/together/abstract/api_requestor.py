@@ -690,14 +690,10 @@ class APIRequestor:
 
         try:
             content_type = rheaders.get("Content-Type", "")
-            if "text/plain" in content_type:
-                data: Dict[str, Any] = {"message": rbody}
-            elif content_type in [
-                "application/octet-stream",
-                "audio/wav",
-                "audio/mpeg",
-            ]:
+            if isinstance(rbody, bytes):
                 data = rbody
+            elif "text/plain" in content_type:
+                data = {"message": rbody}
             else:
                 data = json.loads(rbody)
         except (JSONDecodeError, UnicodeDecodeError) as e:
