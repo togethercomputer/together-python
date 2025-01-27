@@ -46,7 +46,7 @@ class AudioObjectType(str, Enum):
 
 
 class StreamSentinelType(str, Enum):
-    DONE = "[Done]"
+    DONE = "[DONE]"
 
 
 class AudioSpeechRequest(BaseModel):
@@ -66,7 +66,13 @@ class AudioSpeechStreamChunk(BaseModel):
     b64: str
 
 class AudioSpeechStreamEvent(BaseModel):
-    data: AudioSpeechStreamChunk | StreamSentinelType
+    data: AudioSpeechStreamChunk
+
+class StreamSentinel(BaseModel):
+    data: StreamSentinelType = StreamSentinelType.DONE
+
+class AudioSpeechStreamEventResponse(BaseModel):
+    response: AudioSpeechStreamEvent | StreamSentinel
 
 class AudioSpeechStreamResponse(BaseModel):
 
@@ -87,12 +93,12 @@ class AudioSpeechStreamResponse(BaseModel):
                 for chunk in self.response:
 
                     # Try to parse as stream chunk
-                    stream_event = AudioSpeechStreamEvent(data=chunk.data)
+                    stream_event_response = AudioSpeechStreamEventResponse(response={"data": chunk.data})
 
-                    if stream_event.data == StreamSentinelType.DONE:
+                    if isinstance(stream_event_response.response, StreamSentinel):
                         break
 
                     # decode base64
-                    audio = base64.b64decode(stream_event.data.b64)
+                    audio = base64.b64decode(stream_event_response.response.data.b64)
 
                     f.write(audio)
