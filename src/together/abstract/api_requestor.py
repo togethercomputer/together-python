@@ -78,7 +78,7 @@ def parse_stream_helper(line: bytes) -> str | None:
             line = line[len(b"data: ") :]
         else:
             line = line[len(b"data:") :]
-        if line.strip() == b"[DONE]":
+        if line.strip().upper() == b"[DONE]":
             # return here will cause GeneratorExit exception in urllib3
             # and it will close http connection with TCP Reset
             return None
@@ -620,7 +620,8 @@ class APIRequestor:
         self, result: requests.Response, stream: bool
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
-        if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
+        content_type = result.headers.get("Content-Type", "")
+        if stream and "text/event-stream" in content_type:
             return (
                 self._interpret_response_line(
                     line, result.status_code, result.headers, stream=True
@@ -628,9 +629,13 @@ class APIRequestor:
                 for line in parse_stream(result.iter_lines())
             ), True
         else:
+            if content_type in ["application/octet-stream", "audio/wav", "audio/mpeg"]:
+                content = result.content
+            else:
+                content = result.content.decode("utf-8")
             return (
                 self._interpret_response_line(
-                    result.content.decode("utf-8"),
+                    content,
                     result.status_code,
                     result.headers,
                     stream=False,
@@ -670,7 +675,7 @@ class APIRequestor:
             )
 
     def _interpret_response_line(
-        self, rbody: str, rcode: int, rheaders: Any, stream: bool
+        self, rbody: str | bytes, rcode: int, rheaders: Any, stream: bool
     ) -> TogetherResponse:
         # HTTP 204 response code does not have any content in the body.
         if rcode == 204:
@@ -684,13 +689,16 @@ class APIRequestor:
             )
 
         try:
-            if "text/plain" in rheaders.get("Content-Type", ""):
-                data: Dict[str, Any] = {"message": rbody}
+            content_type = rheaders.get("Content-Type", "")
+            if isinstance(rbody, bytes):
+                data: Dict[str, Any] | bytes = rbody
+            elif "text/plain" in content_type:
+                data = {"message": rbody}
             else:
                 data = json.loads(rbody)
         except (JSONDecodeError, UnicodeDecodeError) as e:
             raise error.APIError(
-                f"Error code: {rcode} -{rbody}",
+                f"Error code: {rcode} -{rbody if isinstance(rbody, str) else rbody.decode()}",
                 http_status=rcode,
                 headers=rheaders,
             ) from e

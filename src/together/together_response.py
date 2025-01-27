@@ -8,7 +8,7 @@ class TogetherResponse:
     API Response class. Stores headers and response data.
     """
 
-    def __init__(self, data: Dict[str, Any], headers: Dict[str, Any]):
+    def __init__(self, data: Any, headers: Dict[str, Any]):
         self._headers = headers
         self.data = data
 

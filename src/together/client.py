@@ -19,6 +19,7 @@ class Together:
     models: resources.Models
     fine_tuning: resources.FineTuning
     rerank: resources.Rerank
+    audio: resources.Audio
 
     # client options
     client: TogetherClient
@@ -79,6 +80,7 @@ class Together:
         self.models = resources.Models(self.client)
         self.fine_tuning = resources.FineTuning(self.client)
         self.rerank = resources.Rerank(self.client)
+        self.audio = resources.Audio(self.client)
 
 
 class AsyncTogether:
