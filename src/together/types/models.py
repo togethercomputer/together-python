@@ -15,6 +15,7 @@ class ModelType(str, Enum):
     EMBEDDING = "embedding"
     MODERATION = "moderation"
     RERANK = "rerank"
+    AUDIO = "audio"
 
 
 class PricingObject(BaseModel):
