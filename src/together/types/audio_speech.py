@@ -65,14 +65,14 @@ class AudioSpeechStreamChunk(BaseModel):
     model: str
     b64: str
 
-
 class AudioSpeechStreamEvent(BaseModel):
     data: AudioSpeechStreamChunk
-
 
 class StreamSentinel(BaseModel):
     data: StreamSentinelType = StreamSentinelType.DONE
 
+class AudioSpeechStreamEventResponse(BaseModel):
+    response: AudioSpeechStreamEvent | StreamSentinel
 
 class AudioSpeechStreamResponse(BaseModel):
 
@@ -92,9 +92,13 @@ class AudioSpeechStreamResponse(BaseModel):
             with open(file_path, "wb") as f:
                 for chunk in self.response:
 
-                    data = AudioSpeechStreamChunk(**chunk.data)
+                    # Try to parse as stream chunk
+                    stream_event_response = AudioSpeechStreamEventResponse(response={"data": chunk.data})
+
+                    if isinstance(stream_event_response.response, StreamSentinel):
+                        break
 
                     # decode base64
-                    audio = base64.b64decode(data.b64)
+                    audio = base64.b64decode(stream_event_response.response.data.b64)
 
                     f.write(audio)
