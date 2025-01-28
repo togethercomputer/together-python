@@ -75,6 +75,14 @@ datasets = ">=2.18,<4.0"
 transformers = "^4.39.3"
 
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.14.1"
+types-requests = "^2.31.0"
+openapi-python-client = "^0.19.0"
+
 [tool.poetry.urls]
 "Homepage" = "https://github.com/togethercomputer/together-python"
 "Bug Tracker" = "https://github.com/togethercomputer/together-python/issues"
@@ -84,6 +92,7 @@ together = "together.cli.cli:main"
 
 [tool.black]
 target-version = ['py310']
+line-length = 100
 
 [tool.ruff.lint]
 # Never enforce `E501` (line length violations).

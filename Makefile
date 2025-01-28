@@ -1,4 +1,4 @@
-.PHONY: all format lint test tests test_watch integration_tests docker_tests help extended_tests
+.PHONY: all format lint test tests test_watch integration_tests docker_tests help extended_tests generate-client
 
 # Default target executed when no arguments are given to make.
 all: help
@@ -49,3 +49,6 @@ help:
 	@echo 'test_watch                   - run unit tests in watch mode'
 	@echo 'extended_tests               - run extended tests'
 	@echo 'integration_tests            - run integration tests'
+
+generate-client:
+	python scripts/generate_api_client.py

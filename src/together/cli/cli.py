@@ -11,6 +11,7 @@ from together.cli.api.completions import completions
 from together.cli.api.files import files
 from together.cli.api.finetune import fine_tuning
 from together.cli.api.images import images
+from together.cli.api.inference import inference
 from together.cli.api.models import models
 from together.constants import MAX_RETRIES, TIMEOUT_SECS
 
@@ -30,12 +31,8 @@ def print_version(ctx: click.Context, params: Any, value: Any) -> None:
     help="API Key. Defaults to environment variable `TOGETHER_API_KEY`",
     default=os.getenv("TOGETHER_API_KEY"),
 )
-@click.option(
-    "--base-url", type=str, help="API Base URL. Defaults to Together AI endpoint."
-)
-@click.option(
-    "--timeout", type=int, help=f"Request timeout. Defaults to {TIMEOUT_SECS} seconds"
-)
+@click.option("--base-url", type=str, help="API Base URL. Defaults to Together AI endpoint.")
+@click.option("--timeout", type=int, help=f"Request timeout. Defaults to {TIMEOUT_SECS} seconds")
 @click.option(
     "--max-retries",
     type=int,
@@ -72,6 +69,7 @@ main.add_command(images)
 main.add_command(files)
 main.add_command(fine_tuning)
 main.add_command(models)
+main.add_command(inference)
 
 if __name__ == "__main__":
     main()
