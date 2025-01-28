@@ -1,0 +1,35 @@
+{
+    "name": "Together Python Development",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers-contrib/features/poetry:2": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.isort",
+                "charliermarsh.ruff",
+                "ms-python.mypy-type-checker",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff"
+                },
+                "editor.formatOnSave": true,
+                "editor.codeActionsOnSave": {
+                    "source.fixAll": "explicit",
+                    "source.organizeImports": "explicit"
+                },
+                "ruff.lineLength": 100
+            }
+        }
+    },
+    "postCreateCommand": "poetry install",
+    "remoteUser": "vscode"
+} 
