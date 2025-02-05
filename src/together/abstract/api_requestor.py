@@ -302,7 +302,7 @@ class APIRequestor:
                 request_timeout=request_timeout,
             )
             resp, got_stream = await self._interpret_async_response(result, stream)
-        except Exception:
+        except BaseException:
             # Close the request before exiting session context.
             if result is not None:
                 result.release()
