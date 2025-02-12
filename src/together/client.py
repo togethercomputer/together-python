@@ -81,6 +81,7 @@ class Together:
         self.fine_tuning = resources.FineTuning(self.client)
         self.rerank = resources.Rerank(self.client)
         self.audio = resources.Audio(self.client)
+        self.endpoints = resources.Endpoints(self.client)
 
 
 class AsyncTogether:

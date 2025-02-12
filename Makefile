@@ -1,4 +1,4 @@
-.PHONY: all format lint test tests test_watch integration_tests docker_tests help extended_tests
+.PHONY: all format lint test tests test_watch integration_tests docker_tests help extended_tests generate-client
 
 # Default target executed when no arguments are given to make.
 all: help
@@ -27,10 +27,15 @@ integration_tests:
 install:
 	poetry install --with quality,tests
 	poetry run pre-commit install
+	$(MAKE) generate-client
 
 format:
 	poetry run pre-commit run --all-files
 
+# OpenAPI Client Generation
+
+generate-client:
+	python scripts/generate_api_client.py
 
 # Documentation
 
@@ -49,3 +54,4 @@ help:
 	@echo 'test_watch                   - run unit tests in watch mode'
 	@echo 'extended_tests               - run extended tests'
 	@echo 'integration_tests            - run integration tests'
+	@echo 'generate-client              - generate the OpenAPI client'
