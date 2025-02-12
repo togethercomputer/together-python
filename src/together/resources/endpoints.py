@@ -75,7 +75,9 @@ class Endpoints(BaseEndpoints):
             request = CreateEndpointRequest(
                 model=model,
                 hardware=hardware,
-                autoscaling=Autoscaling(min_replicas=min_replicas, max_replicas=max_replicas),
+                autoscaling=Autoscaling(
+                    min_replicas=min_replicas, max_replicas=max_replicas
+                ),
                 display_name=display_name,
                 disable_prompt_cache=disable_prompt_cache,
                 disable_speculative_decoding=disable_speculative_decoding,
@@ -85,7 +87,9 @@ class Endpoints(BaseEndpoints):
 
         return self._loop.run_until_complete(_create())
 
-    def list(self, type: Literal["dedicated", "serverless"] | None = None) -> List[ListEndpoint]:
+    def list(
+        self, type: Literal["dedicated", "serverless"] | None = None
+    ) -> List[ListEndpoint]:
         """
         List all endpoints.
 
@@ -218,7 +222,9 @@ class AsyncEndpoints(BaseEndpoints):
         request = CreateEndpointRequest(
             model=model,
             hardware=hardware,
-            autoscaling=Autoscaling(min_replicas=min_replicas, max_replicas=max_replicas),
+            autoscaling=Autoscaling(
+                min_replicas=min_replicas, max_replicas=max_replicas
+            ),
             display_name=display_name,
             disable_prompt_cache=disable_prompt_cache,
             disable_speculative_decoding=disable_speculative_decoding,

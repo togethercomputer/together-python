@@ -93,7 +93,8 @@ def _prepare_output(
     content_type = str(headers.get("content-type"))
 
     assert remote_name, (
-        "No model name found in fine_tune object. " "Please specify an `output` file name."
+        "No model name found in fine_tune object. "
+        "Please specify an `output` file name."
     )
 
     if step > 0:
@@ -149,7 +150,9 @@ class DownloadManager:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            raise APIError("Error fetching file metadata", http_status=response.status_code) from e
+            raise APIError(
+                "Error fetching file metadata", http_status=response.status_code
+            ) from e
 
         headers = response.headers
 
@@ -177,7 +180,9 @@ class DownloadManager:
         )
 
         # pre-fetch remote file name and file size
-        file_path, file_size = self.get_file_metadata(url, output, remote_name, fetch_metadata)
+        file_path, file_size = self.get_file_metadata(
+            url, output, remote_name, fetch_metadata
+        )
 
         temp_file_manager = partial(
             tempfile.NamedTemporaryFile, mode="wb", dir=file_path.parent, delete=False

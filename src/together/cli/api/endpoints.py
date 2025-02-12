@@ -12,7 +12,9 @@ from together.generated.exceptions import ForbiddenException, ServiceException
 from together.types import DedicatedEndpoint, ListEndpoint
 
 
-def print_endpoint(endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool = False) -> None:
+def print_endpoint(
+    endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool = False
+) -> None:
     """Print endpoint details in a Docker-like format or JSON."""
     if json:
         import json as json_lib
@@ -79,7 +81,10 @@ def handle_api_errors(f: F) -> F:
             else:
                 error_details = str(e)
 
-            if "credentials" in error_details.lower() or "authentication" in error_details.lower():
+            if (
+                "credentials" in error_details.lower()
+                or "authentication" in error_details.lower()
+            ):
                 click.echo("Error: Invalid API key or authentication failed", err=True)
             else:
                 click.echo(f"Error: {error_details}", err=True)
@@ -259,11 +264,15 @@ def delete(client: Together, endpoint_id: str) -> None:
 @endpoints.command()
 @click.option("--json", is_flag=True, help="Print output in JSON format")
 @click.option(
-    "--type", type=click.Choice(["dedicated", "serverless"]), help="Filter by endpoint type"
+    "--type",
+    type=click.Choice(["dedicated", "serverless"]),
+    help="Filter by endpoint type",
 )
 @click.pass_obj
 @handle_api_errors
-def list(client: Together, json: bool, type: Literal["dedicated", "serverless"] | None) -> None:
+def list(
+    client: Together, json: bool, type: Literal["dedicated", "serverless"] | None
+) -> None:
     """List all inference endpoints (includes both dedicated and serverless endpoints)."""
     endpoints: List[ListEndpoint] = client.endpoints.list(type=type)
 

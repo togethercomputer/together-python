@@ -50,7 +50,9 @@ class ChatShell(cmd.Cmd):
         self.system_message = system_message
 
         self.messages = (
-            [{"role": "system", "content": self.system_message}] if self.system_message else []
+            [{"role": "system", "content": self.system_message}]
+            if self.system_message
+            else []
         )
 
     def precmd(self, line: str) -> str:
@@ -96,7 +98,9 @@ class ChatShell(cmd.Cmd):
 
     def do_reset(self, arg: str) -> None:
         self.messages = (
-            [{"role": "system", "content": self.system_message}] if self.system_message else []
+            [{"role": "system", "content": self.system_message}]
+            if self.system_message
+            else []
         )
 
     def do_exit(self, arg: str) -> bool:
@@ -107,7 +111,9 @@ class ChatShell(cmd.Cmd):
 @click.pass_context
 @click.option("--model", type=str, required=True, help="Model name")
 @click.option("--max-tokens", type=int, help="Max tokens to generate")
-@click.option("--stop", type=str, multiple=True, help="List of strings to stop generation")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
 @click.option("--temperature", type=float, help="Sampling temperature")
 @click.option("--top-p", type=int, help="Top p sampling")
 @click.option("--top-k", type=float, help="Top k sampling")
@@ -163,13 +169,17 @@ def interactive(
 )
 @click.option("--model", type=str, required=True, help="Model name")
 @click.option("--max-tokens", type=int, help="Max tokens to generate")
-@click.option("--stop", type=str, multiple=True, help="List of strings to stop generation")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
 @click.option("--temperature", type=float, help="Sampling temperature")
 @click.option("--top-p", type=int, help="Top p sampling")
 @click.option("--top-k", type=float, help="Top k sampling")
 @click.option("--repetition-penalty", type=float, help="Repetition penalty")
 @click.option("--presence-penalty", type=float, help="Presence penalty sampling method")
-@click.option("--frequency-penalty", type=float, help="Frequency penalty sampling method")
+@click.option(
+    "--frequency-penalty", type=float, help="Frequency penalty sampling method"
+)
 @click.option("--min-p", type=float, help="Min p sampling")
 @click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
@@ -251,7 +261,9 @@ def chat(
         assert isinstance(response.choices, list)
 
         if raw:
-            click.echo(f"{json.dumps(response.model_dump(exclude_none=True), indent=4)}")
+            click.echo(
+                f"{json.dumps(response.model_dump(exclude_none=True), indent=4)}"
+            )
             return
 
         should_print_header = len(response.choices) > 1

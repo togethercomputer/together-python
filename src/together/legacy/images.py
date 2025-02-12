@@ -22,4 +22,6 @@ class Image:
 
         client = together.Together(api_key=api_key)
 
-        return client.images.generate(prompt=prompt, **kwargs).model_dump(exclude_none=True)
+        return client.images.generate(prompt=prompt, **kwargs).model_dump(
+            exclude_none=True
+        )

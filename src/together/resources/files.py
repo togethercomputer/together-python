@@ -83,7 +83,9 @@ class Files:
 
         return FileResponse(**response.data)
 
-    def retrieve_content(self, id: str, *, output: Path | str | None = None) -> FileObject:
+    def retrieve_content(
+        self, id: str, *, output: Path | str | None = None
+    ) -> FileObject:
         download_manager = DownloadManager(self._client)
 
         if isinstance(output, str):
@@ -161,7 +163,9 @@ class AsyncFiles:
 
         return FileResponse(**response.data)
 
-    async def retrieve_content(self, id: str, *, output: Path | str | None = None) -> FileObject:
+    async def retrieve_content(
+        self, id: str, *, output: Path | str | None = None
+    ) -> FileObject:
         raise NotImplementedError()
 
     async def delete(self, id: str) -> FileDeleteResponse:

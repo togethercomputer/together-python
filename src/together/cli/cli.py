@@ -31,8 +31,12 @@ def print_version(ctx: click.Context, params: Any, value: Any) -> None:
     help="API Key. Defaults to environment variable `TOGETHER_API_KEY`",
     default=os.getenv("TOGETHER_API_KEY"),
 )
-@click.option("--base-url", type=str, help="API Base URL. Defaults to Together AI endpoint.")
-@click.option("--timeout", type=int, help=f"Request timeout. Defaults to {TIMEOUT_SECS} seconds")
+@click.option(
+    "--base-url", type=str, help="API Base URL. Defaults to Together AI endpoint."
+)
+@click.option(
+    "--timeout", type=int, help=f"Request timeout. Defaults to {TIMEOUT_SECS} seconds"
+)
 @click.option(
     "--max-retries",
     type=int,

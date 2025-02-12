@@ -54,7 +54,9 @@ class Files:
         client = together.Together(api_key=api_key)
 
         # disabling the check, because it was run previously
-        response = client.files.upload(file=file, check=False).model_dump(exclude_none=True)
+        response = client.files.upload(file=file, check=False).model_dump(
+            exclude_none=True
+        )
 
         if check:
             response["report_dict"] = report_dict
@@ -111,11 +113,15 @@ class Files:
 
         client = together.Together(api_key=api_key)
 
-        return client.files.retrieve_content(id=file_id, output=output).dict(exclude_none=True)
+        return client.files.retrieve_content(id=file_id, output=output).dict(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore
-    def save_jsonl(self, data: Dict[str, str], output_path: str, append: bool = False) -> None:
+    def save_jsonl(
+        self, data: Dict[str, str], output_path: str, append: bool = False
+    ) -> None:
         """
         Write list of objects to a JSON lines file.
         """

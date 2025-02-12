@@ -36,7 +36,9 @@ def get_headers(
 
     user_agent = "Together/v1 PythonBindings/%s" % (together.version,)
 
-    uname_without_node = " ".join(v for k, v in platform.uname()._asdict().items() if k != "node")
+    uname_without_node = " ".join(
+        v for k, v in platform.uname()._asdict().items() if k != "node"
+    )
     ua = {
         "bindings_version": together.version,
         "httplib": "requests",

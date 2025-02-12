@@ -18,7 +18,9 @@ class Finetune:
         n_checkpoints: int | None = 1,
         batch_size: int | None = 32,
         learning_rate: float = 0.00001,
-        suffix: str | None = None,  # resulting finetuned model name will include the suffix
+        suffix: (
+            str | None
+        ) = None,  # resulting finetuned model name will include the suffix
         estimate_price: bool = False,
         wandb_api_key: str | None = None,
         confirm_inputs: bool = False,
@@ -78,7 +80,9 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.retrieve(id=fine_tune_id).model_dump(exclude_none=True)
+        return client.fine_tuning.retrieve(id=fine_tune_id).model_dump(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore
@@ -112,7 +116,9 @@ class Finetune:
 
         client = together.Together(api_key=api_key)
 
-        return client.fine_tuning.list_events(id=fine_tune_id).model_dump(exclude_none=True)
+        return client.fine_tuning.list_events(id=fine_tune_id).model_dump(
+            exclude_none=True
+        )
 
     @classmethod
     @deprecated  # type: ignore

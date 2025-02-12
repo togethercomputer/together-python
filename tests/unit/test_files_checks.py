@@ -171,7 +171,10 @@ def test_check_jsonl_missing_required_field(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "Error parsing file. Could not detect a format for the line 2" in report["message"]
+    assert (
+        "Error parsing file. Could not detect a format for the line 2"
+        in report["message"]
+    )
 
 
 def test_check_jsonl_inconsistent_dataset_format(tmp_path: Path):
@@ -187,7 +190,10 @@ def test_check_jsonl_inconsistent_dataset_format(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "All samples in the dataset must have the same dataset format" in report["message"]
+    assert (
+        "All samples in the dataset must have the same dataset format"
+        in report["message"]
+    )
 
 
 def test_check_jsonl_invalid_role(tmp_path: Path):
@@ -269,7 +275,10 @@ def test_check_jsonl_wrong_turn_type(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Invalid format on line 1 of the input file. Expected a dictionary" in report["message"]
+    assert (
+        "Invalid format on line 1 of the input file. Expected a dictionary"
+        in report["message"]
+    )
 
 
 def test_check_jsonl_extra_column(tmp_path: Path):
@@ -291,4 +300,6 @@ def test_check_jsonl_empty_messages(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Expected a non-empty list of messages. Found empty list" in report["message"]
+    assert (
+        "Expected a non-empty list of messages. Found empty list" in report["message"]
+    )

@@ -14,7 +14,11 @@ from together.types.chat_completions import (
     ChatCompletionResponse,
 )
 from together.types.common import TogetherRequest
-from together.types.completions import CompletionChunk, CompletionRequest, CompletionResponse
+from together.types.completions import (
+    CompletionChunk,
+    CompletionRequest,
+    CompletionResponse,
+)
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 from together.types.endpoints import Autoscaling, DedicatedEndpoint, ListEndpoint
 from together.types.files import (

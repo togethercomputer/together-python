@@ -933,7 +933,7 @@ paths:
   /hardware:
     get:
       tags: ["Hardware"]
-      summary: List available hardware configurations 
+      summary: List available hardware configurations
       description: Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
       operationId: listHardware
       parameters:
@@ -1058,21 +1058,21 @@ components:
                 example: Our solar system orbits the Milky Way galaxy at about 515,000 mph
           example:
             - {
-              "title": "Llama",
-              "text": "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
-            }
+                "title": "Llama",
+                "text": "The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era.",
+              }
             - {
-              "title": "Panda",
-              "text": "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
-            }
+                "title": "Panda",
+                "text": "The giant panda (Ailuropoda melanoleuca), also known as the panda bear or simply panda, is a bear species endemic to China.",
+              }
             - {
-              "title": "Guanaco",
-              "text": "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
-            }
+                "title": "Guanaco",
+                "text": "The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations.",
+              }
             - {
-              "title": "Wild Bactrian camel",
-              "text": "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia.",
-            }
+                "title": "Wild Bactrian camel",
+                "text": "The wild Bactrian camel (Camelus ferus) is an endangered species of camel endemic to Northwest China and southwestern Mongolia.",
+              }
         top_n:
           type: integer
           description: The number of top results to return.
@@ -1132,21 +1132,21 @@ components:
                     nullable: true
           example:
             - {
-              "index": 0,
-              "relevance_score": 0.29980177813003117,
-              "document":
-                {
-                  "text": '{"title":"Llama","text":"The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era."}',
-                },
-            }
+                "index": 0,
+                "relevance_score": 0.29980177813003117,
+                "document":
+                  {
+                    "text": '{"title":"Llama","text":"The llama is a domesticated South American camelid, widely used as a meat and pack animal by Andean cultures since the pre-Columbian era."}',
+                  },
+              }
             - {
-              "index": 2,
-              "relevance_score": 0.2752447527354349,
-              "document":
-                {
-                  "text": '{"title":"Guanaco","text":"The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations."}',
-                },
-            }
+                "index": 2,
+                "relevance_score": 0.2752447527354349,
+                "document":
+                  {
+                    "text": '{"title":"Guanaco","text":"The guanaco is a camelid native to South America, closely related to the llama. Guanacos are one of two wild South American camelids; the other species is the vicuña, which lives at higher elevations."}',
+                  },
+              }
         usage:
           $ref: "#/components/schemas/UsageData"
           example:
@@ -1345,7 +1345,7 @@ components:
 
             format: float
           description: Adjusts the likelihood of specific tokens appearing in the generated output.
-          example: {"1024": -10.5, "105": 21.4}
+          example: { "1024": -10.5, "105": 21.4 }
         seed:
           type: integer
           description: Seed value for reproducibility.
@@ -1593,7 +1593,7 @@ components:
           format: int32
         context_length_exceeded_behavior:
           type: string
-          enum: [ "truncate", "error" ]
+          enum: ["truncate", "error"]
           default: "error"
           description: Defined the behavior of the API when max_tokens exceed the maximum context length of the model. When set to 'error', API will return 400 with appropriate error message. When set to 'truncate', override the max_tokens with maximum context length of the model.
         repetition_penalty:
@@ -1633,7 +1633,7 @@ components:
             type: number
             format: float
           description: Adjusts the likelihood of specific tokens appearing in the generated output.
-          example: {"1024": -10.5, "105": 21.4}
+          example: { "1024": -10.5, "105": 21.4 }
         seed:
           type: integer
           description: Seed value for reproducibility.
@@ -2714,7 +2714,7 @@ components:
             - STARTED
             - STOPPED
           default: STARTED
-          example: STARTED        
+          example: STARTED
 
     DedicatedEndpoint:
       type: object
@@ -2773,7 +2773,7 @@ components:
           enum:
             - PENDING
             - STARTING
-            - STARTED 
+            - STARTED
             - STOPPING
             - STOPPED
             - ERROR
@@ -2835,7 +2835,7 @@ components:
           enum:
             - PENDING
             - STARTING
-            - STARTED 
+            - STARTED
             - STOPPING
             - STOPPED
             - ERROR

@@ -21,7 +21,9 @@ def files(ctx: click.Context) -> None:
 @click.pass_context
 @click.argument(
     "file",
-    type=click.Path(exists=True, file_okay=True, resolve_path=True, readable=True, dir_okay=False),
+    type=click.Path(
+        exists=True, file_okay=True, resolve_path=True, readable=True, dir_okay=False
+    ),
     required=True,
 )
 @click.option(
@@ -59,7 +61,9 @@ def list(ctx: click.Context) -> None:
             {
                 "File name": "\n".join(wrap(i.filename or "", width=30)),
                 "File ID": i.id,
-                "Size": convert_bytes(float(str(i.bytes))),  # convert to string for mypy typing
+                "Size": convert_bytes(
+                    float(str(i.bytes))
+                ),  # convert to string for mypy typing
                 "Created At": convert_unix_timestamp(i.created_at or 0),
                 "Line Count": i.line_count,
             }
@@ -113,7 +117,9 @@ def delete(ctx: click.Context, id: str) -> None:
 @click.pass_context
 @click.argument(
     "file",
-    type=click.Path(exists=True, file_okay=True, resolve_path=True, readable=True, dir_okay=False),
+    type=click.Path(
+        exists=True, file_okay=True, resolve_path=True, readable=True, dir_okay=False
+    ),
     required=True,
 )
 def check(ctx: click.Context, file: pathlib.Path) -> None:

@@ -338,7 +338,9 @@ class APIRequestor:
         try:
             assert isinstance(resp.data, dict)
             error_resp = resp.data.get("error")
-            assert isinstance(error_resp, dict), f"Unexpected error response {error_resp}"
+            assert isinstance(
+                error_resp, dict
+            ), f"Unexpected error response {error_resp}"
             error_data = TogetherErrorResponse(**(error_resp))
         except (KeyError, TypeError):
             raise error.JSONError(
@@ -397,7 +399,9 @@ class APIRequestor:
             )
 
     @classmethod
-    def _validate_headers(cls, supplied_headers: Dict[str, str] | None) -> Dict[str, str]:
+    def _validate_headers(
+        cls, supplied_headers: Dict[str, str] | None
+    ) -> Dict[str, str]:
         headers: Dict[str, str] = {}
         if supplied_headers is None:
             return headers
@@ -524,7 +528,9 @@ class APIRequestor:
                     request_timeout=request_timeout,
                 )
 
-            raise error.APIConnectionError("Error communicating with API: {}".format(e)) from e
+            raise error.APIConnectionError(
+                "Error communicating with API: {}".format(e)
+            ) from e
 
         # retry on 5XX error or rate-limit
         if result is not None:
@@ -589,7 +595,9 @@ class APIRequestor:
         }
 
         try:
-            result = await session.request(method=options.method, url=abs_url, **request_kwargs)
+            result = await session.request(
+                method=options.method, url=abs_url, **request_kwargs
+            )
             utils.log_debug(
                 "Together API response",
                 path=abs_url,
@@ -599,7 +607,9 @@ class APIRequestor:
             )
             # Don't read the whole stream for debug logging unless necessary.
             if together.log == "debug":
-                utils.log_debug("API response body", body=result.content, headers=result.headers)
+                utils.log_debug(
+                    "API response body", body=result.content, headers=result.headers
+                )
             return result
         except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
             raise error.Timeout("Request timed out") from e
@@ -613,7 +623,9 @@ class APIRequestor:
         content_type = result.headers.get("Content-Type", "")
         if stream and "text/event-stream" in content_type:
             return (
-                self._interpret_response_line(line, result.status_code, result.headers, stream=True)
+                self._interpret_response_line(
+                    line, result.status_code, result.headers, stream=True
+                )
                 for line in parse_stream(result.iter_lines())
             ), True
         else:
@@ -633,11 +645,16 @@ class APIRequestor:
 
     async def _interpret_async_response(
         self, result: aiohttp.ClientResponse, stream: bool
-    ) -> tuple[AsyncGenerator[TogetherResponse, None], bool] | tuple[TogetherResponse, bool]:
+    ) -> (
+        tuple[AsyncGenerator[TogetherResponse, None], bool]
+        | tuple[TogetherResponse, bool]
+    ):
         """Returns the response(s) and a bool indicating whether it is a stream."""
         if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
             return (
-                self._interpret_response_line(line, result.status, result.headers, stream=True)
+                self._interpret_response_line(
+                    line, result.status, result.headers, stream=True
+                )
                 async for line in parse_stream_async(result.content)
             ), True
         else:

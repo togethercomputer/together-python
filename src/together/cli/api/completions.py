@@ -15,7 +15,9 @@ from together.types.completions import CompletionChoicesChunk, CompletionRespons
 @click.argument("prompt", type=str, required=True)
 @click.option("--model", type=str, required=True, help="Model name")
 @click.option("--max-tokens", type=int, help="Max tokens to generate")
-@click.option("--stop", type=str, multiple=True, help="List of strings to stop generation")
+@click.option(
+    "--stop", type=str, multiple=True, help="List of strings to stop generation"
+)
 @click.option("--temperature", type=float, help="Sampling temperature")
 @click.option("--top-p", type=int, help="Top p sampling")
 @click.option("--top-k", type=float, help="Top k sampling")
@@ -102,7 +104,9 @@ def completions(
         assert isinstance(response.choices, list)
 
         if raw:
-            click.echo(f"{json.dumps(response.model_dump(exclude_none=True), indent=4)}")
+            click.echo(
+                f"{json.dumps(response.model_dump(exclude_none=True), indent=4)}"
+            )
             return
 
         should_print_header = len(response.choices) > 1

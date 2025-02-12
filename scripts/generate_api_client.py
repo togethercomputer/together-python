@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 
-OPENAPI_SPEC_URL = "https://raw.githubusercontent.com/togethercomputer/openapi/main/openapi.yaml"
+OPENAPI_SPEC_URL = (
+    "https://raw.githubusercontent.com/togethercomputer/openapi/main/openapi.yaml"
+)
 OUTPUT_DIR = Path(__file__).parent.parent / "src" / "together" / "generated"
 GENERATOR_JAR_URL = "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.11.0/openapi-generator-cli-7.11.0.jar"
 GENERATOR_JAR = Path(__file__).parent / "openapi-generator-cli.jar"
