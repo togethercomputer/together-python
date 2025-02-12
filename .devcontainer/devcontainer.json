@@ -10,8 +10,7 @@
             "version": "17",
             "installMaven": false,
             "installGradle": false
-        },
-        "ghcr.io/devcontainers-contrib/features/poetry:2": {}
+        }
     },
     "customizations": {
         "vscode": {
