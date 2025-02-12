@@ -126,6 +126,21 @@ yarl = ">=1.12.0,<2.0"
 speedups = ["Brotli", "aiodns (>=3.2.0)", "brotlicffi"]
 
 [[package]]
+name = "aiohttp-retry"
+version = "2.9.1"
+description = "Simple retry client for aiohttp"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "aiohttp_retry-2.9.1-py3-none-any.whl", hash = "sha256:66d2759d1921838256a05a3f80ad7e724936f083e35be5abb5e16eed6be6dc54"},
+    {file = "aiohttp_retry-2.9.1.tar.gz", hash = "sha256:8eb75e904ed4ee5c2ec242fefe85bf04240f685391c4879d8f541d6028ff01f1"},
+]
+
+[package.dependencies]
+aiohttp = "*"
+
+[[package]]
 name = "aiosignal"
 version = "1.3.1"
 description = "aiosignal: a list of registered asynchronous callbacks"
@@ -746,6 +761,18 @@ groups = ["tests"]
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
+]
+
+[[package]]
+name = "makefun"
+version = "1.15.6"
+description = "Small library to dynamically create python functions."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "makefun-1.15.6-py2.py3-none-any.whl", hash = "sha256:e69b870f0bb60304765b1e3db576aaecf2f9b3e5105afe8cfeff8f2afe6ad067"},
+    {file = "makefun-1.15.6.tar.gz", hash = "sha256:26bc63442a6182fb75efed8b51741dd2d1db2f176bec8c64e20a586256b8f149"},
 ]
 
 [[package]]
@@ -1626,7 +1653,7 @@ version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["examples"]
+groups = ["main", "examples"]
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
     {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
@@ -2035,7 +2062,7 @@ version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-groups = ["examples"]
+groups = ["main", "examples"]
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
@@ -2361,7 +2388,7 @@ version = "2.32.0.20241016"
 description = "Typing stubs for requests"
 optional = false
 python-versions = ">=3.8"
-groups = ["quality"]
+groups = ["dev", "quality"]
 files = [
     {file = "types-requests-2.32.0.20241016.tar.gz", hash = "sha256:0d9cad2f27515d0e3e3da7134a1b6f28fb97129d86b867f24d9c726452634d95"},
     {file = "types_requests-2.32.0.20241016-py3-none-any.whl", hash = "sha256:4195d62d6d3e043a4eaaf08ff8a62184584d2e8684e9d2aa178c7915a7da3747"},
@@ -2428,7 +2455,7 @@ version = "2.2.3"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "examples", "quality"]
+groups = ["main", "dev", "examples", "quality"]
 files = [
     {file = "urllib3-2.2.3-py3-none-any.whl", hash = "sha256:ca899ca043dcb1bafa3e262d73aa25c465bfb49e0bd9dd5d59f1d0acba2f8fac"},
     {file = "urllib3-2.2.3.tar.gz", hash = "sha256:e7d814a81dad81e6caf2ec9fdedb284ecc9c73076b62654547cc64ccdcae26e9"},
@@ -2751,4 +2778,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.8"
-content-hash = "d169851a7d91fdd84e2586eada0e49faa2e7dd9d35a24caf1b26142640f79251"
+content-hash = "82809528a39fc644e6e9cef3bf8f652b195e22929c8b840e2c7d2bf5367f0ced"

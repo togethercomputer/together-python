@@ -5,6 +5,11 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/java:1": {
+            "version": "17",
+            "installMaven": false,
+            "installGradle": false
+        },
         "ghcr.io/devcontainers-contrib/features/poetry:2": {}
     },
     "customizations": {

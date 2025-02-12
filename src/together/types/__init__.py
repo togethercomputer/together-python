@@ -1,16 +1,22 @@
 from together.types.abstract import TogetherClient
+from together.types.audio_speech import (
+    AudioLanguage,
+    AudioResponseEncoding,
+    AudioResponseFormat,
+    AudioSpeechRequest,
+    AudioSpeechStreamChunk,
+    AudioSpeechStreamEvent,
+    AudioSpeechStreamResponse,
+)
 from together.types.chat_completions import (
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
 )
 from together.types.common import TogetherRequest
-from together.types.completions import (
-    CompletionChunk,
-    CompletionRequest,
-    CompletionResponse,
-)
+from together.types.completions import CompletionChunk, CompletionRequest, CompletionResponse
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
+from together.types.endpoints import Autoscaling, DedicatedEndpoint, ListEndpoint
 from together.types.files import (
     FileDeleteResponse,
     FileList,
@@ -22,35 +28,21 @@ from together.types.files import (
 )
 from together.types.finetune import (
     FinetuneDownloadResult,
+    FinetuneLinearLRSchedulerArgs,
     FinetuneList,
     FinetuneListEvents,
+    FinetuneLRScheduler,
     FinetuneRequest,
     FinetuneResponse,
+    FinetuneTrainingLimits,
     FullTrainingType,
     LoRATrainingType,
     TrainingType,
-    FinetuneTrainingLimits,
-    FinetuneLRScheduler,
-    FinetuneLinearLRSchedulerArgs,
 )
-from together.types.images import (
-    ImageRequest,
-    ImageResponse,
-)
+from together.types.images import ImageRequest, ImageResponse
 from together.types.models import ModelObject
-from together.types.rerank import (
-    RerankRequest,
-    RerankResponse,
-)
-from together.types.audio_speech import (
-    AudioSpeechRequest,
-    AudioResponseFormat,
-    AudioLanguage,
-    AudioResponseEncoding,
-    AudioSpeechStreamChunk,
-    AudioSpeechStreamEvent,
-    AudioSpeechStreamResponse,
-)
+from together.types.rerank import RerankRequest, RerankResponse
+
 
 __all__ = [
     "TogetherClient",
@@ -93,4 +85,7 @@ __all__ = [
     "AudioSpeechStreamChunk",
     "AudioSpeechStreamEvent",
     "AudioSpeechStreamResponse",
+    "DedicatedEndpoint",
+    "ListEndpoint",
+    "Autoscaling",
 ]

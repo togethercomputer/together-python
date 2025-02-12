@@ -4,11 +4,7 @@ from typing import List
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
-from together.types import (
-    ModelObject,
-    TogetherClient,
-    TogetherRequest,
-)
+from together.types import ModelObject, TogetherClient, TogetherRequest
 
 
 class Models:
