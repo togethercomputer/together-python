@@ -12,10 +12,7 @@ from together.generated.exceptions import ForbiddenException, ServiceException
 from together.types import DedicatedEndpoint, ListEndpoint
 
 
-F = TypeVar("F", bound=Callable[..., Any])
-
-
-def print_endpoint(endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool = False):
+def print_endpoint(endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool = False) -> None:
     """Print endpoint details in a Docker-like format or JSON."""
     if json:
         import json as json_lib
@@ -63,6 +60,9 @@ def print_endpoint(endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool 
     click.echo(f"Owner:\t\t{endpoint.owner}")
     click.echo(f"State:\t\t{endpoint.state}")
     click.echo(f"Created:\t{endpoint.created_at}")
+
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 def handle_api_errors(f: F) -> F:
@@ -168,7 +168,7 @@ def create(
     no_prompt_cache: bool,
     no_speculative_decoding: bool,
     no_auto_start: bool,
-):
+) -> None:
     """Create a new dedicated inference endpoint."""
     # Map GPU types to their full hardware ID names
     gpu_map = {
@@ -217,7 +217,7 @@ def create(
 @click.option("--json", is_flag=True, help="Print output in JSON format")
 @click.pass_obj
 @handle_api_errors
-def get(client: Together, endpoint_id: str, json: bool):
+def get(client: Together, endpoint_id: str, json: bool) -> None:
     """Get a dedicated inference endpoint."""
     endpoint = client.endpoints.get(endpoint_id)
     print_endpoint(endpoint, json=json)
@@ -227,7 +227,7 @@ def get(client: Together, endpoint_id: str, json: bool):
 @click.argument("endpoint-id", required=True)
 @click.pass_obj
 @handle_api_errors
-def stop(client: Together, endpoint_id: str):
+def stop(client: Together, endpoint_id: str) -> None:
     """Stop a dedicated inference endpoint."""
     client.endpoints.update(endpoint_id, state="STOPPED")
     click.echo("Successfully stopped endpoint", err=True)
@@ -238,7 +238,7 @@ def stop(client: Together, endpoint_id: str):
 @click.argument("endpoint-id", required=True)
 @click.pass_obj
 @handle_api_errors
-def start(client: Together, endpoint_id: str):
+def start(client: Together, endpoint_id: str) -> None:
     """Start a dedicated inference endpoint."""
     client.endpoints.update(endpoint_id, state="STARTED")
     click.echo("Successfully started endpoint", err=True)
@@ -249,7 +249,7 @@ def start(client: Together, endpoint_id: str):
 @click.argument("endpoint-id", required=True)
 @click.pass_obj
 @handle_api_errors
-def delete(client: Together, endpoint_id: str):
+def delete(client: Together, endpoint_id: str) -> None:
     """Delete a dedicated inference endpoint."""
     client.endpoints.delete(endpoint_id)
     click.echo("Successfully deleted endpoint", err=True)
@@ -301,7 +301,7 @@ def update(
     display_name: str | None,
     min_replicas: int | None,
     max_replicas: int | None,
-):
+) -> None:
     """Update a dedicated inference endpoint's configuration."""
     if not any([display_name, min_replicas, max_replicas]):
         click.echo("Error: At least one update option must be specified", err=True)
@@ -316,7 +316,7 @@ def update(
         sys.exit(1)
 
     # Build kwargs for the update
-    kwargs = {}
+    kwargs: Dict[str, Any] = {}
     if display_name is not None:
         kwargs["display_name"] = display_name
     if min_replicas is not None and max_replicas is not None:

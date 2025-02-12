@@ -31,6 +31,10 @@ install:
 format:
 	poetry run pre-commit run --all-files
 
+# OpenAPI Client Generation
+
+generate-client:
+	python scripts/generate_api_client.py
 
 # Documentation
 

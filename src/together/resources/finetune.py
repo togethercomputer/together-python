@@ -75,17 +75,13 @@ def createFinetuneRequest(
         )
 
         batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.lora_training.max_batch_size
+            batch_size if batch_size != "max" else model_limits.lora_training.max_batch_size
         )
     else:
         if model_limits.full_training is None:
             raise ValueError("Full training is not supported for the selected model.")
         batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.full_training.max_batch_size
+            batch_size if batch_size != "max" else model_limits.full_training.max_batch_size
         )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
@@ -406,9 +402,7 @@ class FineTuning:
 
         if isinstance(ft_job.training_type, FullTrainingType):
             if checkpoint_type != DownloadCheckpointType.DEFAULT:
-                raise ValueError(
-                    "Only DEFAULT checkpoint type is allowed for FullTrainingType"
-                )
+                raise ValueError("Only DEFAULT checkpoint type is allowed for FullTrainingType")
             url += "&checkpoint=modelOutputPath"
         elif isinstance(ft_job.training_type, LoRATrainingType):
             if checkpoint_type == DownloadCheckpointType.DEFAULT:
@@ -419,9 +413,7 @@ class FineTuning:
             elif checkpoint_type == DownloadCheckpointType.ADAPTER:
                 url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
             else:
-                raise ValueError(
-                    f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}"
-                )
+                raise ValueError(f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}")
 
         remote_name = ft_job.output_name
 

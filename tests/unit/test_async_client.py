@@ -59,9 +59,7 @@ class TestAsyncTogether:
 
         supplied_headers = {"header1": "value1", "header2": "value2"}
 
-        async_together = AsyncTogether(
-            api_key="fake_api_key", supplied_headers=supplied_headers
-        )
+        async_together = AsyncTogether(api_key="fake_api_key", supplied_headers=supplied_headers)
 
         assert async_together.client.supplied_headers == supplied_headers
 
@@ -83,9 +81,7 @@ class TestAsyncTogether:
 
         assert isinstance(async_together_instance.chat._client, TogetherClient)
 
-        assert isinstance(
-            async_together_instance.chat.completions._client, TogetherClient
-        )
+        assert isinstance(async_together_instance.chat.completions._client, TogetherClient)
 
     def test_embeddings_initialized(self, async_together_instance):
         """

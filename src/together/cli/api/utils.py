@@ -39,9 +39,7 @@ class BooleanWithAutoParamType(click.ParamType):
             return bool(value)
         except ValueError:
             self.fail(
-                _("{value!r} is not a valid {type}.").format(
-                    value=value, type=self.name
-                ),
+                _("{value!r} is not a valid {type}.").format(value=value, type=self.name),
                 param,
                 ctx,
             )

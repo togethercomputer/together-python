@@ -36,9 +36,10 @@ class Endpoints(BaseEndpoints):
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
-    def __del__(self):
+    def __del__(self) -> None:
         if hasattr(self, "api_client"):
-            self._loop.run_until_complete(self.api_client.close())
+            # Using type: ignore since close() is untyped in the library
+            self._loop.run_until_complete(self.api_client.close())  # type: ignore
             self._loop.close()
 
     def create(
@@ -70,7 +71,7 @@ class Endpoints(BaseEndpoints):
             DedicatedEndpoint: Object containing endpoint information
         """
 
-        async def _create():
+        async def _create() -> DedicatedEndpoint:
             request = CreateEndpointRequest(
                 model=model,
                 hardware=hardware,
@@ -95,11 +96,11 @@ class Endpoints(BaseEndpoints):
             Dict[str, Any]: Response containing list of endpoints in the data field
         """
 
-        async def _list():
-            return await self._api.list_endpoints(type=type)
+        async def _list() -> List[ListEndpoint]:
+            response = await self._api.list_endpoints(type=type)
+            return response.data
 
-        response = self._loop.run_until_complete(_list())
-        return response.data
+        return self._loop.run_until_complete(_list())
 
     def get(self, endpoint_id: str) -> DedicatedEndpoint:
         """
@@ -112,7 +113,7 @@ class Endpoints(BaseEndpoints):
             DedicatedEndpoint: Object containing endpoint information
         """
 
-        async def _get():
+        async def _get() -> DedicatedEndpoint:
             return await self._api.get_endpoint(endpoint_id=endpoint_id)
 
         return self._loop.run_until_complete(_get())
@@ -125,7 +126,7 @@ class Endpoints(BaseEndpoints):
             endpoint_id (str): ID of the endpoint to delete
         """
 
-        async def _delete():
+        async def _delete() -> None:
             return await self._api.delete_endpoint(endpoint_id=endpoint_id)
 
         return self._loop.run_until_complete(_delete())
@@ -153,7 +154,7 @@ class Endpoints(BaseEndpoints):
             DedicatedEndpoint: Object containing endpoint information
         """
 
-        async def _update():
+        async def _update() -> DedicatedEndpoint:
             kwargs: Dict[str, Any] = {}
             if min_replicas is not None or max_replicas is not None:
                 current_min = min_replicas

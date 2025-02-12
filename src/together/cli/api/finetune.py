@@ -51,18 +51,12 @@ def fine_tuning(ctx: click.Context) -> None:
 
 @fine_tuning.command()
 @click.pass_context
-@click.option(
-    "--training-file", type=str, required=True, help="Training file ID from Files API"
-)
+@click.option("--training-file", type=str, required=True, help="Training file ID from Files API")
 @click.option("--model", type=str, required=True, help="Base model name")
 @click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
-@click.option(
-    "--validation-file", type=str, default="", help="Validation file ID from Files API"
-)
+@click.option("--validation-file", type=str, default="", help="Validation file ID from Files API")
 @click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
-@click.option(
-    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
-)
+@click.option("--n-checkpoints", type=int, default=1, help="Number of checkpoints to save")
 @click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
@@ -104,9 +98,7 @@ def fine_tuning(ctx: click.Context) -> None:
     default="all-linear",
     help="Trainable modules for LoRA adapters. For example, 'all-linear', 'q_proj,v_proj'",
 )
-@click.option(
-    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
-)
+@click.option("--suffix", type=str, default=None, help="Suffix for the fine-tuned model name")
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 @click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
 @click.option("--wandb-project-name", type=str, default=None, help="Wandb project name")
@@ -182,15 +174,11 @@ def create(
         train_on_inputs=train_on_inputs,
     )
 
-    model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model
-    )
+    model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(model=model)
 
     if lora:
         if model_limits.lora_training is None:
-            raise click.BadParameter(
-                f"LoRA fine-tuning is not supported for the model `{model}`"
-            )
+            raise click.BadParameter(f"LoRA fine-tuning is not supported for the model `{model}`")
 
         default_values = {
             "lora_r": model_limits.lora_training.max_rank,
@@ -207,9 +195,7 @@ def create(
             training_args["lora_alpha"] = training_args["lora_r"] * 2
     else:
         if model_limits.full_training is None:
-            raise click.BadParameter(
-                f"Full fine-tuning is not supported for the model `{model}`"
-            )
+            raise click.BadParameter(f"Full fine-tuning is not supported for the model `{model}`")
 
         for param in ["lora_r", "lora_dropout", "lora_alpha", "lora_trainable_modules"]:
             param_source = ctx.get_parameter_source(param)  # type: ignore[attr-defined]
@@ -240,9 +226,7 @@ def create(
 
         report_string = f"Successfully submitted a fine-tuning job {response.id}"
         if response.created_at is not None:
-            created_time = datetime.strptime(
-                response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z"
-            )
+            created_time = datetime.strptime(response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z")
             # created_at reports UTC time, we use .astimezone() to convert to local time
             formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
             report_string += f" at {formatted_time}"
@@ -299,9 +283,7 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
-@click.option(
-    "--quiet", is_flag=True, help="Do not prompt for confirmation before cancelling job"
-)
+@click.option("--quiet", is_flag=True, help="Do not prompt for confirmation before cancelling job")
 def cancel(ctx: click.Context, fine_tune_id: str, quiet: bool = False) -> None:
     """Cancel fine-tuning job"""
     client: Together = ctx.obj

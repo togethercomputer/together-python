@@ -33,9 +33,7 @@ if TYPE_CHECKING:
 
 requestssession: "requests.Session" | Callable[[], "requests.Session"] | None = None
 
-aiosession: ContextVar["ClientSession" | None] = ContextVar(
-    "aiohttp-session", default=None
-)
+aiosession: ContextVar["ClientSession" | None] = ContextVar("aiohttp-session", default=None)
 
 from together.client import AsyncClient, AsyncTogether, Client, Together
 

@@ -145,10 +145,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
                         # Check that there are no extra columns
                         for column in json_line:
-                            if (
-                                column
-                                not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
-                            ):
+                            if column not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]:
                                 raise InvalidFileFormatError(
                                     message=f'Found extra column "{column}" in the line {idx + 1}.',
                                     line_number=idx + 1,
@@ -166,9 +163,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     )
 
                 if current_format == DatasetFormat.CONVERSATION:
-                    message_column = JSONL_REQUIRED_COLUMNS_MAP[
-                        DatasetFormat.CONVERSATION
-                    ][0]
+                    message_column = JSONL_REQUIRED_COLUMNS_MAP[DatasetFormat.CONVERSATION][0]
                     if not isinstance(json_line[message_column], list):
                         raise InvalidFileFormatError(
                             message=f"Invalid format on line {idx + 1} of the input file. "
@@ -280,8 +275,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
             report_dict["load_json"] = False
             if idx < 0:
                 report_dict["message"] = (
-                    "Unable to decode file. "
-                    "File may be empty or in an unsupported format. "
+                    "Unable to decode file. " "File may be empty or in an unsupported format. "
                 )
             else:
                 report_dict["message"] = (

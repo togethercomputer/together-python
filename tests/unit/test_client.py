@@ -60,9 +60,7 @@ class TestTogether:
 
         supplied_headers = {"header1": "value1", "header2": "value2"}
 
-        sync_together = Together(
-            api_key="fake_api_key", supplied_headers=supplied_headers
-        )
+        sync_together = Together(api_key="fake_api_key", supplied_headers=supplied_headers)
 
         assert sync_together.client.supplied_headers == supplied_headers
 
@@ -84,9 +82,7 @@ class TestTogether:
 
         assert isinstance(sync_together_instance.chat._client, TogetherClient)
 
-        assert isinstance(
-            sync_together_instance.chat.completions._client, TogetherClient
-        )
+        assert isinstance(sync_together_instance.chat.completions._client, TogetherClient)
 
     def test_embeddings_initialized(self, sync_together_instance):
         """

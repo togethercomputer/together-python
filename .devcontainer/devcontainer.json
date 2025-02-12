@@ -5,6 +5,7 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers/features/java:1": {
             "version": "17",
             "installMaven": false,
@@ -37,4 +38,4 @@
     },
     "postCreateCommand": "poetry install",
     "remoteUser": "vscode"
-} 
+}

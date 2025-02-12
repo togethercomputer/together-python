@@ -13,7 +13,7 @@ GENERATOR_JAR_URL = "https://repo1.maven.org/maven2/org/openapitools/openapi-gen
 GENERATOR_JAR = Path(__file__).parent / "openapi-generator-cli.jar"
 
 
-def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
+def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
     """Run a command and optionally check its return code."""
     print(f"Running: {' '.join(cmd)}")
     return subprocess.run(cmd, check=check, capture_output=True, text=True)
@@ -30,6 +30,9 @@ def main() -> None:
     # Download OpenAPI spec
     spec_file = Path(__file__).parent / "openapi.yaml"
     download_file(OPENAPI_SPEC_URL, spec_file)
+
+    # Run formatter on the spec for better merge conflict handling
+    run_command(["npx", "-y", "prettier", "--write", str(spec_file)])
 
     # Download generator if needed
     download_file(GENERATOR_JAR_URL, GENERATOR_JAR)
