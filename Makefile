@@ -27,6 +27,7 @@ integration_tests:
 install:
 	poetry install --with quality,tests
 	poetry run pre-commit install
+	$(MAKE) generate-client
 
 format:
 	poetry run pre-commit run --all-files
@@ -53,6 +54,4 @@ help:
 	@echo 'test_watch                   - run unit tests in watch mode'
 	@echo 'extended_tests               - run extended tests'
 	@echo 'integration_tests            - run integration tests'
-
-generate-client:
-	python scripts/generate_api_client.py
+	@echo 'generate-client              - generate the OpenAPI client'
