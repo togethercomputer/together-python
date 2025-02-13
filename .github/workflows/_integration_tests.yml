@@ -39,10 +39,6 @@ jobs:
           poetry-version: ${{ env.POETRY_VERSION }}
           cache-key: core
 
-      - name: Generate OpenAPI client
-        run: |
-          make generate-client-from-existing-spec
-
       - name: Install dependencies
         shell: bash
         run: poetry install --with quality,tests

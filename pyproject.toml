@@ -1,7 +1,3 @@
-include = [
-  "src/together/generated/**"
-]
-
 [build-system]
 requires = [
     "poetry",
