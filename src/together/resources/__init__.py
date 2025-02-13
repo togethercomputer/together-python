@@ -1,12 +1,13 @@
+from together.resources.audio import AsyncAudio, Audio
 from together.resources.chat import AsyncChat, Chat
 from together.resources.completions import AsyncCompletions, Completions
 from together.resources.embeddings import AsyncEmbeddings, Embeddings
+from together.resources.endpoints import AsyncEndpoints, Endpoints
 from together.resources.files import AsyncFiles, Files
 from together.resources.finetune import AsyncFineTuning, FineTuning
 from together.resources.images import AsyncImages, Images
 from together.resources.models import AsyncModels, Models
 from together.resources.rerank import AsyncRerank, Rerank
-from together.resources.audio import AsyncAudio, Audio
 
 
 __all__ = [
@@ -28,4 +29,6 @@ __all__ = [
     "Rerank",
     "AsyncAudio",
     "Audio",
+    "AsyncEndpoints",
+    "Endpoints",
 ]

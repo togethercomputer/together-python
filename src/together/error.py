@@ -18,6 +18,9 @@ class TogetherException(Exception):
         request_id: str | None = None,
         http_status: int | None = None,
     ) -> None:
+        if isinstance(message, TogetherErrorResponse):
+            self.api_response = message
+
         _message = (
             json.dumps(message.model_dump(exclude_none=True))
             if isinstance(message, TogetherErrorResponse)

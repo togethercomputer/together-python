@@ -437,7 +437,7 @@ class APIRequestor:
                     [(k, v) for k, v in options.params.items() if v is not None]
                 )
                 abs_url = _build_api_url(abs_url, encoded_params)
-        elif options.method.lower() in {"post", "put"}:
+        elif options.method.lower() in {"post", "put", "patch"}:
             if options.params and (options.files or options.override_headers):
                 data = options.params
             elif options.params and not options.files:
@@ -587,16 +587,14 @@ class APIRequestor:
             )
             headers["Content-Type"] = content_type
 
-        request_kwargs = {
-            "headers": headers,
-            "data": data,
-            "timeout": timeout,
-            "allow_redirects": options.allow_redirects,
-        }
-
         try:
             result = await session.request(
-                method=options.method, url=abs_url, **request_kwargs
+                method=options.method,
+                url=abs_url,
+                headers=headers,
+                data=data,
+                timeout=timeout,
+                allow_redirects=options.allow_redirects,
             )
             utils.log_debug(
                 "Together API response",
