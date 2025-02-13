@@ -10,10 +10,6 @@ requires = [
 ]
 build-backend = "poetry.masonry.api"
 
-packages = [
-    { include = "together", from = "src" },
-]
-
 [tool.poetry]
 name = "together"
 version = "1.4.0"
@@ -30,6 +26,9 @@ classifiers = [
 ]
 repository = "https://github.com/togethercomputer/together-python"
 homepage = "https://github.com/togethercomputer/together-python"
+packages = [
+    { include = "together", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
