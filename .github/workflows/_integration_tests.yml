@@ -44,6 +44,10 @@ jobs:
         shell: bash
         run: poetry install --with quality,tests
 
+      - name: Make install
+        run: |
+          make install
+
       - name: Install together
         run: |
           poetry run pip install .
