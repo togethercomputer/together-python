@@ -587,16 +587,14 @@ class APIRequestor:
             )
             headers["Content-Type"] = content_type
 
-        request_kwargs = {
-            "headers": headers,
-            "data": data,
-            "timeout": timeout,
-            "allow_redirects": options.allow_redirects,
-        }
-
         try:
             result = await session.request(
-                method=options.method, url=abs_url, **request_kwargs
+                method=options.method,
+                url=abs_url,
+                headers=headers,
+                data=data,
+                timeout=timeout,
+                allow_redirects=options.allow_redirects,
             )
             utils.log_debug(
                 "Together API response",
