@@ -1,3 +1,7 @@
+include = [
+    "src/together/generated/**"
+]
+
 [build-system]
 requires = [
     "poetry",
@@ -26,10 +30,6 @@ classifiers = [
 ]
 repository = "https://github.com/togethercomputer/together-python"
 homepage = "https://github.com/togethercomputer/together-python"
-packages = [
-    { include = "together", from = "src" },
-    { include = "together/generated/**/*.py", from = "src" }
-]
 
 [tool.poetry.dependencies]
 python = "^3.9"
