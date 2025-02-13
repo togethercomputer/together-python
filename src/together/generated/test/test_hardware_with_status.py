@@ -37,7 +37,7 @@ class TestHardwareWithStatus(unittest.TestCase):
         if include_optional:
             return HardwareWithStatus(
                 object = 'hardware',
-                name = '',
+                id = '',
                 pricing = together.generated.models.endpoint_pricing.EndpointPricing(
                     cents_per_minute = 1.337, ),
                 specs = together.generated.models.hardware_spec.HardwareSpec(
@@ -52,7 +52,7 @@ class TestHardwareWithStatus(unittest.TestCase):
         else:
             return HardwareWithStatus(
                 object = 'hardware',
-                name = '',
+                id = '',
                 pricing = together.generated.models.endpoint_pricing.EndpointPricing(
                     cents_per_minute = 1.337, ),
                 specs = together.generated.models.hardware_spec.HardwareSpec(

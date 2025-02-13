@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 List available hardware configurations
 
-Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
+Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible  with that model, including their current availability status.
 
 ### Example
 
@@ -44,7 +44,7 @@ configuration = together.generated.Configuration(
 async with together.generated.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = together.generated.HardwareApi(api_client)
-    model = 'meta-llama/Llama-3-70b-chat-hf' # str | Filter hardware configurations by model compatibility (optional)
+    model = 'meta-llama/Llama-3-70b-chat-hf' # str | Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration.  (optional)
 
     try:
         # List available hardware configurations
@@ -62,7 +62,7 @@ async with together.generated.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **model** | **str**| Filter hardware configurations by model compatibility | [optional]
+ **model** | **str**| Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration.  | [optional]
 
 ### Return type
 

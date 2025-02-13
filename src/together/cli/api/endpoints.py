@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from functools import wraps
 from typing import Any, Callable, Dict, List, Literal, TypeVar, Union
@@ -8,7 +9,12 @@ import click
 
 from together import Together
 from together.error import AuthenticationError, InvalidRequestError
-from together.generated.exceptions import ForbiddenException, ServiceException
+from together.generated.exceptions import (
+    BadRequestException,
+    ForbiddenException,
+    NotFoundException,
+    ServiceException,
+)
 from together.types import DedicatedEndpoint, ListEndpoint
 
 
@@ -67,6 +73,28 @@ def print_endpoint(
 F = TypeVar("F", bound=Callable[..., Any])
 
 
+def print_api_error(
+    e: Union[
+        ForbiddenException, NotFoundException, BadRequestException, ServiceException
+    ],
+) -> None:
+    error_details = ""
+    if e.data is not None:
+        error_details = e.data.to_dict()["error"]["message"]
+    elif e.body:
+        error_details = json.loads(e.body)["error"]["message"]
+    else:
+        error_details = str(e)
+
+    if (
+        "credentials" in error_details.lower()
+        or "authentication" in error_details.lower()
+    ):
+        click.echo("Error: Invalid API key or authentication failed", err=True)
+    else:
+        click.echo(f"Error: {error_details}", err=True)
+
+
 def handle_api_errors(f: F) -> F:
     """Decorator to handle common API errors in CLI commands."""
 
@@ -74,20 +102,14 @@ def handle_api_errors(f: F) -> F:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return f(*args, **kwargs)
-        except (ForbiddenException, ServiceException) as e:
-            error_details = ""
-            if e.data is not None:
-                error_details = e.data.to_dict()["error"]["message"]
-            else:
-                error_details = str(e)
+        except (
+            ForbiddenException,
+            NotFoundException,
+            BadRequestException,
+            ServiceException,
+        ) as e:
+            print_api_error(e)
 
-            if (
-                "credentials" in error_details.lower()
-                or "authentication" in error_details.lower()
-            ):
-                click.echo("Error: Invalid API key or authentication failed", err=True)
-            else:
-                click.echo(f"Error: {error_details}", err=True)
             sys.exit(1)
         except AuthenticationError as e:
             click.echo(f"Error details: {str(e)}", err=True)
@@ -160,6 +182,12 @@ def endpoints(ctx: click.Context) -> None:
     is_flag=True,
     help="Create the endpoint in STOPPED state instead of auto-starting it",
 )
+@click.option(
+    "--wait",
+    is_flag=True,
+    default=True,
+    help="Wait for the endpoint to be ready after creation",
+)
 @click.pass_obj
 @handle_api_errors
 def create(
@@ -173,6 +201,7 @@ def create(
     no_prompt_cache: bool,
     no_speculative_decoding: bool,
     no_auto_start: bool,
+    wait: bool,
 ) -> None:
     """Create a new dedicated inference endpoint."""
     # Map GPU types to their full hardware ID names
@@ -186,16 +215,26 @@ def create(
 
     hardware_id = f"{gpu_count}x_{gpu_map[gpu]}"
 
-    response = client.endpoints.create(
-        model=model,
-        hardware=hardware_id,
-        min_replicas=min_replicas,
-        max_replicas=max_replicas,
-        display_name=display_name,
-        disable_prompt_cache=no_prompt_cache,
-        disable_speculative_decoding=no_speculative_decoding,
-        state="STOPPED" if no_auto_start else "STARTED",
-    )
+    try:
+        response = client.endpoints.create(
+            model=model,
+            hardware=hardware_id,
+            min_replicas=min_replicas,
+            max_replicas=max_replicas,
+            display_name=display_name,
+            disable_prompt_cache=no_prompt_cache,
+            disable_speculative_decoding=no_speculative_decoding,
+            state="STOPPED" if no_auto_start else "STARTED",
+        )
+    except NotFoundException as e:
+        if "check the hardware api" in str(e).lower():
+            print_api_error(e)
+            fetch_and_print_hardware_options(
+                client=client, model=model, print_json=False, available=True
+            )
+            sys.exit(1)
+
+        raise e
 
     # Print detailed information to stderr
     click.echo("Created dedicated endpoint with:", err=True)
@@ -212,7 +251,16 @@ def create(
     if no_auto_start:
         click.echo("  Auto-start: disabled", err=True)
 
-    click.echo("Endpoint created successfully, id: ", err=True)
+    click.echo("Endpoint created successfully", err=True)
+
+    if wait:
+        import time
+
+        click.echo("Waiting for endpoint to be ready...", err=True)
+        while client.endpoints.get(response.id).state != "STARTED":
+            time.sleep(1)
+        click.echo("Endpoint ready", err=True)
+
     # Print only the endpoint ID to stdout
     click.echo(response.id)
 
@@ -229,24 +277,97 @@ def get(client: Together, endpoint_id: str, json: bool) -> None:
 
 
 @endpoints.command()
-@click.argument("endpoint-id", required=True)
+@click.option("--model", help="Filter hardware options by model")
+@click.option("--json", is_flag=True, help="Print output in JSON format")
+@click.option(
+    "--available",
+    is_flag=True,
+    help="Print only available hardware options (can only be used if model is passed in)",
+)
 @click.pass_obj
 @handle_api_errors
-def stop(client: Together, endpoint_id: str) -> None:
+def hardware(client: Together, model: str | None, json: bool, available: bool) -> None:
+    """List all available hardware options, optionally filtered by model."""
+    fetch_and_print_hardware_options(client, model, json, available)
+
+
+def fetch_and_print_hardware_options(
+    client: Together, model: str | None, print_json: bool, available: bool
+) -> None:
+    """Print hardware options for a model."""
+
+    message = "Available hardware options:" if available else "All hardware options:"
+    click.echo(message, err=True)
+    hardware_options = client.endpoints.list_hardware(model)
+    if available:
+        hardware_options = [
+            hardware
+            for hardware in hardware_options
+            if hardware.availability is not None
+            and hardware.availability.status == "available"
+        ]
+
+    if print_json:
+        json_output = [
+            {
+                "id": hardware.id,
+                "pricing": hardware.pricing.to_dict(),
+                "specs": hardware.specs.to_dict(),
+                "availability": (
+                    hardware.availability.to_dict() if hardware.availability else None
+                ),
+            }
+            for hardware in hardware_options
+        ]
+        click.echo(json.dumps(json_output, indent=2))
+    else:
+        for hardware in hardware_options:
+            click.echo(f"  {hardware.id}", err=True)
+
+
+@endpoints.command()
+@click.argument("endpoint-id", required=True)
+@click.option(
+    "--wait", is_flag=True, default=True, help="Wait for the endpoint to stop"
+)
+@click.pass_obj
+@handle_api_errors
+def stop(client: Together, endpoint_id: str, wait: bool) -> None:
     """Stop a dedicated inference endpoint."""
     client.endpoints.update(endpoint_id, state="STOPPED")
-    click.echo("Successfully stopped endpoint", err=True)
+    click.echo("Successfully marked endpoint as stopping", err=True)
+
+    if wait:
+        import time
+
+        click.echo("Waiting for endpoint to stop...", err=True)
+        while client.endpoints.get(endpoint_id).state != "STOPPED":
+            time.sleep(1)
+        click.echo("Endpoint stopped", err=True)
+
     click.echo(endpoint_id)
 
 
 @endpoints.command()
 @click.argument("endpoint-id", required=True)
+@click.option(
+    "--wait", is_flag=True, default=True, help="Wait for the endpoint to start"
+)
 @click.pass_obj
 @handle_api_errors
-def start(client: Together, endpoint_id: str) -> None:
+def start(client: Together, endpoint_id: str, wait: bool) -> None:
     """Start a dedicated inference endpoint."""
     client.endpoints.update(endpoint_id, state="STARTED")
-    click.echo("Successfully started endpoint", err=True)
+    click.echo("Successfully marked endpoint as starting", err=True)
+
+    if wait:
+        import time
+
+        click.echo("Waiting for endpoint to start...", err=True)
+        while client.endpoints.get(endpoint_id).state != "STARTED":
+            time.sleep(1)
+        click.echo("Endpoint started", err=True)
+
     click.echo(endpoint_id)
 
 

@@ -43,7 +43,9 @@ class HardwareApi:
         self,
         model: Annotated[
             Optional[StrictStr],
-            Field(description="Filter hardware configurations by model compatibility"),
+            Field(
+                description="Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration. "
+            ),
         ] = None,
         _request_timeout: Union[
             None,
@@ -59,9 +61,9 @@ class HardwareApi:
     ) -> ListHardware200Response:
         """List available hardware configurations
 
-        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
+        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible  with that model, including their current availability status.
 
-        :param model: Filter hardware configurations by model compatibility
+        :param model: Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration.
         :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -112,7 +114,9 @@ class HardwareApi:
         self,
         model: Annotated[
             Optional[StrictStr],
-            Field(description="Filter hardware configurations by model compatibility"),
+            Field(
+                description="Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration. "
+            ),
         ] = None,
         _request_timeout: Union[
             None,
@@ -128,9 +132,9 @@ class HardwareApi:
     ) -> ApiResponse[ListHardware200Response]:
         """List available hardware configurations
 
-        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
+        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible  with that model, including their current availability status.
 
-        :param model: Filter hardware configurations by model compatibility
+        :param model: Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration.
         :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -181,7 +185,9 @@ class HardwareApi:
         self,
         model: Annotated[
             Optional[StrictStr],
-            Field(description="Filter hardware configurations by model compatibility"),
+            Field(
+                description="Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration. "
+            ),
         ] = None,
         _request_timeout: Union[
             None,
@@ -197,9 +203,9 @@ class HardwareApi:
     ) -> RESTResponseType:
         """List available hardware configurations
 
-        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
+        Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible  with that model, including their current availability status.
 
-        :param model: Filter hardware configurations by model compatibility
+        :param model: Filter hardware configurations by model compatibility. When provided,  the response includes availability status for each compatible configuration.
         :type model: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

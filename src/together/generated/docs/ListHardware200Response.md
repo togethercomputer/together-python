@@ -6,7 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **object** | **str** |  |
-**data** | [**List[ListHardware200ResponseOneOf1DataInner]**](ListHardware200ResponseOneOf1DataInner.md) |  |
+**data** | [**List[HardwareWithStatus]**](HardwareWithStatus.md) |  |
 
 ## Example
 

@@ -38,14 +38,38 @@ class TestListHardware200Response(unittest.TestCase):
             return ListHardware200Response(
                 object = 'list',
                 data = [
-                    null
+                    together.generated.models.hardware_with_status.HardwareWithStatus(
+                        object = 'hardware',
+                        id = '',
+                        pricing = together.generated.models.endpoint_pricing.EndpointPricing(
+                            cents_per_minute = 1.337, ),
+                        specs = together.generated.models.hardware_spec.HardwareSpec(
+                            gpu_type = '',
+                            gpu_link = '',
+                            gpu_memory = 1.337,
+                            gpu_count = 56, ),
+                        availability = together.generated.models.hardware_availability.HardwareAvailability(
+                            status = 'available', ),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ]
             )
         else:
             return ListHardware200Response(
                 object = 'list',
                 data = [
-                    null
+                    together.generated.models.hardware_with_status.HardwareWithStatus(
+                        object = 'hardware',
+                        id = '',
+                        pricing = together.generated.models.endpoint_pricing.EndpointPricing(
+                            cents_per_minute = 1.337, ),
+                        specs = together.generated.models.hardware_spec.HardwareSpec(
+                            gpu_type = '',
+                            gpu_link = '',
+                            gpu_memory = 1.337,
+                            gpu_count = 56, ),
+                        availability = together.generated.models.hardware_availability.HardwareAvailability(
+                            status = 'available', ),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
         )
         """

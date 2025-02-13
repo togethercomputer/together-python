@@ -1,13 +1,13 @@
 # HardwareWithStatus
 
-Hardware configuration details including current availability status
+Hardware configuration details with optional availability status
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **object** | **str** |  |
-**name** | **str** | Unique identifier for the hardware configuration |
+**id** | **str** | Unique identifier for the hardware configuration |
 **pricing** | [**EndpointPricing**](EndpointPricing.md) |  |
 **specs** | [**HardwareSpec**](HardwareSpec.md) |  |
 **availability** | [**HardwareAvailability**](HardwareAvailability.md) |  | [optional]

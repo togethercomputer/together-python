@@ -29,11 +29,11 @@ from typing_extensions import Self
 
 class HardwareWithStatus(BaseModel):
     """
-    Hardware configuration details including current availability status
+    Hardware configuration details with optional availability status
     """  # noqa: E501
 
     object: StrictStr
-    name: StrictStr = Field(
+    id: StrictStr = Field(
         description="Unique identifier for the hardware configuration"
     )
     pricing: EndpointPricing
@@ -44,7 +44,7 @@ class HardwareWithStatus(BaseModel):
     )
     __properties: ClassVar[List[str]] = [
         "object",
-        "name",
+        "id",
         "pricing",
         "specs",
         "availability",
@@ -118,7 +118,7 @@ class HardwareWithStatus(BaseModel):
         _obj = cls.model_validate(
             {
                 "object": obj.get("object"),
-                "name": obj.get("name"),
+                "id": obj.get("id"),
                 "pricing": (
                     EndpointPricing.from_dict(obj["pricing"])
                     if obj.get("pricing") is not None

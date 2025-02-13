@@ -4,11 +4,13 @@ import asyncio
 from typing import Any, Dict, List, Literal, Optional
 
 from together.generated.api.endpoints_api import EndpointsApi
+from together.generated.api.hardware_api import HardwareApi
 from together.generated.api_client import ApiClient
 from together.generated.configuration import Configuration
 from together.generated.models.autoscaling import Autoscaling
 from together.generated.models.create_endpoint_request import CreateEndpointRequest
 from together.generated.models.dedicated_endpoint import DedicatedEndpoint
+from together.generated.models.hardware_with_status import HardwareWithStatus
 from together.generated.models.list_endpoint import ListEndpoint
 from together.generated.models.update_endpoint_request import UpdateEndpointRequest
 from together.types import TogetherClient
@@ -17,7 +19,9 @@ from together.types import TogetherClient
 class BaseEndpoints:
     """Base class containing common endpoint functionality and documentation."""
 
-    def _get_api_client(self, client: TogetherClient) -> tuple[ApiClient, EndpointsApi]:
+    def _get_api_client(
+        self, client: TogetherClient
+    ) -> tuple[ApiClient, EndpointsApi, HardwareApi]:
         api_client = ApiClient(
             configuration=Configuration(
                 host=client.base_url.rstrip("/") if client.base_url else "",
@@ -25,14 +29,14 @@ class BaseEndpoints:
             header_name="Authorization",
             header_value=f"Bearer {client.api_key}" if client.api_key else None,
         )
-        return api_client, EndpointsApi(api_client)
+        return api_client, EndpointsApi(api_client), HardwareApi(api_client)
 
 
 class Endpoints(BaseEndpoints):
     """Synchronous endpoints client."""
 
     def __init__(self, client: TogetherClient) -> None:
-        self.api_client, self._api = self._get_api_client(client)
+        self.api_client, self._api, self._hardware_api = self._get_api_client(client)
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
 
@@ -184,12 +188,29 @@ class Endpoints(BaseEndpoints):
 
         return self._loop.run_until_complete(_update())
 
+    def list_hardware(self, model: Optional[str] = None) -> List[HardwareWithStatus]:
+        """
+        List available hardware configurations.
+
+        Args:
+            model (str, optional): Filter hardware configurations by model compatibility. Defaults to None.
+
+        Returns:
+            List[HardwareWithStatus]: List of hardware configurations with their availability status
+        """
+
+        async def _list_hardware() -> List[HardwareWithStatus]:
+            response = await self._hardware_api.list_hardware(model=model)
+            return response.data
+
+        return self._loop.run_until_complete(_list_hardware())
+
 
 class AsyncEndpoints(BaseEndpoints):
     """Asynchronous endpoints client."""
 
     def __init__(self, client: TogetherClient) -> None:
-        self.api_client, self._api = self._get_api_client(client)
+        self.api_client, self._api, self._hardware_api = self._get_api_client(client)
 
     async def create(
         self,
@@ -312,3 +333,18 @@ class AsyncEndpoints(BaseEndpoints):
         return await self._api.update_endpoint(
             endpoint_id=endpoint_id, update_endpoint_request=request
         )
+
+    async def list_hardware(
+        self, model: Optional[str] = None
+    ) -> List[HardwareWithStatus]:
+        """
+        List available hardware configurations.
+
+        Args:
+            model (str, optional): Filter hardware configurations by model compatibility. Defaults to None.
+
+        Returns:
+            List[HardwareWithStatus]: List of hardware configurations with their availability status
+        """
+        response = await self._hardware_api.list_hardware(model=model)
+        return response.data

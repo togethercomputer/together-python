@@ -934,7 +934,10 @@ paths:
     get:
       tags: ["Hardware"]
       summary: List available hardware configurations
-      description: Returns a list of available hardware configurations for deploying models. When a model parameter is provided, it returns only hardware configurations compatible with that model, including their current availability status.
+      description: >
+        Returns a list of available hardware configurations for deploying models.
+        When a model parameter is provided, it returns only hardware configurations compatible
+        with that model, including their current availability status.
       operationId: listHardware
       parameters:
         - name: model
@@ -942,7 +945,9 @@ paths:
           required: false
           schema:
             type: string
-          description: Filter hardware configurations by model compatibility
+          description: >
+            Filter hardware configurations by model compatibility. When provided,
+            the response includes availability status for each compatible configuration.
           example: meta-llama/Llama-3-70b-chat-hf
       responses:
         "200":
@@ -950,59 +955,19 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - type: object
-                    description: Response when no model filter is provided
-                    required:
-                      - object
-                      - data
-                    properties:
-                      object:
-                        type: string
-                        enum:
-                          - list
-                      data:
-                        type: array
-                        items:
-                          allOf:
-                            - $ref: "#/components/schemas/HardwareWithStatus"
-                            - type: object
-                              properties:
-                                availability:
-                                  not: {}
-                  - type: object
-                    description: Response when model filter is provided
-                    required:
-                      - object
-                      - data
-                    properties:
-                      object:
-                        type: string
-                        enum:
-                          - list
-                      data:
-                        type: array
-                        items:
-                          allOf:
-                            - $ref: "#/components/schemas/HardwareWithStatus"
-                            - type: object
-                              required:
-                                - availability
-                example:
-                  object: "list"
+                type: object
+                required:
+                  - object
+                  - data
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - list
                   data:
-                    - object: "hardware"
-                      name: "2x_nvidia_a100_80gb_sxm"
-                      pricing:
-                        input: 0
-                        output: 0
-                        cents_per_minute: 5.42
-                      specs:
-                        gpu_type: "a100-80gb"
-                        gpu_link: "sxm"
-                        gpu_memory: 80
-                        gpu_count: 2
-                      updated_at: "2024-01-01T00:00:00Z"
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/HardwareWithStatus"
         "403":
           description: "Unauthorized"
           content:
@@ -2646,10 +2611,10 @@ components:
 
     HardwareWithStatus:
       type: object
-      description: Hardware configuration details including current availability status
+      description: Hardware configuration details with optional availability status
       required:
         - object
-        - name
+        - id
         - pricing
         - specs
         - updated_at
@@ -2658,7 +2623,7 @@ components:
           type: string
           enum:
             - hardware
-        name:
+        id:
           type: string
           description: Unique identifier for the hardware configuration
           examples:
