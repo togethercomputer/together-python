@@ -13,36 +13,9 @@ from together.types import DedicatedEndpoint, ListEndpoint
 
 
 def print_endpoint(
-    endpoint: Union[DedicatedEndpoint, ListEndpoint], json: bool = False
+    endpoint: Union[DedicatedEndpoint, ListEndpoint],
 ) -> None:
     """Print endpoint details in a Docker-like format or JSON."""
-    if json:
-        import json as json_lib
-
-        output: Dict[str, Any] = {
-            "id": endpoint.id,
-            "name": endpoint.name,
-            "model": endpoint.model,
-            "type": endpoint.type,
-            "owner": endpoint.owner,
-            "state": endpoint.state,
-            "created_at": endpoint.created_at.isoformat(),
-        }
-
-        if isinstance(endpoint, DedicatedEndpoint):
-            output.update(
-                {
-                    "display_name": endpoint.display_name,
-                    "hardware": endpoint.hardware,
-                    "autoscaling": {
-                        "min_replicas": endpoint.autoscaling.min_replicas,
-                        "max_replicas": endpoint.autoscaling.max_replicas,
-                    },
-                }
-            )
-
-        click.echo(json_lib.dumps(output, indent=2))
-        return
 
     # Print header info
     click.echo(f"ID:\t\t{endpoint.id}")
@@ -244,7 +217,12 @@ def create(
 def get(client: Together, endpoint_id: str, json: bool) -> None:
     """Get a dedicated inference endpoint."""
     endpoint = client.endpoints.get(endpoint_id)
-    print_endpoint(endpoint, json=json)
+    if json:
+        import json as json_lib
+
+        click.echo(json_lib.dumps(endpoint.model_dump(), indent=2))
+    else:
+        print_endpoint(endpoint)
 
 
 @endpoints.command()
@@ -362,10 +340,19 @@ def list(
         click.echo("No dedicated endpoints found", err=True)
         return
 
-    click.echo("Dedicated endpoints:", err=True)
-    for endpoint in endpoints:
-        print_endpoint(endpoint, json=json)
-        click.echo()
+    click.echo("Endpoints:", err=True)
+    if json:
+        import json as json_lib
+
+        click.echo(
+            json_lib.dumps([endpoint.model_dump() for endpoint in endpoints], indent=2)
+        )
+    else:
+        for endpoint in endpoints:
+            print_endpoint(
+                endpoint,
+            )
+            click.echo()
 
 
 @endpoints.command()

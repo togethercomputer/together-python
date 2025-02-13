@@ -79,7 +79,9 @@ class BaseEndpoint(TogetherJSONModel):
     """Base class for endpoint models with common fields."""
 
     object: Literal["endpoint"] = Field(description="The type of object")
-    id: str = Field(description="Unique identifier for the endpoint")
+    id: Optional[str] = Field(
+        default=None, description="Unique identifier for the endpoint"
+    )
     name: str = Field(description="System name for the endpoint")
     model: str = Field(description="The model deployed on this endpoint")
     type: str = Field(description="The type of endpoint")
@@ -99,6 +101,7 @@ class ListEndpoint(BaseEndpoint):
 class DedicatedEndpoint(BaseEndpoint):
     """Details about a dedicated endpoint deployment."""
 
+    id: str = Field(description="Unique identifier for the endpoint")
     type: Literal["dedicated"] = Field(description="The type of endpoint")
     display_name: str = Field(description="Human-readable name for the endpoint")
     hardware: str = Field(
