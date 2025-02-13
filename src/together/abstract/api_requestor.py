@@ -437,7 +437,7 @@ class APIRequestor:
                     [(k, v) for k, v in options.params.items() if v is not None]
                 )
                 abs_url = _build_api_url(abs_url, encoded_params)
-        elif options.method.lower() in {"post", "put"}:
+        elif options.method.lower() in {"post", "put", "patch"}:
             if options.params and (options.files or options.override_headers):
                 data = options.params
             elif options.params and not options.files:

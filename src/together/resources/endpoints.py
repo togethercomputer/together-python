@@ -1,50 +1,52 @@
 from __future__ import annotations
 
-import asyncio
-from typing import Any, Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 
-from together.generated.api.endpoints_api import EndpointsApi
-from together.generated.api.hardware_api import HardwareApi
-from together.generated.api_client import ApiClient
-from together.generated.configuration import Configuration
-from together.generated.models.autoscaling import Autoscaling
-from together.generated.models.create_endpoint_request import CreateEndpointRequest
-from together.generated.models.dedicated_endpoint import DedicatedEndpoint
-from together.generated.models.hardware_with_status import HardwareWithStatus
-from together.generated.models.list_endpoint import ListEndpoint
-from together.generated.models.update_endpoint_request import UpdateEndpointRequest
-from together.types import TogetherClient
+from together.abstract import api_requestor
+from together.together_response import TogetherResponse
+from together.types import TogetherClient, TogetherRequest
+from together.types.endpoints import DedicatedEndpoint, HardwareWithStatus, ListEndpoint
 
 
-class BaseEndpoints:
-    """Base class containing common endpoint functionality and documentation."""
-
-    def _get_api_client(
-        self, client: TogetherClient
-    ) -> tuple[ApiClient, EndpointsApi, HardwareApi]:
-        api_client = ApiClient(
-            configuration=Configuration(
-                host=client.base_url.rstrip("/") if client.base_url else "",
-            ),
-            header_name="Authorization",
-            header_value=f"Bearer {client.api_key}" if client.api_key else None,
-        )
-        return api_client, EndpointsApi(api_client), HardwareApi(api_client)
-
-
-class Endpoints(BaseEndpoints):
-    """Synchronous endpoints client."""
-
+class Endpoints:
     def __init__(self, client: TogetherClient) -> None:
-        self.api_client, self._api, self._hardware_api = self._get_api_client(client)
-        self._loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self._loop)
+        self._client = client
 
-    def __del__(self) -> None:
-        if hasattr(self, "api_client"):
-            # Using type: ignore since close() is untyped in the library
-            self._loop.run_until_complete(self.api_client.close())  # type: ignore
-            self._loop.close()
+    def list(
+        self, type: Optional[Literal["dedicated", "serverless"]] = None
+    ) -> List[ListEndpoint]:
+        """
+        List all endpoints, can be filtered by type.
+
+        Args:
+            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+
+        Returns:
+            List[ListEndpoint]: List of endpoint objects
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        params = {}
+        if type is not None:
+            params["type"] = type
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="endpoints",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        response.data = response.data["data"]
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, list)
+
+        return [ListEndpoint(**endpoint) for endpoint in response.data]
 
     def create(
         self,
@@ -74,41 +76,37 @@ class Endpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
-        async def _create() -> DedicatedEndpoint:
-            request = CreateEndpointRequest(
-                model=model,
-                hardware=hardware,
-                autoscaling=Autoscaling(
-                    min_replicas=min_replicas, max_replicas=max_replicas
-                ),
-                display_name=display_name,
-                disable_prompt_cache=disable_prompt_cache,
-                disable_speculative_decoding=disable_speculative_decoding,
-                state=state,
-            )
-            return await self._api.create_endpoint(create_endpoint_request=request)
+        data: Dict[str, Union[str, bool, Dict[str, int]]] = {
+            "model": model,
+            "hardware": hardware,
+            "autoscaling": {
+                "min_replicas": min_replicas,
+                "max_replicas": max_replicas,
+            },
+            "disable_prompt_cache": disable_prompt_cache,
+            "disable_speculative_decoding": disable_speculative_decoding,
+            "state": state,
+        }
 
-        return self._loop.run_until_complete(_create())
+        if display_name is not None:
+            data["display_name"] = display_name
 
-    def list(
-        self, type: Literal["dedicated", "serverless"] | None = None
-    ) -> List[ListEndpoint]:
-        """
-        List all endpoints.
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="endpoints",
+                params=data,
+            ),
+            stream=False,
+        )
 
-        Args:
-            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+        assert isinstance(response, TogetherResponse)
 
-        Returns:
-            Dict[str, Any]: Response containing list of endpoints in the data field
-        """
-
-        async def _list() -> List[ListEndpoint]:
-            response = await self._api.list_endpoints(type=type)
-            return response.data
-
-        return self._loop.run_until_complete(_list())
+        return DedicatedEndpoint(**response.data)
 
     def get(self, endpoint_id: str) -> DedicatedEndpoint:
         """
@@ -120,11 +118,21 @@ class Endpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
-        async def _get() -> DedicatedEndpoint:
-            return await self._api.get_endpoint(endpoint_id=endpoint_id)
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url=f"endpoints/{endpoint_id}",
+            ),
+            stream=False,
+        )
 
-        return self._loop.run_until_complete(_get())
+        assert isinstance(response, TogetherResponse)
+
+        return DedicatedEndpoint(**response.data)
 
     def delete(self, endpoint_id: str) -> None:
         """
@@ -133,11 +141,17 @@ class Endpoints(BaseEndpoints):
         Args:
             endpoint_id (str): ID of the endpoint to delete
         """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
-        async def _delete() -> None:
-            return await self._api.delete_endpoint(endpoint_id=endpoint_id)
-
-        return self._loop.run_until_complete(_delete())
+        requestor.request(
+            options=TogetherRequest(
+                method="DELETE",
+                url=f"endpoints/{endpoint_id}",
+            ),
+            stream=False,
+        )
 
     def update(
         self,
@@ -161,56 +175,116 @@ class Endpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
-        async def _update() -> DedicatedEndpoint:
-            kwargs: Dict[str, Any] = {}
-            if min_replicas is not None or max_replicas is not None:
-                current_min = min_replicas
-                current_max = max_replicas
-                if current_min is None or current_max is None:
-                    # Get current values if only one is specified
-                    current = await self._api.get_endpoint(endpoint_id=endpoint_id)
-                    current_min = current_min or current.autoscaling.min_replicas
-                    current_max = current_max or current.autoscaling.max_replicas
-                kwargs["autoscaling"] = Autoscaling(
-                    min_replicas=current_min,
-                    max_replicas=current_max,
-                )
-            if state is not None:
-                kwargs["state"] = state
-            if display_name is not None:
-                kwargs["display_name"] = display_name
+        data: Dict[str, Union[str, Dict[str, int]]] = {}
 
-            request = UpdateEndpointRequest(**kwargs)
-            return await self._api.update_endpoint(
-                endpoint_id=endpoint_id, update_endpoint_request=request
-            )
+        if min_replicas is not None or max_replicas is not None:
+            current_min = min_replicas
+            current_max = max_replicas
+            if current_min is None or current_max is None:
+                # Get current values if only one is specified
+                current = self.get(endpoint_id=endpoint_id)
+                current_min = current_min or current.autoscaling.min_replicas
+                current_max = current_max or current.autoscaling.max_replicas
+            data["autoscaling"] = {
+                "min_replicas": current_min,
+                "max_replicas": current_max,
+            }
 
-        return self._loop.run_until_complete(_update())
+        if state is not None:
+            data["state"] = state
+
+        if display_name is not None:
+            data["display_name"] = display_name
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="PATCH",
+                url=f"endpoints/{endpoint_id}",
+                params=data,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return DedicatedEndpoint(**response.data)
 
     def list_hardware(self, model: Optional[str] = None) -> List[HardwareWithStatus]:
         """
         List available hardware configurations.
 
         Args:
-            model (str, optional): Filter hardware configurations by model compatibility. Defaults to None.
+            model (str, optional): Filter hardware configurations by model compatibility. When provided,
+                                 the response includes availability status for each compatible configuration.
 
         Returns:
-            List[HardwareWithStatus]: List of hardware configurations with their availability status
+            List[HardwareWithStatus]: List of hardware configurations with their status
         """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
 
-        async def _list_hardware() -> List[HardwareWithStatus]:
-            response = await self._hardware_api.list_hardware(model=model)
-            return response.data
+        params = {}
+        if model is not None:
+            params["model"] = model
 
-        return self._loop.run_until_complete(_list_hardware())
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="hardware",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, dict)
+        assert isinstance(response.data["data"], list)
+
+        return [HardwareWithStatus(**item) for item in response.data["data"]]
 
 
-class AsyncEndpoints(BaseEndpoints):
-    """Asynchronous endpoints client."""
-
+class AsyncEndpoints:
     def __init__(self, client: TogetherClient) -> None:
-        self.api_client, self._api, self._hardware_api = self._get_api_client(client)
+        self._client = client
+
+    async def list(
+        self, type: Optional[Literal["dedicated", "serverless"]] = None
+    ) -> List[ListEndpoint]:
+        """
+        List all endpoints, can be filtered by type.
+
+        Args:
+            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+
+        Returns:
+            List[ListEndpoint]: List of endpoint objects
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        params = {}
+        if type is not None:
+            params["type"] = type
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url="endpoints",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, list)
+
+        return [ListEndpoint(**endpoint) for endpoint in response.data]
 
     async def create(
         self,
@@ -240,33 +314,37 @@ class AsyncEndpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
-        request = CreateEndpointRequest(
-            model=model,
-            hardware=hardware,
-            autoscaling=Autoscaling(
-                min_replicas=min_replicas, max_replicas=max_replicas
-            ),
-            display_name=display_name,
-            disable_prompt_cache=disable_prompt_cache,
-            disable_speculative_decoding=disable_speculative_decoding,
-            state=state,
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
         )
-        return await self._api.create_endpoint(create_endpoint_request=request)
 
-    async def list(
-        self, type: Literal["dedicated", "serverless"] | None = None
-    ) -> List[ListEndpoint]:
-        """
-        List all endpoints.
+        data: Dict[str, Union[str, bool, Dict[str, int]]] = {
+            "model": model,
+            "hardware": hardware,
+            "autoscaling": {
+                "min_replicas": min_replicas,
+                "max_replicas": max_replicas,
+            },
+            "disable_prompt_cache": disable_prompt_cache,
+            "disable_speculative_decoding": disable_speculative_decoding,
+            "state": state,
+        }
 
-        Args:
-            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+        if display_name is not None:
+            data["display_name"] = display_name
 
-        Returns:
-            Dict[str, Any]: Response containing list of endpoints in the data field
-        """
-        response = await self._api.list_endpoints(type=type)
-        return response.data
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST",
+                url="endpoints",
+                params=data,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return DedicatedEndpoint(**response.data)
 
     async def get(self, endpoint_id: str) -> DedicatedEndpoint:
         """
@@ -278,7 +356,21 @@ class AsyncEndpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
-        return await self._api.get_endpoint(endpoint_id=endpoint_id)
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url=f"endpoints/{endpoint_id}",
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return DedicatedEndpoint(**response.data)
 
     async def delete(self, endpoint_id: str) -> None:
         """
@@ -287,7 +379,17 @@ class AsyncEndpoints(BaseEndpoints):
         Args:
             endpoint_id (str): ID of the endpoint to delete
         """
-        return await self._api.delete_endpoint(endpoint_id=endpoint_id)
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        await requestor.arequest(
+            options=TogetherRequest(
+                method="DELETE",
+                url=f"endpoints/{endpoint_id}",
+            ),
+            stream=False,
+        )
 
     async def update(
         self,
@@ -311,28 +413,43 @@ class AsyncEndpoints(BaseEndpoints):
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
-        kwargs: Dict[str, Any] = {}
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        data: Dict[str, Union[str, Dict[str, int]]] = {}
+
         if min_replicas is not None or max_replicas is not None:
             current_min = min_replicas
             current_max = max_replicas
             if current_min is None or current_max is None:
                 # Get current values if only one is specified
-                current = await self._api.get_endpoint(endpoint_id=endpoint_id)
+                current = await self.get(endpoint_id=endpoint_id)
                 current_min = current_min or current.autoscaling.min_replicas
                 current_max = current_max or current.autoscaling.max_replicas
-            kwargs["autoscaling"] = Autoscaling(
-                min_replicas=current_min,
-                max_replicas=current_max,
-            )
-        if state is not None:
-            kwargs["state"] = state
-        if display_name is not None:
-            kwargs["display_name"] = display_name
+            data["autoscaling"] = {
+                "min_replicas": current_min,
+                "max_replicas": current_max,
+            }
 
-        request = UpdateEndpointRequest(**kwargs)
-        return await self._api.update_endpoint(
-            endpoint_id=endpoint_id, update_endpoint_request=request
+        if state is not None:
+            data["state"] = state
+
+        if display_name is not None:
+            data["display_name"] = display_name
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="PATCH",
+                url=f"endpoints/{endpoint_id}",
+                params=data,
+            ),
+            stream=False,
         )
+
+        assert isinstance(response, TogetherResponse)
+
+        return DedicatedEndpoint(**response.data)
 
     async def list_hardware(
         self, model: Optional[str] = None
@@ -341,10 +458,31 @@ class AsyncEndpoints(BaseEndpoints):
         List available hardware configurations.
 
         Args:
-            model (str, optional): Filter hardware configurations by model compatibility. Defaults to None.
+            model (str, optional): Filter hardware configurations by model compatibility. When provided,
+                                 the response includes availability status for each compatible configuration.
 
         Returns:
-            List[HardwareWithStatus]: List of hardware configurations with their availability status
+            List[HardwareWithStatus]: List of hardware configurations with their status
         """
-        response = await self._hardware_api.list_hardware(model=model)
-        return response.data
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        params = {}
+        if model is not None:
+            params["model"] = model
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url="hardware",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, dict)
+        assert isinstance(response.data["data"], list)
+
+        return [HardwareWithStatus(**item) for item in response.data["data"]]

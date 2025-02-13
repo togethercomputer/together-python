@@ -27,10 +27,6 @@ jobs:
         path: .venv
         key: venv-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
 
-    - name: Generate OpenAPI client
-      run: |
-        make generate-client-from-existing-spec
-
     - name: Install dependencies
       run: |
         poetry config virtualenvs.in-project true

@@ -8,13 +8,7 @@ from typing import Any, Callable, Dict, List, Literal, TypeVar, Union
 import click
 
 from together import Together
-from together.error import AuthenticationError, InvalidRequestError
-from together.generated.exceptions import (
-    BadRequestException,
-    ForbiddenException,
-    NotFoundException,
-    ServiceException,
-)
+from together.error import InvalidRequestError
 from together.types import DedicatedEndpoint, ListEndpoint
 
 
@@ -74,19 +68,11 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 def print_api_error(
-    e: Union[
-        ForbiddenException, NotFoundException, BadRequestException, ServiceException
-    ],
+    e: InvalidRequestError,
 ) -> None:
-    error_details = ""
-    if e.data is not None:
-        error_details = e.data.to_dict()["error"]["message"]
-    elif e.body:
-        error_details = json.loads(e.body)["error"]["message"]
-    else:
-        error_details = str(e)
+    error_details = e.api_response.message
 
-    if (
+    if error_details and (
         "credentials" in error_details.lower()
         or "authentication" in error_details.lower()
     ):
@@ -102,22 +88,8 @@ def handle_api_errors(f: F) -> F:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return f(*args, **kwargs)
-        except (
-            ForbiddenException,
-            NotFoundException,
-            BadRequestException,
-            ServiceException,
-        ) as e:
-            print_api_error(e)
-
-            sys.exit(1)
-        except AuthenticationError as e:
-            click.echo(f"Error details: {str(e)}", err=True)
-            click.echo("Error: Invalid API key or authentication failed", err=True)
-            sys.exit(1)
         except InvalidRequestError as e:
-            click.echo(f"Error details: {str(e)}", err=True)
-            click.echo("Error: Invalid request", err=True)
+            print_api_error(e)
             sys.exit(1)
         except Exception as e:
             click.echo(f"Error: An unexpected error occurred - {str(e)}", err=True)
@@ -226,15 +198,14 @@ def create(
             disable_speculative_decoding=no_speculative_decoding,
             state="STOPPED" if no_auto_start else "STARTED",
         )
-    except NotFoundException as e:
+    except InvalidRequestError as e:
+        print_api_error(e)
         if "check the hardware api" in str(e).lower():
-            print_api_error(e)
             fetch_and_print_hardware_options(
                 client=client, model=model, print_json=False, available=True
             )
-            sys.exit(1)
 
-        raise e
+        sys.exit(1)
 
     # Print detailed information to stderr
     click.echo("Created dedicated endpoint with:", err=True)
@@ -251,7 +222,7 @@ def create(
     if no_auto_start:
         click.echo("  Auto-start: disabled", err=True)
 
-    click.echo("Endpoint created successfully", err=True)
+    click.echo(f"Endpoint created successfully, id: {response.id}", err=True)
 
     if wait:
         import time
@@ -308,17 +279,7 @@ def fetch_and_print_hardware_options(
         ]
 
     if print_json:
-        json_output = [
-            {
-                "id": hardware.id,
-                "pricing": hardware.pricing.to_dict(),
-                "specs": hardware.specs.to_dict(),
-                "availability": (
-                    hardware.availability.to_dict() if hardware.availability else None
-                ),
-            }
-            for hardware in hardware_options
-        ]
+        json_output = [hardware.model_dump() for hardware in hardware_options]
         click.echo(json.dumps(json_output, indent=2))
     else:
         for hardware in hardware_options:
