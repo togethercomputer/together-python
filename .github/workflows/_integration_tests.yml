@@ -48,6 +48,11 @@ jobs:
         run: |
           make generate-client-from-existing-spec
 
+      - name: Debug - Check generated files
+        run: |
+          ls -la src/together/generated/
+          ls -la src/together/generated/models/
+
       - name: Install together
         run: |
           poetry run pip install .
