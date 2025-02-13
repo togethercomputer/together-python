@@ -44,9 +44,9 @@ jobs:
         shell: bash
         run: poetry install --with quality,tests
 
-      - name: Make install
+      - name: Generate OpenAPI client
         run: |
-          make install
+          make generate-client-from-existing-spec
 
       - name: Install together
         run: |

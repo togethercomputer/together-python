@@ -37,6 +37,9 @@ format:
 generate-client:
 	python scripts/generate_api_client.py
 
+generate-client-from-existing-spec:
+	python scripts/generate_api_client.py --skip-spec-download
+
 # Documentation
 
 html:

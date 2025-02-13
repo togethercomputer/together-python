@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -28,13 +29,32 @@ def download_file(url: str, target: Path) -> None:
     run_command(["wget", "-O", str(target), url])
 
 
-def main() -> None:
-    # Download OpenAPI spec
-    spec_file = Path(__file__).parent / "openapi.yaml"
-    download_file(OPENAPI_SPEC_URL, spec_file)
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Generate Together API client")
+    parser.add_argument(
+        "--skip-spec-download",
+        action="store_true",
+        help="Skip downloading the OpenAPI spec file",
+    )
+    return parser.parse_args()
 
-    # Run formatter on the spec for better merge conflict handling
-    run_command(["npx", "-y", "prettier", "--write", str(spec_file)])
+
+def main() -> None:
+    args = parse_args()
+    spec_file = Path(__file__).parent / "openapi.yaml"
+
+    # Download OpenAPI spec if not skipped
+    if not args.skip_spec_download:
+        download_file(OPENAPI_SPEC_URL, spec_file)
+        # Run formatter on the spec for better merge conflict handling
+        run_command(["npx", "-y", "prettier", "--write", str(spec_file)])
+    elif not spec_file.exists():
+        print(
+            "Error: OpenAPI spec file not found and download was skipped",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     # Download generator if needed
     download_file(GENERATOR_JAR_URL, GENERATOR_JAR)
