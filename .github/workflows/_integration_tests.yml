@@ -24,7 +24,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
@@ -40,13 +39,13 @@ jobs:
           poetry-version: ${{ env.POETRY_VERSION }}
           cache-key: core
 
-      - name: Install dependencies
-        shell: bash
-        run: poetry install --with quality,tests
-
       - name: Generate OpenAPI client
         run: |
           make generate-client-from-existing-spec
+
+      - name: Install dependencies
+        shell: bash
+        run: poetry install --with quality,tests
 
       - name: Install together
         run: |
