@@ -31,6 +31,7 @@ install:
 format:
 	poetry run pre-commit run --all-files
 
+
 # Documentation
 
 html:
