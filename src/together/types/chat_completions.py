@@ -44,9 +44,14 @@ class ToolCalls(BaseModel):
 class ChatCompletionMessageContentType(str, Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
+    VIDEO_URL = "video_url"
 
 
 class ChatCompletionMessageContentImageURL(BaseModel):
+    url: str
+
+
+class ChatCompletionMessageContentVideoURL(BaseModel):
     url: str
 
 
@@ -54,6 +59,7 @@ class ChatCompletionMessageContent(BaseModel):
     type: ChatCompletionMessageContentType
     text: str | None = None
     image_url: ChatCompletionMessageContentImageURL | None = None
+    video_url: ChatCompletionMessageContentVideoURL | None = None
 
 
 class ChatCompletionMessage(BaseModel):
