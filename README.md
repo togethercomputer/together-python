@@ -57,12 +57,60 @@ from together import Together
 
 client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
 
+# Simple text message
 response = client.chat.completions.create(
     model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     messages=[{"role": "user", "content": "tell me about new york"}],
 )
 print(response.choices[0].message.content)
+
+# Multi-modal message with text and image
+response = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "What's in this image?"
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://example.com/image.jpg"
+                }
+            }
+        ]
+    }]
+)
+
+# Multi-modal message with text and video
+response = client.chat.completions.create(
+    model="Qwen/Qwen2.5-VL-72B-Instruct",
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "What's happening in this video?"
+            },
+            {
+                "type": "video_url",
+                "video_url": {
+                    "url": "https://example.com/video.mp4"
+                }
+            }
+        ]
+    }]
+)
 ```
+
+The chat completions API supports three types of content:
+- Plain text messages using the `content` field directly
+- Multi-modal messages with images using `type: "image_url"`
+- Multi-modal messages with videos using `type: "video_url"`
+
+When using multi-modal content, the `content` field becomes an array of content objects, each with its own type and corresponding data.
 
 #### Streaming
 
