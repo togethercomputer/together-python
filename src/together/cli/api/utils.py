@@ -47,5 +47,22 @@ class BooleanWithAutoParamType(click.ParamType):
             )
 
 
+class FromStepParamType(click.ParamType):
+    name = "from_step"
+
+    def convert(self, value: str, param: click.Parameter | None, ctx: click.Context | None) -> int | Literal["final"] | None:
+        if value == "final":
+            return "final"
+        try:
+            return int(value)
+        except ValueError:
+            self.fail(
+                _("{value!r} is not a valid {type}.").format(
+                    value=value, type=self.name
+                ),
+            )
+
+
 INT_WITH_MAX = AutoIntParamType()
 BOOL_WITH_AUTO = BooleanWithAutoParamType()
+FROM_STEP_TYPE = FromStepParamType()

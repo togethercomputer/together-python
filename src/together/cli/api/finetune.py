@@ -11,7 +11,7 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX, FROM_STEP_TYPE
 from together.utils import (
     finetune_price_to_dollars,
     log_warn,
@@ -126,6 +126,12 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
+@click.option(
+    "--from-step",
+    type=FROM_STEP_TYPE,
+    default="final",
+    help="From which checkpoint start a fine-tuning job"
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -152,6 +158,7 @@ def create(
     wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
+    from_step: int | Literal["final"],
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -180,6 +187,7 @@ def create(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        from_step=from_step,
     )
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
