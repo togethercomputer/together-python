@@ -179,7 +179,7 @@ class FinetuneRequest(BaseModel):
     # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
     # from step
-    from_step: int | None = -1
+    from_checkpoint: str
 
 
 class FinetuneResponse(BaseModel):
@@ -258,7 +258,7 @@ class FinetuneResponse(BaseModel):
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
-    from_step: int | None = "-1"
+    from_checkpoint: str
 
     @field_validator("training_type")
     @classmethod
