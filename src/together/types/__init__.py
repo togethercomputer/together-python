@@ -31,6 +31,8 @@ from together.types.files import (
     FileType,
 )
 from together.types.finetune import (
+    FinetuneCheckpoint,
+    FinetuneCheckpointList,
     FinetuneDownloadResult,
     FinetuneLinearLRSchedulerArgs,
     FinetuneList,
@@ -59,6 +61,8 @@ __all__ = [
     "ChatCompletionResponse",
     "EmbeddingRequest",
     "EmbeddingResponse",
+    "FinetuneCheckpoint",
+    "FinetuneCheckpointList",
     "FinetuneRequest",
     "FinetuneResponse",
     "FinetuneList",
