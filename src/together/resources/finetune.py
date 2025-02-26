@@ -28,10 +28,10 @@ from together.types import (
 )
 from together.types.finetune import DownloadCheckpointType, FinetuneEventType
 from together.utils import (
-    log_warn_once, 
-    normalize_key, 
-    format_event_timestamp, 
-    get_event_step
+    log_warn_once,
+    normalize_key,
+    format_event_timestamp,
+    get_event_step,
 )
 
 
@@ -394,17 +394,17 @@ class FineTuning:
             FinetuneCheckpointList: Object containing list of available checkpoints
         """
         events = self.list_events(id).data or []
-        
+
         checkpoints: List[FinetuneCheckpoint] = []
-        
+
         for event in events:
             event_type = event.type
-            
+
             if event_type == FinetuneEventType.CHECKPOINT_SAVE:
                 formatted_time = format_event_timestamp(event)
                 step = get_event_step(event)
                 checkpoint_name = f"{id}:{step}" if step else id
-                
+
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Intermediate",
@@ -415,7 +415,7 @@ class FineTuning:
             elif event_type == FinetuneEventType.JOB_COMPLETE:
                 formatted_time = format_event_timestamp(event)
                 is_lora = hasattr(event, "adapter_path")
-                
+
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Final Merged" if is_lora else "Final",
@@ -423,7 +423,7 @@ class FineTuning:
                         name=id,
                     )
                 )
-                
+
                 if is_lora:
                     checkpoints.append(
                         FinetuneCheckpoint(
@@ -432,10 +432,10 @@ class FineTuning:
                             name=id,
                         )
                     )
-        
+
         # Sort by timestamp (newest first)
         checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
-        
+
         return FinetuneCheckpointList(object="list", data=checkpoints)
 
     def download(
@@ -463,13 +463,15 @@ class FineTuning:
         Returns:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
-        
+
         if re.match(r"^ft-[\dabcde-]+\:\d+$", id) is not None:
             if checkpoint_step == -1:
                 checkpoint_step = int(id.split(":")[1])
                 id = id.split(":")[0]
             else:
-                raise ValueError("Invalid fine-tune ID. Don't use `checkpoint_step` with a colon in the ID.")
+                raise ValueError(
+                    "Invalid fine-tune ID. Don't use `checkpoint_step` with a colon in the ID."
+                )
 
         url = f"finetune/download?ft_id={id}"
 
@@ -786,7 +788,7 @@ class AsyncFineTuning:
         events_list = FinetuneListEvents(object="list", **events_response.data)
 
         return events_list
-        
+
     async def list_checkpoints(self, id: str) -> FinetuneCheckpointList:
         """
         List available checkpoints for a fine-tuning job
@@ -799,17 +801,17 @@ class AsyncFineTuning:
         """
         events_list = await self.list_events(id)
         events = events_list.data or []
-        
+
         checkpoints: List[FinetuneCheckpoint] = []
-        
+
         for event in events:
             event_type = event.type
-            
+
             if event_type == FinetuneEventType.CHECKPOINT_SAVE:
                 formatted_time = format_event_timestamp(event)
                 step = get_event_step(event)
                 checkpoint_name = f"{id}:{step}" if step else id
-                
+
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Intermediate",
@@ -820,7 +822,7 @@ class AsyncFineTuning:
             elif event_type == FinetuneEventType.JOB_COMPLETE:
                 formatted_time = format_event_timestamp(event)
                 is_lora = hasattr(event, "adapter_path")
-                
+
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Final Merged" if is_lora else "Final",
@@ -828,7 +830,7 @@ class AsyncFineTuning:
                         name=id,
                     )
                 )
-                
+
                 if is_lora:
                     checkpoints.append(
                         FinetuneCheckpoint(
@@ -837,10 +839,10 @@ class AsyncFineTuning:
                             name=id,
                         )
                     )
-        
+
         # Sort by timestamp (newest first)
         checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
-        
+
         return FinetuneCheckpointList(object="list", data=checkpoints)
 
     async def download(

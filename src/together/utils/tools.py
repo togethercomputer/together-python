@@ -42,10 +42,10 @@ def parse_timestamp(timestamp: str) -> datetime | None:
 
 def format_event_timestamp(event: Any) -> str:
     """Format event timestamp to a readable date string.
-    
+
     Args:
         event: An event object with a created_at attribute
-        
+
     Returns:
         str: Formatted timestamp string (MM/DD/YYYY, HH:MM AM/PM)
     """
@@ -55,10 +55,10 @@ def format_event_timestamp(event: Any) -> str:
 
 def get_event_step(event: Any) -> str | None:
     """Extract the step number from a checkpoint event.
-    
+
     Args:
         event: A checkpoint event object
-        
+
     Returns:
         str | None: The step number as a string, or None if not found
     """
@@ -66,7 +66,7 @@ def get_event_step(event: Any) -> str | None:
     step = getattr(event, "step", None)
     if step is not None:
         return str(step)
-    
+
     # If not available, try to extract from the message
     message = getattr(event, "message", "") or ""
     step_match = re.search(r"step[:\s]+(\d+)", message.lower())

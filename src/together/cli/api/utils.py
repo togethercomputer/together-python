@@ -46,5 +46,6 @@ class BooleanWithAutoParamType(click.ParamType):
                 ctx,
             )
 
+
 INT_WITH_MAX = AutoIntParamType()
 BOOL_WITH_AUTO = BooleanWithAutoParamType()
