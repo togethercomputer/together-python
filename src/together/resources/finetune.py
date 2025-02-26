@@ -52,7 +52,7 @@ def createFinetuneRequest(
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
-    from_step: int | Literal["final"] = "final"
+    from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
     if batch_size == "max":
         log_warn_once(
@@ -101,9 +101,6 @@ def createFinetuneRequest(
     if weight_decay is not None and (weight_decay < 0):
         raise ValueError("Weight decay should be non-negative")
 
-    if from_step == "final":
-        from_step = -1
-
     lrScheduler = FinetuneLRScheduler(
         lr_scheduler_type="linear",
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
@@ -129,7 +126,7 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
-        from_step=from_step,
+        from_checkpoint=from_checkpoint,
     )
 
     return finetune_request
@@ -167,7 +164,7 @@ class FineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
-        from_step: int | Literal["final"] = "final",
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -213,7 +210,7 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
-            from_step (int or "final"): From which checkpoint start a fine-tuning job
+            from_checkpoint (str, optional): The checkpoint to be used in the fine-tuning.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -251,7 +248,7 @@ class FineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
-            from_step=from_step,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:

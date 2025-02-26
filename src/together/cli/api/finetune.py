@@ -11,7 +11,7 @@ from rich import print as rprint
 from tabulate import tabulate
 
 from together import Together
-from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX, FROM_STEP_TYPE
+from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
 from together.utils import (
     finetune_price_to_dollars,
     log_warn,
@@ -127,10 +127,11 @@ def fine_tuning(ctx: click.Context) -> None:
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
 @click.option(
-    "--from-step",
-    type=FROM_STEP_TYPE,
-    default="final",
-    help="From which checkpoint start a fine-tuning job"
+    "from_checkpoint",
+    type=str,
+    default=None,
+    help="The checkpoint to be used in the fine-tuning. The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
+    "The step value is optional, without it the final checkpoint will be used."
 )
 def create(
     ctx: click.Context,
@@ -158,7 +159,7 @@ def create(
     wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
-    from_step: int | Literal["final"],
+    from_checkpoint: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -187,7 +188,7 @@ def create(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
-        from_step=from_step,
+        from_checkpoint=from_checkpoint,
     )
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
