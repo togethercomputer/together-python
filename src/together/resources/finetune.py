@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
-from typing import Literal
+from typing import Literal, List
 
 from rich import print as rprint
 
@@ -22,9 +23,16 @@ from together.types import (
     TrainingType,
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    FinetuneCheckpoint,
+    FinetuneCheckpointList,
 )
-from together.types.finetune import DownloadCheckpointType
-from together.utils import log_warn_once, normalize_key
+from together.types.finetune import DownloadCheckpointType, FinetuneEventType
+from together.utils import (
+    log_warn_once, 
+    normalize_key, 
+    format_event_timestamp, 
+    get_event_step
+)
 
 
 def createFinetuneRequest(
@@ -371,10 +379,64 @@ class FineTuning:
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneListEvents(**response.data)
+
+    def list_checkpoints(self, id: str) -> FinetuneCheckpointList:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            FinetuneCheckpointList: Object containing list of available checkpoints
+        """
+        events = self.list_events(id).data or []
+        
+        checkpoints: List[FinetuneCheckpoint] = []
+        
+        for event in events:
+            event_type = event.type
+            
+            if event_type == FinetuneEventType.CHECKPOINT_SAVE:
+                formatted_time = format_event_timestamp(event)
+                step = get_event_step(event)
+                checkpoint_name = f"{id}:{step}" if step else id
+                
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type="Intermediate",
+                        timestamp=formatted_time,
+                        name=checkpoint_name,
+                    )
+                )
+            elif event_type == FinetuneEventType.JOB_COMPLETE:
+                formatted_time = format_event_timestamp(event)
+                is_lora = hasattr(event, "adapter_path")
+                
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type="Final Merged" if is_lora else "Final",
+                        timestamp=formatted_time,
+                        name=id,
+                    )
+                )
+                
+                if is_lora:
+                    checkpoints.append(
+                        FinetuneCheckpoint(
+                            type="Final Adapter",
+                            timestamp=formatted_time,
+                            name=id,
+                        )
+                    )
+        
+        # Sort by timestamp (newest first)
+        checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        return FinetuneCheckpointList(object="list", data=checkpoints)
 
     def download(
         self,
@@ -401,6 +463,13 @@ class FineTuning:
         Returns:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
+        
+        if re.match(r"^ft-[\dabcde-]+\:\d+$", id) is not None:
+            if checkpoint_step == -1:
+                checkpoint_step = int(id.split(":")[1])
+                id = id.split(":")[0]
+            else:
+                raise ValueError("Invalid fine-tune ID. Don't use `checkpoint_step` with a colon in the ID.")
 
         url = f"finetune/download?ft_id={id}"
 
@@ -692,30 +761,87 @@ class AsyncFineTuning:
 
     async def list_events(self, id: str) -> FinetuneListEvents:
         """
-        Async method to lists events of a fine-tune job
+        List fine-tuning events
 
         Args:
-            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+            id (str): Unique identifier of the fine-tune job to list events for
 
         Returns:
-            FinetuneListEvents: Object containing list of fine-tune events
+            FinetuneListEvents: Object containing list of fine-tune job events
         """
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        response, _, _ = await requestor.arequest(
+        events_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}/events",
+                url=f"fine-tunes/{normalize_key(id)}/events",
             ),
             stream=False,
         )
 
-        assert isinstance(response, TogetherResponse)
+        # FIXME: API returns "data" field with no object type (should be "list")
+        events_list = FinetuneListEvents(object="list", **events_response.data)
 
-        return FinetuneListEvents(**response.data)
+        return events_list
+        
+    async def list_checkpoints(self, id: str) -> FinetuneCheckpointList:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            FinetuneCheckpointList: Object containing list of available checkpoints
+        """
+        events_list = await self.list_events(id)
+        events = events_list.data or []
+        
+        checkpoints: List[FinetuneCheckpoint] = []
+        
+        for event in events:
+            event_type = event.type
+            
+            if event_type == FinetuneEventType.CHECKPOINT_SAVE:
+                formatted_time = format_event_timestamp(event)
+                step = get_event_step(event)
+                checkpoint_name = f"{id}:{step}" if step else id
+                
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type="Intermediate",
+                        timestamp=formatted_time,
+                        name=checkpoint_name,
+                    )
+                )
+            elif event_type == FinetuneEventType.JOB_COMPLETE:
+                formatted_time = format_event_timestamp(event)
+                is_lora = hasattr(event, "adapter_path")
+                
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type="Final Merged" if is_lora else "Final",
+                        timestamp=formatted_time,
+                        name=id,
+                    )
+                )
+                
+                if is_lora:
+                    checkpoints.append(
+                        FinetuneCheckpoint(
+                            type="Final Adapter",
+                            timestamp=formatted_time,
+                            name=id,
+                        )
+                    )
+        
+        # Sort by timestamp (newest first)
+        checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        return FinetuneCheckpointList(object="list", data=checkpoints)
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1

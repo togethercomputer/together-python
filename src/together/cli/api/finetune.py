@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from textwrap import wrap
 from typing import Any, Literal
+import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -17,8 +18,10 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
+    format_event_timestamp,
+    get_event_step,
 )
-from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
+from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits, FinetuneEventType
 
 
 _CONFIRMATION_MESSAGE = (
@@ -127,7 +130,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
 @click.option(
-    "from_checkpoint",
+    "--from-checkpoint",
     type=str,
     default=None,
     help="The checkpoint to be used in the fine-tuning. The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
@@ -351,6 +354,36 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
 
     click.echo(table)
+
+
+@fine_tuning.command()
+@click.pass_context
+@click.argument("fine_tune_id", type=str, required=True)
+def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
+    """List available checkpoints for a fine-tuning job"""
+    client: Together = ctx.obj
+
+    response = client.fine_tuning.list_checkpoints(fine_tune_id)
+
+    response.data = response.data or []
+    
+    display_list = []
+    for checkpoint in response.data:
+        display_list.append(
+            {
+                "Type": checkpoint.type,
+                "Timestamp": checkpoint.timestamp,
+                "Name": checkpoint.name,
+            }
+        )
+    
+    if display_list:
+        click.echo(f"This job contains these checkpoints:")
+        table = tabulate(display_list, headers="keys", tablefmt="grid")
+        click.echo(table)
+        click.echo("\nTo download a checkpoint, use cmd: together fine-tuning download")
+    else:
+        click.echo(f"No checkpoints found for job {fine_tune_id}")
 
 
 @fine_tuning.command()
