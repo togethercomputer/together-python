@@ -62,12 +62,10 @@ def get_event_step(event: Any) -> str | None:
     Returns:
         str | None: The step number as a string, or None if not found
     """
-    # First try to get step directly from the event object
     step = getattr(event, "step", None)
     if step is not None:
         return str(step)
 
-    # If not available, try to extract from the message
     message = getattr(event, "message", "") or ""
     step_match = re.search(r"step[:\s]+(\d+)", message.lower())
     return step_match.group(1) if step_match else None
@@ -83,8 +81,7 @@ def finetune_price_to_dollars(price: float) -> float:
     Returns:
         float: Price in dollars
     """
-    # Convert from nanodollars (1e-9 dollars) to dollars
-    return price / 1e9
+    return price / NANODOLLAR
 
 
 def convert_bytes(num: float) -> str | None:
