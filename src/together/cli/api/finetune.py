@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
 import re
@@ -21,7 +21,11 @@ from together.utils import (
     format_event_timestamp,
     get_event_step,
 )
-from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits, FinetuneEventType
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneTrainingLimits,
+    FinetuneEventType,
+)
 
 
 _CONFIRMATION_MESSAGE = (
@@ -134,7 +138,7 @@ def fine_tuning(ctx: click.Context) -> None:
     type=str,
     default=None,
     help="The checkpoint to be used in the fine-tuning. The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
-    "The step value is optional, without it the final checkpoint will be used."
+    "The step value is optional, without it the final checkpoint will be used.",
 )
 def create(
     ctx: click.Context,
@@ -273,7 +277,9 @@ def list(ctx: click.Context) -> None:
 
     response.data = response.data or []
 
-    response.data.sort(key=lambda x: parse_timestamp(x.created_at or ""))
+    # Use a default datetime for None values to make sure the key function always returns a comparable value
+    epoch_start = datetime.fromtimestamp(0, tz=timezone.utc)
+    response.data.sort(key=lambda x: parse_timestamp(x.created_at or "") or epoch_start)
 
     display_list = []
     for i in response.data:
@@ -366,7 +372,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
     response = client.fine_tuning.list_checkpoints(fine_tune_id)
 
     response.data = response.data or []
-    
+
     display_list = []
     for checkpoint in response.data:
         display_list.append(
@@ -376,7 +382,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
                 "Name": checkpoint.name,
             }
         )
-    
+
     if display_list:
         click.echo(f"This job contains these checkpoints:")
         table = tabulate(display_list, headers="keys", tablefmt="grid")

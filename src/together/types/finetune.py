@@ -329,6 +329,7 @@ class FinetuneCheckpoint(BaseModel):
     """
     Fine-tune checkpoint information
     """
+
     # checkpoint type (e.g. "Intermediate", "Final", "Final Merged", "Final Adapter")
     type: str
     # timestamp when the checkpoint was created
@@ -341,6 +342,7 @@ class FinetuneCheckpointList(BaseModel):
     """
     List of fine-tune checkpoints
     """
+
     # object type
     object: Literal["list"] | None = None
     # list of fine-tune checkpoint objects
