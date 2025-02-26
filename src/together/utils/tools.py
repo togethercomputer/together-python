@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import os
 from datetime import datetime
+import re
+from typing import Any
 
 
 logger = logging.getLogger("together")
@@ -23,19 +25,66 @@ def normalize_key(key: str) -> str:
     return key.replace("/", "--").replace("_", "-").replace(" ", "-").lower()
 
 
-def parse_timestamp(timestamp: str) -> datetime:
-    formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
-    for fmt in formats:
-        try:
-            return datetime.strptime(timestamp, fmt)
-        except ValueError:
-            continue
-    raise ValueError("Timestamp does not match any expected format")
+def parse_timestamp(timestamp: str) -> datetime | None:
+    """Parse a timestamp string into a datetime object or None if invalid.
+
+    Args:
+        timestamp (str): Timestamp in ISO 8601 format (e.g. "2021-01-01T00:00:00Z")
+
+    Returns:
+        datetime | None: Parsed datetime, or None if the string is empty
+    """
+    if timestamp == "":
+        return None
+
+    return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+
+
+def format_event_timestamp(event: Any) -> str:
+    """Format event timestamp to a readable date string.
+    
+    Args:
+        event: An event object with a created_at attribute
+        
+    Returns:
+        str: Formatted timestamp string (MM/DD/YYYY, HH:MM AM/PM)
+    """
+    timestamp = parse_timestamp(event.created_at or "")
+    return timestamp.strftime("%m/%d/%Y, %I:%M %p") if timestamp else ""
+
+
+def get_event_step(event: Any) -> str | None:
+    """Extract the step number from a checkpoint event.
+    
+    Args:
+        event: A checkpoint event object
+        
+    Returns:
+        str | None: The step number as a string, or None if not found
+    """
+    # First try to get step directly from the event object
+    step = getattr(event, "step", None)
+    if step is not None:
+        return str(step)
+    
+    # If not available, try to extract from the message
+    message = getattr(event, "message", "") or ""
+    step_match = re.search(r"step[:\s]+(\d+)", message.lower())
+    return step_match.group(1) if step_match else None
 
 
 # Convert fine-tune nano-dollar price to dollars
 def finetune_price_to_dollars(price: float) -> float:
-    return price / NANODOLLAR
+    """Convert fine-tune price to dollars
+
+    Args:
+        price (float): Fine-tune price in billing units
+
+    Returns:
+        float: Price in dollars
+    """
+    # Convert from nanodollars (1e-9 dollars) to dollars
+    return price / 1e9
 
 
 def convert_bytes(num: float) -> str | None:
