@@ -22,6 +22,7 @@ from together.types import (
     TrainingType,
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    DPOTrainingMethodType,
 )
 from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
@@ -52,6 +53,8 @@ def createFinetuneRequest(
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
+    training_method: str = "sft",
+    dpo_beta: float | None = None,
 ) -> FinetuneRequest:
     if batch_size == "max":
         log_warn_once(
@@ -105,6 +108,11 @@ def createFinetuneRequest(
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
 
+    if training_method == "dpo":
+        training_method_args = DPOTrainingMethodType(dpo_beta=dpo_beta)
+    else:
+        training_method_args = None
+
     finetune_request = FinetuneRequest(
         model=model,
         training_file=training_file,
@@ -125,6 +133,8 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method,
+        training_method_args=training_method_args,
     )
 
     return finetune_request
@@ -162,6 +172,8 @@ class FineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float = 0.1,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -207,6 +219,9 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to 0.1.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -244,6 +259,8 @@ class FineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
         )
 
         if verbose:
@@ -253,6 +270,8 @@ class FineTuning:
             )
         parameter_payload = finetune_request.model_dump(exclude_none=True)
 
+        # Print the request payload before sending
+        print(f"Request payload: {parameter_payload}")
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
@@ -261,6 +280,8 @@ class FineTuning:
             ),
             stream=False,
         )
+        # Print the response before processing
+        print(f"Response: {response}")
 
         assert isinstance(response, TogetherResponse)
 
@@ -503,6 +524,8 @@ class AsyncFineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float = 0.1,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -548,6 +571,9 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to 0.1.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -585,6 +611,8 @@ class AsyncFineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
         )
 
         if verbose:

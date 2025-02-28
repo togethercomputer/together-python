@@ -135,6 +135,14 @@ class LoRATrainingType(TrainingType):
     type: str = "Lora"
 
 
+class DPOTrainingMethodType(BaseModel):
+    """
+    Training method type for DPO training
+    """
+
+    dpo_beta: float
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -178,6 +186,10 @@ class FinetuneRequest(BaseModel):
     training_type: FullTrainingType | LoRATrainingType | None = None
     # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
+    # training method
+    training_method: str = "sft"
+    # DPO params
+    training_method_args: DPOTrainingMethodType | None = None
 
 
 class FinetuneResponse(BaseModel):

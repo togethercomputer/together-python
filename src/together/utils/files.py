@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 from traceback import format_exc
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from pyarrow import ArrowInvalid, parquet
 
@@ -96,6 +96,123 @@ def check_file(
     return report_dict
 
 
+def _has_weights(messages: List[Dict[str, str | bool]]) -> bool:
+    """Check if any message in the conversation has a weight parameter.
+
+    Args:
+        messages (List[Dict[str, str]]): List of messages to check.
+
+    Returns:
+        bool: True if any message has a weight parameter, False otherwise.
+    """
+    return any("weight" in message for message in messages)
+
+
+def validate_and_filter_messages(
+    messages: List[Dict[str, str | bool]]
+) -> tuple[List[Dict[str, str | bool]], bool]:
+    """Validate and filter the messages column."""
+    if not isinstance(messages, list):
+        raise ValueError(
+            "The dataset is malformed, the `messages` column must be a list."
+        )
+    if len(messages) == 0:
+        raise ValueError(
+            "The dataset is malformed, the `messages` column must not be empty."
+        )
+
+    has_weights = False
+    # Check for weights in messages
+    if _has_weights(messages):
+        has_weights = True
+
+    filtered_messages = []
+    for message in messages:
+        if any(column not in message for column in REQUIRED_COLUMNS_MESSAGE):
+            raise ValueError(
+                "The dataset is malformed. "
+                "Each message in the messages column must have "
+                f"{REQUIRED_COLUMNS_MESSAGE} columns."
+            )
+        for column in REQUIRED_COLUMNS_MESSAGE:
+            if not isinstance(message[column], str):
+                raise ValueError(
+                    f"The dataset is malformed, the column `{column}` must be of the string type."
+                )
+
+        if has_weights and "weight" in message:
+            weight = message["weight"]
+            if not isinstance(weight, int):
+                raise ValueError("Weight must be an integer")
+            if weight not in {0, 1}:
+                raise ValueError("Weight must be either 0 or 1")
+        if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
+            raise ValueError(
+                f"Invalid role {message['role']} in conversation, possible roles: "
+                f"{', '.join(POSSIBLE_ROLES_CONVERSATION)}"
+            )
+        filtered_messages.append(
+            {column: message[column] for column in REQUIRED_COLUMNS_MESSAGE}
+        )
+
+    return filtered_messages, has_weights
+
+
+def validate_preference_openai(example: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate the OpenAI preference dataset format.
+
+    Args:
+        example (dict): Input entry to be checked.
+
+    Raises:
+        ValueError: If the dataset format is invalid.
+
+    Returns:
+        Dict[str, Any]: The validated example.
+    """
+    if not isinstance(example["input"], dict):
+        raise ValueError(
+            "The dataset is malformed, the `input` field must be a dictionary."
+        )
+
+    if "messages" not in example["input"]:
+        raise ValueError(
+            "The dataset is malformed, the `input` dictionary must contain a `messages` field."
+        )
+
+    example["input"]["messages"], _ = validate_and_filter_messages(
+        example["input"]["messages"]
+    )
+
+    if not isinstance(example["preferred_output"], list):
+        raise ValueError(
+            "The dataset is malformed, the `preferred_output` field must be a list."
+        )
+
+    if not isinstance(example["non_preferred_output"], list):
+        raise ValueError(
+            "The dataset is malformed, the `non_preferred_output` field must be a list."
+        )
+
+    if len(example["preferred_output"]) != 1:
+        raise ValueError(
+            "The dataset is malformed, the `preferred_output` list must contain exactly one message."
+        )
+
+    if len(example["non_preferred_output"]) != 1:
+        raise ValueError(
+            "The dataset is malformed, the `non_preferred_output` list must contain exactly one message."
+        )
+
+    example["preferred_output"], _ = validate_and_filter_messages(
+        example["preferred_output"]
+    )
+    example["non_preferred_output"], _ = validate_and_filter_messages(
+        example["non_preferred_output"]
+    )
+    return example
+
+
 def _check_jsonl(file: Path) -> Dict[str, Any]:
     report_dict: Dict[str, Any] = {}
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
@@ -164,8 +281,30 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         line_number=idx + 1,
                         error_source="format",
                     )
-
-                if current_format == DatasetFormat.CONVERSATION:
+                if current_format == DatasetFormat.PREFERENCE_OPENAI:
+                    validate_preference_openai(json_line)
+                elif current_format == DatasetFormat.PREFERENCE:
+                    for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
+                        if not isinstance(json_line[column], list):
+                            raise InvalidFileFormatError(
+                                message=f"The dataset is malformed, the column `{column}` must be a list.",
+                                line_number=idx + 1,
+                                error_source="key_value",
+                            )
+                        if len(json_line[column]) == 0:
+                            raise InvalidFileFormatError(
+                                message=f"The dataset is malformed, the column `{column}` must not be empty.",
+                                line_number=idx + 1,
+                                error_source="key_value",
+                            )
+                        validate_and_filter_messages(json_line[column])
+                        if not json_line[column][-1].get("role") == "assistant":
+                            raise InvalidFileFormatError(
+                                message=f"The last message in {column} must be from an assistant",
+                                line_number=idx + 1,
+                                error_source="key_value",
+                            )
+                elif current_format == DatasetFormat.CONVERSATION:
                     message_column = JSONL_REQUIRED_COLUMNS_MAP[
                         DatasetFormat.CONVERSATION
                     ][0]
