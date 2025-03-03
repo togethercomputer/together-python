@@ -115,8 +115,6 @@ def createFinetuneRequest(
     if training_method == "dpo":
         training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
-    print("\n TRAINING METHOD at CREATE FINE TUNE REQUEST", training_method)
-
     finetune_request = FinetuneRequest(
         model=model,
         training_file=training_file,
@@ -236,7 +234,6 @@ class FineTuning:
 
         if model_limits is None:
             model_limits = self.get_model_limits(model=model)
-        print("\n DPO BETA at CREATE FINE TUNE REQUEST", dpo_beta)
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
             training_file=training_file,
@@ -271,11 +268,8 @@ class FineTuning:
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
-        print("\n FINETUNE REQUEST before dump", finetune_request)
         parameter_payload = finetune_request.model_dump(exclude_none=True)
 
-        # Print the request payload before sending
-        print(f"Request payload: {parameter_payload}")
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
@@ -284,9 +278,6 @@ class FineTuning:
             ),
             stream=False,
         )
-        # Print the response before processing
-        print(f"Response: {response}")
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
