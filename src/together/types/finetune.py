@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Union
 
 from pydantic import StrictBool, Field, validator, field_validator
 
@@ -135,12 +135,29 @@ class LoRATrainingType(TrainingType):
     type: str = "Lora"
 
 
-class DPOTrainingMethodType(BaseModel):
+class TrainingMethod(BaseModel):
+    """
+    Training method type
+    """
+
+    method: str
+
+
+class TrainingMethodSFT(TrainingMethod):
+    """
+    Training method type for SFT training
+    """
+
+    method: str = "sft"
+
+
+class TrainingMethodDPO(TrainingMethod):
     """
     Training method type for DPO training
     """
 
-    dpo_beta: float
+    method: str = "dpo"
+    dpo_beta: float | None = None
 
 
 class FinetuneRequest(BaseModel):
@@ -187,9 +204,9 @@ class FinetuneRequest(BaseModel):
     # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
     # training method
-    training_method: str = "sft"
-    # DPO params
-    training_method_args: DPOTrainingMethodType | None = None
+    training_method: Union[TrainingMethodSFT, TrainingMethodDPO] = Field(
+        default_factory=TrainingMethodSFT
+    )
 
 
 class FinetuneResponse(BaseModel):

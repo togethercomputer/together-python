@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Union
 
 from rich import print as rprint
 
@@ -22,7 +22,8 @@ from together.types import (
     TrainingType,
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
-    DPOTrainingMethodType,
+    TrainingMethodDPO,
+    TrainingMethodSFT,
 )
 from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
@@ -108,10 +109,13 @@ def createFinetuneRequest(
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
 
+    training_method_cls: Union[TrainingMethodSFT, TrainingMethodDPO] = (
+        TrainingMethodSFT()
+    )
     if training_method == "dpo":
-        training_method_args = DPOTrainingMethodType(dpo_beta=dpo_beta)
-    else:
-        training_method_args = None
+        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
+
+    print("\n TRAINING METHOD at CREATE FINE TUNE REQUEST", training_method)
 
     finetune_request = FinetuneRequest(
         model=model,
@@ -133,8 +137,7 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
-        training_method=training_method,
-        training_method_args=training_method_args,
+        training_method=training_method_cls,
     )
 
     return finetune_request
@@ -173,7 +176,7 @@ class FineTuning:
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
-        dpo_beta: float = 0.1,
+        dpo_beta: float | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -221,7 +224,7 @@ class FineTuning:
                 Defaults to "auto".
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
-            dpo_beta (float, optional): DPO beta parameter. Defaults to 0.1.
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -233,7 +236,7 @@ class FineTuning:
 
         if model_limits is None:
             model_limits = self.get_model_limits(model=model)
-
+        print("\n DPO BETA at CREATE FINE TUNE REQUEST", dpo_beta)
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
             training_file=training_file,
@@ -268,6 +271,7 @@ class FineTuning:
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
+        print("\n FINETUNE REQUEST before dump", finetune_request)
         parameter_payload = finetune_request.model_dump(exclude_none=True)
 
         # Print the request payload before sending
@@ -525,7 +529,7 @@ class AsyncFineTuning:
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
-        dpo_beta: float = 0.1,
+        dpo_beta: float | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -573,7 +577,7 @@ class AsyncFineTuning:
                 Defaults to "auto".
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
-            dpo_beta (float, optional): DPO beta parameter. Defaults to 0.1.
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
