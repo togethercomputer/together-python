@@ -114,7 +114,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--dpo-beta",
     type=float,
     default=0.1,
-    help="Beta parameter for DPO training (only used when training-method is 'dpo')",
+    help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
