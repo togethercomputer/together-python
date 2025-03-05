@@ -39,7 +39,6 @@ class DatasetFormat(enum.Enum):
     GENERAL = "general"
     CONVERSATION = "conversation"
     INSTRUCTION = "instruction"
-    PREFERENCE = "preference"
     PREFERENCE_OPENAI = "preference_openai"
 
 
@@ -47,7 +46,6 @@ JSONL_REQUIRED_COLUMNS_MAP = {
     DatasetFormat.GENERAL: ["text"],
     DatasetFormat.CONVERSATION: ["messages"],
     DatasetFormat.INSTRUCTION: ["prompt", "completion"],
-    DatasetFormat.PREFERENCE: ["chosen", "rejected"],
     DatasetFormat.PREFERENCE_OPENAI: [
         "input",
         "preferred_output",

@@ -5,6 +5,54 @@ from pathlib import Path
 from together.constants import MIN_SAMPLES
 from together.utils.files import check_file
 
+_TEST_PREFERENCE_OPENAI_CONTENT = [
+    {
+        "input": {
+            "messages": [
+                {"role": "user", "content": "Hi there, I have a question."},
+                {"role": "assistant", "content": "Hello, how is your day going?"},
+                {
+                    "role": "user",
+                    "content": "Hello, can you tell me how cold San Francisco is today?",
+                },
+            ],
+        },
+        "preferred_output": [
+            {
+                "role": "assistant",
+                "content": "Today in San Francisco, it is not quite cold as expected. Morning clouds will give away "
+                "to sunshine, with a high near 68°F (20°C) and a low around 57°F (14°C).",
+            }
+        ],
+        "non_preferred_output": [
+            {
+                "role": "assistant",
+                "content": "It is not particularly cold in San Francisco today.",
+            }
+        ],
+    },
+    {
+        "input": {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "What's the best way to learn programming?",
+                },
+            ],
+        },
+        "preferred_output": [
+            {
+                "role": "assistant",
+                "content": "The best way to learn programming is through consistent practice, working on real projects, "
+                "and breaking down complex problems into smaller parts. Start with a beginner-friendly language like Python.",
+            }
+        ],
+        "non_preferred_output": [
+            {"role": "assistant", "content": "Just read some books and you'll be fine."}
+        ],
+    },
+]
+
 
 def test_check_jsonl_valid_general(tmp_path: Path):
     # Create a valid JSONL file
@@ -80,36 +128,7 @@ def test_check_jsonl_valid_conversational_single_turn(tmp_path: Path):
 def test_check_jsonl_valid_conversational_multiple_turns(tmp_path: Path):
     # Create a valid JSONL file with conversational format and multiple user-assistant turn pairs
     file = tmp_path / "valid_conversational_multiple_turns.jsonl"
-    content = [
-        {
-            "messages": [
-                {"role": "user", "content": "Is it going to rain today?"},
-                {
-                    "role": "assistant",
-                    "content": "Yes, expect showers in the afternoon.",
-                },
-                {"role": "user", "content": "What is the weather like in Tokyo?"},
-                {"role": "assistant", "content": "It is sunny with a chance of rain."},
-            ]
-        },
-        {
-            "messages": [
-                {"role": "user", "content": "Who won the game last night?"},
-                {"role": "assistant", "content": "The home team won by two points."},
-                {"role": "user", "content": "What is the weather like in Amsterdam?"},
-                {"role": "assistant", "content": "It is cloudy with a chance of snow."},
-            ]
-        },
-        {
-            "messages": [
-                {"role": "system", "content": "You are a kind AI"},
-                {"role": "user", "content": "Who won the game last night?"},
-                {"role": "assistant", "content": "The home team won by two points."},
-                {"role": "user", "content": "What is the weather like in Amsterdam?"},
-                {"role": "assistant", "content": "It is cloudy with a chance of snow."},
-            ]
-        },
-    ]
+    content = _TEST_PREFERENCE_OPENAI_CONTENT
     with file.open("w") as f:
         f.write("\n".join(json.dumps(item) for item in content))
 
@@ -119,6 +138,139 @@ def test_check_jsonl_valid_conversational_multiple_turns(tmp_path: Path):
     assert report["utf8"]
     assert report["num_samples"] == len(content)
     assert report["has_min_samples"]
+
+
+def test_check_jsonl_valid_preference_openai(tmp_path: Path):
+    file = tmp_path / "valid_preference_openai.jsonl"
+    content = _TEST_PREFERENCE_OPENAI_CONTENT
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+
+    assert report["is_check_passed"]
+    assert report["utf8"]
+    assert report["num_samples"] == len(content)
+    assert report["has_min_samples"]
+
+
+def test_check_jsonl_invalid_preference_openai_missing_fields(tmp_path: Path):
+    # Test all required fields in OpenAI preference format
+    required_fields = [
+        ("input", "Missing input field"),
+        ("preferred_output", "Missing preferred_output field"),
+        ("non_preferred_output", "Missing non_preferred_output field"),
+    ]
+
+    for field_to_remove, description in required_fields:
+        file = tmp_path / f"invalid_preference_openai_missing_{field_to_remove}.jsonl"
+        content = [item.copy() for item in _TEST_PREFERENCE_OPENAI_CONTENT]
+
+        # Remove the specified field from the first item
+        del content[0][field_to_remove]
+
+        with file.open("w") as f:
+            f.write("\n".join(json.dumps(item) for item in content))
+
+        report = check_file(file)
+
+        assert not report["is_check_passed"], f"Test should fail when {description}"
+
+
+def test_check_jsonl_invalid_preference_openai_structural_issues(tmp_path: Path):
+    # Test various structural issues in OpenAI preference format
+    test_cases = [
+        {
+            "name": "empty_messages",
+            "modifier": lambda item: item.update({"input": {"messages": []}}),
+            "description": "Empty messages array",
+        },
+        {
+            "name": "missing_role_preferred",
+            "modifier": lambda item: item.update(
+                {"preferred_output": [{"content": "Missing role field"}]}
+            ),
+            "description": "Missing role in preferred_output",
+        },
+        {
+            "name": "missing_role_non_preferred",
+            "modifier": lambda item: item.update(
+                {"non_preferred_output": [{"content": "Missing role field"}]}
+            ),
+            "description": "Missing role in non_preferred_output",
+        },
+        {
+            "name": "wrong_output_format_preferred",
+            "modifier": lambda item: item.update(
+                {"preferred_output": "Not an array but a string"}
+            ),
+            "description": "Wrong format for preferred_output",
+        },
+        {
+            "name": "wrong_output_format_non_preferred",
+            "modifier": lambda item: item.update(
+                {"non_preferred_output": "Not an array but a string"}
+            ),
+            "description": "Wrong format for non_preferred_output",
+        },
+        {
+            "name": "missing_content",
+            "modifier": lambda item: item.update(
+                {"input": {"messages": [{"role": "user"}]}}
+            ),
+            "description": "Missing content in messages",
+        },
+        {
+            "name": "multiple_preferred_outputs",
+            "modifier": lambda item: item.update(
+                {
+                    "preferred_output": [
+                        {"role": "assistant", "content": "First response"},
+                        {"role": "assistant", "content": "Second response"},
+                    ]
+                }
+            ),
+            "description": "Multiple messages in preferred_output",
+        },
+        {
+            "name": "multiple_non_preferred_outputs",
+            "modifier": lambda item: item.update(
+                {
+                    "non_preferred_output": [
+                        {"role": "assistant", "content": "First response"},
+                        {"role": "assistant", "content": "Second response"},
+                    ]
+                }
+            ),
+            "description": "Multiple messages in non_preferred_output",
+        },
+        {
+            "name": "empty_preferred_output",
+            "modifier": lambda item: item.update({"preferred_output": []}),
+            "description": "Empty preferred_output array",
+        },
+        {
+            "name": "empty_non_preferred_output",
+            "modifier": lambda item: item.update({"non_preferred_output": []}),
+            "description": "Empty non_preferred_output array",
+        },
+    ]
+
+    for test_case in test_cases:
+        file = tmp_path / f"invalid_preference_openai_{test_case['name']}.jsonl"
+        content = [item.copy() for item in _TEST_PREFERENCE_OPENAI_CONTENT]
+
+        # Apply the modification to the first item
+        test_case["modifier"](content[0])
+
+        with file.open("w") as f:
+            f.write("\n".join(json.dumps(item) for item in content))
+
+        report = check_file(file)
+
+        assert not report[
+            "is_check_passed"
+        ], f"Test should fail with {test_case['description']}"
 
 
 def test_check_jsonl_empty_file(tmp_path: Path):
