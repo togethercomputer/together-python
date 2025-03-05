@@ -114,13 +114,15 @@ def validate_messages(
     """Validate the messages column."""
     if not isinstance(messages, list):
         raise InvalidFileFormatError(
-            message="The dataset is malformed, the `messages` column must be a list.",
+            message=f"Invalid format on line {idx + 1} of the input file. "
+            f"Expected a list of messages. Found {type(messages)}",
             line_number=idx + 1,
             error_source="key_value",
         )
     if not messages:
         raise InvalidFileFormatError(
-            message="The dataset is malformed, the `messages` column must not be empty.",
+            message=f"Invalid format on line {idx + 1} of the input file. "
+            f"Expected a non-empty list of messages. Found empty list",
             line_number=idx + 1,
             error_source="key_value",
         )
@@ -132,21 +134,29 @@ def validate_messages(
 
     previous_role = None
     for message in messages:
-        if any(column not in message for column in REQUIRED_COLUMNS_MESSAGE):
+        if not isinstance(message, dict):
             raise InvalidFileFormatError(
-                message="The dataset is malformed. "
-                "Each message in the messages column must have "
-                f"{REQUIRED_COLUMNS_MESSAGE} columns.",
+                message=f"Invalid format on line {idx + 1} of the input file. "
+                f"Expected a dictionary in the messages list. Found {type(message)}",
                 line_number=idx + 1,
                 error_source="key_value",
             )
         for column in REQUIRED_COLUMNS_MESSAGE:
-            if not isinstance(message[column], str):
+            if column not in message:
                 raise InvalidFileFormatError(
-                    message=f"The dataset is malformed, the column `{column}` must be of the string type.",
+                    message=f"Field `{column}` is missing for a turn `{message}` on line {idx + 1} "
+                    "of the the input file.",
                     line_number=idx + 1,
                     error_source="key_value",
                 )
+            else:
+                if not isinstance(message[column], str):
+                    raise InvalidFileFormatError(
+                        message=f"Invalid format on line {idx + 1} in the column {column} for turn `{message}` "
+                        f"of the input file. Expected string. Found {type(message[column])}",
+                        line_number=idx + 1,
+                        error_source="text_field",
+                    )
 
         if has_weights and "weight" in message:
             weight = message["weight"]
@@ -164,8 +174,8 @@ def validate_messages(
                 )
         if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
             raise InvalidFileFormatError(
-                message=f"Invalid role {message['role']} in conversation, possible roles: "
-                f"{', '.join(POSSIBLE_ROLES_CONVERSATION)}",
+                message=f"Found invalid role `{message['role']}` in the messages on the line {idx + 1}. "
+                f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}",
                 line_number=idx + 1,
                 error_source="key_value",
             )
