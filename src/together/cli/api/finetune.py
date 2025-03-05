@@ -108,7 +108,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--training-method",
     type=click.Choice(["sft", "dpo"]),
     default="sft",
-    help="Training method to use. Options: sft (supervised fine-tuning), dpo (direct preference optimization)",
+    help="Training method to use. Options: sft (supervised fine-tuning), dpo (Direct Preference Optimization)",
 )
 @click.option(
     "--dpo-beta",
