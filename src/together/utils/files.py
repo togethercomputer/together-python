@@ -328,52 +328,6 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     )
                 if current_format == DatasetFormat.PREFERENCE_OPENAI:
                     validate_preference_openai(json_line, idx)
-                elif current_format == DatasetFormat.PREFERENCE:
-                    for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
-                        if not isinstance(json_line[column], list):
-                            raise InvalidFileFormatError(
-                                message=f"The dataset is malformed, the column `{column}` must be a list.",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-                        if len(json_line[column]) == 0:
-                            raise InvalidFileFormatError(
-                                message=f"The dataset is malformed, the column `{column}` must not be empty.",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-                        validate_messages(json_line[column], idx)
-                        if not json_line[column][-1].get("role") == "assistant":
-                            raise InvalidFileFormatError(
-                                message=f"The last message in {column} must be from an assistant",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-                    # Check that all messages except the last one are the same for "chosen" and "rejected"
-                    chosen_messages = json_line["chosen"]
-                    rejected_messages = json_line["rejected"]
-
-                    if len(chosen_messages) != len(rejected_messages):
-                        raise InvalidFileFormatError(
-                            message="The 'chosen' and 'rejected' lists must have the same number of messages.",
-                            line_number=idx + 1,
-                            error_source="key_value",
-                        )
-
-                    # Count discrepancies between messages using a generator
-                    discrepancies = sum(
-                        1
-                        for i in range(len(chosen_messages) - 1)
-                        if chosen_messages[i] != rejected_messages[i]
-                    )
-
-                    if discrepancies > 1:
-                        raise InvalidFileFormatError(
-                            message=f"Found {discrepancies} different messages between 'chosen' and 'rejected'. "
-                            "Only the last message should differ.",
-                            line_number=idx + 1,
-                            error_source="key_value",
-                        )
                 elif current_format == DatasetFormat.CONVERSATION:
                     message_column = JSONL_REQUIRED_COLUMNS_MAP[
                         DatasetFormat.CONVERSATION
