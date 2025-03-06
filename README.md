@@ -52,17 +52,93 @@ This repo contains both a Python Library and a CLI. We'll demonstrate how to use
 ### Chat Completions
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
+# Simple text message
 response = client.chat.completions.create(
     model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     messages=[{"role": "user", "content": "tell me about new york"}],
 )
 print(response.choices[0].message.content)
+
+# Multi-modal message with text and image
+response = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+    messages=[{
+        "role": "user", 
+        "content": [
+            {
+                "type": "text",
+                "text": "What's in this image?"
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://huggingface.co/datasets/patrickvonplaten/random_img/resolve/main/yosemite.png"
+                }
+            }
+        ]
+    }]
+)
+print(response.choices[0].message.content)
+
+# Multi-modal message with multiple images
+response = client.chat.completions.create(
+    model="Qwen/Qwen2.5-VL-72B-Instruct",
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "text", 
+                "text": "Compare these two images."
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://huggingface.co/datasets/patrickvonplaten/random_img/resolve/main/yosemite.png"
+                }
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://huggingface.co/datasets/patrickvonplaten/random_img/resolve/main/slack.png"
+                }
+            }
+        ]
+    }]
+)
+print(response.choices[0].message.content)
+
+# Multi-modal message with text and video
+response = client.chat.completions.create(
+    model="Qwen/Qwen2.5-VL-72B-Instruct",
+    messages=[{
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "What's happening in this video?"
+            },
+            {
+                "type": "video_url",
+                "video_url": {
+                    "url": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+                }
+            }
+        ]
+    }]
+)
+print(response.choices[0].message.content)
 ```
+
+The chat completions API supports three types of content:
+- Plain text messages using the `content` field directly
+- Multi-modal messages with images using `type: "image_url"`
+- Multi-modal messages with videos using `type: "video_url"`
+
+When using multi-modal content, the `content` field becomes an array of content objects, each with its own type and corresponding data.
 
 #### Streaming
 
@@ -70,7 +146,7 @@ print(response.choices[0].message.content)
 import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 stream = client.chat.completions.create(
     model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     messages=[{"role": "user", "content": "tell me about new york"}],
@@ -84,17 +160,17 @@ for chunk in stream:
 #### Async usage
 
 ```python
-import os, asyncio
+import asyncio
 from together import AsyncTogether
 
-async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+async_client = AsyncTogether()
 messages = [
     "What are the top things to do in San Francisco?",
     "What country is Paris in?",
 ]
 
 async def async_chat_completion(messages):
-    async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+    async_client = AsyncTogether()
     tasks = [
         async_client.chat.completions.create(
             model="mistralai/Mixtral-8x7B-Instruct-v0.1",
@@ -115,10 +191,9 @@ asyncio.run(async_chat_completion(messages))
 Completions are for code and language models shown [here](https://docs.together.ai/docs/inference-models). Below, a code model example is shown.
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 response = client.completions.create(
     model="codellama/CodeLlama-34b-Python-hf",
@@ -131,10 +206,9 @@ print(response.choices[0].text)
 #### Streaming
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 stream = client.completions.create(
     model="codellama/CodeLlama-34b-Python-hf",
     prompt="Write a Next.js component with TailwindCSS for a header component.",
@@ -148,10 +222,10 @@ for chunk in stream:
 #### Async usage
 
 ```python
-import os, asyncio
+import asyncio
 from together import AsyncTogether
 
-async_client = AsyncTogether(api_key=os.environ.get("TOGETHER_API_KEY"))
+async_client = AsyncTogether()
 prompts = [
     "Write a Next.js component with TailwindCSS for a header component.",
     "Write a python function for the fibonacci sequence",
@@ -176,10 +250,9 @@ asyncio.run(async_chat_completion(prompts))
 ### Image generation
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 response = client.images.generate(
     prompt="space robots",
@@ -196,7 +269,7 @@ print(response.data[0].b64_json)
 from typing import List
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 def get_embeddings(texts: List[str], model: str) -> List[List[float]]:
     texts = [text.replace("\n", " ") for text in texts]
@@ -215,7 +288,7 @@ print(embeddings)
 from typing import List
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 def get_reranked_documents(query: str, documents: List[str], model: str, top_n: int = 3) -> List[str]:
     outputs = client.rerank.create(model=model, query=query, documents=documents, top_n=top_n)
@@ -237,10 +310,9 @@ Read more about Reranking [here](https://docs.together.ai/docs/rerank-overview).
 The files API is used for fine-tuning and allows developers to upload data to fine-tune on. It also has several methods to list all files, retrive files, and delete files. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 client.files.upload(file="somedata.jsonl") # uploads a file
 client.files.list() # lists all uploaded files
@@ -254,10 +326,9 @@ client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a 
 The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 client.fine_tuning.create(
   training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
@@ -281,10 +352,9 @@ client.fine_tuning.download(id="ft-c66a5c18-1d6d-43c9-94bd-32d756425b4b") # down
 This lists all the models that Together supports.
 
 ```python
-import os
 from together import Together
 
-client = Together(api_key=os.environ.get("TOGETHER_API_KEY"))
+client = Together()
 
 models = client.models.list()
 
