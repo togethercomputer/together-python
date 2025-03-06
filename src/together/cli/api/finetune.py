@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
+import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -17,8 +18,14 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
+    format_event_timestamp,
+    get_event_step,
 )
-from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneTrainingLimits,
+    FinetuneEventType,
+)
 
 
 _CONFIRMATION_MESSAGE = (
@@ -126,6 +133,13 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
+@click.option(
+    "--from-checkpoint",
+    type=str,
+    default=None,
+    help="The checkpoint to be used in the fine-tuning. The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
+    "The step value is optional, without it the final checkpoint will be used.",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -152,6 +166,7 @@ def create(
     wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
+    from_checkpoint: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -180,6 +195,7 @@ def create(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        from_checkpoint=from_checkpoint,
     )
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
@@ -261,7 +277,9 @@ def list(ctx: click.Context) -> None:
 
     response.data = response.data or []
 
-    response.data.sort(key=lambda x: parse_timestamp(x.created_at or ""))
+    # Use a default datetime for None values to make sure the key function always returns a comparable value
+    epoch_start = datetime.fromtimestamp(0, tz=timezone.utc)
+    response.data.sort(key=lambda x: parse_timestamp(x.created_at or "") or epoch_start)
 
     display_list = []
     for i in response.data:
@@ -342,6 +360,36 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
 
     click.echo(table)
+
+
+@fine_tuning.command()
+@click.pass_context
+@click.argument("fine_tune_id", type=str, required=True)
+def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
+    """List available checkpoints for a fine-tuning job"""
+    client: Together = ctx.obj
+
+    response = client.fine_tuning.list_checkpoints(fine_tune_id)
+
+    response.data = response.data or []
+
+    display_list = []
+    for checkpoint in response.data:
+        display_list.append(
+            {
+                "Type": checkpoint.type,
+                "Timestamp": checkpoint.timestamp,
+                "Name": checkpoint.name,
+            }
+        )
+
+    if display_list:
+        click.echo(f"This job contains these checkpoints:")
+        table = tabulate(display_list, headers="keys", tablefmt="grid")
+        click.echo(table)
+        click.echo("\nTo download a checkpoint, use cmd: together fine-tuning download")
+    else:
+        click.echo(f"No checkpoints found for job {fine_tune_id}")
 
 
 @fine_tuning.command()
