@@ -31,6 +31,8 @@ from together.types.files import (
     FileType,
 )
 from together.types.finetune import (
+    TrainingMethodDPO,
+    TrainingMethodSFT,
     FinetuneDownloadResult,
     FinetuneLinearLRSchedulerArgs,
     FinetuneList,
@@ -79,6 +81,8 @@ __all__ = [
     "TrainingType",
     "FullTrainingType",
     "LoRATrainingType",
+    "TrainingMethodDPO",
+    "TrainingMethodSFT",
     "RerankRequest",
     "RerankResponse",
     "FinetuneTrainingLimits",

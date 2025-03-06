@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Union
 
 from rich import print as rprint
 
@@ -22,6 +22,8 @@ from together.types import (
     TrainingType,
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    TrainingMethodDPO,
+    TrainingMethodSFT,
 )
 from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
@@ -52,6 +54,8 @@ def createFinetuneRequest(
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
+    training_method: str = "sft",
+    dpo_beta: float | None = None,
 ) -> FinetuneRequest:
     if batch_size == "max":
         log_warn_once(
@@ -105,6 +109,12 @@ def createFinetuneRequest(
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
 
+    training_method_cls: Union[TrainingMethodSFT, TrainingMethodDPO] = (
+        TrainingMethodSFT()
+    )
+    if training_method == "dpo":
+        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
+
     finetune_request = FinetuneRequest(
         model=model,
         training_file=training_file,
@@ -125,6 +135,7 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method_cls,
     )
 
     return finetune_request
@@ -162,6 +173,8 @@ class FineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -207,6 +220,9 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -218,7 +234,6 @@ class FineTuning:
 
         if model_limits is None:
             model_limits = self.get_model_limits(model=model)
-
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
             training_file=training_file,
@@ -244,6 +259,8 @@ class FineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
         )
 
         if verbose:
@@ -261,7 +278,6 @@ class FineTuning:
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
@@ -503,6 +519,8 @@ class AsyncFineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -548,6 +566,9 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -585,6 +606,8 @@ class AsyncFineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
         )
 
         if verbose:
