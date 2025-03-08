@@ -123,7 +123,7 @@ class Completions:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="completions",
+                url="/v1/completions",
                 params=parameter_payload,
             ),
             stream=stream,
@@ -247,7 +247,7 @@ class AsyncCompletions:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="completions",
+                url="/v1/completions",
                 params=parameter_payload,
             ),
             stream=stream,

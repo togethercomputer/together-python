@@ -9,7 +9,7 @@ INITIAL_RETRY_DELAY = 0.5
 MAX_RETRY_DELAY = 8.0
 
 # API defaults
-BASE_URL = "https://api.together.xyz/v1"
+BASE_URL = "https://api.together.xyz"
 
 # Download defaults
 DOWNLOAD_BLOCK_SIZE = 10 * 1024 * 1024  # 10 MB
