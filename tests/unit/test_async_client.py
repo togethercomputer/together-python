@@ -50,7 +50,7 @@ class TestAsyncTogether:
 
         async_together = AsyncTogether(api_key="fake_api_key")
 
-        assert async_together.client.base_url == "https://api.together.xyz/v1/"
+        assert async_together.client.base_url == "https://api.together.xyz/"
 
     def test_init_with_supplied_headers(self):
         """
