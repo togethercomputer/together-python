@@ -57,7 +57,7 @@ class Files:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="files",
+                url="/v1/files",
             ),
             stream=False,
         )
@@ -74,7 +74,7 @@ class Files:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"files/{id}",
+                url=f"/v1/files/{id}",
             ),
             stream=False,
         )
@@ -110,7 +110,7 @@ class Files:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="DELETE",
-                url=f"files/{id}",
+                url=f"/v1/files/{id}",
             ),
             stream=False,
         )
@@ -137,7 +137,7 @@ class AsyncFiles:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="files",
+                url="/v1/files",
             ),
             stream=False,
         )
@@ -154,7 +154,7 @@ class AsyncFiles:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"files/{id}",
+                url=f"/v1/files/{id}",
             ),
             stream=False,
         )
@@ -176,7 +176,7 @@ class AsyncFiles:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="DELETE",
-                url=f"files/{id}",
+                url=f"/v1/files/{id}",
             ),
             stream=False,
         )

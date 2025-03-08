@@ -35,7 +35,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="endpoints",
+                url="/v1/endpoints",
                 params=params,
             ),
             stream=False,
@@ -98,7 +98,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="endpoints",
+                url="/v1/endpoints",
                 params=data,
             ),
             stream=False,
@@ -125,7 +125,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
             ),
             stream=False,
         )
@@ -148,7 +148,7 @@ class Endpoints:
         requestor.request(
             options=TogetherRequest(
                 method="DELETE",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
             ),
             stream=False,
         )
@@ -203,7 +203,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="PATCH",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
                 params=data,
             ),
             stream=False,
@@ -235,7 +235,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="hardware",
+                url="/v1/hardware",
                 params=params,
             ),
             stream=False,
@@ -275,7 +275,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="endpoints",
+                url="/v1/endpoints",
                 params=params,
             ),
             stream=False,
@@ -336,7 +336,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="endpoints",
+                url="/v1/endpoints",
                 params=data,
             ),
             stream=False,
@@ -363,7 +363,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
             ),
             stream=False,
         )
@@ -386,7 +386,7 @@ class AsyncEndpoints:
         await requestor.arequest(
             options=TogetherRequest(
                 method="DELETE",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
             ),
             stream=False,
         )
@@ -441,7 +441,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="PATCH",
-                url=f"endpoints/{endpoint_id}",
+                url=f"/v1/endpoints/{endpoint_id}",
                 params=data,
             ),
             stream=False,
@@ -475,7 +475,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="hardware",
+                url="/v1/hardware",
                 params=params,
             ),
             stream=False,

@@ -256,7 +256,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="fine-tunes",
+                url="/v1/fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
@@ -281,7 +281,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="fine-tunes",
+                url="/v1/fine-tunes",
             ),
             stream=False,
         )
@@ -308,7 +308,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}",
+                url=f"/v1/fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -335,7 +335,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url=f"fine-tunes/{id}/cancel",
+                url=f"/v1/fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -362,7 +362,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}/events",
+                url=f"/v1/fine-tunes/{id}/events",
             ),
             stream=False,
         )
@@ -460,7 +460,7 @@ class FineTuning:
         model_limits_response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="fine-tunes/models/limits",
+                url="/v1/fine-tunes/models/limits",
                 params={"model_name": model},
             ),
             stream=False,
@@ -597,7 +597,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="fine-tunes",
+                url="/v1/fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
@@ -622,7 +622,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="fine-tunes",
+                url="/v1/fine-tunes",
             ),
             stream=False,
         )
@@ -649,7 +649,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}",
+                url=f"/v1/fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -676,7 +676,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url=f"fine-tunes/{id}/cancel",
+                url=f"/v1/fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -703,7 +703,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}/events",
+                url=f"/v1/fine-tunes/{id}/events",
             ),
             stream=False,
         )
@@ -742,7 +742,7 @@ class AsyncFineTuning:
         model_limits_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="fine-tunes/models/limits",
+                url="/v1/fine-tunes/models/limits",
                 params={"model": model},
             ),
             stream=False,

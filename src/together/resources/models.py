@@ -32,7 +32,7 @@ class Models:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="models",
+                url="/v1/models",
             ),
             stream=False,
         )
@@ -64,7 +64,7 @@ class AsyncModels:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="models",
+                url="/v1/models",
             ),
             stream=False,
         )
