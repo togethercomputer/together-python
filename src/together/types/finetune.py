@@ -327,7 +327,7 @@ class FinetuneLinearLRSchedulerArgs(BaseModel):
 
 class FinetuneCheckpoint(BaseModel):
     """
-    Fine-tune checkpoint information
+    Fine-tuning checkpoint information
     """
 
     # checkpoint type (e.g. "Intermediate", "Final", "Final Merged", "Final Adapter")
@@ -336,14 +336,3 @@ class FinetuneCheckpoint(BaseModel):
     timestamp: str
     # checkpoint name/identifier
     name: str
-
-
-class FinetuneCheckpointList(BaseModel):
-    """
-    List of fine-tune checkpoints
-    """
-
-    # object type
-    object: Literal["list"] | None = None
-    # list of fine-tune checkpoint objects
-    data: List[FinetuneCheckpoint] | None = None

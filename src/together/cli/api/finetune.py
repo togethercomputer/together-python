@@ -137,7 +137,8 @@ def fine_tuning(ctx: click.Context) -> None:
     "--from-checkpoint",
     type=str,
     default=None,
-    help="The checkpoint to be used in the fine-tuning. The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
+    help="The checkpoint identifier to continue training from a previous fine-tuning job. "
+    "The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
     "The step value is optional, without it the final checkpoint will be used.",
 )
 def create(
@@ -369,12 +370,10 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
     """List available checkpoints for a fine-tuning job"""
     client: Together = ctx.obj
 
-    response = client.fine_tuning.list_checkpoints(fine_tune_id)
-
-    response.data = response.data or []
+    checkpoints = client.fine_tuning.list_checkpoints(fine_tune_id)
 
     display_list = []
-    for checkpoint in response.data:
+    for checkpoint in checkpoints:
         display_list.append(
             {
                 "Type": checkpoint.type,
@@ -384,7 +383,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
         )
 
     if display_list:
-        click.echo(f"This job contains these checkpoints:")
+        click.echo(f"Job {fine_tune_id} contains the following checkpoints:")
         table = tabulate(display_list, headers="keys", tablefmt="grid")
         click.echo(table)
         click.echo("\nTo download a checkpoint, use cmd: together fine-tuning download")
@@ -406,7 +405,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
     "--checkpoint-step",
     type=int,
     required=False,
-    default=-1,
+    default=None,
     help="Download fine-tuning checkpoint. Defaults to latest.",
 )
 @click.option(
@@ -420,7 +419,7 @@ def download(
     ctx: click.Context,
     fine_tune_id: str,
     output_dir: str,
-    checkpoint_step: int,
+    checkpoint_step: int | None,
     checkpoint_type: DownloadCheckpointType,
 ) -> None:
     """Download fine-tuning checkpoint"""
