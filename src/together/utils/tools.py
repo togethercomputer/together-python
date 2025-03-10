@@ -26,10 +26,10 @@ def normalize_key(key: str) -> str:
 
 
 def parse_timestamp(timestamp: str) -> datetime | None:
-    """Parse a timestamp string into a datetime object or None if invalid.
+    """Parse a timestamp string into a datetime object or None if the string is empty.
 
     Args:
-        timestamp (str): Timestamp in ISO 8601 format (e.g. "2021-01-01T00:00:00Z")
+        timestamp (str): Timestamp
 
     Returns:
         datetime | None: Parsed datetime, or None if the string is empty
@@ -37,7 +37,14 @@ def parse_timestamp(timestamp: str) -> datetime | None:
     if timestamp == "":
         return None
 
-    return datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
+    for fmt in formats:
+        try:
+            return datetime.strptime(timestamp, fmt)
+        except ValueError:
+            continue
+
+    raise ValueError("Timestamp does not match any expected format")
 
 
 def format_event_timestamp(event: Any) -> str:
@@ -65,18 +72,14 @@ def get_event_step(event: Any) -> str | None:
     step = getattr(event, "step", None)
     if step is not None:
         return str(step)
-
-    message = getattr(event, "message", "") or ""
-    step_match = re.search(r"step[:\s]+(\d+)", message.lower())
-    return step_match.group(1) if step_match else None
+    return None
 
 
-# Convert fine-tune nano-dollar price to dollars
 def finetune_price_to_dollars(price: float) -> float:
-    """Convert fine-tune price to dollars
+    """Convert fine-tuning job price to dollars
 
     Args:
-        price (float): Fine-tune price in billing units
+        price (float): Fine-tuning job price in billing units
 
     Returns:
         float: Price in dollars

@@ -24,7 +24,6 @@ from together.types import (
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
     FinetuneCheckpoint,
-    FinetuneCheckpointList,
 )
 from together.types.finetune import DownloadCheckpointType, FinetuneEventType
 from together.utils import (
@@ -33,6 +32,8 @@ from together.utils import (
     format_event_timestamp,
     get_event_step,
 )
+
+_FT_JOB_REGEX = r"^ft-[\dabcdef-]+:\d+$"
 
 
 def createFinetuneRequest(
@@ -383,7 +384,7 @@ class FineTuning:
 
         return FinetuneListEvents(**response.data)
 
-    def list_checkpoints(self, id: str) -> FinetuneCheckpointList:
+    def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
         """
         List available checkpoints for a fine-tuning job
 
@@ -391,7 +392,7 @@ class FineTuning:
             id (str): Unique identifier of the fine-tune job to list checkpoints for
 
         Returns:
-            FinetuneCheckpointList: Object containing list of available checkpoints
+            List[FinetuneCheckpoint]: List of available checkpoints
         """
         events = self.list_events(id).data or []
 
@@ -414,20 +415,27 @@ class FineTuning:
                 )
             elif event_type == FinetuneEventType.JOB_COMPLETE:
                 formatted_time = format_event_timestamp(event)
-                is_lora = hasattr(event, "adapter_path")
-
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type="Final Merged" if is_lora else "Final",
-                        timestamp=formatted_time,
-                        name=id,
-                    )
-                )
-
-                if is_lora:
+                if hasattr(event, "model_path"):
                     checkpoints.append(
                         FinetuneCheckpoint(
-                            type="Final Adapter",
+                            type=(
+                                "Final Merged"
+                                if hasattr(event, "adapter_path")
+                                else "Final"
+                            ),
+                            timestamp=formatted_time,
+                            name=id,
+                        )
+                    )
+
+                if hasattr(event, "adapter_path"):
+                    checkpoints.append(
+                        FinetuneCheckpoint(
+                            type=(
+                                "Final Adapter"
+                                if hasattr(event, "model_path")
+                                else "Final"
+                            ),
                             timestamp=formatted_time,
                             name=id,
                         )
@@ -436,14 +444,14 @@ class FineTuning:
         # Sort by timestamp (newest first)
         checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
 
-        return FinetuneCheckpointList(object="list", data=checkpoints)
+        return checkpoints
 
     def download(
         self,
         id: str,
         *,
         output: Path | str | None = None,
-        checkpoint_step: int = -1,
+        checkpoint_step: int | None = None,
         checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
@@ -464,18 +472,19 @@ class FineTuning:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
 
-        if re.match(r"^ft-[\dabcde-]+\:\d+$", id) is not None:
-            if checkpoint_step == -1:
+        if re.match(_FT_JOB_REGEX, id) is not None:
+            if checkpoint_step is None:
                 checkpoint_step = int(id.split(":")[1])
                 id = id.split(":")[0]
             else:
                 raise ValueError(
-                    "Invalid fine-tune ID. Don't use `checkpoint_step` with a colon in the ID."
+                    "Fine-tuning job ID {id} contains a colon to specify the step to download, but `checkpoint_step` "
+                    "was also set. Remove one of the step specifiers to proceed."
                 )
 
         url = f"finetune/download?ft_id={id}"
 
-        if checkpoint_step > 0:
+        if checkpoint_step is not None:
             url += f"&checkpoint_step={checkpoint_step}"
 
         ft_job = self.retrieve(id)
@@ -789,7 +798,7 @@ class AsyncFineTuning:
 
         return events_list
 
-    async def list_checkpoints(self, id: str) -> FinetuneCheckpointList:
+    async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
         """
         List available checkpoints for a fine-tuning job
 
@@ -797,7 +806,7 @@ class AsyncFineTuning:
             id (str): Unique identifier of the fine-tune job to list checkpoints for
 
         Returns:
-            FinetuneCheckpointList: Object containing list of available checkpoints
+            List[FinetuneCheckpoint]: Object containing list of available checkpoints
         """
         events_list = await self.list_events(id)
         events = events_list.data or []
@@ -843,7 +852,7 @@ class AsyncFineTuning:
         # Sort by timestamp (newest first)
         checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
 
-        return FinetuneCheckpointList(object="list", data=checkpoints)
+        return checkpoints
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1
