@@ -161,7 +161,7 @@ class Finetune:
         cls,
         fine_tune_id: str,
         output: str | None = None,
-        step: int = -1,
+        step: int | None = None,
     ) -> Dict[str, Any]:
         """Legacy finetuning download function."""
 
