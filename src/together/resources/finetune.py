@@ -286,7 +286,7 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
-            from_checkpoint (str, optional): The checkpoint to be used in the fine-tuning.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
 
@@ -654,7 +654,7 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
-            from_checkpoint (str, optional): The checkpoint to be used in the fine-tuning.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
 
