@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import os
 from datetime import datetime
+import re
+from typing import Any
 
 
 logger = logging.getLogger("together")
@@ -23,18 +25,67 @@ def normalize_key(key: str) -> str:
     return key.replace("/", "--").replace("_", "-").replace(" ", "-").lower()
 
 
-def parse_timestamp(timestamp: str) -> datetime:
+def parse_timestamp(timestamp: str) -> datetime | None:
+    """Parse a timestamp string into a datetime object or None if the string is empty.
+
+    Args:
+        timestamp (str): Timestamp
+
+    Returns:
+        datetime | None: Parsed datetime, or None if the string is empty
+    """
+    if timestamp == "":
+        return None
+
     formats = ["%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]
     for fmt in formats:
         try:
             return datetime.strptime(timestamp, fmt)
         except ValueError:
             continue
+
     raise ValueError("Timestamp does not match any expected format")
 
 
-# Convert fine-tune nano-dollar price to dollars
+def format_timestamp(timestamp_str: str) -> str:
+    """Format timestamp to a readable date string.
+
+    Args:
+        timestamp: A timestamp string
+
+    Returns:
+        str: Formatted timestamp string (MM/DD/YYYY, HH:MM AM/PM)
+    """
+    timestamp = parse_timestamp(timestamp_str)
+    if timestamp is None:
+        return ""
+    return timestamp.strftime("%m/%d/%Y, %I:%M %p")
+
+
+def get_event_step(event: Any) -> str | None:
+    """Extract the step number from a checkpoint event.
+
+    Args:
+        event: A checkpoint event object
+
+    Returns:
+        str | None: The step number as a string, or None if not found
+    """
+    step = getattr(event, "step", None)
+    if step is not None:
+        return str(step)
+    return None
+
+
 def finetune_price_to_dollars(price: float) -> float:
+    """Convert fine-tuning job price to dollars
+
+    Args:
+        price (float): Fine-tuning job price in billing units
+
+    Returns:
+        float: Price in dollars
+    """
     return price / NANODOLLAR
 
 

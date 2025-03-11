@@ -33,6 +33,7 @@ from together.types.files import (
 from together.types.finetune import (
     TrainingMethodDPO,
     TrainingMethodSFT,
+    FinetuneCheckpoint,
     FinetuneDownloadResult,
     FinetuneLinearLRSchedulerArgs,
     FinetuneList,
@@ -61,6 +62,7 @@ __all__ = [
     "ChatCompletionResponse",
     "EmbeddingRequest",
     "EmbeddingResponse",
+    "FinetuneCheckpoint",
     "FinetuneRequest",
     "FinetuneResponse",
     "FinetuneList",

@@ -8,6 +8,8 @@ from together.utils.tools import (
     finetune_price_to_dollars,
     normalize_key,
     parse_timestamp,
+    format_timestamp,
+    get_event_step,
 )
 
 
@@ -23,6 +25,8 @@ __all__ = [
     "enforce_trailing_slash",
     "normalize_key",
     "parse_timestamp",
+    "format_timestamp",
+    "get_event_step",
     "finetune_price_to_dollars",
     "convert_bytes",
     "convert_unix_timestamp",

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
-from typing import Literal
+from typing import Literal, List
 
 from rich import print as rprint
 
@@ -24,9 +25,20 @@ from together.types import (
     FinetuneLinearLRSchedulerArgs,
     TrainingMethodDPO,
     TrainingMethodSFT,
+    FinetuneCheckpoint,
 )
-from together.types.finetune import DownloadCheckpointType
-from together.utils import log_warn_once, normalize_key
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneEvent,
+)
+from together.utils import (
+    log_warn_once,
+    normalize_key,
+    get_event_step,
+)
+
+_FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
 
 
 AVAILABLE_TRAINING_METHODS = {
@@ -62,6 +74,7 @@ def createFinetuneRequest(
     train_on_inputs: bool | Literal["auto"] = "auto",
     training_method: str = "sft",
     dpo_beta: float | None = None,
+    from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
 
     if batch_size == "max":
@@ -146,9 +159,74 @@ def createFinetuneRequest(
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
         training_method=training_method_cls,
+        from_checkpoint=from_checkpoint,
     )
 
     return finetune_request
+
+
+def _process_checkpoints_from_events(
+    events: List[FinetuneEvent], id: str
+) -> List[FinetuneCheckpoint]:
+    """
+    Helper function to process events and create checkpoint list.
+
+    Args:
+        events (List[FinetuneEvent]): List of fine-tune events to process
+        id (str): Fine-tune job ID
+
+    Returns:
+        List[FinetuneCheckpoint]: List of available checkpoints
+    """
+    checkpoints: List[FinetuneCheckpoint] = []
+
+    for event in events:
+        event_type = event.type
+
+        if event_type == FinetuneEventType.CHECKPOINT_SAVE:
+            step = get_event_step(event)
+            checkpoint_name = f"{id}:{step}" if step is not None else id
+
+            checkpoints.append(
+                FinetuneCheckpoint(
+                    type=(
+                        f"Intermediate (step {step})"
+                        if step is not None
+                        else "Intermediate"
+                    ),
+                    timestamp=event.created_at,
+                    name=checkpoint_name,
+                )
+            )
+        elif event_type == FinetuneEventType.JOB_COMPLETE:
+            if hasattr(event, "model_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Merged"
+                            if hasattr(event, "adapter_path")
+                            else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+            if hasattr(event, "adapter_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Adapter" if hasattr(event, "model_path") else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+    # Sort by timestamp (newest first)
+    checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+
+    return checkpoints
 
 
 class FineTuning:
@@ -185,6 +263,7 @@ class FineTuning:
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -233,6 +312,9 @@ class FineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -271,6 +353,7 @@ class FineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:
@@ -392,17 +475,29 @@ class FineTuning:
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneListEvents(**response.data)
+
+    def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: List of available checkpoints
+        """
+        events = self.list_events(id).data or []
+        return _process_checkpoints_from_events(events, id)
 
     def download(
         self,
         id: str,
         *,
         output: Path | str | None = None,
-        checkpoint_step: int = -1,
+        checkpoint_step: int | None = None,
         checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
@@ -423,9 +518,19 @@ class FineTuning:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
 
+        if re.match(_FT_JOB_WITH_STEP_REGEX, id) is not None:
+            if checkpoint_step is None:
+                checkpoint_step = int(id.split(":")[1])
+                id = id.split(":")[0]
+            else:
+                raise ValueError(
+                    "Fine-tuning job ID {id} contains a colon to specify the step to download, but `checkpoint_step` "
+                    "was also set. Remove one of the step specifiers to proceed."
+                )
+
         url = f"finetune/download?ft_id={id}"
 
-        if checkpoint_step > 0:
+        if checkpoint_step is not None:
             url += f"&checkpoint_step={checkpoint_step}"
 
         ft_job = self.retrieve(id)
@@ -531,6 +636,7 @@ class AsyncFineTuning:
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -579,6 +685,9 @@ class AsyncFineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -618,6 +727,7 @@ class AsyncFineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:
@@ -720,30 +830,45 @@ class AsyncFineTuning:
 
     async def list_events(self, id: str) -> FinetuneListEvents:
         """
-        Async method to lists events of a fine-tune job
+        List fine-tuning events
 
         Args:
-            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+            id (str): Unique identifier of the fine-tune job to list events for
 
         Returns:
-            FinetuneListEvents: Object containing list of fine-tune events
+            FinetuneListEvents: Object containing list of fine-tune job events
         """
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        response, _, _ = await requestor.arequest(
+        events_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"fine-tunes/{id}/events",
+                url=f"fine-tunes/{normalize_key(id)}/events",
             ),
             stream=False,
         )
 
-        assert isinstance(response, TogetherResponse)
+        # FIXME: API returns "data" field with no object type (should be "list")
+        events_list = FinetuneListEvents(object="list", **events_response.data)
 
-        return FinetuneListEvents(**response.data)
+        return events_list
+
+    async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: Object containing list of available checkpoints
+        """
+        events_list = await self.list_events(id)
+        events = events_list.data or []
+        return _process_checkpoints_from_events(events, id)
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1

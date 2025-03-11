@@ -207,6 +207,8 @@ class FinetuneRequest(BaseModel):
     training_method: TrainingMethodSFT | TrainingMethodDPO = Field(
         default_factory=TrainingMethodSFT
     )
+    # from step
+    from_checkpoint: str
 
 
 class FinetuneResponse(BaseModel):
@@ -285,6 +287,7 @@ class FinetuneResponse(BaseModel):
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
+    from_checkpoint: str | None = None
 
     @field_validator("training_type")
     @classmethod
@@ -349,3 +352,16 @@ class FinetuneLRScheduler(BaseModel):
 
 class FinetuneLinearLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
+
+
+class FinetuneCheckpoint(BaseModel):
+    """
+    Fine-tuning checkpoint information
+    """
+
+    # checkpoint type (e.g. "Intermediate", "Final", "Final Merged", "Final Adapter")
+    type: str
+    # timestamp when the checkpoint was created
+    timestamp: str
+    # checkpoint name/identifier
+    name: str
