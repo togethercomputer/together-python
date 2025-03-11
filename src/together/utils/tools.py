@@ -47,17 +47,19 @@ def parse_timestamp(timestamp: str) -> datetime | None:
     raise ValueError("Timestamp does not match any expected format")
 
 
-def format_event_timestamp(event: Any) -> str:
-    """Format event timestamp to a readable date string.
+def format_timestamp(timestamp_str: str) -> str:
+    """Format timestamp to a readable date string.
 
     Args:
-        event: An event object with a created_at attribute
+        timestamp: A timestamp string
 
     Returns:
         str: Formatted timestamp string (MM/DD/YYYY, HH:MM AM/PM)
     """
-    timestamp = parse_timestamp(event.created_at or "")
-    return timestamp.strftime("%m/%d/%Y, %I:%M %p") if timestamp else ""
+    timestamp = parse_timestamp(timestamp_str)
+    if timestamp is None:
+        return ""
+    return timestamp.strftime("%m/%d/%Y, %I:%M %p")
 
 
 def get_event_step(event: Any) -> str | None:

@@ -18,8 +18,7 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
-    format_event_timestamp,
-    get_event_step,
+    format_timestamp,
 )
 from together.types.finetune import (
     DownloadCheckpointType,
@@ -377,7 +376,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
         display_list.append(
             {
                 "Type": checkpoint.type,
-                "Timestamp": checkpoint.timestamp,
+                "Timestamp": format_timestamp(checkpoint.timestamp),
                 "Name": checkpoint.name,
             }
         )
@@ -386,7 +385,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
         click.echo(f"Job {fine_tune_id} contains the following checkpoints:")
         table = tabulate(display_list, headers="keys", tablefmt="grid")
         click.echo(table)
-        click.echo("\nTo download a checkpoint, use cmd: together fine-tuning download")
+        click.echo("\nTo download a checkpoint, use `together fine-tuning download`")
     else:
         click.echo(f"No checkpoints found for job {fine_tune_id}")
 

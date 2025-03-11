@@ -29,11 +29,10 @@ from together.types.finetune import DownloadCheckpointType, FinetuneEventType
 from together.utils import (
     log_warn_once,
     normalize_key,
-    format_event_timestamp,
     get_event_step,
 )
 
-_FT_JOB_REGEX = r"^ft-[\dabcdef-]+:\d+$"
+_FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
 
 
 def createFinetuneRequest(
@@ -220,6 +219,8 @@ class FineTuning:
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
             from_checkpoint (str, optional): The checkpoint to be used in the fine-tuning.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -402,19 +403,21 @@ class FineTuning:
             event_type = event.type
 
             if event_type == FinetuneEventType.CHECKPOINT_SAVE:
-                formatted_time = format_event_timestamp(event)
                 step = get_event_step(event)
-                checkpoint_name = f"{id}:{step}" if step else id
+                checkpoint_name = f"{id}:{step}" if step is not None else id
 
                 checkpoints.append(
                     FinetuneCheckpoint(
-                        type="Intermediate",
-                        timestamp=formatted_time,
+                        type=(
+                            f"Intermediate (step {step})"
+                            if step is not None
+                            else "Intermediate"
+                        ),
+                        timestamp=event.created_at,
                         name=checkpoint_name,
                     )
                 )
             elif event_type == FinetuneEventType.JOB_COMPLETE:
-                formatted_time = format_event_timestamp(event)
                 if hasattr(event, "model_path"):
                     checkpoints.append(
                         FinetuneCheckpoint(
@@ -423,7 +426,7 @@ class FineTuning:
                                 if hasattr(event, "adapter_path")
                                 else "Final"
                             ),
-                            timestamp=formatted_time,
+                            timestamp=event.created_at,
                             name=id,
                         )
                     )
@@ -436,7 +439,7 @@ class FineTuning:
                                 if hasattr(event, "model_path")
                                 else "Final"
                             ),
-                            timestamp=formatted_time,
+                            timestamp=event.created_at,
                             name=id,
                         )
                     )
@@ -472,7 +475,7 @@ class FineTuning:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
 
-        if re.match(_FT_JOB_REGEX, id) is not None:
+        if re.match(_FT_JOB_WITH_STEP_REGEX, id) is not None:
             if checkpoint_step is None:
                 checkpoint_step = int(id.split(":")[1])
                 id = id.split(":")[0]
@@ -588,6 +591,7 @@ class AsyncFineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -633,6 +637,9 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            from_checkpoint (str, optional): The checkpoint to be used in the fine-tuning.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -670,6 +677,7 @@ class AsyncFineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:
@@ -817,25 +825,23 @@ class AsyncFineTuning:
             event_type = event.type
 
             if event_type == FinetuneEventType.CHECKPOINT_SAVE:
-                formatted_time = format_event_timestamp(event)
                 step = get_event_step(event)
                 checkpoint_name = f"{id}:{step}" if step else id
 
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Intermediate",
-                        timestamp=formatted_time,
+                        timestamp=event.created_at,
                         name=checkpoint_name,
                     )
                 )
             elif event_type == FinetuneEventType.JOB_COMPLETE:
-                formatted_time = format_event_timestamp(event)
                 is_lora = hasattr(event, "adapter_path")
 
                 checkpoints.append(
                     FinetuneCheckpoint(
                         type="Final Merged" if is_lora else "Final",
-                        timestamp=formatted_time,
+                        timestamp=event.created_at,
                         name=id,
                     )
                 )
@@ -844,7 +850,7 @@ class AsyncFineTuning:
                     checkpoints.append(
                         FinetuneCheckpoint(
                             type="Final Adapter",
-                            timestamp=formatted_time,
+                            timestamp=event.created_at,
                             name=id,
                         )
                     )
