@@ -96,21 +96,9 @@ def check_file(
     return report_dict
 
 
-def _has_weights(messages: List[Dict[str, str | bool]]) -> bool:
-    """Check if any message in the conversation has a weight parameter.
-
-    Args:
-        messages (List[Dict[str, str]]): List of messages to check.
-
-    Returns:
-        bool: True if any message has a weight parameter, False otherwise.
-    """
-    return any("weight" in message for message in messages)
-
-
 def validate_messages(
-    messages: List[Dict[str, str | bool]], idx: int = 0
-) -> tuple[List[Dict[str, str | bool]], bool]:
+    messages: List[Dict[str, str | bool]], idx: int
+) -> None:
     """Validate the messages column."""
     if not isinstance(messages, list):
         raise InvalidFileFormatError(
@@ -127,10 +115,7 @@ def validate_messages(
             error_source="key_value",
         )
 
-    has_weights = False
-    # Check for weights in messages
-    if _has_weights(messages):
-        has_weights = True
+    has_weights = any("weight" in message for message in messages)
 
     previous_role = None
     for message in messages:
@@ -189,10 +174,8 @@ def validate_messages(
             )
         previous_role = message["role"]
 
-    return messages, has_weights
 
-
-def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> Dict[str, Any]:
+def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
     """Validate the OpenAI preference dataset format.
 
     Args:
@@ -201,9 +184,6 @@ def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> Dict[st
 
     Raises:
         InvalidFileFormatError: If the dataset format is invalid.
-
-    Returns:
-        Dict[str, Any]: The validated example.
     """
     if not isinstance(example["input"], dict):
         raise InvalidFileFormatError(
@@ -219,43 +199,38 @@ def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> Dict[st
             error_source="key_value",
         )
 
-    example["input"]["messages"], _ = validate_messages(
-        example["input"]["messages"], idx
-    )
+    validate_messages(example["input"]["messages"], idx)
 
-    if not isinstance(example["preferred_output"], list):
-        raise InvalidFileFormatError(
-            message="The dataset is malformed, the `preferred_output` field must be a list.",
-            line_number=idx + 1,
-            error_source="key_value",
-        )
+    for output_field in ["preferred_output", "non_preferred_output"]:
+        if not isinstance(example[output_field], list):
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` field must be a list.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
 
-    if not isinstance(example["non_preferred_output"], list):
-        raise InvalidFileFormatError(
-            message="The dataset is malformed, the `non_preferred_output` field must be a list.",
-            line_number=idx + 1,
-            error_source="key_value",
-        )
+        if len(example[output_field]) != 1:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` list must contain exactly one message.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        if "role" not in example[output_field][0]:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` message is missing the `role` field.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        elif example[output_field][0]["role"] != "assistant":
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` must contain an assistant message.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        
 
-    if len(example["preferred_output"]) != 1:
-        raise InvalidFileFormatError(
-            message="The dataset is malformed, the `preferred_output` list must contain exactly one message.",
-            line_number=idx + 1,
-            error_source="key_value",
-        )
-
-    if len(example["non_preferred_output"]) != 1:
-        raise InvalidFileFormatError(
-            message="The dataset is malformed, the `non_preferred_output` list must contain exactly one message.",
-            line_number=idx + 1,
-            error_source="key_value",
-        )
-
-    example["preferred_output"], _ = validate_messages(example["preferred_output"], idx)
-    example["non_preferred_output"], _ = validate_messages(
-        example["non_preferred_output"], idx
-    )
-    return example
+    validate_messages(example["preferred_output"], idx)
+    validate_messages(example["non_preferred_output"], idx)
 
 
 def _check_jsonl(file: Path) -> Dict[str, Any]:
@@ -332,9 +307,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                     message_column = JSONL_REQUIRED_COLUMNS_MAP[
                         DatasetFormat.CONVERSATION
                     ][0]
-                    messages, has_weights = validate_messages(
-                        json_line[message_column], idx
-                    )
+                    validate_messages(json_line[message_column], idx)
                 else:
                     for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
                         if not isinstance(json_line[column], str):
