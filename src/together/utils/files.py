@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 from traceback import format_exc
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from pyarrow import ArrowInvalid, parquet
 
@@ -96,6 +96,140 @@ def check_file(
     return report_dict
 
 
+def validate_messages(messages: List[Dict[str, str | bool]], idx: int) -> None:
+    """Validate the messages column."""
+    if not isinstance(messages, list):
+        raise InvalidFileFormatError(
+            message=f"Invalid format on line {idx + 1} of the input file. "
+            f"Expected a list of messages. Found {type(messages)}",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+    if not messages:
+        raise InvalidFileFormatError(
+            message=f"Invalid format on line {idx + 1} of the input file. "
+            f"Expected a non-empty list of messages. Found empty list",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+
+    has_weights = any("weight" in message for message in messages)
+
+    previous_role = None
+    for message in messages:
+        if not isinstance(message, dict):
+            raise InvalidFileFormatError(
+                message=f"Invalid format on line {idx + 1} of the input file. "
+                f"Expected a dictionary in the messages list. Found {type(message)}",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        for column in REQUIRED_COLUMNS_MESSAGE:
+            if column not in message:
+                raise InvalidFileFormatError(
+                    message=f"Field `{column}` is missing for a turn `{message}` on line {idx + 1} "
+                    "of the the input file.",
+                    line_number=idx + 1,
+                    error_source="key_value",
+                )
+            else:
+                if not isinstance(message[column], str):
+                    raise InvalidFileFormatError(
+                        message=f"Invalid format on line {idx + 1} in the column {column} for turn `{message}` "
+                        f"of the input file. Expected string. Found {type(message[column])}",
+                        line_number=idx + 1,
+                        error_source="text_field",
+                    )
+
+        if has_weights and "weight" in message:
+            weight = message["weight"]
+            if not isinstance(weight, int):
+                raise InvalidFileFormatError(
+                    message="Weight must be an integer",
+                    line_number=idx + 1,
+                    error_source="key_value",
+                )
+            if weight not in {0, 1}:
+                raise InvalidFileFormatError(
+                    message="Weight must be either 0 or 1",
+                    line_number=idx + 1,
+                    error_source="key_value",
+                )
+        if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
+            raise InvalidFileFormatError(
+                message=f"Found invalid role `{message['role']}` in the messages on the line {idx + 1}. "
+                f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if previous_role == message["role"]:
+            raise InvalidFileFormatError(
+                message=f"Invalid role turns on line {idx + 1} of the input file. "
+                "`user` and `assistant` roles must alternate user/assistant/user/assistant/...",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        previous_role = message["role"]
+
+
+def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
+    """Validate the OpenAI preference dataset format.
+
+    Args:
+        example (dict): Input entry to be checked.
+        idx (int): Line number in the file.
+
+    Raises:
+        InvalidFileFormatError: If the dataset format is invalid.
+    """
+    if not isinstance(example["input"], dict):
+        raise InvalidFileFormatError(
+            message="The dataset is malformed, the `input` field must be a dictionary.",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+
+    if "messages" not in example["input"]:
+        raise InvalidFileFormatError(
+            message="The dataset is malformed, the `input` dictionary must contain a `messages` field.",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+
+    validate_messages(example["input"]["messages"], idx)
+
+    for output_field in ["preferred_output", "non_preferred_output"]:
+        if not isinstance(example[output_field], list):
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` field must be a list.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if len(example[output_field]) != 1:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` list must contain exactly one message.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        if "role" not in example[output_field][0]:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` message is missing the `role` field.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        elif example[output_field][0]["role"] != "assistant":
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{output_field}` must contain an assistant message.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+    validate_messages(example["preferred_output"], idx)
+    validate_messages(example["non_preferred_output"], idx)
+
+
 def _check_jsonl(file: Path) -> Dict[str, Any]:
     report_dict: Dict[str, Any] = {}
     # Check that the file is UTF-8 encoded. If not report where the error occurs.
@@ -164,74 +298,13 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         line_number=idx + 1,
                         error_source="format",
                     )
-
-                if current_format == DatasetFormat.CONVERSATION:
+                if current_format == DatasetFormat.PREFERENCE_OPENAI:
+                    validate_preference_openai(json_line, idx)
+                elif current_format == DatasetFormat.CONVERSATION:
                     message_column = JSONL_REQUIRED_COLUMNS_MAP[
                         DatasetFormat.CONVERSATION
                     ][0]
-                    if not isinstance(json_line[message_column], list):
-                        raise InvalidFileFormatError(
-                            message=f"Invalid format on line {idx + 1} of the input file. "
-                            f"Expected a list of messages. Found {type(json_line[message_column])}",
-                            line_number=idx + 1,
-                            error_source="key_value",
-                        )
-
-                    if len(json_line[message_column]) == 0:
-                        raise InvalidFileFormatError(
-                            message=f"Invalid format on line {idx + 1} of the input file. "
-                            f"Expected a non-empty list of messages. Found empty list",
-                            line_number=idx + 1,
-                            error_source="key_value",
-                        )
-
-                    for turn_id, turn in enumerate(json_line[message_column]):
-                        if not isinstance(turn, dict):
-                            raise InvalidFileFormatError(
-                                message=f"Invalid format on line {idx + 1} of the input file. "
-                                f"Expected a dictionary in the {turn_id + 1} turn. Found {type(turn)}",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-
-                    previous_role = None
-                    for turn in json_line[message_column]:
-                        for column in REQUIRED_COLUMNS_MESSAGE:
-                            if column not in turn:
-                                raise InvalidFileFormatError(
-                                    message=f"Field `{column}` is missing for a turn `{turn}` on line {idx + 1} "
-                                    "of the the input file.",
-                                    line_number=idx + 1,
-                                    error_source="key_value",
-                                )
-                            else:
-                                if not isinstance(turn[column], str):
-                                    raise InvalidFileFormatError(
-                                        message=f"Invalid format on line {idx + 1} in the column {column} for turn `{turn}` "
-                                        f"of the input file. Expected string. Found {type(turn[column])}",
-                                        line_number=idx + 1,
-                                        error_source="text_field",
-                                    )
-                        role = turn["role"]
-
-                        if role not in POSSIBLE_ROLES_CONVERSATION:
-                            raise InvalidFileFormatError(
-                                message=f"Found invalid role `{role}` in the messages on the line {idx + 1}. "
-                                f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-
-                        if previous_role == role:
-                            raise InvalidFileFormatError(
-                                message=f"Invalid role turns on line {idx + 1} of the input file. "
-                                "`user` and `assistant` roles must alternate user/assistant/user/assistant/...",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
-
-                        previous_role = role
-
+                    validate_messages(json_line[message_column], idx)
                 else:
                     for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
                         if not isinstance(json_line[column], str):

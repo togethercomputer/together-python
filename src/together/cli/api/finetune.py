@@ -111,6 +111,18 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Trainable modules for LoRA adapters. For example, 'all-linear', 'q_proj,v_proj'",
 )
 @click.option(
+    "--training-method",
+    type=click.Choice(["sft", "dpo"]),
+    default="sft",
+    help="Training method to use. Options: sft (supervised fine-tuning), dpo (Direct Preference Optimization)",
+)
+@click.option(
+    "--dpo-beta",
+    type=float,
+    default=0.1,
+    help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
+)
+@click.option(
     "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
@@ -166,6 +178,8 @@ def create(
     wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
+    training_method: str,
+    dpo_beta: float,
     from_checkpoint: str,
 ) -> None:
     """Start fine-tuning"""
@@ -195,6 +209,8 @@ def create(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method,
+        dpo_beta=dpo_beta,
         from_checkpoint=from_checkpoint,
     )
 

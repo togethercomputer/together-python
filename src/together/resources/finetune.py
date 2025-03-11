@@ -23,6 +23,8 @@ from together.types import (
     TrainingType,
     FinetuneLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    TrainingMethodDPO,
+    TrainingMethodSFT,
     FinetuneCheckpoint,
 )
 from together.types.finetune import (
@@ -37,6 +39,12 @@ from together.utils import (
 )
 
 _FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
+
+
+AVAILABLE_TRAINING_METHODS = {
+    TrainingMethodSFT().method,
+    TrainingMethodDPO().method,
+}
 
 
 def createFinetuneRequest(
@@ -64,8 +72,11 @@ def createFinetuneRequest(
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
+    training_method: str = "sft",
+    dpo_beta: float | None = None,
     from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
+
     if batch_size == "max":
         log_warn_once(
             "Starting from together>=1.3.0, "
@@ -113,10 +124,19 @@ def createFinetuneRequest(
     if weight_decay is not None and (weight_decay < 0):
         raise ValueError("Weight decay should be non-negative")
 
+    if training_method not in AVAILABLE_TRAINING_METHODS:
+        raise ValueError(
+            f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
+        )
+
     lrScheduler = FinetuneLRScheduler(
         lr_scheduler_type="linear",
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
+
+    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
+    if training_method == "dpo":
+        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
     finetune_request = FinetuneRequest(
         model=model,
@@ -138,6 +158,7 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
     )
 
@@ -240,6 +261,8 @@ class FineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
         from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
@@ -286,6 +309,9 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
@@ -300,7 +326,6 @@ class FineTuning:
 
         if model_limits is None:
             model_limits = self.get_model_limits(model=model)
-
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
             training_file=training_file,
@@ -326,6 +351,8 @@ class FineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
             from_checkpoint=from_checkpoint,
         )
 
@@ -344,7 +371,6 @@ class FineTuning:
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
@@ -608,6 +634,8 @@ class AsyncFineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
         from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
@@ -654,6 +682,9 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
@@ -694,6 +725,8 @@ class AsyncFineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
             from_checkpoint=from_checkpoint,
         )
 

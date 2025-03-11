@@ -135,6 +135,31 @@ class LoRATrainingType(TrainingType):
     type: str = "Lora"
 
 
+class TrainingMethod(BaseModel):
+    """
+    Training method type
+    """
+
+    method: str
+
+
+class TrainingMethodSFT(TrainingMethod):
+    """
+    Training method type for SFT training
+    """
+
+    method: Literal["sft"] = "sft"
+
+
+class TrainingMethodDPO(TrainingMethod):
+    """
+    Training method type for DPO training
+    """
+
+    method: Literal["dpo"] = "dpo"
+    dpo_beta: float | None = None
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -178,6 +203,10 @@ class FinetuneRequest(BaseModel):
     training_type: FullTrainingType | LoRATrainingType | None = None
     # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
+    # training method
+    training_method: TrainingMethodSFT | TrainingMethodDPO = Field(
+        default_factory=TrainingMethodSFT
+    )
     # from step
     from_checkpoint: str
 
