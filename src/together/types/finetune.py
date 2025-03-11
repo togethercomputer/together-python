@@ -208,7 +208,7 @@ class FinetuneRequest(BaseModel):
         default_factory=TrainingMethodSFT
     )
     # from step
-    from_checkpoint: str
+    from_checkpoint: str | None = None
 
 
 class FinetuneResponse(BaseModel):
