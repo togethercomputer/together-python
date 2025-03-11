@@ -25,7 +25,11 @@ from together.types import (
     FinetuneLinearLRSchedulerArgs,
     FinetuneCheckpoint,
 )
-from together.types.finetune import DownloadCheckpointType, FinetuneEventType
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneEvent,
+)
 from together.utils import (
     log_warn_once,
     normalize_key,
@@ -138,6 +142,70 @@ def createFinetuneRequest(
     )
 
     return finetune_request
+
+
+def _process_checkpoints_from_events(
+    events: List[FinetuneEvent], id: str
+) -> List[FinetuneCheckpoint]:
+    """
+    Helper function to process events and create checkpoint list.
+
+    Args:
+        events (List[FinetuneEvent]): List of fine-tune events to process
+        id (str): Fine-tune job ID
+
+    Returns:
+        List[FinetuneCheckpoint]: List of available checkpoints
+    """
+    checkpoints: List[FinetuneCheckpoint] = []
+
+    for event in events:
+        event_type = event.type
+
+        if event_type == FinetuneEventType.CHECKPOINT_SAVE:
+            step = get_event_step(event)
+            checkpoint_name = f"{id}:{step}" if step is not None else id
+
+            checkpoints.append(
+                FinetuneCheckpoint(
+                    type=(
+                        f"Intermediate (step {step})"
+                        if step is not None
+                        else "Intermediate"
+                    ),
+                    timestamp=event.created_at,
+                    name=checkpoint_name,
+                )
+            )
+        elif event_type == FinetuneEventType.JOB_COMPLETE:
+            if hasattr(event, "model_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Merged"
+                            if hasattr(event, "adapter_path")
+                            else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+            if hasattr(event, "adapter_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Adapter" if hasattr(event, "model_path") else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+    # Sort by timestamp (newest first)
+    checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+
+    return checkpoints
 
 
 class FineTuning:
@@ -396,58 +464,7 @@ class FineTuning:
             List[FinetuneCheckpoint]: List of available checkpoints
         """
         events = self.list_events(id).data or []
-
-        checkpoints: List[FinetuneCheckpoint] = []
-
-        for event in events:
-            event_type = event.type
-
-            if event_type == FinetuneEventType.CHECKPOINT_SAVE:
-                step = get_event_step(event)
-                checkpoint_name = f"{id}:{step}" if step is not None else id
-
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type=(
-                            f"Intermediate (step {step})"
-                            if step is not None
-                            else "Intermediate"
-                        ),
-                        timestamp=event.created_at,
-                        name=checkpoint_name,
-                    )
-                )
-            elif event_type == FinetuneEventType.JOB_COMPLETE:
-                if hasattr(event, "model_path"):
-                    checkpoints.append(
-                        FinetuneCheckpoint(
-                            type=(
-                                "Final Merged"
-                                if hasattr(event, "adapter_path")
-                                else "Final"
-                            ),
-                            timestamp=event.created_at,
-                            name=id,
-                        )
-                    )
-
-                if hasattr(event, "adapter_path"):
-                    checkpoints.append(
-                        FinetuneCheckpoint(
-                            type=(
-                                "Final Adapter"
-                                if hasattr(event, "model_path")
-                                else "Final"
-                            ),
-                            timestamp=event.created_at,
-                            name=id,
-                        )
-                    )
-
-        # Sort by timestamp (newest first)
-        checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
-
-        return checkpoints
+        return _process_checkpoints_from_events(events, id)
 
     def download(
         self,
@@ -818,47 +835,7 @@ class AsyncFineTuning:
         """
         events_list = await self.list_events(id)
         events = events_list.data or []
-
-        checkpoints: List[FinetuneCheckpoint] = []
-
-        for event in events:
-            event_type = event.type
-
-            if event_type == FinetuneEventType.CHECKPOINT_SAVE:
-                step = get_event_step(event)
-                checkpoint_name = f"{id}:{step}" if step else id
-
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type="Intermediate",
-                        timestamp=event.created_at,
-                        name=checkpoint_name,
-                    )
-                )
-            elif event_type == FinetuneEventType.JOB_COMPLETE:
-                is_lora = hasattr(event, "adapter_path")
-
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type="Final Merged" if is_lora else "Final",
-                        timestamp=event.created_at,
-                        name=id,
-                    )
-                )
-
-                if is_lora:
-                    checkpoints.append(
-                        FinetuneCheckpoint(
-                            type="Final Adapter",
-                            timestamp=event.created_at,
-                            name=id,
-                        )
-                    )
-
-        # Sort by timestamp (newest first)
-        checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
-
-        return checkpoints
+        return _process_checkpoints_from_events(events, id)
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1
