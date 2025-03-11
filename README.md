@@ -67,7 +67,7 @@ print(response.choices[0].message.content)
 response = client.chat.completions.create(
     model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
     messages=[{
-        "role": "user", 
+        "role": "user",
         "content": [
             {
                 "type": "text",
@@ -91,7 +91,7 @@ response = client.chat.completions.create(
         "role": "user",
         "content": [
             {
-                "type": "text", 
+                "type": "text",
                 "text": "Compare these two images."
             },
             {

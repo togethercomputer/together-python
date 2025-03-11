@@ -86,9 +86,9 @@ class BaseEndpoint(TogetherJSONModel):
     model: str = Field(description="The model deployed on this endpoint")
     type: str = Field(description="The type of endpoint")
     owner: str = Field(description="The owner of this endpoint")
-    state: Literal["PENDING", "STARTING", "STARTED", "STOPPING", "STOPPED", "FAILED", "ERROR"] = (
-        Field(description="Current state of the endpoint")
-    )
+    state: Literal[
+        "PENDING", "STARTING", "STARTED", "STOPPING", "STOPPED", "FAILED", "ERROR"
+    ] = Field(description="Current state of the endpoint")
     created_at: datetime = Field(description="Timestamp when the endpoint was created")
 
 
