@@ -96,9 +96,7 @@ def check_file(
     return report_dict
 
 
-def validate_messages(
-    messages: List[Dict[str, str | bool]], idx: int
-) -> None:
+def validate_messages(messages: List[Dict[str, str | bool]], idx: int) -> None:
     """Validate the messages column."""
     if not isinstance(messages, list):
         raise InvalidFileFormatError(
@@ -227,7 +225,6 @@ def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
                 line_number=idx + 1,
                 error_source="key_value",
             )
-        
 
     validate_messages(example["preferred_output"], idx)
     validate_messages(example["non_preferred_output"], idx)

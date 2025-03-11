@@ -29,6 +29,12 @@ from together.types.finetune import DownloadCheckpointType
 from together.utils import log_warn_once, normalize_key
 
 
+AVAILABLE_TRAINING_METHODS = {
+    TrainingMethodSFT().method,
+    TrainingMethodDPO().method,
+}
+
+
 def createFinetuneRequest(
     model_limits: FinetuneTrainingLimits,
     training_file: str,
@@ -105,10 +111,6 @@ def createFinetuneRequest(
     if weight_decay is not None and (weight_decay < 0):
         raise ValueError("Weight decay should be non-negative")
 
-    AVAILABLE_TRAINING_METHODS = {
-        TrainingMethodSFT().method,
-        TrainingMethodDPO().method,
-    }
     if training_method not in AVAILABLE_TRAINING_METHODS:
         raise ValueError(
             f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
