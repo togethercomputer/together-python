@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Literal, Union
+from typing import Literal
 
 from rich import print as rprint
 
@@ -57,6 +57,7 @@ def createFinetuneRequest(
     training_method: str = "sft",
     dpo_beta: float | None = None,
 ) -> FinetuneRequest:
+
     if batch_size == "max":
         log_warn_once(
             "Starting from together>=1.3.0, "
@@ -104,14 +105,21 @@ def createFinetuneRequest(
     if weight_decay is not None and (weight_decay < 0):
         raise ValueError("Weight decay should be non-negative")
 
+    AVAILABLE_TRAINING_METHODS = {
+        TrainingMethodSFT().method,
+        TrainingMethodDPO().method,
+    }
+    if training_method not in AVAILABLE_TRAINING_METHODS:
+        raise ValueError(
+            f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
+        )
+
     lrScheduler = FinetuneLRScheduler(
         lr_scheduler_type="linear",
         lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
     )
 
-    training_method_cls: Union[TrainingMethodSFT, TrainingMethodDPO] = (
-        TrainingMethodSFT()
-    )
+    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
     if training_method == "dpo":
         training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
