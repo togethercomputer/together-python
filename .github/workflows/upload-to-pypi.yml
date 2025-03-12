@@ -4,6 +4,12 @@ on:
   release:
     types: [published]
 
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,8 +42,11 @@ jobs:
       run: |
         poetry build
 
-    - name: Publish distribution to PyPI
-      if: startsWith(github.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.ORANGETIN_PYPI }}
+    - name: tests
+      run: echo test
+
+    # - name: Publish distribution to PyPI
+    #   if: startsWith(github.ref, 'refs/tags')
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     password: ${{ secrets.ORANGETIN_PYPI }}
