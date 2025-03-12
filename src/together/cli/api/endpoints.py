@@ -128,6 +128,11 @@ def endpoints(ctx: click.Context) -> None:
     help="Create the endpoint in STOPPED state instead of auto-starting it",
 )
 @click.option(
+    "--inactive-timeout",
+    type=int,
+    help="Number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable.",
+)
+@click.option(
     "--wait",
     is_flag=True,
     default=True,
@@ -146,6 +151,7 @@ def create(
     no_prompt_cache: bool,
     no_speculative_decoding: bool,
     no_auto_start: bool,
+    inactive_timeout: int | None,
     wait: bool,
 ) -> None:
     """Create a new dedicated inference endpoint."""
@@ -170,6 +176,7 @@ def create(
             disable_prompt_cache=no_prompt_cache,
             disable_speculative_decoding=no_speculative_decoding,
             state="STOPPED" if no_auto_start else "STARTED",
+            inactive_timeout=inactive_timeout,
         )
     except InvalidRequestError as e:
         print_api_error(e)
@@ -194,6 +201,8 @@ def create(
         click.echo("  Speculative decoding: disabled", err=True)
     if no_auto_start:
         click.echo("  Auto-start: disabled", err=True)
+    if inactive_timeout is not None:
+        click.echo(f"  Inactive timeout: {inactive_timeout} minutes", err=True)
 
     click.echo(f"Endpoint created successfully, id: {response.id}", err=True)
 
@@ -371,6 +380,11 @@ def list(
     type=int,
     help="New maximum number of replicas to scale up to",
 )
+@click.option(
+    "--inactive-timeout",
+    type=int,
+    help="Number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable.",
+)
 @click.pass_obj
 @handle_api_errors
 def update(
@@ -379,9 +393,10 @@ def update(
     display_name: str | None,
     min_replicas: int | None,
     max_replicas: int | None,
+    inactive_timeout: int | None,
 ) -> None:
     """Update a dedicated inference endpoint's configuration."""
-    if not any([display_name, min_replicas, max_replicas]):
+    if not any([display_name, min_replicas, max_replicas, inactive_timeout]):
         click.echo("Error: At least one update option must be specified", err=True)
         sys.exit(1)
 
@@ -400,6 +415,8 @@ def update(
     if min_replicas is not None and max_replicas is not None:
         kwargs["min_replicas"] = min_replicas
         kwargs["max_replicas"] = max_replicas
+    if inactive_timeout is not None:
+        kwargs["inactive_timeout"] = inactive_timeout
 
     _response = client.endpoints.update(endpoint_id, **kwargs)
 
@@ -410,6 +427,8 @@ def update(
     if min_replicas is not None and max_replicas is not None:
         click.echo(f"  Min replicas: {min_replicas}", err=True)
         click.echo(f"  Max replicas: {max_replicas}", err=True)
+    if inactive_timeout is not None:
+        click.echo(f"  Inactive timeout: {inactive_timeout} minutes", err=True)
 
     click.echo("Successfully updated endpoint", err=True)
     click.echo(endpoint_id)
