@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import Dict
+import sys
+from typing import Dict, TYPE_CHECKING
 
 from together import resources
 from together.constants import BASE_URL, MAX_RETRIES, TIMEOUT_SECS
@@ -43,6 +44,23 @@ class Together:
         # get api key
         if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
+        # If running in Google Colab, check notebook secrets
+        if not api_key and "google.colab" in sys.modules:
+            if TYPE_CHECKING:
+                from google.colab import userdata  # type: ignore
+            else:
+                from google.colab import userdata
+            try:
+                api_key = userdata.get("TOGETHER_API_KEY")
+            except userdata.NotebookAccessError:
+                print(
+                    "The TOGETHER_API_KEY Colab secret was found, but notebook access is disabled. Please enable notebook "
+                    "access for the secret."
+                )
+            except userdata.SecretNotFoundError:
+                # warn and carry on
+                print("Colab: No Google Colab secret named TOGETHER_API_KEY was found.")
 
         if not api_key:
             raise AuthenticationError(
