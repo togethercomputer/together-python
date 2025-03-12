@@ -15,12 +15,17 @@ def models(ctx: click.Context) -> None:
 
 
 @models.command()
+@click.option(
+    "--type",
+    type=click.Choice(["dedicated"]),
+    help="Filter models by type (dedicated: models that support autoscaling)",
+)
 @click.pass_context
-def list(ctx: click.Context) -> None:
+def list(ctx: click.Context, type: str | None) -> None:
     """List models"""
     client: Together = ctx.obj
 
-    response = client.models.list()
+    response = client.models.list(dedicated=(type == "dedicated"))
 
     display_list = []
 
