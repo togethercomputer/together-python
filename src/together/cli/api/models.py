@@ -18,7 +18,7 @@ def models(ctx: click.Context) -> None:
 @click.option(
     "--type",
     type=click.Choice(["dedicated"]),
-    help="Filter models by type (dedicated: models that support autoscaling)",
+    help="Filter models by type (dedicated: models that can be deployed as dedicated endpoints)",
 )
 @click.option(
     "--json",
