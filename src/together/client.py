@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import os
-from typing import Dict
+import sys
+from typing import Dict, TYPE_CHECKING
 
 from together import resources
 from together.constants import BASE_URL, MAX_RETRIES, TIMEOUT_SECS
 from together.error import AuthenticationError
 from together.types import TogetherClient
 from together.utils import enforce_trailing_slash
+from together.utils.api_helpers import get_google_colab_secret
 
 
 class Together:
@@ -43,6 +45,9 @@ class Together:
         # get api key
         if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
+        if not api_key and "google.colab" in sys.modules:
+            api_key = get_google_colab_secret("TOGETHER_API_KEY")
 
         if not api_key:
             raise AuthenticationError(
@@ -116,6 +121,9 @@ class AsyncTogether:
         # get api key
         if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
+        if not api_key and "google.colab" in sys.modules:
+            api_key = get_google_colab_secret("TOGETHER_API_KEY")
 
         if not api_key:
             raise AuthenticationError(
