@@ -1,4 +1,4 @@
-from textwrap import wrap
+import json as json_lib
 
 import click
 from tabulate import tabulate
@@ -20,8 +20,13 @@ def models(ctx: click.Context) -> None:
     type=click.Choice(["dedicated"]),
     help="Filter models by type (dedicated: models that support autoscaling)",
 )
+@click.option(
+    "--json",
+    is_flag=True,
+    help="Output in JSON format",
+)
 @click.pass_context
-def list(ctx: click.Context, type: str | None) -> None:
+def list(ctx: click.Context, type: str | None, json: bool) -> None:
     """List models"""
     client: Together = ctx.obj
 
@@ -44,4 +49,7 @@ def list(ctx: click.Context, type: str | None) -> None:
             }
         )
 
-    click.echo(tabulate(display_list, headers="keys", tablefmt="plain"))
+    if json:
+        click.echo(json_lib.dumps(display_list, indent=2))
+    else:
+        click.echo(tabulate(display_list, headers="keys", tablefmt="plain"))
