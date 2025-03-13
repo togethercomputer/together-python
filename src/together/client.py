@@ -9,6 +9,7 @@ from together.constants import BASE_URL, MAX_RETRIES, TIMEOUT_SECS
 from together.error import AuthenticationError
 from together.types import TogetherClient
 from together.utils import enforce_trailing_slash
+from together.utils.api_helpers import get_google_colab_secret
 
 
 class Together:
@@ -45,22 +46,8 @@ class Together:
         if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
 
-        # If running in Google Colab, check notebook secrets
         if not api_key and "google.colab" in sys.modules:
-            if TYPE_CHECKING:
-                from google.colab import userdata  # type: ignore
-            else:
-                from google.colab import userdata
-            try:
-                api_key = userdata.get("TOGETHER_API_KEY")
-            except userdata.NotebookAccessError:
-                print(
-                    "The TOGETHER_API_KEY Colab secret was found, but notebook access is disabled. Please enable notebook "
-                    "access for the secret."
-                )
-            except userdata.SecretNotFoundError:
-                # warn and carry on
-                print("Colab: No Google Colab secret named TOGETHER_API_KEY was found.")
+            api_key = get_google_colab_secret("TOGETHER_API_KEY")
 
         if not api_key:
             raise AuthenticationError(
@@ -134,6 +121,9 @@ class AsyncTogether:
         # get api key
         if not api_key:
             api_key = os.environ.get("TOGETHER_API_KEY")
+
+        if not api_key and "google.colab" in sys.modules:
+            api_key = get_google_colab_secret("TOGETHER_API_KEY")
 
         if not api_key:
             raise AuthenticationError(
