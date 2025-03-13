@@ -1,5 +1,5 @@
 completion_test_model_list = [
-    "mistralai/Mistral-7B-v0.1",
+    "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
 ]
 chat_test_model_list = []
 embedding_test_model_list = []
