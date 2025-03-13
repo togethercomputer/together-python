@@ -33,15 +33,15 @@ def list(ctx: click.Context, type: str | None) -> None:
     for model in response:
         display_list.append(
             {
-                "ID": "\n".join(wrap(model.id or "", width=30)),
-                "Name": "\n".join(wrap(model.display_name or "", width=30)),
+                "ID": model.id,
+                "Name": model.display_name,
                 "Organization": model.organization,
                 "Type": model.type,
                 "Context Length": model.context_length,
-                "License": "\n".join(wrap(model.license or "", width=30)),
+                "License": model.license,
                 "Input per 1M token": model.pricing.input,
                 "Output per 1M token": model.pricing.output,
             }
         )
 
-    click.echo(tabulate(display_list, headers="keys", tablefmt="grid"))
+    click.echo(tabulate(display_list, headers="keys", tablefmt="plain"))

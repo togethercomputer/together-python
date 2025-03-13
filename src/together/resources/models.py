@@ -81,6 +81,8 @@ class Models(ModelsBase):
 
             models = self._filter_dedicated_models(models, dedicated_response)
 
+        models.sort(key=lambda x: x.id.lower())
+
         return models
 
 
@@ -126,5 +128,7 @@ class AsyncModels(ModelsBase):
             )
 
             models = self._filter_dedicated_models(models, dedicated_response)
+
+        models.sort(key=lambda x: x.id.lower())
 
         return models
