@@ -51,7 +51,7 @@ optional = true
 
 [tool.poetry.group.quality.dependencies]
 black = ">=23.1,<26.0"
-ruff = ">=0.3.2,<0.10.0"
+ruff = ">=0.3.2,<0.11.0"
 types-tqdm = "^4.65.0.0"
 types-tabulate = "^0.9.0.3"
 pre-commit = "4.1.0"
