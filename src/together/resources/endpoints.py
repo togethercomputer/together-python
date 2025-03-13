@@ -59,6 +59,7 @@ class Endpoints:
         disable_prompt_cache: bool = False,
         disable_speculative_decoding: bool = False,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
+        inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -72,6 +73,7 @@ class Endpoints:
             disable_prompt_cache (bool, optional): Whether to disable the prompt cache. Defaults to False.
             disable_speculative_decoding (bool, optional): Whether to disable speculative decoding. Defaults to False.
             state (str, optional): The desired state of the endpoint. Defaults to "STARTED".
+            inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -80,7 +82,7 @@ class Endpoints:
             client=self._client,
         )
 
-        data: Dict[str, Union[str, bool, Dict[str, int]]] = {
+        data: Dict[str, Union[str, bool, Dict[str, int], int]] = {
             "model": model,
             "hardware": hardware,
             "autoscaling": {
@@ -94,6 +96,9 @@ class Endpoints:
 
         if display_name is not None:
             data["display_name"] = display_name
+
+        if inactive_timeout is not None:
+            data["inactive_timeout"] = inactive_timeout
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -161,6 +166,7 @@ class Endpoints:
         max_replicas: Optional[int] = None,
         state: Optional[Literal["STARTED", "STOPPED"]] = None,
         display_name: Optional[str] = None,
+        inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
         """
         Update an endpoint's configuration.
@@ -171,6 +177,7 @@ class Endpoints:
             max_replicas (int, optional): The maximum number of replicas to scale up to
             state (str, optional): The desired state of the endpoint ("STARTED" or "STOPPED")
             display_name (str, optional): A human-readable name for the endpoint
+            inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -179,7 +186,7 @@ class Endpoints:
             client=self._client,
         )
 
-        data: Dict[str, Union[str, Dict[str, int]]] = {}
+        data: Dict[str, Union[str, Dict[str, int], int]] = {}
 
         if min_replicas is not None or max_replicas is not None:
             current_min = min_replicas
@@ -199,6 +206,9 @@ class Endpoints:
 
         if display_name is not None:
             data["display_name"] = display_name
+
+        if inactive_timeout is not None:
+            data["inactive_timeout"] = inactive_timeout
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -297,6 +307,7 @@ class AsyncEndpoints:
         disable_prompt_cache: bool = False,
         disable_speculative_decoding: bool = False,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
+        inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -310,6 +321,7 @@ class AsyncEndpoints:
             disable_prompt_cache (bool, optional): Whether to disable the prompt cache. Defaults to False.
             disable_speculative_decoding (bool, optional): Whether to disable speculative decoding. Defaults to False.
             state (str, optional): The desired state of the endpoint. Defaults to "STARTED".
+            inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -318,7 +330,7 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        data: Dict[str, Union[str, bool, Dict[str, int]]] = {
+        data: Dict[str, Union[str, bool, Dict[str, int], int]] = {
             "model": model,
             "hardware": hardware,
             "autoscaling": {
@@ -332,6 +344,9 @@ class AsyncEndpoints:
 
         if display_name is not None:
             data["display_name"] = display_name
+
+        if inactive_timeout is not None:
+            data["inactive_timeout"] = inactive_timeout
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
@@ -399,6 +414,7 @@ class AsyncEndpoints:
         max_replicas: Optional[int] = None,
         state: Optional[Literal["STARTED", "STOPPED"]] = None,
         display_name: Optional[str] = None,
+        inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
         """
         Update an endpoint's configuration.
@@ -409,6 +425,7 @@ class AsyncEndpoints:
             max_replicas (int, optional): The maximum number of replicas to scale up to
             state (str, optional): The desired state of the endpoint ("STARTED" or "STOPPED")
             display_name (str, optional): A human-readable name for the endpoint
+            inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -417,7 +434,7 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        data: Dict[str, Union[str, Dict[str, int]]] = {}
+        data: Dict[str, Union[str, Dict[str, int], int]] = {}
 
         if min_replicas is not None or max_replicas is not None:
             current_min = min_replicas
@@ -437,6 +454,9 @@ class AsyncEndpoints:
 
         if display_name is not None:
             data["display_name"] = display_name
+
+        if inactive_timeout is not None:
+            data["inactive_timeout"] = inactive_timeout
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
