@@ -213,7 +213,7 @@ class TestTogetherCompletion:
         product(
             completion_test_model_list,
             completion_prompt_list,
-            [35000, 40000, 50000],
+            [200000, 400000, 500000],
         ),
     )
     def test_high_max_tokens(
