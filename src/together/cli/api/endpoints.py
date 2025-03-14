@@ -133,8 +133,7 @@ def endpoints(ctx: click.Context) -> None:
     help="Number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable.",
 )
 @click.option(
-    "--wait",
-    is_flag=True,
+    "--wait/--no-wait",
     default=True,
     help="Wait for the endpoint to be ready after creation",
 )
@@ -276,7 +275,9 @@ def fetch_and_print_hardware_options(
 @endpoints.command()
 @click.argument("endpoint-id", required=True)
 @click.option(
-    "--wait", is_flag=True, default=True, help="Wait for the endpoint to stop"
+    "--wait/--no-wait",
+    default=True,
+    help="Wait for the endpoint to stop",
 )
 @click.pass_obj
 @handle_api_errors
@@ -299,7 +300,9 @@ def stop(client: Together, endpoint_id: str, wait: bool) -> None:
 @endpoints.command()
 @click.argument("endpoint-id", required=True)
 @click.option(
-    "--wait", is_flag=True, default=True, help="Wait for the endpoint to start"
+    "--wait/--no-wait",
+    default=True,
+    help="Wait for the endpoint to start",
 )
 @click.pass_obj
 @handle_api_errors
