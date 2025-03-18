@@ -72,10 +72,22 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
 @click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
 @click.option(
+    "--lr-scheduler-type",
+    type=click.Choice(["linear", "cosine"]),
+    default="linear",
+    help="Learning rate scheduler type",
+)
+@click.option(
     "--min-lr-ratio",
     type=float,
     default=0.0,
     help="The ratio of the final learning rate to the peak learning rate",
+)
+@click.option(
+    "--num-cycles",
+    type=float,
+    default=0.5,
+    help="Number of cycles for cosine learning rate scheduler.",
 )
 @click.option(
     "--warmup-ratio",
@@ -162,7 +174,9 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    lr_scheduler_type: Literal["linear", "cosine"],
     min_lr_ratio: float,
+    num_cycles: float,
     warmup_ratio: float,
     max_grad_norm: float,
     weight_decay: float,
@@ -194,7 +208,9 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_type=lr_scheduler_type,
         min_lr_ratio=min_lr_ratio,
+        num_cycles=num_cycles,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Union
 
-from pydantic import StrictBool, Field, validator, field_validator
+from pydantic import StrictBool, Field, validator, field_validator, ValidationInfo
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -345,13 +345,44 @@ class FinetuneTrainingLimits(BaseModel):
     lora_training: FinetuneLoraTrainingLimits | None = None
 
 
-class FinetuneLRScheduler(BaseModel):
-    lr_scheduler_type: str
-    lr_scheduler_args: FinetuneLinearLRSchedulerArgs | None = None
-
-
 class FinetuneLinearLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
+
+
+class FinetuneCosineLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0
+    num_cycles: float | None = 0.5
+
+
+LRSchedulerTypeToArgs = {
+    "linear": FinetuneLinearLRSchedulerArgs,
+    "cosine": FinetuneCosineLRSchedulerArgs,
+}
+
+FinetuneLRSchedulerArgs = Union[
+    FinetuneLinearLRSchedulerArgs, FinetuneCosineLRSchedulerArgs, None
+]
+
+
+class FinetuneLRScheduler(BaseModel):
+    lr_scheduler_type: Literal["linear", "cosine"]
+    lr_scheduler_args: FinetuneLRSchedulerArgs | None = None
+
+    @field_validator("lr_scheduler_args")
+    @classmethod
+    def validate_scheduler_args(
+        cls, v: FinetuneLRSchedulerArgs, info: ValidationInfo
+    ) -> FinetuneLRSchedulerArgs:
+        scheduler_type = info.data.get("lr_scheduler_type")
+
+        if v is None:
+            return v
+
+        expected_type = LRSchedulerTypeToArgs[str(scheduler_type)]
+        if not isinstance(v, expected_type):
+            raise ValueError(f"Expected {expected_type}, got {type(v)}")
+
+        return v
 
 
 class FinetuneCheckpoint(BaseModel):
