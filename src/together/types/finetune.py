@@ -365,20 +365,29 @@ FinetuneLRSchedulerArgs = Union[
 
 
 class FinetuneLRScheduler(BaseModel):
-    lr_scheduler_type: Literal["linear", "cosine"]
+    lr_scheduler_type: str
     lr_scheduler_args: FinetuneLRSchedulerArgs | None = None
+
+    @field_validator("lr_scheduler_type")
+    @classmethod
+    def validate_scheduler_type(cls, v: str) -> str:
+        if v not in LRSchedulerTypeToArgs:
+            raise ValueError(
+                f"Scheduler type must be one of: {LRSchedulerTypeToArgs.keys()}"
+            )
+        return v
 
     @field_validator("lr_scheduler_args")
     @classmethod
     def validate_scheduler_args(
         cls, v: FinetuneLRSchedulerArgs, info: ValidationInfo
     ) -> FinetuneLRSchedulerArgs:
-        scheduler_type = info.data.get("lr_scheduler_type")
+        scheduler_type = str(info.data.get("lr_scheduler_type"))
 
         if v is None:
             return v
 
-        expected_type = LRSchedulerTypeToArgs[str(scheduler_type)]
+        expected_type = LRSchedulerTypeToArgs[scheduler_type]
         if not isinstance(v, expected_type):
             raise ValueError(f"Expected {expected_type}, got {type(v)}")
 
