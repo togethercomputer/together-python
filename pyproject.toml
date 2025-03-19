@@ -12,7 +12,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "together"
-version = "1.4.7"
+version = "1.5.1"
 authors = [
     "Together AI <support@together.ai>"
 ]
@@ -28,7 +28,7 @@ repository = "https://github.com/togethercomputer/together-python"
 homepage = "https://github.com/togethercomputer/together-python"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 typer = ">=0.9,<0.16"
 requests = "^2.31.0"
 rich = "^13.8.1"
