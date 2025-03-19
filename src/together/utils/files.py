@@ -6,7 +6,6 @@ from pathlib import Path
 from traceback import format_exc
 from typing import Any, Dict, List
 
-from pyarrow import ArrowInvalid, parquet
 
 from together.constants import (
     MAX_FILE_SIZE_GB,
@@ -372,6 +371,8 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
 
 def _check_parquet(file: Path) -> Dict[str, Any]:
+    # in method import - this allows client to exclude the pyarrow dep if they don't need it. Saved ~80MB and more compatible with older systems.
+    from pyarrow import ArrowInvalid, parquet
     report_dict: Dict[str, Any] = {}
 
     try:
