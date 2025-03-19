@@ -176,7 +176,7 @@ class FinetuneRequest(BaseModel):
     # training learning rate
     learning_rate: float
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
@@ -239,7 +239,7 @@ class FinetuneResponse(BaseModel):
     # training learning rate
     learning_rate: float | None = None
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
     # max gradient norm
@@ -354,44 +354,18 @@ class FinetuneCosineLRSchedulerArgs(BaseModel):
     num_cycles: float | None = 0.5
 
 
-LRSchedulerTypeToArgs = {
-    "linear": FinetuneLinearLRSchedulerArgs,
-    "cosine": FinetuneCosineLRSchedulerArgs,
-}
-
-FinetuneLRSchedulerArgs = Union[
-    FinetuneLinearLRSchedulerArgs, FinetuneCosineLRSchedulerArgs, None
-]
-
-
 class FinetuneLRScheduler(BaseModel):
     lr_scheduler_type: str
-    lr_scheduler_args: FinetuneLRSchedulerArgs | None = None
 
-    @field_validator("lr_scheduler_type")
-    @classmethod
-    def validate_scheduler_type(cls, scheduler_type: str) -> str:
-        if scheduler_type not in LRSchedulerTypeToArgs:
-            raise ValueError(
-                f"Scheduler type must be one of: {LRSchedulerTypeToArgs.keys()}"
-            )
-        return scheduler_type
 
-    @field_validator("lr_scheduler_args")
-    @classmethod
-    def validate_scheduler_args(
-        cls, args: FinetuneLRSchedulerArgs, info: ValidationInfo
-    ) -> FinetuneLRSchedulerArgs:
-        scheduler_type = str(info.data.get("lr_scheduler_type"))
+class FinetuneLinearLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["linear"] = "linear"
+    lr_scheduler: FinetuneLinearLRSchedulerArgs | None = None
 
-        if args is None:
-            return args
 
-        expected_type = LRSchedulerTypeToArgs[scheduler_type]
-        if not isinstance(args, expected_type):
-            raise TypeError(f"Expected {expected_type}, got {type(args)}")
-
-        return args
+class FinetuneCosineLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["cosine"] = "cosine"
+    lr_scheduler: FinetuneCosineLRSchedulerArgs | None = None
 
 
 class FinetuneCheckpoint(BaseModel):

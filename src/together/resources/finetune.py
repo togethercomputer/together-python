@@ -22,6 +22,8 @@ from together.types import (
     TogetherRequest,
     TrainingType,
     FinetuneLRScheduler,
+    FinetuneLinearLRScheduler,
+    FinetuneCosineLRScheduler,
     FinetuneLinearLRSchedulerArgs,
     FinetuneCosineLRSchedulerArgs,
     TrainingMethodDPO,
@@ -132,19 +134,20 @@ def createFinetuneRequest(
             f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
         )
 
+    # Default to generic lr scheduler
+    lrScheduler: FinetuneLRScheduler = FinetuneLRScheduler(lr_scheduler_type="linear")
+
     if lr_scheduler_type == "cosine":
         if num_cycles <= 0.0:
             raise ValueError("Number of cycles should be greater than 0")
 
-        lrScheduler = FinetuneLRScheduler(
-            lr_scheduler_type="cosine",
+        lrScheduler = FinetuneCosineLRScheduler(
             lr_scheduler_args=FinetuneCosineLRSchedulerArgs(
                 min_lr_ratio=min_lr_ratio, num_cycles=num_cycles
             ),
         )
     else:
-        lrScheduler = FinetuneLRScheduler(
-            lr_scheduler_type="linear",
+        lrScheduler = FinetuneLinearLRScheduler(
             lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
         )
 
