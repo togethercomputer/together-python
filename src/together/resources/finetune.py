@@ -298,8 +298,8 @@ class FineTuning:
             lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            num_cycles (float, optional): Number of cycles for cosine learning rate scheduler. Defaults to 0.5.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            num_cycles (float, optional): Number of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -677,8 +677,8 @@ class AsyncFineTuning:
             lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            num_cycles (float, optional): Number of cycles for cosine learning rate scheduler. Defaults to 0.5.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            num_cycles (float, optional): Number of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.

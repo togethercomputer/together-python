@@ -370,28 +370,28 @@ class FinetuneLRScheduler(BaseModel):
 
     @field_validator("lr_scheduler_type")
     @classmethod
-    def validate_scheduler_type(cls, v: str) -> str:
-        if v not in LRSchedulerTypeToArgs:
+    def validate_scheduler_type(cls, scheduler_type: str) -> str:
+        if scheduler_type not in LRSchedulerTypeToArgs:
             raise ValueError(
                 f"Scheduler type must be one of: {LRSchedulerTypeToArgs.keys()}"
             )
-        return v
+        return scheduler_type
 
     @field_validator("lr_scheduler_args")
     @classmethod
     def validate_scheduler_args(
-        cls, v: FinetuneLRSchedulerArgs, info: ValidationInfo
+        cls, args: FinetuneLRSchedulerArgs, info: ValidationInfo
     ) -> FinetuneLRSchedulerArgs:
         scheduler_type = str(info.data.get("lr_scheduler_type"))
 
-        if v is None:
-            return v
+        if args is None:
+            return args
 
         expected_type = LRSchedulerTypeToArgs[scheduler_type]
-        if not isinstance(v, expected_type):
-            raise ValueError(f"Expected {expected_type}, got {type(v)}")
+        if not isinstance(args, expected_type):
+            raise TypeError(f"Expected {expected_type}, got {type(args)}")
 
-        return v
+        return args
 
 
 class FinetuneCheckpoint(BaseModel):
