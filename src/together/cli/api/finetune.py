@@ -87,7 +87,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "--num-cycles",
     type=float,
     default=0.5,
-    help="Number of cycles for the cosine learning rate scheduler.",
+    help="Number or fraction of cycles for the cosine learning rate scheduler.",
 )
 @click.option(
     "--warmup-ratio",
