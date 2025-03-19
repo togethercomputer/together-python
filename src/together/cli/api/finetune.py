@@ -84,7 +84,7 @@ def fine_tuning(ctx: click.Context) -> None:
     help="The ratio of the final learning rate to the peak learning rate",
 )
 @click.option(
-    "--num-cycles",
+    "--scheduler-num-cycles",
     type=float,
     default=0.5,
     help="Number or fraction of cycles for the cosine learning rate scheduler.",
@@ -176,7 +176,7 @@ def create(
     learning_rate: float,
     lr_scheduler_type: Literal["linear", "cosine"],
     min_lr_ratio: float,
-    num_cycles: float,
+    scheduler_num_cycles: float,
     warmup_ratio: float,
     max_grad_norm: float,
     weight_decay: float,
@@ -210,7 +210,7 @@ def create(
         learning_rate=learning_rate,
         lr_scheduler_type=lr_scheduler_type,
         min_lr_ratio=min_lr_ratio,
-        num_cycles=num_cycles,
+        scheduler_num_cycles=scheduler_num_cycles,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,

@@ -62,7 +62,7 @@ def createFinetuneRequest(
     learning_rate: float | None = 0.00001,
     lr_scheduler_type: Literal["linear", "cosine"] = "linear",
     min_lr_ratio: float = 0.0,
-    num_cycles: float = 0.5,
+    scheduler_num_cycles: float = 0.5,
     warmup_ratio: float = 0.0,
     max_grad_norm: float = 1.0,
     weight_decay: float = 0.0,
@@ -138,12 +138,12 @@ def createFinetuneRequest(
     lrScheduler: FinetuneLRScheduler = FinetuneLRScheduler(lr_scheduler_type="linear")
 
     if lr_scheduler_type == "cosine":
-        if num_cycles <= 0.0:
+        if scheduler_num_cycles <= 0.0:
             raise ValueError("Number of cycles should be greater than 0")
 
         lrScheduler = FinetuneCosineLRScheduler(
             lr_scheduler_args=FinetuneCosineLRSchedulerArgs(
-                min_lr_ratio=min_lr_ratio, num_cycles=num_cycles
+                min_lr_ratio=min_lr_ratio, num_cycles=scheduler_num_cycles
             ),
         )
     else:
@@ -263,7 +263,7 @@ class FineTuning:
         learning_rate: float | None = 0.00001,
         lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
-        num_cycles: float = 0.5,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -301,7 +301,7 @@ class FineTuning:
             lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
             warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
@@ -359,7 +359,7 @@ class FineTuning:
             learning_rate=learning_rate,
             lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
-            num_cycles=num_cycles,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
@@ -642,7 +642,7 @@ class AsyncFineTuning:
         learning_rate: float | None = 0.00001,
         lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
-        num_cycles: float = 0.5,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -680,7 +680,7 @@ class AsyncFineTuning:
             lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
             warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
@@ -739,7 +739,7 @@ class AsyncFineTuning:
             learning_rate=learning_rate,
             lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
-            num_cycles=num_cycles,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
