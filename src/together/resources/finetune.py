@@ -77,6 +77,11 @@ def createFinetuneRequest(
     from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
 
+    if model is not None and from_checkpoint is not None:
+        raise ValueError(
+            "You must specify either a model or a checkpoint to start a job from, not both"
+        )
+
     if batch_size == "max":
         log_warn_once(
             "Starting from together>=1.3.0, "
