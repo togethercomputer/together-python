@@ -50,7 +50,7 @@ AVAILABLE_TRAINING_METHODS = {
 def createFinetuneRequest(
     model_limits: FinetuneTrainingLimits,
     training_file: str,
-    model: str,
+    model: str | None = None,
     n_epochs: int = 1,
     validation_file: str | None = "",
     n_evals: int | None = 0,
@@ -76,6 +76,11 @@ def createFinetuneRequest(
     dpo_beta: float | None = None,
     from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
+
+    if model is not None and from_checkpoint is not None:
+        raise ValueError(
+            "You must specify either a model or a checkpoint to start a job from, not both"
+        )
 
     if batch_size == "max":
         log_warn_once(
@@ -237,7 +242,7 @@ class FineTuning:
         self,
         *,
         training_file: str,
-        model: str,
+        model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
         n_evals: int | None = 0,
@@ -270,7 +275,7 @@ class FineTuning:
 
         Args:
             training_file (str): File-ID of a file uploaded to the Together API
-            model (str): Name of the base model to run fine-tune job on
+            model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
@@ -320,12 +325,24 @@ class FineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
+        if model is None and from_checkpoint is None:
+            raise ValueError("You must specify either a model or a checkpoint")
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
         if model_limits is None:
-            model_limits = self.get_model_limits(model=model)
+            # mypy doesn't understand that model or from_checkpoint is not None
+            if model is not None:
+                model_name = model
+            elif from_checkpoint is not None:
+                model_name = from_checkpoint.split(":")[0]
+            else:
+                # this branch is unreachable, but mypy doesn't know that
+                pass
+            model_limits = self.get_model_limits(model=model_name)
+
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
             training_file=training_file,
@@ -610,7 +627,7 @@ class AsyncFineTuning:
         self,
         *,
         training_file: str,
-        model: str,
+        model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
         n_evals: int | None = 0,
@@ -643,7 +660,7 @@ class AsyncFineTuning:
 
         Args:
             training_file (str): File-ID of a file uploaded to the Together API
-            model (str): Name of the base model to run fine-tune job on
+            model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
@@ -693,12 +710,23 @@ class AsyncFineTuning:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
 
+        if model is None and from_checkpoint is None:
+            raise ValueError("You must specify either a model or a checkpoint")
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
         if model_limits is None:
-            model_limits = await self.get_model_limits(model=model)
+            # mypy doesn't understand that model or from_checkpoint is not None
+            if model is not None:
+                model_name = model
+            elif from_checkpoint is not None:
+                model_name = from_checkpoint.split(":")[0]
+            else:
+                # this branch is unreachable, but mypy doesn't know that
+                pass
+            model_limits = await self.get_model_limits(model=model_name)
 
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
