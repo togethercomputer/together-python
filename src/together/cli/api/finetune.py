@@ -423,6 +423,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 @click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
+    "-o",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=None,
@@ -430,6 +431,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--checkpoint-step",
+    "-s",
     type=int,
     required=False,
     default=None,
