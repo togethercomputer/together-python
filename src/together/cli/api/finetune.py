@@ -58,19 +58,27 @@ def fine_tuning(ctx: click.Context) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.option(
-    "--training-file", type=str, required=True, help="Training file ID from Files API"
+    "--training-file",
+    "-t",
+    type=str,
+    required=True,
+    help="Training file ID from Files API",
 )
-@click.option("--model", type=str, help="Base model name")
-@click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option("--model", "-m", type=str, help="Base model name")
+@click.option(
+    "--n-epochs", "-ne", type=int, default=1, help="Number of epochs to train for"
+)
 @click.option(
     "--validation-file", type=str, default="", help="Validation file ID from Files API"
 )
 @click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
 @click.option(
-    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
+    "--n-checkpoints", "-c", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
-@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--batch-size", "-b", type=INT_WITH_MAX, default="max", help="Train batch size"
+)
+@click.option("--learning-rate", "-lr", type=float, default=1e-5, help="Learning rate")
 @click.option(
     "--min-lr-ratio",
     type=float,
@@ -123,7 +131,11 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
-    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
+    "--suffix",
+    "-s",
+    type=str,
+    default=None,
+    help="Suffix for the fine-tuned model name",
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 @click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
@@ -418,6 +430,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 @click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
+    "-o",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=None,
@@ -425,6 +438,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--checkpoint-step",
+    "-s",
     type=int,
     required=False,
     default=None,
