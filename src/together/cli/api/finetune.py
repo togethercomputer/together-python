@@ -64,7 +64,7 @@ def fine_tuning(ctx: click.Context) -> None:
     required=True,
     help="Training file ID from Files API",
 )
-@click.option("--model", "-m", type=str, required=True, help="Base model name")
+@click.option("--model", "-m", type=str, help="Base model name")
 @click.option(
     "--n-epochs", "-ne", type=int, default=1, help="Number of epochs to train for"
 )
@@ -226,8 +226,15 @@ def create(
         from_checkpoint=from_checkpoint,
     )
 
+    if model is None and from_checkpoint is None:
+        raise click.BadParameter("You must specify either a model or a checkpoint")
+
+    model_name = model
+    if from_checkpoint is not None:
+        model_name = from_checkpoint.split(":")[0]
+
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model
+        model=model_name
     )
 
     if lora:
