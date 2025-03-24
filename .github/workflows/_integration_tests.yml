@@ -44,7 +44,7 @@ jobs:
 
       - name: Install together
         run: |
-          poetry run pip install .
+          poetry install
 
       - name: Run integration tests
         shell: bash
