@@ -44,6 +44,7 @@ jobs:
 
       - name: Install together
         run: |
+          poetry config virtualenvs.in-project true
           poetry install
 
       - name: Run integration tests
