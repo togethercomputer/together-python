@@ -22,7 +22,10 @@ from together.types import (
     TogetherRequest,
     TrainingType,
     FinetuneLRScheduler,
+    FinetuneLinearLRScheduler,
+    FinetuneCosineLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    FinetuneCosineLRSchedulerArgs,
     TrainingMethodDPO,
     TrainingMethodSFT,
     FinetuneCheckpoint,
@@ -57,7 +60,9 @@ def createFinetuneRequest(
     n_checkpoints: int | None = 1,
     batch_size: int | Literal["max"] = "max",
     learning_rate: float | None = 0.00001,
+    lr_scheduler_type: Literal["linear", "cosine"] = "linear",
     min_lr_ratio: float = 0.0,
+    scheduler_num_cycles: float = 0.5,
     warmup_ratio: float = 0.0,
     max_grad_norm: float = 1.0,
     weight_decay: float = 0.0,
@@ -147,10 +152,22 @@ def createFinetuneRequest(
             f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
         )
 
-    lrScheduler = FinetuneLRScheduler(
-        lr_scheduler_type="linear",
-        lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
-    )
+    # Default to generic lr scheduler
+    lrScheduler: FinetuneLRScheduler = FinetuneLRScheduler(lr_scheduler_type="linear")
+
+    if lr_scheduler_type == "cosine":
+        if scheduler_num_cycles <= 0.0:
+            raise ValueError("Number of cycles should be greater than 0")
+
+        lrScheduler = FinetuneCosineLRScheduler(
+            lr_scheduler_args=FinetuneCosineLRSchedulerArgs(
+                min_lr_ratio=min_lr_ratio, num_cycles=scheduler_num_cycles
+            ),
+        )
+    else:
+        lrScheduler = FinetuneLinearLRScheduler(
+            lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
+        )
 
     training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
     if training_method == "dpo":
@@ -262,7 +279,9 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -297,9 +316,11 @@ class FineTuning:
             batch_size (int or "max"): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -363,7 +384,9 @@ class FineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
@@ -644,7 +667,9 @@ class AsyncFineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -679,9 +704,11 @@ class AsyncFineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -745,7 +772,9 @@ class AsyncFineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,

@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  POETRY_VERSION: "1.7.1"
+  POETRY_VERSION: "2.1.1"
 
 jobs:
   build:
@@ -38,13 +38,9 @@ jobs:
           poetry-version: ${{ env.POETRY_VERSION }}
           cache-key: core
 
-      - name: Install dependencies
+      - name: Install together with dependencies
         shell: bash
         run: poetry install --with quality,tests
-
-      - name: Install together
-        run: |
-          poetry run pip install .
 
       - name: Run integration tests
         shell: bash

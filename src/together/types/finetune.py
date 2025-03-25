@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Union
 
-from pydantic import StrictBool, Field, validator, field_validator
+from pydantic import StrictBool, Field, validator, field_validator, ValidationInfo
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -176,7 +176,7 @@ class FinetuneRequest(BaseModel):
     # training learning rate
     learning_rate: float
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
@@ -239,7 +239,7 @@ class FinetuneResponse(BaseModel):
     # training learning rate
     learning_rate: float | None = None
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
     # max gradient norm
@@ -345,13 +345,27 @@ class FinetuneTrainingLimits(BaseModel):
     lora_training: FinetuneLoraTrainingLimits | None = None
 
 
-class FinetuneLRScheduler(BaseModel):
-    lr_scheduler_type: str
-    lr_scheduler_args: FinetuneLinearLRSchedulerArgs | None = None
-
-
 class FinetuneLinearLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
+
+
+class FinetuneCosineLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0
+    num_cycles: float | None = 0.5
+
+
+class FinetuneLRScheduler(BaseModel):
+    lr_scheduler_type: str
+
+
+class FinetuneLinearLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["linear"] = "linear"
+    lr_scheduler: FinetuneLinearLRSchedulerArgs | None = None
+
+
+class FinetuneCosineLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["cosine"] = "cosine"
+    lr_scheduler: FinetuneCosineLRSchedulerArgs | None = None
 
 
 class FinetuneCheckpoint(BaseModel):
