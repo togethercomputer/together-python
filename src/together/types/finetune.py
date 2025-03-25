@@ -170,7 +170,7 @@ class FinetuneRequest(BaseModel):
     # validation file id
     validation_file: str | None = None
     # base model string
-    model: str
+    model: str | None = None
     # number of epochs to train for
     n_epochs: int
     # training learning rate
