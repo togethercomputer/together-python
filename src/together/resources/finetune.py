@@ -87,6 +87,9 @@ def createFinetuneRequest(
             "You must specify either a model or a checkpoint to start a job from, not both"
         )
 
+    if model is None and from_checkpoint is None:
+        raise ValueError("You must specify either a model or a checkpoint")
+
     if batch_size == "max":
         log_warn_once(
             "Starting from together>=1.3.0, "
@@ -96,6 +99,8 @@ def createFinetuneRequest(
         warmup_ratio = 0.0
 
     training_type: TrainingType = FullTrainingType()
+    max_batch_size: int = 0
+    min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
             raise ValueError("LoRA adapters are not supported for the selected model.")
@@ -108,18 +113,26 @@ def createFinetuneRequest(
             lora_trainable_modules=lora_trainable_modules,
         )
 
-        batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.lora_training.max_batch_size
-        )
+        max_batch_size = model_limits.lora_training.max_batch_size
+        min_batch_size = model_limits.lora_training.min_batch_size
+
     else:
         if model_limits.full_training is None:
             raise ValueError("Full training is not supported for the selected model.")
-        batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.full_training.max_batch_size
+
+        max_batch_size = model_limits.full_training.max_batch_size
+        min_batch_size = model_limits.full_training.min_batch_size
+
+    batch_size = batch_size if batch_size != "max" else max_batch_size
+
+    if batch_size > max_batch_size:
+        raise ValueError(
+            "Requested batch size is higher that the maximum allowed value."
+        )
+
+    if batch_size < min_batch_size:
+        raise ValueError(
+            "Requested batch size is lower that the minimum allowed value."
         )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
@@ -345,9 +358,6 @@ class FineTuning:
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
-
-        if model is None and from_checkpoint is None:
-            raise ValueError("You must specify either a model or a checkpoint")
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
@@ -736,9 +746,6 @@ class AsyncFineTuning:
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
         """
-
-        if model is None and from_checkpoint is None:
-            raise ValueError("You must specify either a model or a checkpoint")
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
