@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
+import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -17,8 +18,13 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
+    format_timestamp,
 )
-from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneTrainingLimits,
+    FinetuneEventType,
+)
 
 
 _CONFIRMATION_MESSAGE = (
@@ -52,19 +58,33 @@ def fine_tuning(ctx: click.Context) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.option(
-    "--training-file", type=str, required=True, help="Training file ID from Files API"
+    "--training-file",
+    "-t",
+    type=str,
+    required=True,
+    help="Training file ID from Files API",
 )
-@click.option("--model", type=str, required=True, help="Base model name")
-@click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option("--model", "-m", type=str, help="Base model name")
+@click.option(
+    "--n-epochs", "-ne", type=int, default=1, help="Number of epochs to train for"
+)
 @click.option(
     "--validation-file", type=str, default="", help="Validation file ID from Files API"
 )
 @click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
 @click.option(
-    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
+    "--n-checkpoints", "-c", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
-@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--batch-size", "-b", type=INT_WITH_MAX, default="max", help="Train batch size"
+)
+@click.option("--learning-rate", "-lr", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--lr-scheduler-type",
+    type=click.Choice(["linear", "cosine"]),
+    default="linear",
+    help="Learning rate scheduler type",
+)
 @click.option(
     "--min-lr-ratio",
     type=float,
@@ -72,10 +92,16 @@ def fine_tuning(ctx: click.Context) -> None:
     help="The ratio of the final learning rate to the peak learning rate",
 )
 @click.option(
+    "--scheduler-num-cycles",
+    type=float,
+    default=0.5,
+    help="Number or fraction of cycles for the cosine learning rate scheduler.",
+)
+@click.option(
     "--warmup-ratio",
     type=float,
     default=0.0,
-    help="Warmup ratio for learning rate scheduler.",
+    help="Warmup ratio for the learning rate scheduler.",
 )
 @click.option(
     "--max-grad-norm",
@@ -105,7 +131,23 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Trainable modules for LoRA adapters. For example, 'all-linear', 'q_proj,v_proj'",
 )
 @click.option(
-    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
+    "--training-method",
+    type=click.Choice(["sft", "dpo"]),
+    default="sft",
+    help="Training method to use. Options: sft (supervised fine-tuning), dpo (Direct Preference Optimization)",
+)
+@click.option(
+    "--dpo-beta",
+    type=float,
+    default=0.1,
+    help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
+)
+@click.option(
+    "--suffix",
+    "-s",
+    type=str,
+    default=None,
+    help="Suffix for the fine-tuned model name",
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 @click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
@@ -126,6 +168,14 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
+@click.option(
+    "--from-checkpoint",
+    type=str,
+    default=None,
+    help="The checkpoint identifier to continue training from a previous fine-tuning job. "
+    "The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
+    "The step value is optional, without it the final checkpoint will be used.",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -136,7 +186,9 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    lr_scheduler_type: Literal["linear", "cosine"],
     min_lr_ratio: float,
+    scheduler_num_cycles: float,
     warmup_ratio: float,
     max_grad_norm: float,
     weight_decay: float,
@@ -152,6 +204,9 @@ def create(
     wandb_name: str,
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
+    training_method: str,
+    dpo_beta: float,
+    from_checkpoint: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -165,7 +220,9 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_type=lr_scheduler_type,
         min_lr_ratio=min_lr_ratio,
+        scheduler_num_cycles=scheduler_num_cycles,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,
@@ -180,10 +237,20 @@ def create(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method,
+        dpo_beta=dpo_beta,
+        from_checkpoint=from_checkpoint,
     )
 
+    if model is None and from_checkpoint is None:
+        raise click.BadParameter("You must specify either a model or a checkpoint")
+
+    model_name = model
+    if from_checkpoint is not None:
+        model_name = from_checkpoint.split(":")[0]
+
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model
+        model=model_name
     )
 
     if lora:
@@ -261,7 +328,9 @@ def list(ctx: click.Context) -> None:
 
     response.data = response.data or []
 
-    response.data.sort(key=lambda x: parse_timestamp(x.created_at or ""))
+    # Use a default datetime for None values to make sure the key function always returns a comparable value
+    epoch_start = datetime.fromtimestamp(0, tz=timezone.utc)
+    response.data.sort(key=lambda x: parse_timestamp(x.created_at or "") or epoch_start)
 
     display_list = []
     for i in response.data:
@@ -347,8 +416,37 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.argument("fine_tune_id", type=str, required=True)
+def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
+    """List available checkpoints for a fine-tuning job"""
+    client: Together = ctx.obj
+
+    checkpoints = client.fine_tuning.list_checkpoints(fine_tune_id)
+
+    display_list = []
+    for checkpoint in checkpoints:
+        display_list.append(
+            {
+                "Type": checkpoint.type,
+                "Timestamp": format_timestamp(checkpoint.timestamp),
+                "Name": checkpoint.name,
+            }
+        )
+
+    if display_list:
+        click.echo(f"Job {fine_tune_id} contains the following checkpoints:")
+        table = tabulate(display_list, headers="keys", tablefmt="grid")
+        click.echo(table)
+        click.echo("\nTo download a checkpoint, use `together fine-tuning download`")
+    else:
+        click.echo(f"No checkpoints found for job {fine_tune_id}")
+
+
+@fine_tuning.command()
+@click.pass_context
+@click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
+    "-o",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=None,
@@ -356,9 +454,10 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--checkpoint-step",
+    "-s",
     type=int,
     required=False,
-    default=-1,
+    default=None,
     help="Download fine-tuning checkpoint. Defaults to latest.",
 )
 @click.option(
@@ -372,7 +471,7 @@ def download(
     ctx: click.Context,
     fine_tune_id: str,
     output_dir: str,
-    checkpoint_step: int,
+    checkpoint_step: int | None,
     checkpoint_type: DownloadCheckpointType,
 ) -> None:
     """Download fine-tuning checkpoint"""

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Union
 
-from pydantic import StrictBool, Field, validator, field_validator
+from pydantic import StrictBool, Field, validator, field_validator, ValidationInfo
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -135,6 +135,31 @@ class LoRATrainingType(TrainingType):
     type: str = "Lora"
 
 
+class TrainingMethod(BaseModel):
+    """
+    Training method type
+    """
+
+    method: str
+
+
+class TrainingMethodSFT(TrainingMethod):
+    """
+    Training method type for SFT training
+    """
+
+    method: Literal["sft"] = "sft"
+
+
+class TrainingMethodDPO(TrainingMethod):
+    """
+    Training method type for DPO training
+    """
+
+    method: Literal["dpo"] = "dpo"
+    dpo_beta: float | None = None
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -145,13 +170,13 @@ class FinetuneRequest(BaseModel):
     # validation file id
     validation_file: str | None = None
     # base model string
-    model: str
+    model: str | None = None
     # number of epochs to train for
     n_epochs: int
     # training learning rate
     learning_rate: float
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
@@ -178,6 +203,12 @@ class FinetuneRequest(BaseModel):
     training_type: FullTrainingType | LoRATrainingType | None = None
     # train on inputs
     train_on_inputs: StrictBool | Literal["auto"] = "auto"
+    # training method
+    training_method: TrainingMethodSFT | TrainingMethodDPO = Field(
+        default_factory=TrainingMethodSFT
+    )
+    # from step
+    from_checkpoint: str | None = None
 
 
 class FinetuneResponse(BaseModel):
@@ -208,7 +239,7 @@ class FinetuneResponse(BaseModel):
     # training learning rate
     learning_rate: float | None = None
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
     # max gradient norm
@@ -256,6 +287,7 @@ class FinetuneResponse(BaseModel):
     training_file_num_lines: int | None = Field(None, alias="TrainingFileNumLines")
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
+    from_checkpoint: str | None = None
 
     @field_validator("training_type")
     @classmethod
@@ -313,10 +345,37 @@ class FinetuneTrainingLimits(BaseModel):
     lora_training: FinetuneLoraTrainingLimits | None = None
 
 
-class FinetuneLRScheduler(BaseModel):
-    lr_scheduler_type: str
-    lr_scheduler_args: FinetuneLinearLRSchedulerArgs | None = None
-
-
 class FinetuneLinearLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
+
+
+class FinetuneCosineLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0
+    num_cycles: float | None = 0.5
+
+
+class FinetuneLRScheduler(BaseModel):
+    lr_scheduler_type: str
+
+
+class FinetuneLinearLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["linear"] = "linear"
+    lr_scheduler: FinetuneLinearLRSchedulerArgs | None = None
+
+
+class FinetuneCosineLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["cosine"] = "cosine"
+    lr_scheduler: FinetuneCosineLRSchedulerArgs | None = None
+
+
+class FinetuneCheckpoint(BaseModel):
+    """
+    Fine-tuning checkpoint information
+    """
+
+    # checkpoint type (e.g. "Intermediate", "Final", "Final Merged", "Final Adapter")
+    type: str
+    # timestamp when the checkpoint was created
+    timestamp: str
+    # checkpoint name/identifier
+    name: str
