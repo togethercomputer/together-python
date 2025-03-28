@@ -13,9 +13,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "together"
 version = "1.5.3"
-authors = [
-    "Together AI <support@together.ai>"
-]
+authors = ["Together AI <support@together.ai>"]
 description = "Python client for Together's Cloud Platform!"
 readme = "README.md"
 license = "Apache-2.0"
@@ -65,6 +63,7 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 pytest = ">=7.4.2,<9.0.0"
 pytest-watch = "^4.2.0"
+pytest-mock = "^4.0.0"
 tox = "^4.14.1"
 
 [tool.poetry.group.examples]
