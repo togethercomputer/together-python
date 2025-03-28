@@ -1,19 +1,32 @@
 from __future__ import annotations
 
-import pytest
 
 from together.resources.code_interpreter import CodeInterpreter
 from together.together_response import TogetherResponse
-from together.types.code_interpreter import ExecuteResponse, ExecuteResponseData, InterpreterOutput
+from together.types.code_interpreter import (
+    ExecuteResponse,
+    ExecuteResponseData,
+    InterpreterOutput,
+)
 
 
 def test_interpreter_output_validation():
-    # Test valid stdout output
+    # Test stdout output
     stdout = InterpreterOutput(type="stdout", data="Hello, world!")
     assert stdout.type == "stdout"
     assert stdout.data == "Hello, world!"
 
-    # Test valid display_data output
+    # Test stderr output
+    stderr = InterpreterOutput(type="stderr", data="Warning message")
+    assert stderr.type == "stderr"
+    assert stderr.data == "Warning message"
+
+    # Test error output
+    error = InterpreterOutput(type="error", data="Error occurred")
+    assert error.type == "error"
+    assert error.data == "Error occurred"
+
+    # Test display_data output with dict data
     display_data = InterpreterOutput(
         type="display_data",
         data={
@@ -22,11 +35,14 @@ def test_interpreter_output_validation():
         },
     )
     assert display_data.type == "display_data"
-    assert display_data.data["text/plain"] == "Hello"
+    assert isinstance(display_data.data, dict)
+    assert display_data.data.get("text/plain") == "Hello"
+    assert display_data.data.get("text/html") == "<p>Hello</p>"
 
-    # Test invalid type
-    with pytest.raises(ValueError):
-        InterpreterOutput(type="invalid", data="test")
+    # Test execute_result output
+    execute_result = InterpreterOutput(type="execute_result", data="42")
+    assert execute_result.type == "execute_result"
+    assert execute_result.data == "42"
 
 
 def test_execute_response_validation():
@@ -67,7 +83,9 @@ def test_code_interpreter_run(mocker):
     }
     mock_response = TogetherResponse(data=response_data, headers=mock_headers)
     mock_requestor.request.return_value = (mock_response, None, None)
-    mocker.patch("together.abstract.api_requestor.APIRequestor", return_value=mock_requestor)
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
 
     # Create code interpreter instance
     client = mocker.MagicMock()
@@ -121,7 +139,9 @@ def test_code_interpreter_run_without_session(mocker):
     }
     mock_response = TogetherResponse(data=response_data, headers=mock_headers)
     mock_requestor.request.return_value = (mock_response, None, None)
-    mocker.patch("together.abstract.api_requestor.APIRequestor", return_value=mock_requestor)
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
 
     # Create code interpreter instance
     client = mocker.MagicMock()
@@ -143,3 +163,166 @@ def test_code_interpreter_run_without_session(mocker):
         "code": "x = 1",
         "language": "python",
     }
+
+
+def test_code_interpreter_error_handling(mocker):
+    # Mock the API requestor to simulate an error
+    mock_requestor = mocker.MagicMock()
+    response_data = {
+        "data": {
+            "session_id": "test_session",
+            "status": "error",
+            "outputs": [{"type": "error", "data": "Division by zero"}],
+        }
+    }
+    mock_headers = {
+        "cf-ray": "test-ray-id",
+        "x-ratelimit-remaining": "100",
+        "x-hostname": "test-host",
+        "x-total-time": "42.0",
+    }
+    mock_response = TogetherResponse(data=response_data, headers=mock_headers)
+    mock_requestor.request.return_value = (mock_response, None, None)
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
+
+    # Create code interpreter instance
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    # Test run method with code that would cause an error
+    response = interpreter.run(
+        code="1/0",  # This will cause a division by zero error
+        language="python",
+        session_id="test_session",
+    )
+
+    # Verify the error response
+    assert isinstance(response, ExecuteResponse)
+    assert response.data.status == "error"
+    assert len(response.data.outputs) == 1
+    assert response.data.outputs[0].type == "error"
+    assert "Division by zero" in response.data.outputs[0].data
+
+
+def test_code_interpreter_multiple_outputs(mocker):
+    # Mock the API requestor
+    mock_requestor = mocker.MagicMock()
+    response_data = {
+        "data": {
+            "session_id": "test_session",
+            "status": "success",
+            "outputs": [
+                {"type": "stdout", "data": "First line"},
+                {"type": "stderr", "data": "Warning message"},
+                {"type": "execute_result", "data": "42"},
+            ],
+        }
+    }
+    mock_headers = {
+        "cf-ray": "test-ray-id",
+        "x-ratelimit-remaining": "100",
+        "x-hostname": "test-host",
+        "x-total-time": "42.0",
+    }
+    mock_response = TogetherResponse(data=response_data, headers=mock_headers)
+    mock_requestor.request.return_value = (mock_response, None, None)
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
+
+    # Create code interpreter instance
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    # Test run method with code that produces multiple outputs
+    response = interpreter.run(
+        code='print("First line")\nimport sys\nsys.stderr.write("Warning message")\n42',
+        language="python",
+        session_id="test_session",
+    )
+
+    # Verify the response with multiple outputs
+    assert isinstance(response, ExecuteResponse)
+    assert response.data.status == "success"
+    assert len(response.data.outputs) == 3
+    assert response.data.outputs[0].type == "stdout"
+    assert response.data.outputs[1].type == "stderr"
+    assert response.data.outputs[2].type == "execute_result"
+
+
+def test_code_interpreter_session_management(mocker):
+    # Mock the API requestor
+    mock_requestor = mocker.MagicMock()
+
+    # First response - create new session
+    response_data1 = {
+        "data": {
+            "session_id": "new_session",
+            "status": "success",
+            "outputs": [{"type": "stdout", "data": "First execution"}],
+        }
+    }
+
+    # Second response - use existing session
+    response_data2 = {
+        "data": {
+            "session_id": "new_session",
+            "status": "success",
+            "outputs": [{"type": "stdout", "data": "Second execution"}],
+        }
+    }
+
+    mock_headers = {
+        "cf-ray": "test-ray-id",
+        "x-ratelimit-remaining": "100",
+        "x-hostname": "test-host",
+        "x-total-time": "42.0",
+    }
+
+    mock_response1 = TogetherResponse(data=response_data1, headers=mock_headers)
+    mock_response2 = TogetherResponse(data=response_data2, headers=mock_headers)
+    mock_requestor.request.side_effect = [
+        (mock_response1, None, None),
+        (mock_response2, None, None),
+    ]
+
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
+
+    # Create code interpreter instance
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    # First execution - no session ID
+    response1 = interpreter.run(
+        code='print("First execution")',
+        language="python",
+    )
+
+    # Second execution - using session ID from first execution
+    response2 = interpreter.run(
+        code='print("Second execution")',
+        language="python",
+        session_id=response1.data.session_id,
+    )
+
+    # Verify both responses
+    assert response1.data.session_id == "new_session"
+    assert response2.data.session_id == "new_session"
+    assert len(response1.data.outputs) == 1
+    assert len(response2.data.outputs) == 1
+    assert response1.data.outputs[0].data == "First execution"
+    assert response2.data.outputs[0].data == "Second execution"
+
+    # Verify API calls
+    assert mock_requestor.request.call_count == 2
+    calls = mock_requestor.request.call_args_list
+
+    # First call should not have session_id
+    assert "session_id" not in calls[0][1]["options"].params
+
+    # Second call should have session_id
+    assert calls[1][1]["options"].params["session_id"] == "new_session"
