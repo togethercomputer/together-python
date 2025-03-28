@@ -76,7 +76,7 @@ class Speech:
         response, streamed, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/audio/speech",
+                url="audio/speech",
                 params=parameter_payload,
             ),
             stream=stream,
@@ -144,7 +144,7 @@ class AsyncSpeech:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/audio/speech",
+                url="audio/speech",
                 params=parameter_payload,
             ),
             stream=stream,

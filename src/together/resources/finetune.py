@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
-from typing import Literal
+from typing import Literal, List
 
 from rich import print as rprint
 
@@ -21,23 +22,47 @@ from together.types import (
     TogetherRequest,
     TrainingType,
     FinetuneLRScheduler,
+    FinetuneLinearLRScheduler,
+    FinetuneCosineLRScheduler,
     FinetuneLinearLRSchedulerArgs,
+    FinetuneCosineLRSchedulerArgs,
+    TrainingMethodDPO,
+    TrainingMethodSFT,
+    FinetuneCheckpoint,
 )
-from together.types.finetune import DownloadCheckpointType
-from together.utils import log_warn_once, normalize_key
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneEvent,
+)
+from together.utils import (
+    log_warn_once,
+    normalize_key,
+    get_event_step,
+)
+
+_FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
+
+
+AVAILABLE_TRAINING_METHODS = {
+    TrainingMethodSFT().method,
+    TrainingMethodDPO().method,
+}
 
 
 def createFinetuneRequest(
     model_limits: FinetuneTrainingLimits,
     training_file: str,
-    model: str,
+    model: str | None = None,
     n_epochs: int = 1,
     validation_file: str | None = "",
     n_evals: int | None = 0,
     n_checkpoints: int | None = 1,
     batch_size: int | Literal["max"] = "max",
     learning_rate: float | None = 0.00001,
+    lr_scheduler_type: Literal["linear", "cosine"] = "linear",
     min_lr_ratio: float = 0.0,
+    scheduler_num_cycles: float = 0.5,
     warmup_ratio: float = 0.0,
     max_grad_norm: float = 1.0,
     weight_decay: float = 0.0,
@@ -52,7 +77,19 @@ def createFinetuneRequest(
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
     train_on_inputs: bool | Literal["auto"] = "auto",
+    training_method: str = "sft",
+    dpo_beta: float | None = None,
+    from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
+
+    if model is not None and from_checkpoint is not None:
+        raise ValueError(
+            "You must specify either a model or a checkpoint to start a job from, not both"
+        )
+
+    if model is None and from_checkpoint is None:
+        raise ValueError("You must specify either a model or a checkpoint")
+
     if batch_size == "max":
         log_warn_once(
             "Starting from together>=1.3.0, "
@@ -62,6 +99,8 @@ def createFinetuneRequest(
         warmup_ratio = 0.0
 
     training_type: TrainingType = FullTrainingType()
+    max_batch_size: int = 0
+    min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
             raise ValueError("LoRA adapters are not supported for the selected model.")
@@ -74,18 +113,26 @@ def createFinetuneRequest(
             lora_trainable_modules=lora_trainable_modules,
         )
 
-        batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.lora_training.max_batch_size
-        )
+        max_batch_size = model_limits.lora_training.max_batch_size
+        min_batch_size = model_limits.lora_training.min_batch_size
+
     else:
         if model_limits.full_training is None:
             raise ValueError("Full training is not supported for the selected model.")
-        batch_size = (
-            batch_size
-            if batch_size != "max"
-            else model_limits.full_training.max_batch_size
+
+        max_batch_size = model_limits.full_training.max_batch_size
+        min_batch_size = model_limits.full_training.min_batch_size
+
+    batch_size = batch_size if batch_size != "max" else max_batch_size
+
+    if batch_size > max_batch_size:
+        raise ValueError(
+            "Requested batch size is higher that the maximum allowed value."
+        )
+
+    if batch_size < min_batch_size:
+        raise ValueError(
+            "Requested batch size is lower that the minimum allowed value."
         )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
@@ -100,10 +147,31 @@ def createFinetuneRequest(
     if weight_decay is not None and (weight_decay < 0):
         raise ValueError("Weight decay should be non-negative")
 
-    lrScheduler = FinetuneLRScheduler(
-        lr_scheduler_type="linear",
-        lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
-    )
+    if training_method not in AVAILABLE_TRAINING_METHODS:
+        raise ValueError(
+            f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
+        )
+
+    # Default to generic lr scheduler
+    lrScheduler: FinetuneLRScheduler = FinetuneLRScheduler(lr_scheduler_type="linear")
+
+    if lr_scheduler_type == "cosine":
+        if scheduler_num_cycles <= 0.0:
+            raise ValueError("Number of cycles should be greater than 0")
+
+        lrScheduler = FinetuneCosineLRScheduler(
+            lr_scheduler_args=FinetuneCosineLRSchedulerArgs(
+                min_lr_ratio=min_lr_ratio, num_cycles=scheduler_num_cycles
+            ),
+        )
+    else:
+        lrScheduler = FinetuneLinearLRScheduler(
+            lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
+        )
+
+    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
+    if training_method == "dpo":
+        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
     finetune_request = FinetuneRequest(
         model=model,
@@ -125,9 +193,75 @@ def createFinetuneRequest(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         train_on_inputs=train_on_inputs,
+        training_method=training_method_cls,
+        from_checkpoint=from_checkpoint,
     )
 
     return finetune_request
+
+
+def _process_checkpoints_from_events(
+    events: List[FinetuneEvent], id: str
+) -> List[FinetuneCheckpoint]:
+    """
+    Helper function to process events and create checkpoint list.
+
+    Args:
+        events (List[FinetuneEvent]): List of fine-tune events to process
+        id (str): Fine-tune job ID
+
+    Returns:
+        List[FinetuneCheckpoint]: List of available checkpoints
+    """
+    checkpoints: List[FinetuneCheckpoint] = []
+
+    for event in events:
+        event_type = event.type
+
+        if event_type == FinetuneEventType.CHECKPOINT_SAVE:
+            step = get_event_step(event)
+            checkpoint_name = f"{id}:{step}" if step is not None else id
+
+            checkpoints.append(
+                FinetuneCheckpoint(
+                    type=(
+                        f"Intermediate (step {step})"
+                        if step is not None
+                        else "Intermediate"
+                    ),
+                    timestamp=event.created_at,
+                    name=checkpoint_name,
+                )
+            )
+        elif event_type == FinetuneEventType.JOB_COMPLETE:
+            if hasattr(event, "model_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Merged"
+                            if hasattr(event, "adapter_path")
+                            else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+            if hasattr(event, "adapter_path"):
+                checkpoints.append(
+                    FinetuneCheckpoint(
+                        type=(
+                            "Final Adapter" if hasattr(event, "model_path") else "Final"
+                        ),
+                        timestamp=event.created_at,
+                        name=id,
+                    )
+                )
+
+    # Sort by timestamp (newest first)
+    checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+
+    return checkpoints
 
 
 class FineTuning:
@@ -138,14 +272,16 @@ class FineTuning:
         self,
         *,
         training_file: str,
-        model: str,
+        model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -162,13 +298,16 @@ class FineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
 
         Args:
             training_file (str): File-ID of a file uploaded to the Together API
-            model (str): Name of the base model to run fine-tune job on
+            model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
@@ -177,9 +316,11 @@ class FineTuning:
             batch_size (int or "max"): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -207,6 +348,12 @@ class FineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -217,7 +364,15 @@ class FineTuning:
         )
 
         if model_limits is None:
-            model_limits = self.get_model_limits(model=model)
+            # mypy doesn't understand that model or from_checkpoint is not None
+            if model is not None:
+                model_name = model
+            elif from_checkpoint is not None:
+                model_name = from_checkpoint.split(":")[0]
+            else:
+                # this branch is unreachable, but mypy doesn't know that
+                pass
+            model_limits = self.get_model_limits(model=model_name)
 
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
@@ -229,7 +384,9 @@ class FineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
@@ -244,6 +401,9 @@ class FineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:
@@ -256,12 +416,11 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/fine-tunes",
+                url="fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
@@ -281,7 +440,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="/v1/fine-tunes",
+                url="fine-tunes",
             ),
             stream=False,
         )
@@ -308,7 +467,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"/v1/fine-tunes/{id}",
+                url=f"fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -335,7 +494,7 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url=f"/v1/fine-tunes/{id}/cancel",
+                url=f"fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -362,21 +521,33 @@ class FineTuning:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"/v1/fine-tunes/{id}/events",
+                url=f"fine-tunes/{id}/events",
             ),
             stream=False,
         )
-
         assert isinstance(response, TogetherResponse)
 
         return FinetuneListEvents(**response.data)
+
+    def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: List of available checkpoints
+        """
+        events = self.list_events(id).data or []
+        return _process_checkpoints_from_events(events, id)
 
     def download(
         self,
         id: str,
         *,
         output: Path | str | None = None,
-        checkpoint_step: int = -1,
+        checkpoint_step: int | None = None,
         checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
@@ -397,9 +568,19 @@ class FineTuning:
             FinetuneDownloadResult: Object containing downloaded model metadata
         """
 
+        if re.match(_FT_JOB_WITH_STEP_REGEX, id) is not None:
+            if checkpoint_step is None:
+                checkpoint_step = int(id.split(":")[1])
+                id = id.split(":")[0]
+            else:
+                raise ValueError(
+                    "Fine-tuning job ID {id} contains a colon to specify the step to download, but `checkpoint_step` "
+                    "was also set. Remove one of the step specifiers to proceed."
+                )
+
         url = f"finetune/download?ft_id={id}"
 
-        if checkpoint_step > 0:
+        if checkpoint_step is not None:
             url += f"&checkpoint_step={checkpoint_step}"
 
         ft_job = self.retrieve(id)
@@ -460,7 +641,7 @@ class FineTuning:
         model_limits_response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="/v1/fine-tunes/models/limits",
+                url="fine-tunes/models/limits",
                 params={"model_name": model},
             ),
             stream=False,
@@ -479,14 +660,16 @@ class AsyncFineTuning:
         self,
         *,
         training_file: str,
-        model: str,
+        model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
         n_evals: int | None = 0,
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
+        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
         min_lr_ratio: float = 0.0,
+        scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
         max_grad_norm: float = 1.0,
         weight_decay: float = 0.0,
@@ -503,13 +686,16 @@ class AsyncFineTuning:
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
         train_on_inputs: bool | Literal["auto"] = "auto",
+        training_method: str = "sft",
+        dpo_beta: float | None = None,
+        from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
 
         Args:
             training_file (str): File-ID of a file uploaded to the Together API
-            model (str): Name of the base model to run fine-tune job on
+            model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
             n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
@@ -518,9 +704,11 @@ class AsyncFineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
-            warmup_ratio (float, optional): Warmup ratio for learning rate scheduler.
+            scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
+            warmup_ratio (float, optional): Warmup ratio for the learning rate scheduler.
             max_grad_norm (float, optional): Max gradient norm. Defaults to 1.0, set to 0 to disable.
             weight_decay (float, optional): Weight decay. Defaults to 0.0.
             lora (bool, optional): Whether to use LoRA adapters. Defaults to True.
@@ -548,6 +736,12 @@ class AsyncFineTuning:
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
                 Defaults to "auto".
+            training_method (str, optional): Training method. Defaults to "sft".
+                Supported methods: "sft", "dpo".
+            dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
+                The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
+                The step value is optional, without it the final checkpoint will be used.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -558,7 +752,15 @@ class AsyncFineTuning:
         )
 
         if model_limits is None:
-            model_limits = await self.get_model_limits(model=model)
+            # mypy doesn't understand that model or from_checkpoint is not None
+            if model is not None:
+                model_name = model
+            elif from_checkpoint is not None:
+                model_name = from_checkpoint.split(":")[0]
+            else:
+                # this branch is unreachable, but mypy doesn't know that
+                pass
+            model_limits = await self.get_model_limits(model=model_name)
 
         finetune_request = createFinetuneRequest(
             model_limits=model_limits,
@@ -570,7 +772,9 @@ class AsyncFineTuning:
             n_checkpoints=n_checkpoints,
             batch_size=batch_size,
             learning_rate=learning_rate,
+            lr_scheduler_type=lr_scheduler_type,
             min_lr_ratio=min_lr_ratio,
+            scheduler_num_cycles=scheduler_num_cycles,
             warmup_ratio=warmup_ratio,
             max_grad_norm=max_grad_norm,
             weight_decay=weight_decay,
@@ -585,6 +789,9 @@ class AsyncFineTuning:
             wandb_project_name=wandb_project_name,
             wandb_name=wandb_name,
             train_on_inputs=train_on_inputs,
+            training_method=training_method,
+            dpo_beta=dpo_beta,
+            from_checkpoint=from_checkpoint,
         )
 
         if verbose:
@@ -597,7 +804,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/fine-tunes",
+                url="fine-tunes",
                 params=parameter_payload,
             ),
             stream=False,
@@ -622,7 +829,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="/v1/fine-tunes",
+                url="fine-tunes",
             ),
             stream=False,
         )
@@ -649,7 +856,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"/v1/fine-tunes/{id}",
+                url=f"fine-tunes/{id}",
             ),
             stream=False,
         )
@@ -676,7 +883,7 @@ class AsyncFineTuning:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url=f"/v1/fine-tunes/{id}/cancel",
+                url=f"fine-tunes/{id}/cancel",
             ),
             stream=False,
         )
@@ -687,30 +894,45 @@ class AsyncFineTuning:
 
     async def list_events(self, id: str) -> FinetuneListEvents:
         """
-        Async method to lists events of a fine-tune job
+        List fine-tuning events
 
         Args:
-            id (str): Fine-tune ID to list events for. A string that starts with `ft-`.
+            id (str): Unique identifier of the fine-tune job to list events for
 
         Returns:
-            FinetuneListEvents: Object containing list of fine-tune events
+            FinetuneListEvents: Object containing list of fine-tune job events
         """
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        response, _, _ = await requestor.arequest(
+        events_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"/v1/fine-tunes/{id}/events",
+                url=f"fine-tunes/{normalize_key(id)}/events",
             ),
             stream=False,
         )
 
-        assert isinstance(response, TogetherResponse)
+        # FIXME: API returns "data" field with no object type (should be "list")
+        events_list = FinetuneListEvents(object="list", **events_response.data)
 
-        return FinetuneListEvents(**response.data)
+        return events_list
+
+    async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: Object containing list of available checkpoints
+        """
+        events_list = await self.list_events(id)
+        events = events_list.data or []
+        return _process_checkpoints_from_events(events, id)
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1
@@ -742,7 +964,7 @@ class AsyncFineTuning:
         model_limits_response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="/v1/fine-tunes/models/limits",
+                url="fine-tunes/models/limits",
                 params={"model": model},
             ),
             stream=False,

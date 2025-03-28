@@ -141,7 +141,7 @@ class ChatCompletions:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/chat/completions",
+                url="chat/completions",
                 params=parameter_payload,
             ),
             stream=stream,
@@ -283,7 +283,7 @@ class AsyncChatCompletions:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/chat/completions",
+                url="chat/completions",
                 params=parameter_payload,
             ),
             stream=stream,

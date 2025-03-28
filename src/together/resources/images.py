@@ -76,7 +76,7 @@ class Images:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/images/generations",
+                url="images/generations",
                 params=parameter_payload,
             ),
             stream=False,
@@ -151,7 +151,7 @@ class AsyncImages:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/images/generations",
+                url="images/generations",
                 params=parameter_payload,
             ),
             stream=False,

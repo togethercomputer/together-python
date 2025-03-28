@@ -59,7 +59,7 @@ class Rerank:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/rerank",
+                url="rerank",
                 params=parameter_payload,
             ),
             stream=False,
@@ -117,7 +117,7 @@ class AsyncRerank:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="POST",
-                url="/v1/rerank",
+                url="rerank",
                 params=parameter_payload,
             ),
             stream=False,
