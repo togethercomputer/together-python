@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal, Union
+from typing import List, Literal
 
-from pydantic import StrictBool, Field, validator, field_validator, ValidationInfo
+from pydantic import StrictBool, Field, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -176,7 +176,7 @@ class FinetuneRequest(BaseModel):
     # training learning rate
     learning_rate: float
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
+    lr_scheduler: LinearLRScheduler | CosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
@@ -239,7 +239,7 @@ class FinetuneResponse(BaseModel):
     # training learning rate
     learning_rate: float | None = None
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLinearLRScheduler | FinetuneCosineLRScheduler | None = None
+    lr_scheduler: LinearLRScheduler | CosineLRScheduler | EmptyLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
     # max gradient norm
@@ -345,11 +345,11 @@ class FinetuneTrainingLimits(BaseModel):
     lora_training: FinetuneLoraTrainingLimits | None = None
 
 
-class FinetuneLinearLRSchedulerArgs(BaseModel):
+class LinearLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
 
 
-class FinetuneCosineLRSchedulerArgs(BaseModel):
+class CosineLRSchedulerArgs(BaseModel):
     min_lr_ratio: float | None = 0.0
     num_cycles: float | None = 0.5
 
@@ -358,14 +358,20 @@ class FinetuneLRScheduler(BaseModel):
     lr_scheduler_type: str
 
 
-class FinetuneLinearLRScheduler(FinetuneLRScheduler):
+class LinearLRScheduler(FinetuneLRScheduler):
     lr_scheduler_type: Literal["linear"] = "linear"
-    lr_scheduler: FinetuneLinearLRSchedulerArgs | None = None
+    lr_scheduler_args: LinearLRSchedulerArgs | None = None
 
 
-class FinetuneCosineLRScheduler(FinetuneLRScheduler):
+class CosineLRScheduler(FinetuneLRScheduler):
     lr_scheduler_type: Literal["cosine"] = "cosine"
-    lr_scheduler: FinetuneCosineLRSchedulerArgs | None = None
+    lr_scheduler_args: CosineLRSchedulerArgs | None = None
+
+
+# placeholder for old fine-tuning jobs with no lr_scheduler_type specified
+class EmptyLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal[""]
+    lr_scheduler_args: None = None
 
 
 class FinetuneCheckpoint(BaseModel):

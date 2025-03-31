@@ -22,10 +22,10 @@ from together.types import (
     TogetherRequest,
     TrainingType,
     FinetuneLRScheduler,
-    FinetuneLinearLRScheduler,
-    FinetuneCosineLRScheduler,
-    FinetuneLinearLRSchedulerArgs,
-    FinetuneCosineLRSchedulerArgs,
+    LinearLRScheduler,
+    CosineLRScheduler,
+    LinearLRSchedulerArgs,
+    CosineLRSchedulerArgs,
     TrainingMethodDPO,
     TrainingMethodSFT,
     FinetuneCheckpoint,
@@ -50,7 +50,7 @@ AVAILABLE_TRAINING_METHODS = {
 }
 
 
-def createFinetuneRequest(
+def create_finetune_request(
     model_limits: FinetuneTrainingLimits,
     training_file: str,
     model: str | None = None,
@@ -152,21 +152,19 @@ def createFinetuneRequest(
             f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
         )
 
-    # Default to generic lr scheduler
-    lrScheduler: FinetuneLRScheduler = FinetuneLRScheduler(lr_scheduler_type="linear")
-
+    lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
         if scheduler_num_cycles <= 0.0:
             raise ValueError("Number of cycles should be greater than 0")
 
-        lrScheduler = FinetuneCosineLRScheduler(
-            lr_scheduler_args=FinetuneCosineLRSchedulerArgs(
+        lr_scheduler = CosineLRScheduler(
+            lr_scheduler_args=CosineLRSchedulerArgs(
                 min_lr_ratio=min_lr_ratio, num_cycles=scheduler_num_cycles
             ),
         )
     else:
-        lrScheduler = FinetuneLinearLRScheduler(
-            lr_scheduler_args=FinetuneLinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
+        lr_scheduler = LinearLRScheduler(
+            lr_scheduler_args=LinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
         )
 
     training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
@@ -182,7 +180,7 @@ def createFinetuneRequest(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
-        lr_scheduler=lrScheduler,
+        lr_scheduler=lr_scheduler,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,
@@ -374,7 +372,7 @@ class FineTuning:
                 pass
             model_limits = self.get_model_limits(model=model_name)
 
-        finetune_request = createFinetuneRequest(
+        finetune_request = create_finetune_request(
             model_limits=model_limits,
             training_file=training_file,
             model=model,
@@ -762,7 +760,7 @@ class AsyncFineTuning:
                 pass
             model_limits = await self.get_model_limits(model=model_name)
 
-        finetune_request = createFinetuneRequest(
+        finetune_request = create_finetune_request(
             model_limits=model_limits,
             training_file=training_file,
             model=model,
