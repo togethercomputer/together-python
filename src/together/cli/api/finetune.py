@@ -212,6 +212,14 @@ def fine_tuning(ctx: click.Context) -> None:
     default=None,
     help="HF repo to upload the fine-tuned model to",
 )
+@click.option(
+    "--from-hf-model",
+    type=str,
+    default=None,
+    help="Model name from the Hugging Face Hub that will be used to initialize the trained model. "
+    "The model config is not validated; any model supported by Transformers should work, but the batch size "
+    "limits are not checked.",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -248,6 +256,7 @@ def create(
     from_checkpoint: str,
     hf_api_token: str | None,
     hf_output_repo_name: str | None,
+    from_hf_model: str,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -286,6 +295,7 @@ def create(
         from_checkpoint=from_checkpoint,
         hf_api_token=hf_api_token,
         hf_output_repo_name=hf_output_repo_name,
+        from_hf_model=from_hf_model,
     )
 
     if model is None and from_checkpoint is None:

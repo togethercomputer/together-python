@@ -217,6 +217,7 @@ class FinetuneRequest(BaseModel):
     # hf related fields
     hf_api_token: str | None = None
     hf_output_repo_name: str | None = None
+    from_hf_model: str | None = None
 
 
 class FinetuneResponse(BaseModel):
