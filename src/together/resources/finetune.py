@@ -76,6 +76,8 @@ def create_finetune_request(
     rpo_alpha: float | None = None,
     simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
+    from_hf_model: str | None = None,
+    hf_api_token: str | None = None,
 ) -> FinetuneRequest:
     if model is not None and from_checkpoint is not None:
         raise ValueError(
@@ -244,6 +246,8 @@ def create_finetune_request(
         wandb_name=wandb_name,
         training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
+        from_hf_model=from_hf_model,
+        hf_api_token=hf_api_token,
     )
 
     return finetune_request
@@ -323,6 +327,8 @@ class FineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        from_hf_model: str | None = None,
+        hf_api_token: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -379,6 +385,10 @@ class FineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            from_hf_model (str, optional): Model name from the Hugging Face Hub that will be used to initialize the trained model.
+                The model config is not validated; any model supported by Transformers should work, but the batch size
+                limits are not checked. Defaults to None.
+            hf_api_token (str, optional): API key for the Hugging Face Hub. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -432,6 +442,8 @@ class FineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            from_hf_model=from_hf_model,
+            hf_api_token=hf_api_token,
         )
 
         if verbose:
@@ -744,6 +756,8 @@ class AsyncFineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        from_hf_model: str | None = None,
+        hf_api_token: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -800,6 +814,10 @@ class AsyncFineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            from_hf_model (str, optional): Model name from the Hugging Face Hub that will be used to initialize the trained model.
+                The model config is not validated; any model supported by Transformers should work, but the batch size
+                limits are not checked. Defaults to None.
+            hf_api_token (str, optional): API key for the Huggging Face Hub. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -853,6 +871,8 @@ class AsyncFineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            from_hf_model=from_hf_model,
+            hf_api_token=hf_api_token,
         )
 
         if verbose:
