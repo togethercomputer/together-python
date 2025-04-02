@@ -12,7 +12,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "together"
-version = "1.5.4"
+version = "1.5.5"
 authors = ["Together AI <support@together.ai>"]
 description = "Python client for Together's Cloud Platform!"
 readme = "README.md"
