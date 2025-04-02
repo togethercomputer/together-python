@@ -378,7 +378,8 @@ class UploadManager:
 
             if not callback_response.status_code == 200:
                 raise APIError(
-                    f"Error code: {callback_response.status_code} - Failed to process uploaded file"
+                    f"Error during file upload: {callback_response.content.decode()}, headers: {callback_response.headers}",
+                    http_status=callback_response.status_code,
                 )
 
             response = self.callback(f"{url}/{file_id}/preprocess")
