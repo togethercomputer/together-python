@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Literal, List
+from typing import List, Literal
 
 from rich import print as rprint
 
@@ -10,36 +10,37 @@ from together.abstract import api_requestor
 from together.filemanager import DownloadManager
 from together.together_response import TogetherResponse
 from together.types import (
+    CosineLRScheduler,
+    CosineLRSchedulerArgs,
+    FinetuneCheckpoint,
     FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
+    FinetuneLRScheduler,
     FinetuneRequest,
     FinetuneResponse,
     FinetuneTrainingLimits,
     FullTrainingType,
+    LinearLRScheduler,
+    LinearLRSchedulerArgs,
     LoRATrainingType,
     TogetherClient,
     TogetherRequest,
-    TrainingType,
-    FinetuneLRScheduler,
-    LinearLRScheduler,
-    CosineLRScheduler,
-    LinearLRSchedulerArgs,
-    CosineLRSchedulerArgs,
     TrainingMethodDPO,
     TrainingMethodSFT,
-    FinetuneCheckpoint,
+    TrainingType,
 )
 from together.types.finetune import (
     DownloadCheckpointType,
-    FinetuneEventType,
     FinetuneEvent,
+    FinetuneEventType,
 )
 from together.utils import (
+    get_event_step,
     log_warn_once,
     normalize_key,
-    get_event_step,
 )
+
 
 _FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
 
@@ -63,7 +64,7 @@ def create_finetune_request(
     lr_scheduler_type: Literal["linear", "cosine"] = "linear",
     min_lr_ratio: float = 0.0,
     scheduler_num_cycles: float = 0.5,
-    warmup_ratio: float = 0.0,
+    warmup_ratio: float | None = None,
     max_grad_norm: float = 1.0,
     weight_decay: float = 0.0,
     lora: bool = False,
@@ -81,7 +82,6 @@ def create_finetune_request(
     dpo_beta: float | None = None,
     from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
-
     if model is not None and from_checkpoint is not None:
         raise ValueError(
             "You must specify either a model or a checkpoint to start a job from, not both"
@@ -89,6 +89,8 @@ def create_finetune_request(
 
     if model is None and from_checkpoint is None:
         raise ValueError("You must specify either a model or a checkpoint")
+
+    model_or_checkpoint = model or from_checkpoint
 
     if batch_size == "max":
         log_warn_once(
@@ -103,7 +105,9 @@ def create_finetune_request(
     min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
-            raise ValueError("LoRA adapters are not supported for the selected model.")
+            raise ValueError(
+                f"LoRA adapters are not supported for the selected model ({model_or_checkpoint})."
+            )
         lora_r = lora_r if lora_r is not None else model_limits.lora_training.max_rank
         lora_alpha = lora_alpha if lora_alpha is not None else lora_r * 2
         training_type = LoRATrainingType(
@@ -118,7 +122,9 @@ def create_finetune_request(
 
     else:
         if model_limits.full_training is None:
-            raise ValueError("Full training is not supported for the selected model.")
+            raise ValueError(
+                f"Full training is not supported for the selected model ({model_or_checkpoint})."
+            )
 
         max_batch_size = model_limits.full_training.max_batch_size
         min_batch_size = model_limits.full_training.min_batch_size
@@ -127,25 +133,29 @@ def create_finetune_request(
 
     if batch_size > max_batch_size:
         raise ValueError(
-            "Requested batch size is higher that the maximum allowed value."
+            f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
         )
 
     if batch_size < min_batch_size:
         raise ValueError(
-            "Requested batch size is lower that the minimum allowed value."
+            f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}."
         )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
-        raise ValueError("Warmup ratio should be between 0 and 1")
+        raise ValueError(f"Warmup ratio should be between 0 and 1 (got {warmup_ratio})")
 
     if min_lr_ratio is not None and (min_lr_ratio > 1 or min_lr_ratio < 0):
-        raise ValueError("Min learning rate ratio should be between 0 and 1")
+        raise ValueError(
+            f"Min learning rate ratio should be between 0 and 1 (got {min_lr_ratio})"
+        )
 
     if max_grad_norm < 0:
-        raise ValueError("Max gradient norm should be non-negative")
+        raise ValueError(
+            f"Max gradient norm should be non-negative (got {max_grad_norm})"
+        )
 
     if weight_decay is not None and (weight_decay < 0):
-        raise ValueError("Weight decay should be non-negative")
+        raise ValueError(f"Weight decay should be non-negative (got {weight_decay})")
 
     if training_method not in AVAILABLE_TRAINING_METHODS:
         raise ValueError(
@@ -155,7 +165,9 @@ def create_finetune_request(
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
         if scheduler_num_cycles <= 0.0:
-            raise ValueError("Number of cycles should be greater than 0")
+            raise ValueError(
+                f"Number of cycles should be greater than 0 (got {scheduler_num_cycles})"
+            )
 
         lr_scheduler = CosineLRScheduler(
             lr_scheduler_args=CosineLRSchedulerArgs(
