@@ -2,9 +2,9 @@ import pytest
 
 from together.resources.finetune import create_finetune_request
 from together.types.finetune import (
-    FinetuneTrainingLimits,
     FinetuneFullTrainingLimits,
     FinetuneLoraTrainingLimits,
+    FinetuneTrainingLimits,
 )
 
 
@@ -117,50 +117,36 @@ def test_no_from_checkpoint_no_model_name():
         )
 
 
-def test_batch_size_limit():
-    with pytest.raises(
-        ValueError,
-        match="Requested batch size is higher that the maximum allowed value",
-    ):
-        _ = create_finetune_request(
-            model_limits=_MODEL_LIMITS,
-            model=_MODEL_NAME,
-            training_file=_TRAINING_FILE,
-            batch_size=128,
-        )
+@pytest.mark.parametrize("batch_size", [256, 1])
+@pytest.mark.parametrize("use_lora", [False, True])
+def test_batch_size_limit(batch_size, use_lora):
+    model_limits = (
+        _MODEL_LIMITS.full_training if not use_lora else _MODEL_LIMITS.lora_training
+    )
+    max_batch_size = model_limits.max_batch_size
+    min_batch_size = model_limits.min_batch_size
 
-    with pytest.raises(
-        ValueError, match="Requested batch size is lower that the minimum allowed value"
-    ):
-        _ = create_finetune_request(
-            model_limits=_MODEL_LIMITS,
-            model=_MODEL_NAME,
-            training_file=_TRAINING_FILE,
-            batch_size=1,
-        )
+    if batch_size > max_batch_size:
+        error_message = f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}"
+        with pytest.raises(ValueError, match=error_message):
+            _ = create_finetune_request(
+                model_limits=_MODEL_LIMITS,
+                model=_MODEL_NAME,
+                training_file=_TRAINING_FILE,
+                batch_size=batch_size,
+                lora=use_lora,
+            )
 
-    with pytest.raises(
-        ValueError,
-        match="Requested batch size is higher that the maximum allowed value",
-    ):
-        _ = create_finetune_request(
-            model_limits=_MODEL_LIMITS,
-            model=_MODEL_NAME,
-            training_file=_TRAINING_FILE,
-            batch_size=256,
-            lora=True,
-        )
-
-    with pytest.raises(
-        ValueError, match="Requested batch size is lower that the minimum allowed value"
-    ):
-        _ = create_finetune_request(
-            model_limits=_MODEL_LIMITS,
-            model=_MODEL_NAME,
-            training_file=_TRAINING_FILE,
-            batch_size=1,
-            lora=True,
-        )
+    if batch_size < min_batch_size:
+        error_message = f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}"
+        with pytest.raises(ValueError, match=error_message):
+            _ = create_finetune_request(
+                model_limits=_MODEL_LIMITS,
+                model=_MODEL_NAME,
+                training_file=_TRAINING_FILE,
+                batch_size=batch_size,
+                lora=use_lora,
+            )
 
 
 def test_non_lora_model():
