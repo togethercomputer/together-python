@@ -186,6 +186,30 @@ async def async_chat_completion(messages):
 asyncio.run(async_chat_completion(messages))
 ```
 
+#### Fetching logprobs
+
+Logprobs are logarithms of token-level generation probabilities that indicate the likelihood of the generated token based on the previous tokens in the context. Logprobs allow us to estimate the model's confidence in its outputs, which can be used to decide how to optimally consume the model's output (e.g. rejecting low confidence outputs, retrying or ensembling model outputs etc).
+
+```python
+from together import Together
+
+client = Together()
+
+response = client.chat.completions.create(
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    messages=[{"role": "user", "content": "tell me about new york"}],
+    logprobs=1
+)
+
+response_lobprobs = response.choices[0].logprobs
+
+print(dict(zip(response_lobprobs.tokens, response_lobprobs.token_logprobs)))
+# {'New': -2.384e-07, ' York': 0.0, ',': 0.0, ' also': -0.20703125, ' known': -0.20214844, ' as': -8.34465e-07, ... }
+```
+
+More details about using logprobs in Together's API can be found [here](https://docs.together.ai/docs/logprobs).
+
+
 ### Completions
 
 Completions are for code and language models shown [here](https://docs.together.ai/docs/inference-models). Below, a code model example is shown.
