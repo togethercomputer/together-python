@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Literal, Any
 
-from pydantic import StrictBool, Field, field_validator
+from pydantic import Field, StrictBool, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -149,6 +149,7 @@ class TrainingMethodSFT(TrainingMethod):
     """
 
     method: Literal["sft"] = "sft"
+    train_on_inputs: StrictBool | Literal["auto"] = "auto"
 
 
 class TrainingMethodDPO(TrainingMethod):
@@ -201,8 +202,6 @@ class FinetuneRequest(BaseModel):
     wandb_name: str | None = None
     # training type
     training_type: FullTrainingType | LoRATrainingType | None = None
-    # train on inputs
-    train_on_inputs: StrictBool | Literal["auto"] = "auto"
     # training method
     training_method: TrainingMethodSFT | TrainingMethodDPO = Field(
         default_factory=TrainingMethodSFT
