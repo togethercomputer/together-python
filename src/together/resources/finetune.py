@@ -175,6 +175,9 @@ def create_finetune_request(
         )
         train_on_inputs = "auto"
 
+    if dpo_beta is not None and training_method != "dpo":
+        raise ValueError("dpo_beta is only supported for DPO training")
+
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
         if scheduler_num_cycles <= 0.0:
