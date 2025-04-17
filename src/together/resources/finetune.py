@@ -69,7 +69,7 @@ def create_finetune_request(
     wandb_base_url: str | None = None,
     wandb_project_name: str | None = None,
     wandb_name: str | None = None,
-    train_on_inputs: bool | Literal["auto"] = "auto",
+    train_on_inputs: bool | Literal["auto"] | None = None,
     training_method: str = "sft",
     dpo_beta: float | None = None,
     from_checkpoint: str | None = None,
@@ -166,6 +166,15 @@ def create_finetune_request(
             f"training_method must be one of {', '.join(AVAILABLE_TRAINING_METHODS)}"
         )
 
+    if train_on_inputs is not None and training_method != "sft":
+        raise ValueError("train_on_inputs is only supported for SFT training")
+
+    if train_on_inputs is None and training_method == "sft":
+        log_warn_once(
+            "train_on_inputs is not set for SFT training, it will be set to 'auto' automatically"
+        )
+        train_on_inputs = "auto"
+
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
         if scheduler_num_cycles <= 0.0:
@@ -183,7 +192,9 @@ def create_finetune_request(
             lr_scheduler_args=LinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
         )
 
-    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
+    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT(
+        train_on_inputs=train_on_inputs
+    )
     if training_method == "dpo":
         training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
@@ -206,7 +217,6 @@ def create_finetune_request(
         wandb_base_url=wandb_base_url,
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
-        train_on_inputs=train_on_inputs,
         training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
     )
@@ -281,7 +291,7 @@ class FineTuning:
         wandb_name: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
-        train_on_inputs: bool | Literal["auto"] = "auto",
+        train_on_inputs: bool | Literal["auto"] | None = None,
         training_method: str = "sft",
         dpo_beta: float | None = None,
         from_checkpoint: str | None = None,
@@ -326,12 +336,12 @@ class FineTuning:
                 Defaults to False.
             model_limits (FinetuneTrainingLimits, optional): Limits for the hyperparameters the model in Fine-tuning.
                 Defaults to None.
-            train_on_inputs (bool or "auto"): Whether to mask the user messages in conversational data or prompts in instruction data.
+            train_on_inputs (bool or "auto", optional): Whether to mask the user messages in conversational data or prompts in instruction data.
                 "auto" will automatically determine whether to mask the inputs based on the data format.
                 For datasets with the "text" field (general format), inputs will not be masked.
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
-                Defaults to "auto".
+                Defaults to None, or "auto" if training_method is "sft" (set in create_finetune_request).
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
@@ -693,7 +703,7 @@ class AsyncFineTuning:
         wandb_name: str | None = None,
         verbose: bool = False,
         model_limits: FinetuneTrainingLimits | None = None,
-        train_on_inputs: bool | Literal["auto"] = "auto",
+        train_on_inputs: bool | Literal["auto"] | None = None,
         training_method: str = "sft",
         dpo_beta: float | None = None,
         from_checkpoint: str | None = None,
@@ -743,7 +753,7 @@ class AsyncFineTuning:
                 For datasets with the "text" field (general format), inputs will not be masked.
                 For datasets with the "messages" field (conversational format) or "prompt" and "completion" fields
                 (Instruction format), inputs will be masked.
-                Defaults to "auto".
+                Defaults to None, or "auto" if training_method is "sft" (set in create_finetune_request).
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
-import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -13,17 +13,17 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneTrainingLimits,
+)
 from together.utils import (
     finetune_price_to_dollars,
+    format_timestamp,
     log_warn,
     log_warn_once,
     parse_timestamp,
-    format_timestamp,
-)
-from together.types.finetune import (
-    DownloadCheckpointType,
-    FinetuneTrainingLimits,
-    FinetuneEventType,
 )
 
 
@@ -348,9 +348,9 @@ def list(ctx: click.Context) -> None:
                 "Model Output Name": "\n".join(wrap(i.output_name or "", width=30)),
                 "Status": i.status,
                 "Created At": i.created_at,
-                "Price": f"""${finetune_price_to_dollars(
-                    float(str(i.total_price))
-                )}""",  # convert to string for mypy typing
+                "Price": f"""${
+                    finetune_price_to_dollars(float(str(i.total_price)))
+                }""",  # convert to string for mypy typing
             }
         )
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
