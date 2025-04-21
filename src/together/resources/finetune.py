@@ -195,10 +195,10 @@ def create_finetune_request(
             lr_scheduler_args=LinearLRSchedulerArgs(min_lr_ratio=min_lr_ratio),
         )
 
-    training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT(
-        train_on_inputs=train_on_inputs
-    )
-    if training_method == "dpo":
+    training_method_cls: TrainingMethodSFT | TrainingMethodDPO
+    if training_method == "sft":
+        training_method_cls = TrainingMethodSFT(train_on_inputs=train_on_inputs)
+    elif training_method == "dpo":
         training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
 
     finetune_request = FinetuneRequest(
