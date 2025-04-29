@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+from pydantic import ValidationError
 
 from together.resources.code_interpreter import CodeInterpreter
 from together.together_response import TogetherResponse
@@ -326,3 +328,117 @@ def test_code_interpreter_session_management(mocker):
 
     # Second call should have session_id
     assert calls[1][1]["options"].params["session_id"] == "new_session"
+
+
+def test_code_interpreter_run_with_files(mocker):
+
+    mock_requestor = mocker.MagicMock()
+    response_data = {
+        "data": {
+            "session_id": "test_session_files",
+            "status": "success",
+            "outputs": [{"type": "stdout", "data": "File content read"}],
+        }
+    }
+    mock_headers = {
+        "cf-ray": "test-ray-id-files",
+        "x-ratelimit-remaining": "98",
+        "x-hostname": "test-host",
+        "x-total-time": "42.0",
+    }
+    mock_response = TogetherResponse(data=response_data, headers=mock_headers)
+    mock_requestor.request.return_value = (mock_response, None, None)
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
+
+    # Create code interpreter instance
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    # Define files
+    files_to_upload = [
+        {"name": "test.txt", "encoding": "string", "content": "Hello from file!"},
+        {"name": "image.png", "encoding": "base64", "content": "aW1hZ2UgZGF0YQ=="},
+    ]
+
+    # Test run method with files (passing list of dicts)
+    response = interpreter.run(
+        code='with open("test.txt") as f: print(f.read())',
+        language="python",
+        files=files_to_upload, # Pass the list of dictionaries directly
+    )
+
+    # Verify the response
+    assert isinstance(response, ExecuteResponse)
+    assert response.data.session_id == "test_session_files"
+    assert response.data.status == "success"
+    assert len(response.data.outputs) == 1
+    assert response.data.outputs[0].type == "stdout"
+
+    # Verify API request includes files (expected_files_payload remains the same)
+    mock_requestor.request.assert_called_once_with(
+        options=mocker.ANY,
+        stream=False,
+    )
+    request_options = mock_requestor.request.call_args[1]["options"]
+    assert request_options.method == "POST"
+    assert request_options.url == "/tci/execute"
+    expected_files_payload = [
+        {"name": "test.txt", "encoding": "string", "content": "Hello from file!"},
+        {"name": "image.png", "encoding": "base64", "content": "aW1hZ2UgZGF0YQ=="},
+    ]
+    assert request_options.params == {
+        "code": 'with open("test.txt") as f: print(f.read())',
+        "language": "python",
+        "files": expected_files_payload,
+    }
+
+def test_code_interpreter_run_with_invalid_file_dict_structure(mocker):
+    """Test that run raises ValueError for missing keys in file dict."""
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    invalid_files = [
+        {"name": "test.txt", "content": "Missing encoding"} # Missing 'encoding'
+    ]
+
+    with pytest.raises(ValueError, match="Invalid file input format"):
+        interpreter.run(
+            code="print('test')",
+            language="python",
+            files=invalid_files,
+        )
+
+def test_code_interpreter_run_with_invalid_file_dict_encoding(mocker):
+    """Test that run raises ValueError for invalid encoding value."""
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    invalid_files = [
+        {"name": "test.txt", "encoding": "utf-8", "content": "Invalid encoding"} # Invalid 'encoding' value
+    ]
+
+    with pytest.raises(ValueError, match="Invalid file input format"):
+        interpreter.run(
+            code="print('test')",
+            language="python",
+            files=invalid_files,
+        )
+
+def test_code_interpreter_run_with_invalid_file_list_item(mocker):
+    """Test that run raises ValueError for non-dict item in files list."""
+    client = mocker.MagicMock()
+    interpreter = CodeInterpreter(client)
+
+    invalid_files = [
+        {"name": "good.txt", "encoding": "string", "content": "Good"},
+        "not a dictionary" # Invalid item type
+    ]
+
+    with pytest.raises(ValueError, match="Invalid file input: Each item in 'files' must be a dictionary"):
+        interpreter.run(
+            code="print('test')",
+            language="python",
+            files=invalid_files,
+        )
