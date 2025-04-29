@@ -103,7 +103,7 @@ code_to_run_script = "!python myscript.py"
 response = code_interpreter.run(
     code=code_to_run_script,
     language="python",
-    files=[script_file], # Pass the script dictionary in a list
+    files=[script_file],  # Pass the script dictionary in a list
 )
 
 # Print results
@@ -124,12 +124,13 @@ tiny_png_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkY
 
 image_file = {
     "name": "tiny.png",
-    "encoding": "base64", # Use base64 encoding for binary files
+    "encoding": "base64",  # Use base64 encoding for binary files
     "content": tiny_png_base64,
 }
 
 # Code to check if the file exists and its size (Python doesn't inherently know image dimensions from bytes alone)
-code_to_check_file = """
+code_to_check_file = (
+    """
 import os
 import base64
 
@@ -138,7 +139,9 @@ if os.path.exists(file_path):
     # Read the raw bytes back
     with open(file_path, 'rb') as f:
         raw_bytes = f.read()
-    original_bytes = base64.b64decode('""" + tiny_png_base64 + """')
+    original_bytes = base64.b64decode('"""
+    + tiny_png_base64
+    + """')
     print(f"File '{file_path}' exists.")
     print(f"Size on disk: {os.path.getsize(file_path)} bytes.")
     print(f"Size of original decoded base64 data: {len(original_bytes)} bytes.")
@@ -146,6 +149,7 @@ if os.path.exists(file_path):
 else:
     print(f"File '{file_path}' does not exist.")
 """
+)
 
 response = code_interpreter.run(
     code=code_to_check_file,

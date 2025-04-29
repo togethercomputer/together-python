@@ -41,7 +41,7 @@ class CodeInterpreter:
             client=self._client,
         )
 
-        data: Dict[str, str] = {
+        data: Dict[str, Any] = {
             "code": code,
             "language": language,
         }
@@ -60,7 +60,9 @@ class CodeInterpreter:
             except ValidationError as e:
                 raise ValueError(f"Invalid file input format: {e}") from e
             except TypeError as e:
-                 raise ValueError(f"Invalid file input: Each item in 'files' must be a dictionary. Error: {e}") from e
+                raise ValueError(
+                    f"Invalid file input: Each item in 'files' must be a dictionary. Error: {e}"
+                ) from e
 
             data["files"] = serialized_files
 

@@ -366,7 +366,7 @@ def test_code_interpreter_run_with_files(mocker):
     response = interpreter.run(
         code='with open("test.txt") as f: print(f.read())',
         language="python",
-        files=files_to_upload, # Pass the list of dictionaries directly
+        files=files_to_upload,  # Pass the list of dictionaries directly
     )
 
     # Verify the response
@@ -394,13 +394,14 @@ def test_code_interpreter_run_with_files(mocker):
         "files": expected_files_payload,
     }
 
+
 def test_code_interpreter_run_with_invalid_file_dict_structure(mocker):
     """Test that run raises ValueError for missing keys in file dict."""
     client = mocker.MagicMock()
     interpreter = CodeInterpreter(client)
 
     invalid_files = [
-        {"name": "test.txt", "content": "Missing encoding"} # Missing 'encoding'
+        {"name": "test.txt", "content": "Missing encoding"}  # Missing 'encoding'
     ]
 
     with pytest.raises(ValueError, match="Invalid file input format"):
@@ -409,6 +410,7 @@ def test_code_interpreter_run_with_invalid_file_dict_structure(mocker):
             language="python",
             files=invalid_files,
         )
+
 
 def test_code_interpreter_run_with_invalid_file_dict_encoding(mocker):
     """Test that run raises ValueError for invalid encoding value."""
@@ -416,7 +418,11 @@ def test_code_interpreter_run_with_invalid_file_dict_encoding(mocker):
     interpreter = CodeInterpreter(client)
 
     invalid_files = [
-        {"name": "test.txt", "encoding": "utf-8", "content": "Invalid encoding"} # Invalid 'encoding' value
+        {
+            "name": "test.txt",
+            "encoding": "utf-8",
+            "content": "Invalid encoding",
+        }  # Invalid 'encoding' value
     ]
 
     with pytest.raises(ValueError, match="Invalid file input format"):
@@ -425,6 +431,7 @@ def test_code_interpreter_run_with_invalid_file_dict_encoding(mocker):
             language="python",
             files=invalid_files,
         )
+
 
 def test_code_interpreter_run_with_invalid_file_list_item(mocker):
     """Test that run raises ValueError for non-dict item in files list."""
@@ -433,10 +440,13 @@ def test_code_interpreter_run_with_invalid_file_list_item(mocker):
 
     invalid_files = [
         {"name": "good.txt", "encoding": "string", "content": "Good"},
-        "not a dictionary" # Invalid item type
+        "not a dictionary",  # Invalid item type
     ]
 
-    with pytest.raises(ValueError, match="Invalid file input: Each item in 'files' must be a dictionary"):
+    with pytest.raises(
+        ValueError,
+        match="Invalid file input: Each item in 'files' must be a dictionary",
+    ):
         interpreter.run(
             code="print('test')",
             language="python",

@@ -6,6 +6,7 @@ from pydantic import Field
 
 from together.types.endpoints import TogetherJSONModel
 
+
 class FileInput(TogetherJSONModel):
     """File input to be uploaded to the code interpreter session."""
 
