@@ -213,9 +213,6 @@ class DownloadManager:
                 if not fetch_metadata:
                     file_size = int(response.headers.get("content-length", 0))
 
-                # TODO: We are commenting this out while we figure out why we get file_size == 0.
-                # assert file_size != 0, "Unable to retrieve remote file."
-
                 with tqdm(
                     total=file_size,
                     unit="B",
