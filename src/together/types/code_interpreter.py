@@ -7,6 +7,16 @@ from pydantic import Field
 from together.types.endpoints import TogetherJSONModel
 
 
+class FileInput(TogetherJSONModel):
+    """File input to be uploaded to the code interpreter session."""
+
+    name: str = Field(description="The name of the file.")
+    encoding: Literal["string", "base64"] = Field(
+        description="Encoding of the file content. Use 'string' for text files and 'base64' for binary files."
+    )
+    content: str = Field(description="The content of the file, encoded as specified.")
+
+
 class InterpreterOutput(TogetherJSONModel):
     """Base class for interpreter output types."""
 
@@ -40,6 +50,7 @@ class ExecuteResponse(TogetherJSONModel):
 
 
 __all__ = [
+    "FileInput",
     "InterpreterOutput",
     "ExecuteResponseData",
     "ExecuteResponse",
