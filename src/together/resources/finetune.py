@@ -80,6 +80,7 @@ def create_finetune_request(
     train_on_inputs: bool | Literal["auto"] = "auto",
     training_method: str = "sft",
     dpo_beta: float | None = None,
+    rpo_alpha: float | None = None,
     from_checkpoint: str | None = None,
 ) -> FinetuneRequest:
     if model is not None and from_checkpoint is not None:
@@ -193,7 +194,7 @@ def create_finetune_request(
 
     training_method_cls: TrainingMethodSFT | TrainingMethodDPO = TrainingMethodSFT()
     if training_method == "dpo":
-        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
+        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta, rpo_alpha=rpo_alpha)
 
     finetune_request = FinetuneRequest(
         model=model,
@@ -322,6 +323,7 @@ class FineTuning:
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        rpo_alpha: float | None = None,
         from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
@@ -373,6 +375,7 @@ class FineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            rpo_alpha (float, optional): RPO alpha to control the weight of NLL loss component for chosen responses. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
@@ -425,6 +428,7 @@ class FineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            rpo_alpha=rpo_alpha,
             from_checkpoint=from_checkpoint,
         )
 
@@ -710,6 +714,7 @@ class AsyncFineTuning:
         train_on_inputs: bool | Literal["auto"] = "auto",
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        rpo_alpha: float | None = None,
         from_checkpoint: str | None = None,
     ) -> FinetuneResponse:
         """
@@ -761,6 +766,7 @@ class AsyncFineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            rpo_alpha (float, optional): RPO alpha to control the weight of NLL loss component for chosen responses. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
@@ -813,6 +819,7 @@ class AsyncFineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            rpo_alpha=rpo_alpha,
             from_checkpoint=from_checkpoint,
         )
 
