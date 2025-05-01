@@ -329,6 +329,7 @@ class FinetuneDownloadResult(BaseModel):
 
 class FinetuneFullTrainingLimits(BaseModel):
     max_batch_size: int
+    max_batch_size_dpo: int
     min_batch_size: int
 
 

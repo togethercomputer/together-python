@@ -18,10 +18,12 @@ _MODEL_LIMITS = FinetuneTrainingLimits(
     min_learning_rate=1e-6,
     full_training=FinetuneFullTrainingLimits(
         max_batch_size=96,
+        max_batch_size_dpo=48,
         min_batch_size=8,
     ),
     lora_training=FinetuneLoraTrainingLimits(
         max_batch_size=128,
+        max_batch_size_dpo=64,
         min_batch_size=8,
         max_rank=64,
         target_modules=["q", "k", "v", "o", "mlp"],
@@ -81,6 +83,40 @@ def test_lora_request():
     assert request.training_type.lora_dropout == 0.0
     assert request.training_type.lora_trainable_modules == "all-linear"
     assert request.batch_size == _MODEL_LIMITS.lora_training.max_batch_size
+
+
+def test_dpo_request_lora():
+    request = create_finetune_request(
+        model_limits=_MODEL_LIMITS,
+        model=_MODEL_NAME,
+        training_file=_TRAINING_FILE,
+        training_method="dpo",
+        lora=True,
+    )
+
+    assert request.training_type.type == "Lora"
+    assert request.training_type.lora_r == _MODEL_LIMITS.lora_training.max_rank
+    assert request.training_type.lora_alpha == _MODEL_LIMITS.lora_training.max_rank * 2
+    assert request.training_type.lora_dropout == 0.0
+    assert request.training_type.lora_trainable_modules == "all-linear"
+    assert request.batch_size == _MODEL_LIMITS.lora_training.max_batch_size_dpo
+
+
+def test_dpo_request():
+    request = create_finetune_request(
+        model_limits=_MODEL_LIMITS,
+        model=_MODEL_NAME,
+        training_file=_TRAINING_FILE,
+        training_method="dpo",
+        lora=False,
+    )
+
+    assert request.training_type.type == "Lora"
+    assert request.training_type.lora_r == _MODEL_LIMITS.lora_training.max_rank
+    assert request.training_type.lora_alpha == _MODEL_LIMITS.lora_training.max_rank * 2
+    assert request.training_type.lora_dropout == 0.0
+    assert request.training_type.lora_trainable_modules == "all-linear"
+    assert request.batch_size == _MODEL_LIMITS.full_training.max_batch_size_dpo
 
 
 def test_from_checkpoint_request():
