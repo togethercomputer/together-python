@@ -102,6 +102,7 @@ def create_finetune_request(
 
     training_type: TrainingType = FullTrainingType()
     max_batch_size: int = 0
+    max_batch_size_dpo: int = 0
     min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
@@ -119,7 +120,7 @@ def create_finetune_request(
 
         max_batch_size = model_limits.lora_training.max_batch_size
         min_batch_size = model_limits.lora_training.min_batch_size
-
+        max_batch_size_dpo = model_limits.lora_training.max_batch_size_dpo
     else:
         if model_limits.full_training is None:
             raise ValueError(
@@ -128,13 +129,24 @@ def create_finetune_request(
 
         max_batch_size = model_limits.full_training.max_batch_size
         min_batch_size = model_limits.full_training.min_batch_size
+        max_batch_size_dpo = model_limits.full_training.max_batch_size_dpo
 
-    batch_size = batch_size if batch_size != "max" else max_batch_size
+    if batch_size == "max":
+        if training_method == "dpo":
+            batch_size = max_batch_size_dpo
+        else:
+            batch_size = max_batch_size
 
-    if batch_size > max_batch_size:
-        raise ValueError(
-            f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
-        )
+    if training_method == "sft":
+        if batch_size > max_batch_size:
+            raise ValueError(
+                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
+            )
+    elif training_method == "dpo":
+        if batch_size > max_batch_size_dpo:
+            raise ValueError(
+                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size_dpo}."
+            )
 
     if batch_size < min_batch_size:
         raise ValueError(

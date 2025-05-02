@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Any
 
 from pydantic import StrictBool, Field, field_validator
 
@@ -329,7 +329,15 @@ class FinetuneDownloadResult(BaseModel):
 
 class FinetuneFullTrainingLimits(BaseModel):
     max_batch_size: int
+    max_batch_size_dpo: int = -1
     min_batch_size: int
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        if self.max_batch_size_dpo == -1:
+            half_max = self.max_batch_size // 2
+            rounded_half_max = (half_max // 8) * 8
+            self.max_batch_size_dpo = max(self.min_batch_size, rounded_half_max)
 
 
 class FinetuneLoraTrainingLimits(FinetuneFullTrainingLimits):
