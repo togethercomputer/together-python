@@ -111,11 +111,7 @@ def test_dpo_request():
         lora=False,
     )
 
-    assert request.training_type.type == "Lora"
-    assert request.training_type.lora_r == _MODEL_LIMITS.lora_training.max_rank
-    assert request.training_type.lora_alpha == _MODEL_LIMITS.lora_training.max_rank * 2
-    assert request.training_type.lora_dropout == 0.0
-    assert request.training_type.lora_trainable_modules == "all-linear"
+    assert request.training_type.type == "Full"
     assert request.batch_size == _MODEL_LIMITS.full_training.max_batch_size_dpo
 
 
@@ -196,6 +192,7 @@ def test_non_lora_model():
                 min_learning_rate=1e-6,
                 full_training=FinetuneFullTrainingLimits(
                     max_batch_size=96,
+                    max_batch_size_dpo=48,
                     min_batch_size=8,
                 ),
                 lora_training=None,
@@ -217,6 +214,7 @@ def test_non_full_model():
                 min_learning_rate=1e-6,
                 lora_training=FinetuneLoraTrainingLimits(
                     max_batch_size=96,
+                    max_batch_size_dpo=48,
                     min_batch_size=8,
                     max_rank=64,
                     target_modules=["q", "k", "v", "o", "mlp"],
