@@ -158,6 +158,7 @@ class TrainingMethodDPO(TrainingMethod):
 
     method: Literal["dpo"] = "dpo"
     dpo_beta: float | None = None
+    rpo_alpha: float | None = None
 
 
 class FinetuneRequest(BaseModel):
