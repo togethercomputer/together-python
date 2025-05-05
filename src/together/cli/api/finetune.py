@@ -145,7 +145,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--rpo-alpha",
     type=float,
-    default=1.0,
+    default=None,
     help="RPO alpha to control the weight of NLL loss component for chosen responses "
     "(only used when '--training-method' is 'dpo')",
 )
