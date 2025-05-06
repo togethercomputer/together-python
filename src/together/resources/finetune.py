@@ -614,12 +614,12 @@ class FineTuning:
                 )
             url += "&checkpoint=model_output_path"
         elif isinstance(ft_job.training_type, LoRATrainingType):
-            if checkpoint_type == DownloadCheckpointType.DEFAULT:
-                checkpoint_type = DownloadCheckpointType.MERGED
+            if checkpoint_type == DownloadCheckpointType.DEFAULT.value:
+                checkpoint_type = DownloadCheckpointType.MERGED.value
 
-            if checkpoint_type == DownloadCheckpointType.MERGED:
+            if checkpoint_type == DownloadCheckpointType.MERGED.value:
                 url += f"&checkpoint={DownloadCheckpointType.MERGED.value}"
-            elif checkpoint_type == DownloadCheckpointType.ADAPTER:
+            elif checkpoint_type == DownloadCheckpointType.ADAPTER.value:
                 url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
             else:
                 raise ValueError(
