@@ -608,21 +608,21 @@ class FineTuning:
         ft_job = self.retrieve(id)
 
         # convert to str
-        if isinstance(checkpoint_type, DownloadCheckpointType):
-            checkpoint_type = checkpoint_type.value
+        if isinstance(checkpoint_type, str):
+            checkpoint_type = DownloadCheckpointType(checkpoint_type)
 
         if isinstance(ft_job.training_type, FullTrainingType):
-            if checkpoint_type != DownloadCheckpointType.DEFAULT.value:
+            if checkpoint_type != DownloadCheckpointType.DEFAULT:
                 raise ValueError(
                     "Only DEFAULT checkpoint type is allowed for FullTrainingType"
                 )
             url += "&checkpoint=model_output_path"
         elif isinstance(ft_job.training_type, LoRATrainingType):
-            if checkpoint_type == DownloadCheckpointType.DEFAULT.value:
-                checkpoint_type = DownloadCheckpointType.MERGED.value
+            if checkpoint_type == DownloadCheckpointType.DEFAULT:
+                checkpoint_type = DownloadCheckpointType.MERGED
 
-            if checkpoint_type in {DownloadCheckpointType.MERGED.value, DownloadCheckpointType.ADAPTER.value}:
-                url += f"&checkpoint={checkpoint_type}"
+            if checkpoint_type in {DownloadCheckpointType.MERGED, DownloadCheckpointType.ADAPTER}:
+                url += f"&checkpoint={checkpoint_type.value}"
             else:
                 raise ValueError(
                     f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}"
