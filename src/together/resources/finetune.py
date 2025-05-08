@@ -609,7 +609,7 @@ class FineTuning:
 
         ft_job = self.retrieve(id)
 
-        # convert to str
+        # convert str to DownloadCheckpointType
         if isinstance(checkpoint_type, str):
             try:
                 checkpoint_type = DownloadCheckpointType(checkpoint_type.lower())
