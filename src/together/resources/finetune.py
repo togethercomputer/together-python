@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Literal
+from typing import Dict, List, Literal
 
 from rich import print as rprint
 
@@ -220,6 +220,49 @@ def create_finetune_request(
     )
 
     return finetune_request
+
+
+def _parse_raw_checkpoints(
+    checkpoints: List[Dict[str, str]], id: str
+) -> List[FinetuneCheckpoint]:
+    """
+    Helper function to process raw checkpoints and create checkpoint list.
+
+    Args:
+        checkpoints (List[Dict[str, str]]): List of raw checkpoints metadata
+        id (str): Fine-tune job ID
+
+    Returns:
+        List[FinetuneCheckpoint]: List of available checkpoints
+    """
+    had_adapters = any(ckpt["path"].endswith("_adapter") for ckpt in checkpoints)
+
+    parsed_checkpoints = []
+    for checkpoint in checkpoints:
+        checkpoint_path = checkpoint["path"]
+        step = checkpoint["step"]
+
+        is_final = int(step) == 0
+        checkpoint_name = f"{id}:step" if step else id
+
+        if is_final:
+            if checkpoint_path.endswith("_adapter"):
+                checkpoint_type = "Final Adapter"
+            else:
+                checkpoint_type = "Final Merged" if had_adapters else "Final"
+        else:
+            checkpoint_type = "Intermediate"
+
+        parsed_checkpoints.append(
+            FinetuneCheckpoint(
+                type=checkpoint_type,
+                timestamp=checkpoint["created_at"],
+                name=checkpoint_name,
+            )
+        )
+
+    parsed_checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
+    return parsed_checkpoints
 
 
 def _process_checkpoints_from_events(
@@ -551,7 +594,7 @@ class FineTuning:
 
         return FinetuneListEvents(**response.data)
 
-    def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+    def list_checkpoints_from_events(self, id: str) -> List[FinetuneCheckpoint]:
         """
         List available checkpoints for a fine-tuning job
 
@@ -563,6 +606,32 @@ class FineTuning:
         """
         events = self.list_events(id).data or []
         return _process_checkpoints_from_events(events, id)
+
+    def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: List of available checkpoints
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url=f"fine-tunes/{id}/checkpoints",
+            ),
+            stream=False,
+        )
+        assert isinstance(response, TogetherResponse)
+
+        raw_checkpoints = response.data["data"]
+        return _parse_raw_checkpoints(raw_checkpoints, id)
 
     def download(
         self,
@@ -942,7 +1011,7 @@ class AsyncFineTuning:
 
         return events_list
 
-    async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+    async def list_checkpoints_from_events(self, id: str) -> List[FinetuneCheckpoint]:
         """
         List available checkpoints for a fine-tuning job
 
@@ -955,6 +1024,32 @@ class AsyncFineTuning:
         events_list = await self.list_events(id)
         events = events_list.data or []
         return _process_checkpoints_from_events(events, id)
+
+    async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
+        """
+        List available checkpoints for a fine-tuning job
+
+        Args:
+            id (str): Unique identifier of the fine-tune job to list checkpoints for
+
+        Returns:
+            List[FinetuneCheckpoint]: List of available checkpoints
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url=f"fine-tunes/{id}/checkpoints",
+            ),
+            stream=False,
+        )
+        assert isinstance(response, TogetherResponse)
+
+        raw_checkpoints = response.data["data"]
+        return _parse_raw_checkpoints(raw_checkpoints, id)
 
     async def download(
         self, id: str, *, output: str | None = None, checkpoint_step: int = -1
