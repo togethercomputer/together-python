@@ -1005,11 +1005,9 @@ class AsyncFineTuning:
             ),
             stream=False,
         )
+        assert isinstance(events_response, TogetherResponse)
 
-        # FIXME: API returns "data" field with no object type (should be "list")
-        events_list = FinetuneListEvents(object="list", **events_response.data)
-
-        return events_list
+        return FinetuneListEvents(**events_response.data)
 
     async def list_checkpoints_from_events(self, id: str) -> List[FinetuneCheckpoint]:
         """
