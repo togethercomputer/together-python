@@ -570,7 +570,9 @@ class FineTuning:
         *,
         output: Path | str | None = None,
         checkpoint_step: int | None = None,
-        checkpoint_type: Union[DownloadCheckpointType, str] = DownloadCheckpointType.DEFAULT,
+        checkpoint_type: Union[
+            DownloadCheckpointType, str
+        ] = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -609,7 +611,13 @@ class FineTuning:
 
         # convert to str
         if isinstance(checkpoint_type, str):
-            checkpoint_type = DownloadCheckpointType(checkpoint_type)
+            try:
+                checkpoint_type = DownloadCheckpointType(checkpoint_type.lower())
+            except ValueError:
+                enum_strs = ", ".join([e.value for e in DownloadCheckpointType])
+                raise ValueError(
+                    f"Invalid checkpoint type: {checkpoint_type}. Choose one of {{{enum_strs}}}."
+                )
 
         if isinstance(ft_job.training_type, FullTrainingType):
             if checkpoint_type != DownloadCheckpointType.DEFAULT:
@@ -621,7 +629,10 @@ class FineTuning:
             if checkpoint_type == DownloadCheckpointType.DEFAULT:
                 checkpoint_type = DownloadCheckpointType.MERGED
 
-            if checkpoint_type in {DownloadCheckpointType.MERGED, DownloadCheckpointType.ADAPTER}:
+            if checkpoint_type in {
+                DownloadCheckpointType.MERGED,
+                DownloadCheckpointType.ADAPTER,
+            }:
                 url += f"&checkpoint={checkpoint_type.value}"
             else:
                 raise ValueError(
