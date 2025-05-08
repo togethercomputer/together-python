@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Literal
+from typing import List, Literal, Union
 
 from rich import print as rprint
 
@@ -570,7 +570,7 @@ class FineTuning:
         *,
         output: Path | str | None = None,
         checkpoint_step: int | None = None,
-        checkpoint_type: DownloadCheckpointType = DownloadCheckpointType.DEFAULT,
+        checkpoint_type: Union[DownloadCheckpointType, str] = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
@@ -583,7 +583,7 @@ class FineTuning:
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
-            checkpoint_type (CheckpointType, optional): Specifies which checkpoint to download.
+            checkpoint_type (Union[CheckpointType, str], optional): Specifies which checkpoint to download.
                 Defaults to CheckpointType.DEFAULT.
 
         Returns:
@@ -607,8 +607,12 @@ class FineTuning:
 
         ft_job = self.retrieve(id)
 
+        # convert to str
+        if isinstance(checkpoint_type, DownloadCheckpointType):
+            checkpoint_type = checkpoint_type.value
+
         if isinstance(ft_job.training_type, FullTrainingType):
-            if checkpoint_type != DownloadCheckpointType.DEFAULT:
+            if checkpoint_type != DownloadCheckpointType.DEFAULT.value:
                 raise ValueError(
                     "Only DEFAULT checkpoint type is allowed for FullTrainingType"
                 )
@@ -617,10 +621,8 @@ class FineTuning:
             if checkpoint_type == DownloadCheckpointType.DEFAULT.value:
                 checkpoint_type = DownloadCheckpointType.MERGED.value
 
-            if checkpoint_type == DownloadCheckpointType.MERGED.value:
-                url += f"&checkpoint={DownloadCheckpointType.MERGED.value}"
-            elif checkpoint_type == DownloadCheckpointType.ADAPTER.value:
-                url += f"&checkpoint={DownloadCheckpointType.ADAPTER.value}"
+            if checkpoint_type in {DownloadCheckpointType.MERGED.value, DownloadCheckpointType.ADAPTER.value}:
+                url += f"&checkpoint={checkpoint_type}"
             else:
                 raise ValueError(
                     f"Invalid checkpoint type for LoRATrainingType: {checkpoint_type}"
