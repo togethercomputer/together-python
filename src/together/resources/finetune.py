@@ -30,16 +30,8 @@ from together.types import (
     TrainingMethodSFT,
     TrainingType,
 )
-from together.types.finetune import (
-    DownloadCheckpointType,
-    FinetuneEvent,
-    FinetuneEventType,
-)
-from together.utils import (
-    get_event_step,
-    log_warn_once,
-    normalize_key,
-)
+from together.types.finetune import DownloadCheckpointType
+from together.utils import log_warn_once, normalize_key
 
 
 _FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
@@ -254,70 +246,6 @@ def _parse_raw_checkpoints(
 
     parsed_checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
     return parsed_checkpoints
-
-
-def _process_checkpoints_from_events(
-    events: List[FinetuneEvent], id: str
-) -> List[FinetuneCheckpoint]:
-    """
-    Helper function to process events and create checkpoint list.
-
-    Args:
-        events (List[FinetuneEvent]): List of fine-tune events to process
-        id (str): Fine-tune job ID
-
-    Returns:
-        List[FinetuneCheckpoint]: List of available checkpoints
-    """
-    checkpoints: List[FinetuneCheckpoint] = []
-
-    for event in events:
-        event_type = event.type
-
-        if event_type == FinetuneEventType.CHECKPOINT_SAVE:
-            step = get_event_step(event)
-            checkpoint_name = f"{id}:{step}" if step is not None else id
-
-            checkpoints.append(
-                FinetuneCheckpoint(
-                    type=(
-                        f"Intermediate (step {step})"
-                        if step is not None
-                        else "Intermediate"
-                    ),
-                    timestamp=event.created_at,
-                    name=checkpoint_name,
-                )
-            )
-        elif event_type == FinetuneEventType.JOB_COMPLETE:
-            if hasattr(event, "model_path"):
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type=(
-                            "Final Merged"
-                            if hasattr(event, "adapter_path")
-                            else "Final"
-                        ),
-                        timestamp=event.created_at,
-                        name=id,
-                    )
-                )
-
-            if hasattr(event, "adapter_path"):
-                checkpoints.append(
-                    FinetuneCheckpoint(
-                        type=(
-                            "Final Adapter" if hasattr(event, "model_path") else "Final"
-                        ),
-                        timestamp=event.created_at,
-                        name=id,
-                    )
-                )
-
-    # Sort by timestamp (newest first)
-    checkpoints.sort(key=lambda x: x.timestamp, reverse=True)
-
-    return checkpoints
 
 
 class FineTuning:
@@ -584,19 +512,6 @@ class FineTuning:
         assert isinstance(response, TogetherResponse)
 
         return FinetuneListEvents(**response.data)
-
-    def list_checkpoints_from_events(self, id: str) -> List[FinetuneCheckpoint]:
-        """
-        List available checkpoints for a fine-tuning job
-
-        Args:
-            id (str): Unique identifier of the fine-tune job to list checkpoints for
-
-        Returns:
-            List[FinetuneCheckpoint]: List of available checkpoints
-        """
-        events = self.list_events(id).data or []
-        return _process_checkpoints_from_events(events, id)
 
     def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
         """
@@ -999,20 +914,6 @@ class AsyncFineTuning:
         assert isinstance(events_response, TogetherResponse)
 
         return FinetuneListEvents(**events_response.data)
-
-    async def list_checkpoints_from_events(self, id: str) -> List[FinetuneCheckpoint]:
-        """
-        List available checkpoints for a fine-tuning job
-
-        Args:
-            id (str): Unique identifier of the fine-tune job to list checkpoints for
-
-        Returns:
-            List[FinetuneCheckpoint]: Object containing list of available checkpoints
-        """
-        events_list = await self.list_events(id)
-        events = events_list.data or []
-        return _process_checkpoints_from_events(events, id)
 
     async def list_checkpoints(self, id: str) -> List[FinetuneCheckpoint]:
         """
