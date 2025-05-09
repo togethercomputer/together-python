@@ -235,23 +235,22 @@ def _parse_raw_checkpoints(
     Returns:
         List[FinetuneCheckpoint]: List of available checkpoints
     """
-    had_adapters = any(ckpt["path"].endswith("_adapter") for ckpt in checkpoints)
+    has_adapters = any(ckpt["is_adapter"] for ckpt in checkpoints)
 
     parsed_checkpoints = []
     for checkpoint in checkpoints:
-        checkpoint_path = checkpoint["path"]
         step = checkpoint["step"]
-
-        is_final = int(step) == 0
-        checkpoint_name = f"{id}:step" if step else id
+        is_adapter = checkpoint["is_adapter"]
+        is_final = checkpoint["is_final"]
+        checkpoint_name = f"{id}:{step}" if not is_final else id
 
         if is_final:
-            if checkpoint_path.endswith("_adapter"):
+            if is_adapter:
                 checkpoint_type = "Final Adapter"
             else:
-                checkpoint_type = "Final Merged" if had_adapters else "Final"
+                checkpoint_type = "Final Merged" if has_adapters else "Final"
         else:
-            checkpoint_type = "Intermediate"
+            checkpoint_type = "Intermediate (step {step})"
 
         parsed_checkpoints.append(
             FinetuneCheckpoint(
