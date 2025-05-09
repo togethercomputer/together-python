@@ -98,6 +98,7 @@ class ToolChoice(BaseModel):
 
 class ToolChoiceEnum(str, Enum):
     Auto = "auto"
+    Required = "required"
 
 
 class ChatCompletionRequest(BaseModel):
