@@ -250,7 +250,7 @@ def _parse_raw_checkpoints(
             else:
                 checkpoint_type = "Final Merged" if has_adapters else "Final"
         else:
-            checkpoint_type = "Intermediate (step {step})"
+            checkpoint_type = f"Intermediate (step {step})"
 
         parsed_checkpoints.append(
             FinetuneCheckpoint(
