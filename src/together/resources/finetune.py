@@ -240,7 +240,9 @@ def _parse_raw_checkpoints(
     for checkpoint in checkpoints:
         step = checkpoint["step"]
         checkpoint_type = checkpoint["checkpoint_type"]
-        checkpoint_name = f"{id}:{step}" if "intermediate" in checkpoint_type.lower() else id
+        checkpoint_name = (
+            f"{id}:{step}" if "intermediate" in checkpoint_type.lower() else id
+        )
 
         parsed_checkpoints.append(
             FinetuneCheckpoint(
