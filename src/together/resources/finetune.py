@@ -614,7 +614,7 @@ class FineTuning:
             try:
                 checkpoint_type = DownloadCheckpointType(checkpoint_type.lower())
             except ValueError:
-                enum_strs = ", ".join([e.value for e in DownloadCheckpointType])
+                enum_strs = ", ".join(e.value for e in DownloadCheckpointType)
                 raise ValueError(
                     f"Invalid checkpoint type: {checkpoint_type}. Choose one of {{{enum_strs}}}."
                 )
