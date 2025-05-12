@@ -171,7 +171,7 @@ def create_finetune_request(
 
     if train_on_inputs is None and training_method == "sft":
         log_warn_once(
-            "train_on_inputs is not set for SFT training, it will be set to 'auto' automatically"
+            "train_on_inputs is not set for SFT training, it will be set to 'auto'"
         )
         train_on_inputs = "auto"
 
