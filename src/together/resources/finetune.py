@@ -558,7 +558,7 @@ class FineTuning:
                 Defaults to None.
             checkpoint_step (int, optional): Specifies step number for checkpoint to download.
                 Defaults to -1 (download the final model)
-            checkpoint_type (Union[CheckpointType, str], optional): Specifies which checkpoint to download.
+            checkpoint_type (CheckpointType | str, optional): Specifies which checkpoint to download.
                 Defaults to CheckpointType.DEFAULT.
 
         Returns:
