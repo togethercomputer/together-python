@@ -281,3 +281,32 @@ def test_bad_training_method():
             training_file=_TRAINING_FILE,
             training_method="NON_SFT",
         )
+
+
+@pytest.mark.parametrize("train_on_inputs", [True, False, "auto", None])
+def test_train_on_inputs_for_sft(train_on_inputs):
+    request = create_finetune_request(
+        model_limits=_MODEL_LIMITS,
+        model=_MODEL_NAME,
+        training_file=_TRAINING_FILE,
+        training_method="sft",
+        train_on_inputs=train_on_inputs,
+    )
+    assert request.training_method.method == "sft"
+    if isinstance(train_on_inputs, bool):
+        assert request.training_method.train_on_inputs is train_on_inputs
+    else:
+        assert request.training_method.train_on_inputs == "auto"
+
+
+def test_train_on_inputs_not_supported_for_dpo():
+    with pytest.raises(
+        ValueError, match="train_on_inputs is only supported for SFT training"
+    ):
+        _ = create_finetune_request(
+            model_limits=_MODEL_LIMITS,
+            model=_MODEL_NAME,
+            training_file=_TRAINING_FILE,
+            training_method="dpo",
+            train_on_inputs=True,
+        )
