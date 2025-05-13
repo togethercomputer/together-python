@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Dict, Literal, Union
+from typing import List, Dict, Literal
 
 from rich import print as rprint
 
@@ -545,9 +545,7 @@ class FineTuning:
         *,
         output: Path | str | None = None,
         checkpoint_step: int | None = None,
-        checkpoint_type: Union[
-            DownloadCheckpointType, str
-        ] = DownloadCheckpointType.DEFAULT,
+        checkpoint_type: DownloadCheckpointType | str = DownloadCheckpointType.DEFAULT,
     ) -> FinetuneDownloadResult:
         """
         Downloads compressed fine-tuned model or checkpoint to local disk.
