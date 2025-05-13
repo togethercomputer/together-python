@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Literal, Union, Literal
+from typing import List, Dict, Literal, Union
 
 from rich import print as rprint
 
