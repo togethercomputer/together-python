@@ -36,7 +36,7 @@ class TestTogetherCompletionStream:
     ) -> None:
         prompt = "The space robots have"
         model = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
-        stop = ["</s>"]
+        stop = ["<|eot|>"]
 
         # max_tokens should be a reasonable number for this test
         assert 0 < random_max_tokens < 1024
