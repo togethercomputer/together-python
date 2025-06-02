@@ -375,7 +375,9 @@ def _check_parquet(file: Path) -> Dict[str, Any]:
         # Pyarrow is optional as it's large (~80MB) and isn't compatible with older systems.
         from pyarrow import ArrowInvalid, parquet
     except ImportError:
-        raise ImportError("pyarrow is not installed and is required to use parquet files. Please install it via `pip install together[pyarrow]`")
+        raise ImportError(
+            "pyarrow is not installed and is required to use parquet files. Please install it via `pip install together[pyarrow]`"
+        )
 
     report_dict: Dict[str, Any] = {}
 
