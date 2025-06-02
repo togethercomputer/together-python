@@ -196,7 +196,7 @@ from together import Together
 client = Together()
 
 response = client.chat.completions.create(
-    model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    model="meta-llama/Llama-3.2-3B-Instruct-Turbo",
     messages=[{"role": "user", "content": "tell me about new york"}],
     logprobs=1
 )
@@ -347,7 +347,7 @@ client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a 
 
 ### Fine-tunes
 
-The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
+The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-quickstart).
 
 ```python
 from together import Together
@@ -356,7 +356,7 @@ client = Together()
 
 client.fine_tuning.create(
   training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
-  model = 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
+  model = 'meta-llama/Llama-3.2-3B-Instruct',
   n_epochs = 3,
   n_checkpoints = 1,
   batch_size = "max",
