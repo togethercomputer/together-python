@@ -6,7 +6,6 @@ from pathlib import Path
 from traceback import format_exc
 from typing import Any, Dict, List
 
-from pyarrow import ArrowInvalid, parquet
 
 from together.constants import (
     MAX_FILE_SIZE_GB,
@@ -372,6 +371,14 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
 
 def _check_parquet(file: Path) -> Dict[str, Any]:
+    try:
+        # Pyarrow is optional as it's large (~80MB) and isn't compatible with older systems.
+        from pyarrow import ArrowInvalid, parquet
+    except ImportError:
+        raise ImportError(
+            "pyarrow is not installed and is required to use parquet files. Please install it via `pip install together[pyarrow]`"
+        )
+
     report_dict: Dict[str, Any] = {}
 
     try:
