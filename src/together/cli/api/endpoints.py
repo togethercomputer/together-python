@@ -82,7 +82,7 @@ def endpoints(ctx: click.Context) -> None:
 @click.option(
     "--model",
     required=True,
-    help="The model to deploy (e.g. mistralai/Mixtral-8x7B-Instruct-v0.1)",
+    help="The model to deploy (e.g. meta-llama/Llama-4-Scout-17B-16E-Instruct)",
 )
 @click.option(
     "--min-replicas",
