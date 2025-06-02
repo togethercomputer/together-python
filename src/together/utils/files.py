@@ -371,8 +371,12 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
 
 
 def _check_parquet(file: Path) -> Dict[str, Any]:
-    # in method import - this allows client to exclude the pyarrow dep if they don't need it. Saved ~80MB and more compatible with older systems.
-    from pyarrow import ArrowInvalid, parquet
+    try:
+        # Pyarrow is optional as it's large (~80MB) and isn't compatible with older systems.
+        from pyarrow import ArrowInvalid, parquet
+    except ImportError:
+        raise ImportError("pyarrow is not installed and is required to use parquet files. Please install it via `pip install together[pyarrow]`")
+
     report_dict: Dict[str, Any] = {}
 
     try:
