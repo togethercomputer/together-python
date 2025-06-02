@@ -12,10 +12,8 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "together"
-version = "1.5.0"
-authors = [
-    "Together AI <support@together.ai>"
-]
+version = "1.5.10"
+authors = ["Together AI <support@together.ai>"]
 description = "Python client for Together's Cloud Platform!"
 readme = "README.md"
 license = "Apache-2.0"
@@ -31,7 +29,7 @@ homepage = "https://github.com/togethercomputer/together-python"
 python = "^3.10"
 typer = ">=0.9,<0.16"
 requests = "^2.31.0"
-rich = "^13.8.1"
+rich = ">=13.8.1,<15.0.0"
 tqdm = "^4.66.2"
 tabulate = "^0.9.0"
 pydantic = "^2.6.3"
@@ -54,10 +52,10 @@ optional = true
 
 [tool.poetry.group.quality.dependencies]
 black = ">=23.1,<26.0"
-ruff = ">=0.3.2,<0.10.0"
+ruff = ">=0.3.2,<0.12.0"
 types-tqdm = "^4.65.0.0"
 types-tabulate = "^0.9.0.3"
-pre-commit = "4.1.0"
+pre-commit = "4.2.0"
 types-requests = "^2.31.0.20240218"
 pyarrow-stubs = ">=10.0.1.7,<20240831.0.0.0"
 mypy = "^1.9.0"
@@ -68,6 +66,7 @@ optional = true
 [tool.poetry.group.tests.dependencies]
 pytest = ">=7.4.2,<9.0.0"
 pytest-watch = "^4.2.0"
+pytest-mock = "^3.14.0"
 tox = "^4.14.1"
 
 [tool.poetry.group.examples]

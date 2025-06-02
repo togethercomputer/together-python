@@ -7,6 +7,7 @@ from typing import Dict, TYPE_CHECKING
 from together import resources
 from together.constants import BASE_URL, MAX_RETRIES, TIMEOUT_SECS
 from together.error import AuthenticationError
+from together.resources.code_interpreter import CodeInterpreter
 from together.types import TogetherClient
 from together.utils import enforce_trailing_slash
 from together.utils.api_helpers import get_google_colab_secret
@@ -22,6 +23,7 @@ class Together:
     fine_tuning: resources.FineTuning
     rerank: resources.Rerank
     audio: resources.Audio
+    code_interpreter: CodeInterpreter
 
     # client options
     client: TogetherClient
@@ -87,6 +89,7 @@ class Together:
         self.rerank = resources.Rerank(self.client)
         self.audio = resources.Audio(self.client)
         self.endpoints = resources.Endpoints(self.client)
+        self.code_interpreter = CodeInterpreter(self.client)
 
 
 class AsyncTogether:
@@ -98,6 +101,7 @@ class AsyncTogether:
     models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
     rerank: resources.AsyncRerank
+    code_interpreter: CodeInterpreter
 
     # client options
     client: TogetherClient
@@ -161,6 +165,7 @@ class AsyncTogether:
         self.models = resources.AsyncModels(self.client)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
         self.rerank = resources.AsyncRerank(self.client)
+        self.code_interpreter = CodeInterpreter(self.client)
 
 
 Client = Together

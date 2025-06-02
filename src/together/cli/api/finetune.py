@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
-import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -13,17 +13,17 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneTrainingLimits,
+)
 from together.utils import (
     finetune_price_to_dollars,
+    format_timestamp,
     log_warn,
     log_warn_once,
     parse_timestamp,
-    format_timestamp,
-)
-from together.types.finetune import (
-    DownloadCheckpointType,
-    FinetuneTrainingLimits,
-    FinetuneEventType,
 )
 
 
@@ -58,19 +58,33 @@ def fine_tuning(ctx: click.Context) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.option(
-    "--training-file", type=str, required=True, help="Training file ID from Files API"
+    "--training-file",
+    "-t",
+    type=str,
+    required=True,
+    help="Training file ID from Files API",
 )
-@click.option("--model", type=str, required=True, help="Base model name")
-@click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option("--model", "-m", type=str, help="Base model name")
+@click.option(
+    "--n-epochs", "-ne", type=int, default=1, help="Number of epochs to train for"
+)
 @click.option(
     "--validation-file", type=str, default="", help="Validation file ID from Files API"
 )
 @click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
 @click.option(
-    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
+    "--n-checkpoints", "-c", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
-@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--batch-size", "-b", type=INT_WITH_MAX, default="max", help="Train batch size"
+)
+@click.option("--learning-rate", "-lr", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--lr-scheduler-type",
+    type=click.Choice(["linear", "cosine"]),
+    default="linear",
+    help="Learning rate scheduler type",
+)
 @click.option(
     "--min-lr-ratio",
     type=float,
@@ -78,10 +92,16 @@ def fine_tuning(ctx: click.Context) -> None:
     help="The ratio of the final learning rate to the peak learning rate",
 )
 @click.option(
+    "--scheduler-num-cycles",
+    type=float,
+    default=0.5,
+    help="Number or fraction of cycles for the cosine learning rate scheduler.",
+)
+@click.option(
     "--warmup-ratio",
     type=float,
     default=0.0,
-    help="Warmup ratio for learning rate scheduler.",
+    help="Warmup ratio for the learning rate scheduler.",
 )
 @click.option(
     "--max-grad-norm",
@@ -123,7 +143,11 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
-    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
+    "--suffix",
+    "-s",
+    type=str,
+    default=None,
+    help="Suffix for the fine-tuned model name",
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 @click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
@@ -162,7 +186,9 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    lr_scheduler_type: Literal["linear", "cosine"],
     min_lr_ratio: float,
+    scheduler_num_cycles: float,
     warmup_ratio: float,
     max_grad_norm: float,
     weight_decay: float,
@@ -194,7 +220,9 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_type=lr_scheduler_type,
         min_lr_ratio=min_lr_ratio,
+        scheduler_num_cycles=scheduler_num_cycles,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,
@@ -214,8 +242,15 @@ def create(
         from_checkpoint=from_checkpoint,
     )
 
+    if model is None and from_checkpoint is None:
+        raise click.BadParameter("You must specify either a model or a checkpoint")
+
+    model_name = model
+    if from_checkpoint is not None:
+        model_name = from_checkpoint.split(":")[0]
+
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model
+        model=model_name
     )
 
     if lora:
@@ -223,10 +258,13 @@ def create(
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"
             )
-
+        if training_method == "dpo":
+            default_batch_size = model_limits.lora_training.max_batch_size_dpo
+        else:
+            default_batch_size = model_limits.lora_training.max_batch_size
         default_values = {
             "lora_r": model_limits.lora_training.max_rank,
-            "batch_size": model_limits.lora_training.max_batch_size,
+            "batch_size": default_batch_size,
             "learning_rate": 1e-3,
         }
 
@@ -253,7 +291,12 @@ def create(
 
         batch_size_source = ctx.get_parameter_source("batch_size")  # type: ignore[attr-defined]
         if batch_size_source == ParameterSource.DEFAULT:
-            training_args["batch_size"] = model_limits.full_training.max_batch_size
+            if training_method == "dpo":
+                training_args["batch_size"] = (
+                    model_limits.full_training.max_batch_size_dpo
+                )
+            else:
+                training_args["batch_size"] = model_limits.full_training.max_batch_size
 
     if n_evals <= 0 and validation_file:
         log_warn(
@@ -305,9 +348,9 @@ def list(ctx: click.Context) -> None:
                 "Model Output Name": "\n".join(wrap(i.output_name or "", width=30)),
                 "Status": i.status,
                 "Created At": i.created_at,
-                "Price": f"""${finetune_price_to_dollars(
-                    float(str(i.total_price))
-                )}""",  # convert to string for mypy typing
+                "Price": f"""${
+                    finetune_price_to_dollars(float(str(i.total_price)))
+                }""",  # convert to string for mypy typing
             }
         )
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
@@ -411,6 +454,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 @click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
+    "-o",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=None,
@@ -418,6 +462,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--checkpoint-step",
+    "-s",
     type=int,
     required=False,
     default=None,

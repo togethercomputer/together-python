@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal
+from typing import List, Literal, Any
 
-from pydantic import StrictBool, Field, validator, field_validator
+from pydantic import Field, StrictBool, field_validator
 
 from together.types.abstract import BaseModel
 from together.types.common import (
@@ -149,6 +149,7 @@ class TrainingMethodSFT(TrainingMethod):
     """
 
     method: Literal["sft"] = "sft"
+    train_on_inputs: StrictBool | Literal["auto"] = "auto"
 
 
 class TrainingMethodDPO(TrainingMethod):
@@ -170,13 +171,13 @@ class FinetuneRequest(BaseModel):
     # validation file id
     validation_file: str | None = None
     # base model string
-    model: str
+    model: str | None = None
     # number of epochs to train for
     n_epochs: int
     # training learning rate
     learning_rate: float
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: LinearLRScheduler | CosineLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float
     # max gradient norm
@@ -201,8 +202,6 @@ class FinetuneRequest(BaseModel):
     wandb_name: str | None = None
     # training type
     training_type: FullTrainingType | LoRATrainingType | None = None
-    # train on inputs
-    train_on_inputs: StrictBool | Literal["auto"] = "auto"
     # training method
     training_method: TrainingMethodSFT | TrainingMethodDPO = Field(
         default_factory=TrainingMethodSFT
@@ -239,7 +238,7 @@ class FinetuneResponse(BaseModel):
     # training learning rate
     learning_rate: float | None = None
     # learning rate scheduler type and args
-    lr_scheduler: FinetuneLRScheduler | None = None
+    lr_scheduler: LinearLRScheduler | CosineLRScheduler | EmptyLRScheduler | None = None
     # learning rate warmup ratio
     warmup_ratio: float | None = None
     # max gradient norm
@@ -329,7 +328,15 @@ class FinetuneDownloadResult(BaseModel):
 
 class FinetuneFullTrainingLimits(BaseModel):
     max_batch_size: int
+    max_batch_size_dpo: int = -1
     min_batch_size: int
+
+    def __init__(self, **data: Any) -> None:
+        super().__init__(**data)
+        if self.max_batch_size_dpo == -1:
+            half_max = self.max_batch_size // 2
+            rounded_half_max = (half_max // 8) * 8
+            self.max_batch_size_dpo = max(self.min_batch_size, rounded_half_max)
 
 
 class FinetuneLoraTrainingLimits(FinetuneFullTrainingLimits):
@@ -345,13 +352,33 @@ class FinetuneTrainingLimits(BaseModel):
     lora_training: FinetuneLoraTrainingLimits | None = None
 
 
+class LinearLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0
+
+
+class CosineLRSchedulerArgs(BaseModel):
+    min_lr_ratio: float | None = 0.0
+    num_cycles: float | None = 0.5
+
+
 class FinetuneLRScheduler(BaseModel):
     lr_scheduler_type: str
-    lr_scheduler_args: FinetuneLinearLRSchedulerArgs | None = None
 
 
-class FinetuneLinearLRSchedulerArgs(BaseModel):
-    min_lr_ratio: float | None = 0.0
+class LinearLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["linear"] = "linear"
+    lr_scheduler_args: LinearLRSchedulerArgs | None = None
+
+
+class CosineLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal["cosine"] = "cosine"
+    lr_scheduler_args: CosineLRSchedulerArgs | None = None
+
+
+# placeholder for old fine-tuning jobs with no lr_scheduler_type specified
+class EmptyLRScheduler(FinetuneLRScheduler):
+    lr_scheduler_type: Literal[""]
+    lr_scheduler_args: None = None
 
 
 class FinetuneCheckpoint(BaseModel):
