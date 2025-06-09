@@ -82,7 +82,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--lr-scheduler-type",
     type=click.Choice(["linear", "cosine"]),
-    default="linear",
+    default="cosine",
     help="Learning rate scheduler type",
 )
 @click.option(
