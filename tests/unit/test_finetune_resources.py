@@ -85,6 +85,32 @@ def test_lora_request():
     assert request.batch_size == _MODEL_LIMITS.lora_training.max_batch_size
 
 
+@pytest.mark.parametrize("lora_dropout", [-1, 0, 0.5, 1.0, 10.0])
+def test_lora_request_with_lora_dropout(lora_dropout: float):
+
+    if 0 <= lora_dropout < 1:
+        request = create_finetune_request(
+            model_limits=_MODEL_LIMITS,
+            model=_MODEL_NAME,
+            training_file=_TRAINING_FILE,
+            lora=True,
+            lora_dropout=lora_dropout,
+        )
+        assert request.training_type.lora_dropout == lora_dropout
+    else:
+        with pytest.raises(
+            ValueError,
+            match=r"LoRA dropout must be in \[0, 1\) range.",
+        ):
+            create_finetune_request(
+                model_limits=_MODEL_LIMITS,
+                model=_MODEL_NAME,
+                training_file=_TRAINING_FILE,
+                lora=True,
+                lora_dropout=lora_dropout,
+            )
+
+
 def test_dpo_request_lora():
     request = create_finetune_request(
         model_limits=_MODEL_LIMITS,

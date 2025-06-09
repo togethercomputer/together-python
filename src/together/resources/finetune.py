@@ -101,6 +101,11 @@ def create_finetune_request(
             raise ValueError(
                 f"LoRA adapters are not supported for the selected model ({model_or_checkpoint})."
             )
+
+        if lora_dropout is not None:
+            if not 0 <= lora_dropout < 1.0:
+                raise ValueError("LoRA dropout must be in [0, 1) range.")
+
         lora_r = lora_r if lora_r is not None else model_limits.lora_training.max_rank
         lora_alpha = lora_alpha if lora_alpha is not None else lora_r * 2
         training_type = LoRATrainingType(
