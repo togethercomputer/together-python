@@ -53,7 +53,7 @@ def create_finetune_request(
     n_checkpoints: int | None = 1,
     batch_size: int | Literal["max"] = "max",
     learning_rate: float | None = 0.00001,
-    lr_scheduler_type: Literal["linear", "cosine"] = "linear",
+    lr_scheduler_type: Literal["linear", "cosine"] = "cosine",
     min_lr_ratio: float = 0.0,
     scheduler_num_cycles: float = 0.5,
     warmup_ratio: float | None = None,
@@ -281,7 +281,7 @@ class FineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
+        lr_scheduler_type: Literal["linear", "cosine"] = "cosine",
         min_lr_ratio: float = 0.0,
         scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
@@ -318,7 +318,7 @@ class FineTuning:
             batch_size (int or "max"): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "cosine".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
@@ -693,7 +693,7 @@ class AsyncFineTuning:
         n_checkpoints: int | None = 1,
         batch_size: int | Literal["max"] = "max",
         learning_rate: float | None = 0.00001,
-        lr_scheduler_type: Literal["linear", "cosine"] = "linear",
+        lr_scheduler_type: Literal["linear", "cosine"] = "cosine",
         min_lr_ratio: float = 0.0,
         scheduler_num_cycles: float = 0.5,
         warmup_ratio: float = 0.0,
@@ -730,7 +730,7 @@ class AsyncFineTuning:
             batch_size (int, optional): Batch size for fine-tuning. Defaults to max.
             learning_rate (float, optional): Learning rate multiplier to use for training
                 Defaults to 0.00001.
-            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "linear".
+            lr_scheduler_type (Literal["linear", "cosine"]): Learning rate scheduler type. Defaults to "cosine".
             min_lr_ratio (float, optional): Min learning rate ratio of the initial learning rate for
                 the learning rate scheduler. Defaults to 0.0.
             scheduler_num_cycles (float, optional): Number or fraction of cycles for the cosine learning rate scheduler. Defaults to 0.5.
