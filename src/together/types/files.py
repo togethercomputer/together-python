@@ -13,6 +13,7 @@ from together.types.common import (
 
 class FilePurpose(str, Enum):
     FineTune = "fine-tune"
+    BatchAPI = "batch-api"
 
 
 class FileType(str, Enum):

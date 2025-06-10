@@ -32,7 +32,7 @@ class Files:
     ) -> FileResponse:
         upload_manager = UploadManager(self._client)
 
-        if check:
+        if check and purpose == FilePurpose.FineTune:
             report_dict = check_file(file)
             if not report_dict["is_check_passed"]:
                 raise FileTypeError(
