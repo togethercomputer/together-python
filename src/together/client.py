@@ -23,6 +23,7 @@ class Together:
     fine_tuning: resources.FineTuning
     rerank: resources.Rerank
     audio: resources.Audio
+    batches: resources.Batches
     code_interpreter: CodeInterpreter
 
     # client options
@@ -90,6 +91,7 @@ class Together:
         self.audio = resources.Audio(self.client)
         self.endpoints = resources.Endpoints(self.client)
         self.code_interpreter = CodeInterpreter(self.client)
+        self.batches = resources.Batches(self.client)
 
 
 class AsyncTogether:
@@ -102,7 +104,7 @@ class AsyncTogether:
     fine_tuning: resources.AsyncFineTuning
     rerank: resources.AsyncRerank
     code_interpreter: CodeInterpreter
-
+    batches: resources.AsyncBatches
     # client options
     client: TogetherClient
 
@@ -166,6 +168,7 @@ class AsyncTogether:
         self.fine_tuning = resources.AsyncFineTuning(self.client)
         self.rerank = resources.AsyncRerank(self.client)
         self.code_interpreter = CodeInterpreter(self.client)
+        self.batches = resources.AsyncBatches(self.client)
 
 
 Client = Together

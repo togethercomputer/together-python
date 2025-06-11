@@ -52,6 +52,7 @@ from together.types.finetune import (
 from together.types.images import ImageRequest, ImageResponse
 from together.types.models import ModelObject
 from together.types.rerank import RerankRequest, RerankResponse
+from together.types.batch import BatchJob, BatchJobStatus, BatchEndpoint
 
 
 __all__ = [
@@ -104,4 +105,7 @@ __all__ = [
     "DedicatedEndpoint",
     "ListEndpoint",
     "Autoscaling",
+    "BatchJob",
+    "BatchJobStatus",
+    "BatchEndpoint",
 ]
