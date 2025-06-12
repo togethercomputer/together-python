@@ -186,7 +186,9 @@ def create_finetune_request(
     if dpo_beta is not None and training_method != "dpo":
         raise ValueError("dpo_beta is only supported for DPO training")
     if dpo_normalize_logratios_by_length and training_method != "dpo":
-        raise ValueError("dpo_normalize_logratios_by_length=True is only supported for DPO training")
+        raise ValueError(
+            "dpo_normalize_logratios_by_length=True is only supported for DPO training"
+        )
     if rpo_alpha is not None and training_method != "dpo":
         raise ValueError("rpo_alpha is only supported for DPO training")
     if simpo_gamma is not None and training_method != "dpo":
