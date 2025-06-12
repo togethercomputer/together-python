@@ -73,7 +73,6 @@ def create_finetune_request(
     training_method: str = "sft",
     dpo_beta: float | None = None,
     dpo_normalize_logratios_by_length: bool = False,
-    dpo_reference_free: bool = False,
     rpo_alpha: float | None = None,
     simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
@@ -188,8 +187,6 @@ def create_finetune_request(
         raise ValueError("dpo_beta is only supported for DPO training")
     if dpo_normalize_logratios_by_length and training_method != "dpo":
         raise ValueError("dpo_normalize_logratios_by_length=True is only supported for DPO training")
-    if dpo_reference_free and training_method != "dpo":
-        raise ValueError("dpo_reference_free=True is only supported for DPO training")
     if rpo_alpha is not None and training_method != "dpo":
         raise ValueError("rpo_alpha is only supported for DPO training")
     if simpo_gamma is not None and training_method != "dpo":
@@ -216,6 +213,12 @@ def create_finetune_request(
     if training_method == "sft":
         training_method_cls = TrainingMethodSFT(train_on_inputs=train_on_inputs)
     elif training_method == "dpo":
+        if simpo_gamma is not None and simpo_gamma > 0:
+            dpo_reference_free = True
+            rprint(
+                f"Parameter simpo_gamma was set to {simpo_gamma}. "
+                "SimPO training detected. Reference logits will not be used."
+            )
         training_method_cls = TrainingMethodDPO(
             dpo_beta=dpo_beta,
             dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
@@ -321,7 +324,6 @@ class FineTuning:
         training_method: str = "sft",
         dpo_beta: float | None = None,
         dpo_normalize_logratios_by_length: bool = False,
-        dpo_reference_free: bool = False,
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
@@ -376,7 +378,6 @@ class FineTuning:
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
             dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample lenght. Defaults to False,
-            dpo_reference_free (bool): Whether to skip reference logits usage. Defaults to False.
             rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
             simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
@@ -432,7 +433,6 @@ class FineTuning:
             training_method=training_method,
             dpo_beta=dpo_beta,
             dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
-            dpo_reference_free=dpo_reference_free,
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
@@ -745,7 +745,6 @@ class AsyncFineTuning:
         training_method: str = "sft",
         dpo_beta: float | None = None,
         dpo_normalize_logratios_by_length: bool = False,
-        dpo_reference_free: bool = False,
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
@@ -800,7 +799,6 @@ class AsyncFineTuning:
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
             dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample lenght. Defaults to False,
-            dpo_reference_free (bool): Whether to skip reference logits usage. Defaults to False.
             rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
             simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
@@ -856,7 +854,6 @@ class AsyncFineTuning:
             training_method=training_method,
             dpo_beta=dpo_beta,
             dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
-            dpo_reference_free=dpo_reference_free,
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
