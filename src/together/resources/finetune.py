@@ -215,9 +215,11 @@ def create_finetune_request(
     elif training_method == "dpo":
         if simpo_gamma is not None and simpo_gamma > 0:
             dpo_reference_free = True
+            dpo_normalize_logratios_by_length = True
             rprint(
                 f"Parameter simpo_gamma was set to {simpo_gamma}. "
-                "SimPO training detected. Reference logits will not be used."
+                "SimPO training detected. Reference logits will not be used "
+                "and length normalization of logps will be enabled."
             )
         else:
             dpo_reference_free = False
