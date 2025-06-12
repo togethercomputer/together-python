@@ -219,6 +219,9 @@ def create_finetune_request(
                 f"Parameter simpo_gamma was set to {simpo_gamma}. "
                 "SimPO training detected. Reference logits will not be used."
             )
+        else:
+            dpo_reference_free=None
+
         training_method_cls = TrainingMethodDPO(
             dpo_beta=dpo_beta,
             dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
