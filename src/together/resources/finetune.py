@@ -220,7 +220,7 @@ def create_finetune_request(
                 "SimPO training detected. Reference logits will not be used."
             )
         else:
-            dpo_reference_free=None
+            dpo_reference_free = False
 
         training_method_cls = TrainingMethodDPO(
             dpo_beta=dpo_beta,
