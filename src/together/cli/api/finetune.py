@@ -152,12 +152,6 @@ def fine_tuning(ctx: click.Context) -> None:
     ),
 )
 @click.option(
-    "--dpo-reference-free",
-    type=bool,
-    default=False,
-    help="Whether to skip reference logits usage (only used when '--training-method' is 'dpo')",
-)
-@click.option(
     "--rpo-alpha",
     type=float,
     default=0.0,
