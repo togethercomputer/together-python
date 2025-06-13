@@ -189,10 +189,17 @@ def create_finetune_request(
         raise ValueError(
             "dpo_normalize_logratios_by_length=True is only supported for DPO training"
         )
-    if rpo_alpha is not None and training_method != "dpo":
-        raise ValueError("rpo_alpha is only supported for DPO training")
-    if simpo_gamma is not None and training_method != "dpo":
-        raise ValueError("simpo_gamma is only supported for DPO training")
+    if rpo_alpha is not None: 
+        if training_method != "dpo":
+            raise ValueError("rpo_alpha is only supported for DPO training")
+        if not rpo_alpha >= 0.0:
+            raise ValueError(f"rpo_alpha should be non-negative (got {rpo_alpha})")
+
+    if simpo_gamma is not None:
+        if training_method != "dpo":
+            raise ValueError("simpo_gamma is only supported for DPO training")
+        if not simpo_gamma >= 0.0:
+            raise ValueError(f"simpo_gamma should be non-negative (got {simpo_gamma})")
 
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
@@ -221,7 +228,7 @@ def create_finetune_request(
             rprint(
                 f"Parameter simpo_gamma was set to {simpo_gamma}. "
                 "SimPO training detected. Reference logits will not be used "
-                "and length normalization of logps will be enabled."
+                "and length normalization of log-probabilities will be enabled."
             )
         else:
             dpo_reference_free = False
