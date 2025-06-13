@@ -189,7 +189,7 @@ def create_finetune_request(
         raise ValueError(
             "dpo_normalize_logratios_by_length=True is only supported for DPO training"
         )
-    if rpo_alpha is not None: 
+    if rpo_alpha is not None:
         if training_method != "dpo":
             raise ValueError("rpo_alpha is only supported for DPO training")
         if not rpo_alpha >= 0.0:
