@@ -159,6 +159,10 @@ class TrainingMethodDPO(TrainingMethod):
 
     method: Literal["dpo"] = "dpo"
     dpo_beta: float | None = None
+    dpo_normalize_logratios_by_length: bool = False
+    dpo_reference_free: bool = False
+    rpo_alpha: float | None = None
+    simpo_gamma: float | None = None
 
 
 class FinetuneRequest(BaseModel):
