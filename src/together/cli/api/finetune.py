@@ -143,7 +143,7 @@ def fine_tuning(ctx: click.Context) -> None:
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
-    "--dpo-normalize-logratios_by-length",
+    "--dpo-normalize-logratios-by-length",
     type=bool,
     default=False,
     help=(

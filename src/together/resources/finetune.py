@@ -391,7 +391,7 @@ class FineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
-            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample lenght. Defaults to False,
+            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample length. Defaults to False,
             rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
             simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
@@ -812,7 +812,7 @@ class AsyncFineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
-            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample lenght. Defaults to False,
+            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample length. Defaults to False,
             rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
             simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
