@@ -163,7 +163,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--simpo-gamma",
     type=float,
-    default=0.1,
+    default=0.0,
     help="SimPO gamma parameter (only used when '--training-method' is 'dpo')",
 )
 @click.option(
