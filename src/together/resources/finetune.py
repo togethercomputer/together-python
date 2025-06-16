@@ -183,24 +183,6 @@ def create_finetune_request(
         )
         train_on_inputs = "auto"
 
-    if dpo_beta is not None and training_method != "dpo":
-        raise ValueError("dpo_beta is only supported for DPO training")
-    if dpo_normalize_logratios_by_length and training_method != "dpo":
-        raise ValueError(
-            "dpo_normalize_logratios_by_length=True is only supported for DPO training"
-        )
-    if rpo_alpha is not None:
-        if training_method != "dpo":
-            raise ValueError("rpo_alpha is only supported for DPO training")
-        if not rpo_alpha >= 0.0:
-            raise ValueError(f"rpo_alpha should be non-negative (got {rpo_alpha})")
-
-    if simpo_gamma is not None:
-        if training_method != "dpo":
-            raise ValueError("simpo_gamma is only supported for DPO training")
-        if not simpo_gamma >= 0.0:
-            raise ValueError(f"simpo_gamma should be non-negative (got {simpo_gamma})")
-
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
         if scheduler_num_cycles <= 0.0:
