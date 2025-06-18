@@ -188,7 +188,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--train-on-inputs",
     type=BOOL_WITH_AUTO,
-    default="auto",
+    default=None,
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
