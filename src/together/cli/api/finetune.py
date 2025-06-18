@@ -139,7 +139,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--dpo-beta",
     type=float,
-    default=0.1,
+    default=None,
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
@@ -154,7 +154,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--rpo-alpha",
     type=float,
-    default=0.0,
+    default=None,
     help=(
         "RPO alpha parameter of DPO training to include NLL in the loss "
         "(only used when '--training-method' is 'dpo')"
@@ -163,7 +163,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--simpo-gamma",
     type=float,
-    default=0.0,
+    default=None,
     help="SimPO gamma parameter (only used when '--training-method' is 'dpo')",
 )
 @click.option(
@@ -229,10 +229,10 @@ def create(
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
     training_method: str,
-    dpo_beta: float,
+    dpo_beta: float | None,
     dpo_normalize_logratios_by_length: bool,
-    rpo_alpha: float,
-    simpo_gamma: float,
+    rpo_alpha: float | None,
+    simpo_gamma: float | None,
     from_checkpoint: str,
 ) -> None:
     """Start fine-tuning"""
