@@ -45,8 +45,8 @@ AVAILABLE_TRAINING_METHODS = {
 
 def create_finetune_request(
     model_limits: FinetuneTrainingLimits,
-    training_file: str,
     model: str | None = None,
+    training_files: str | List[str] = "",
     n_epochs: int = 1,
     validation_file: str | None = "",
     n_evals: int | None = 0,
@@ -76,7 +76,22 @@ def create_finetune_request(
     rpo_alpha: float | None = None,
     simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
+    # Deprecated
+    training_file: str | None = None,
 ) -> FinetuneRequest:
+    
+    if training_file is not None:
+        if training_files:
+            raise ValueError("Cannot specify both `training_file` and `training_files`")
+        log_warn_once(
+            "The `training_file` argument is deprecated. Use `training_files` instead."
+        )
+        training_files = [training_file]
+    elif not training_files:
+        raise ValueError("Either `training_file` or `training_files` must be provided")
+    elif isinstance(training_files, str):
+        training_files = [training_files]
+
     if model is not None and from_checkpoint is not None:
         raise ValueError(
             "You must specify either a model or a checkpoint to start a job from, not both"
@@ -243,7 +258,7 @@ def create_finetune_request(
 
     finetune_request = FinetuneRequest(
         model=model,
-        training_file=training_file,
+        training_files=training_files,
         validation_file=validation_file,
         n_epochs=n_epochs,
         n_evals=n_evals,
@@ -308,7 +323,7 @@ class FineTuning:
     def create(
         self,
         *,
-        training_file: str,
+        training_files: str | List[str] = "",
         model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
@@ -341,12 +356,14 @@ class FineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        # Deprecated
+        training_file: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
 
         Args:
-            training_file (str): File-ID of a file uploaded to the Together API
+            training_files (str | List[str]): File-ID, or list of File-IDs, of a file uploaded to the Together API
             model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
@@ -397,6 +414,7 @@ class FineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            training_file (str, optional): Deprecated. Use `training_files` instead.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -419,7 +437,7 @@ class FineTuning:
 
         finetune_request = create_finetune_request(
             model_limits=model_limits,
-            training_file=training_file,
+            training_files=training_files,
             model=model,
             n_epochs=n_epochs,
             validation_file=validation_file,
@@ -450,6 +468,7 @@ class FineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            training_file=training_file,
         )
 
         if verbose:
@@ -729,7 +748,7 @@ class AsyncFineTuning:
     async def create(
         self,
         *,
-        training_file: str,
+        training_files: str | List[str] = "",
         model: str | None = None,
         n_epochs: int = 1,
         validation_file: str | None = "",
@@ -762,12 +781,14 @@ class AsyncFineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        # Deprecated
+        training_file: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
 
         Args:
-            training_file (str): File-ID of a file uploaded to the Together API
+            training_files (str | List[str]): File-ID, or list of File-IDs, of a file uploaded to the Together API
             model (str, optional): Name of the base model to run fine-tune job on
             n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
             validation file (str, optional): File ID of a file uploaded to the Together API for validation.
@@ -818,6 +839,7 @@ class AsyncFineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            training_file (str, optional): Deprecated. Use `training_files` instead.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -840,7 +862,7 @@ class AsyncFineTuning:
 
         finetune_request = create_finetune_request(
             model_limits=model_limits,
-            training_file=training_file,
+            training_files=training_files,
             model=model,
             n_epochs=n_epochs,
             validation_file=validation_file,
@@ -871,6 +893,7 @@ class AsyncFineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            training_file=training_file,
         )
 
         if verbose:

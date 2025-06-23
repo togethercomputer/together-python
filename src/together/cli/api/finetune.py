@@ -4,7 +4,7 @@ import json
 import re
 from datetime import datetime, timezone
 from textwrap import wrap
-from typing import Any, Literal
+from typing import Any, Literal, List
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -62,6 +62,7 @@ def fine_tuning(ctx: click.Context) -> None:
     "-t",
     type=str,
     required=True,
+    multiple=True,
     help="Training file ID from Files API",
 )
 @click.option("--model", "-m", type=str, help="Base model name")
@@ -202,7 +203,7 @@ def fine_tuning(ctx: click.Context) -> None:
 )
 def create(
     ctx: click.Context,
-    training_file: str,
+    training_file: str | List[str],
     validation_file: str,
     model: str,
     n_epochs: int,
@@ -239,7 +240,7 @@ def create(
     client: Together = ctx.obj
 
     training_args: dict[str, Any] = dict(
-        training_file=training_file,
+        training_files=training_file,
         model=model,
         n_epochs=n_epochs,
         validation_file=validation_file,

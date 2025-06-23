@@ -171,7 +171,7 @@ class FinetuneRequest(BaseModel):
     """
 
     # training file ID
-    training_file: str
+    training_files: List[str]
     # validation file id
     validation_file: str | None = None
     # base model string
@@ -222,7 +222,10 @@ class FinetuneResponse(BaseModel):
     # job ID
     id: str | None = None
     # training file id
+    # NOTE: Will be deprecated in the future
     training_file: str | None = None
+    # training file ids
+    training_files: List[str] | None = None
     # validation file id
     validation_file: str | None = None
     # base model name
