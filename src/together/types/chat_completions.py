@@ -28,6 +28,7 @@ class MessageRole(str, Enum):
 class ResponseFormatType(str, Enum):
     JSON_OBJECT = "json_object"
     JSON_SCHEMA = "json_schema"
+    REGEX = "regex"
 
 
 class FunctionCall(BaseModel):
@@ -71,9 +72,15 @@ class ChatCompletionMessage(BaseModel):
 class ResponseFormat(BaseModel):
     type: ResponseFormatType
     schema_: Dict[str, Any] | None = None
-
+    pattern: str | None = None
+    
     def to_dict(self) -> Dict[str, Any]:
-        return {"schema": self.schema_, "type": self.type}
+        result = {"type": self.type}
+        if self.schema_ is not None:
+            result["schema"] = self.schema_
+        if self.pattern is not None:
+            result["pattern"] = self.pattern
+        return result
 
 
 class FunctionTool(BaseModel):
