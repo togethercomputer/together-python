@@ -70,17 +70,17 @@ class ChatCompletionMessage(BaseModel):
 
 
 class ResponseFormat(BaseModel):
-   type: ResponseFormatType
-   schema_: Dict[str, Any] | None = None
-   pattern: str | None = None
+    type: ResponseFormatType
+    schema_: Dict[str, Any] | None = None
+    pattern: str | None = None
 
-   def to_dict(self) -> Dict[str, Any]:
-       result: Dict[str, Any] = {"type": self.type.value}
-       if self.schema_ is not None:
-           result["schema"] = self.schema_
-       if self.pattern is not None:
-           result["pattern"] = self.pattern
-       return result
+    def to_dict(self) -> Dict[str, Any]:
+        result: Dict[str, Any] = {"type": self.type.value}
+        if self.schema_ is not None:
+            result["schema"] = self.schema_
+        if self.pattern is not None:
+            result["pattern"] = self.pattern
+        return result
 
 
 class FunctionTool(BaseModel):
