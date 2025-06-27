@@ -386,6 +386,33 @@ for model in models:
     print(model)
 ```
 
+### Batch Inference
+
+The batch API allows you to submit larger inference jobs for completion with a 24 hour turn-around time, below is an example. To learn more refer to the [docs here](https://docs.together.ai/docs/batch-inference).
+
+```python
+from together import Together
+
+client = Together()
+
+# Upload the batch file
+batch_file = client.files.upload(file="simpleqa_batch_student.jsonl", purpose="batch-api")
+
+# Create the batch job
+batch = client.batches.create_batch(file_id=batch_file.id, endpoint="/v1/chat/completions")
+
+# Monitor the batch status
+batch_stat = client.batches.get_batch(batch.id)
+
+# List all batches - contains other batches as well
+client.batches.list_batches()
+
+# Download the file content if job completed
+if batch_stat.status == 'COMPLETED':
+    output_response = client.files.retrieve_content(id=batch_stat.output_file_id,
+                                                    output="simpleqa_v3_output.jsonl")
+```
+
 ## Usage – CLI
 
 ### Chat Completions
