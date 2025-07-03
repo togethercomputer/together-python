@@ -201,18 +201,10 @@ def fine_tuning(ctx: click.Context) -> None:
     "The step value is optional, without it the final checkpoint will be used.",
 )
 @click.option(
-    "--from-hf-model",
-    type=str,
-    default=None,
-    help="Model name from the Hugging Face Hub that will be used to initialize the trained model. "
-    "The model config is not validated; any model supported by Transformers should work, but the batch size "
-    "limits are not checked.",
-)
-@click.option(
     "--hf-api-token",
     type=str,
     default=None,
-    help="HF API token to use to download a checkpoint from a private repo",
+    help="HF API token to use to upload a checkpoint to a private repo",
 )
 def create(
     ctx: click.Context,
@@ -248,7 +240,6 @@ def create(
     rpo_alpha: float | None,
     simpo_gamma: float | None,
     from_checkpoint: str,
-    from_hf_model: str,
     hf_api_token: str,
 ) -> None:
     """Start fine-tuning"""
@@ -286,7 +277,6 @@ def create(
         rpo_alpha=rpo_alpha,
         simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
-        from_hf_model=from_hf_model,
         hf_api_token=hf_api_token,
     )
 

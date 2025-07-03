@@ -212,7 +212,6 @@ class FinetuneRequest(BaseModel):
     )
     # from step
     from_checkpoint: str | None = None
-    from_hf_model: str | None = None
     hf_api_token: str | None = None
 
 
