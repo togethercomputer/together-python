@@ -77,6 +77,7 @@ def create_finetune_request(
     simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
     hf_api_token: str | None = None,
+    hf_repo_to_upload: str | None = None,
 ) -> FinetuneRequest:
     if model is not None and from_checkpoint is not None:
         raise ValueError(
@@ -264,6 +265,7 @@ def create_finetune_request(
         training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
         hf_api_token=hf_api_token,
+        hf_repo_to_upload=hf_repo_to_upload,
     )
 
     return finetune_request
