@@ -206,6 +206,12 @@ def fine_tuning(ctx: click.Context) -> None:
     default=None,
     help="HF API token to use to upload a checkpoint to a private repo",
 )
+@click.option(
+    "--hf-repo-to-upload",
+    type=str,
+    default=None,
+    help="HF repo to upload the fine-tuned model to",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -240,7 +246,8 @@ def create(
     rpo_alpha: float | None,
     simpo_gamma: float | None,
     from_checkpoint: str,
-    hf_api_token: str,
+    hf_api_token: str | None,
+    hf_repo_to_upload: str | None,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -278,6 +285,7 @@ def create(
         simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
         hf_api_token=hf_api_token,
+        hf_repo_to_upload=hf_repo_to_upload,
     )
 
     if model is None and from_checkpoint is None:

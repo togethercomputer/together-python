@@ -344,6 +344,7 @@ class FineTuning:
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
         hf_api_token: str | None = None,
+        hf_repo_to_upload: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -401,6 +402,7 @@ class FineTuning:
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
             hf_api_token (str, optional): API key for the Hugging Face Hub. Defaults to None.
+            hf_repo_to_upload (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -455,6 +457,7 @@ class FineTuning:
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
             hf_api_token=hf_api_token,
+            hf_repo_to_upload=hf_repo_to_upload,
         )
 
         if verbose:
@@ -768,6 +771,7 @@ class AsyncFineTuning:
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
         hf_api_token: str | None = None,
+        hf_repo_to_upload: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -825,6 +829,7 @@ class AsyncFineTuning:
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
             hf_api_token (str, optional): API key for the Huggging Face Hub. Defaults to None.
+            hf_repo_to_upload (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -878,8 +883,8 @@ class AsyncFineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
-            from_hf_model=from_hf_model,
             hf_api_token=hf_api_token,
+            hf_repo_to_upload=hf_repo_to_upload,
         )
 
         if verbose:
