@@ -207,7 +207,7 @@ def fine_tuning(ctx: click.Context) -> None:
     help="HF API token to use to upload a checkpoint to a private repo",
 )
 @click.option(
-    "--hf-repo-to-upload",
+    "--hf-output-repo-name",
     type=str,
     default=None,
     help="HF repo to upload the fine-tuned model to",
