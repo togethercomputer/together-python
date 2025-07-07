@@ -214,7 +214,7 @@ class FinetuneRequest(BaseModel):
     from_checkpoint: str | None = None
     # hf related fields
     hf_api_token: str | None = None
-    hf_repo_to_upload: str | None = None
+    hf_output_repo_name: str | None = None
 
 
 class FinetuneResponse(BaseModel):
