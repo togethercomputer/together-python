@@ -247,7 +247,7 @@ def create(
     simpo_gamma: float | None,
     from_checkpoint: str,
     hf_api_token: str | None,
-    hf_repo_to_upload: str | None,
+    hf_output_repo_name: str | None,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -285,7 +285,7 @@ def create(
         simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
         hf_api_token=hf_api_token,
-        hf_repo_to_upload=hf_repo_to_upload,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
     if model is None and from_checkpoint is None:
