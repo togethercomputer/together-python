@@ -139,8 +139,32 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--dpo-beta",
     type=float,
-    default=0.1,
+    default=None,
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
+)
+@click.option(
+    "--dpo-normalize-logratios-by-length",
+    type=bool,
+    default=False,
+    help=(
+        "Whether to normalize logratios by sample length "
+        "(only used when '--training-method' is 'dpo')"
+    ),
+)
+@click.option(
+    "--rpo-alpha",
+    type=float,
+    default=None,
+    help=(
+        "RPO alpha parameter of DPO training to include NLL in the loss "
+        "(only used when '--training-method' is 'dpo')"
+    ),
+)
+@click.option(
+    "--simpo-gamma",
+    type=float,
+    default=None,
+    help="SimPO gamma parameter (only used when '--training-method' is 'dpo')",
 )
 @click.option(
     "--suffix",
@@ -164,7 +188,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--train-on-inputs",
     type=BOOL_WITH_AUTO,
-    default="auto",
+    default=None,
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
@@ -175,6 +199,18 @@ def fine_tuning(ctx: click.Context) -> None:
     help="The checkpoint identifier to continue training from a previous fine-tuning job. "
     "The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
     "The step value is optional, without it the final checkpoint will be used.",
+)
+@click.option(
+    "--hf-api-token",
+    type=str,
+    default=None,
+    help="HF API token to use for uploading a checkpoint to a private repo",
+)
+@click.option(
+    "--hf-output-repo-name",
+    type=str,
+    default=None,
+    help="HF repo to upload the fine-tuned model to",
 )
 def create(
     ctx: click.Context,
@@ -205,8 +241,13 @@ def create(
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
     training_method: str,
-    dpo_beta: float,
+    dpo_beta: float | None,
+    dpo_normalize_logratios_by_length: bool,
+    rpo_alpha: float | None,
+    simpo_gamma: float | None,
     from_checkpoint: str,
+    hf_api_token: str | None,
+    hf_output_repo_name: str | None,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -239,7 +280,12 @@ def create(
         train_on_inputs=train_on_inputs,
         training_method=training_method,
         dpo_beta=dpo_beta,
+        dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
+        rpo_alpha=rpo_alpha,
+        simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
+        hf_api_token=hf_api_token,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
     if model is None and from_checkpoint is None:
@@ -250,7 +296,7 @@ def create(
         model_name = from_checkpoint.split(":")[0]
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model_name
+        model=model_name,
     )
 
     if lora:

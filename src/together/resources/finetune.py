@@ -72,7 +72,12 @@ def create_finetune_request(
     train_on_inputs: bool | Literal["auto"] | None = None,
     training_method: str = "sft",
     dpo_beta: float | None = None,
+    dpo_normalize_logratios_by_length: bool = False,
+    rpo_alpha: float | None = None,
+    simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
+    hf_api_token: str | None = None,
+    hf_output_repo_name: str | None = None,
 ) -> FinetuneRequest:
     if model is not None and from_checkpoint is not None:
         raise ValueError(
@@ -182,6 +187,21 @@ def create_finetune_request(
 
     if dpo_beta is not None and training_method != "dpo":
         raise ValueError("dpo_beta is only supported for DPO training")
+    if dpo_normalize_logratios_by_length and training_method != "dpo":
+        raise ValueError(
+            "dpo_normalize_logratios_by_length=True is only supported for DPO training"
+        )
+    if rpo_alpha is not None:
+        if training_method != "dpo":
+            raise ValueError("rpo_alpha is only supported for DPO training")
+        if not rpo_alpha >= 0.0:
+            raise ValueError(f"rpo_alpha should be non-negative (got {rpo_alpha})")
+
+    if simpo_gamma is not None:
+        if training_method != "dpo":
+            raise ValueError("simpo_gamma is only supported for DPO training")
+        if not simpo_gamma >= 0.0:
+            raise ValueError(f"simpo_gamma should be non-negative (got {simpo_gamma})")
 
     lr_scheduler: FinetuneLRScheduler
     if lr_scheduler_type == "cosine":
@@ -204,7 +224,24 @@ def create_finetune_request(
     if training_method == "sft":
         training_method_cls = TrainingMethodSFT(train_on_inputs=train_on_inputs)
     elif training_method == "dpo":
-        training_method_cls = TrainingMethodDPO(dpo_beta=dpo_beta)
+        if simpo_gamma is not None and simpo_gamma > 0:
+            dpo_reference_free = True
+            dpo_normalize_logratios_by_length = True
+            rprint(
+                f"Parameter simpo_gamma was set to {simpo_gamma}. "
+                "SimPO training detected. Reference logits will not be used "
+                "and length normalization of log-probabilities will be enabled."
+            )
+        else:
+            dpo_reference_free = False
+
+        training_method_cls = TrainingMethodDPO(
+            dpo_beta=dpo_beta,
+            dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
+            dpo_reference_free=dpo_reference_free,
+            rpo_alpha=rpo_alpha,
+            simpo_gamma=simpo_gamma,
+        )
 
     finetune_request = FinetuneRequest(
         model=model,
@@ -227,6 +264,8 @@ def create_finetune_request(
         wandb_name=wandb_name,
         training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
+        hf_api_token=hf_api_token,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
     return finetune_request
@@ -302,7 +341,12 @@ class FineTuning:
         train_on_inputs: bool | Literal["auto"] | None = None,
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        dpo_normalize_logratios_by_length: bool = False,
+        rpo_alpha: float | None = None,
+        simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        hf_api_token: str | None = None,
+        hf_output_repo_name: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -353,9 +397,14 @@ class FineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample length. Defaults to False,
+            rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
+            simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            hf_api_token (str, optional): API key for the Hugging Face Hub. Defaults to None.
+            hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -405,7 +454,12 @@ class FineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
+            rpo_alpha=rpo_alpha,
+            simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            hf_api_token=hf_api_token,
+            hf_output_repo_name=hf_output_repo_name,
         )
 
         if verbose:
@@ -714,7 +768,12 @@ class AsyncFineTuning:
         train_on_inputs: bool | Literal["auto"] | None = None,
         training_method: str = "sft",
         dpo_beta: float | None = None,
+        dpo_normalize_logratios_by_length: bool = False,
+        rpo_alpha: float | None = None,
+        simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        hf_api_token: str | None = None,
+        hf_output_repo_name: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -765,9 +824,14 @@ class AsyncFineTuning:
             training_method (str, optional): Training method. Defaults to "sft".
                 Supported methods: "sft", "dpo".
             dpo_beta (float, optional): DPO beta parameter. Defaults to None.
+            dpo_normalize_logratios_by_length (bool): Whether or not normalize logratios by sample length. Defaults to False,
+            rpo_alpha (float, optional): RPO alpha parameter of DPO training to include NLL in the loss. Defaults to None.
+            simpo_gamma: (float, optional): SimPO gamma parameter. Defaults to None.
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            hf_api_token (str, optional): API key for the Huggging Face Hub. Defaults to None.
+            hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -817,7 +881,12 @@ class AsyncFineTuning:
             train_on_inputs=train_on_inputs,
             training_method=training_method,
             dpo_beta=dpo_beta,
+            dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
+            rpo_alpha=rpo_alpha,
+            simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            hf_api_token=hf_api_token,
+            hf_output_repo_name=hf_output_repo_name,
         )
 
         if verbose:

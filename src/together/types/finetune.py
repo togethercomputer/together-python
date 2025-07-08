@@ -159,6 +159,10 @@ class TrainingMethodDPO(TrainingMethod):
 
     method: Literal["dpo"] = "dpo"
     dpo_beta: float | None = None
+    dpo_normalize_logratios_by_length: bool = False
+    dpo_reference_free: bool = False
+    rpo_alpha: float | None = None
+    simpo_gamma: float | None = None
 
 
 class FinetuneRequest(BaseModel):
@@ -208,6 +212,9 @@ class FinetuneRequest(BaseModel):
     )
     # from step
     from_checkpoint: str | None = None
+    # hf related fields
+    hf_api_token: str | None = None
+    hf_output_repo_name: str | None = None
 
 
 class FinetuneResponse(BaseModel):
