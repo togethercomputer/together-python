@@ -25,6 +25,7 @@ class Together:
     audio: resources.Audio
     batches: resources.Batches
     code_interpreter: CodeInterpreter
+    evaluation: resources.Evaluation
 
     # client options
     client: TogetherClient
@@ -92,6 +93,7 @@ class Together:
         self.endpoints = resources.Endpoints(self.client)
         self.code_interpreter = CodeInterpreter(self.client)
         self.batches = resources.Batches(self.client)
+        self.evaluation = resources.Evaluation(self.client)
 
 
 class AsyncTogether:
@@ -105,6 +107,7 @@ class AsyncTogether:
     rerank: resources.AsyncRerank
     code_interpreter: CodeInterpreter
     batches: resources.AsyncBatches
+    evaluation: resources.AsyncEvaluation
     # client options
     client: TogetherClient
 
@@ -169,6 +172,7 @@ class AsyncTogether:
         self.rerank = resources.AsyncRerank(self.client)
         self.code_interpreter = CodeInterpreter(self.client)
         self.batches = resources.AsyncBatches(self.client)
+        self.evaluation = resources.AsyncEvaluation(self.client)
 
 
 Client = Together

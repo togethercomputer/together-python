@@ -14,11 +14,13 @@ from together.types.common import (
 class FilePurpose(str, Enum):
     FineTune = "fine-tune"
     BatchAPI = "batch-api"
+    Eval = "eval"
 
 
 class FileType(str, Enum):
     jsonl = "jsonl"
     parquet = "parquet"
+    csv = "csv"
 
 
 class FileRequest(BaseModel):

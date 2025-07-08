@@ -1,9 +1,10 @@
 import json
 import pytest
+import csv
 from pathlib import Path
 
 from together.constants import MIN_SAMPLES
-from together.utils.files import check_file
+from together.utils.files import check_file, FilePurpose
 
 
 def test_check_jsonl_valid_general(tmp_path: Path):
@@ -392,3 +393,64 @@ def test_check_jsonl_invalid_weight(tmp_path: Path):
     report = check_file(file)
     assert not report["is_check_passed"]
     assert "Weight must be either 0 or 1" in report["message"]
+
+
+def test_check_csv_valid_general(tmp_path: Path):
+    # Create a valid CSV file
+    file = tmp_path / "valid.csv"
+    with open(file, "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["text"])
+        writer.writeheader()
+        writer.writerow({"text": "Hello, world!"})
+        writer.writerow({"text": "How are you?"})
+
+    report = check_file(file, purpose=FilePurpose.Eval)
+    assert report["is_check_passed"]
+    assert report["utf8"]
+    assert report["num_samples"] == 2
+    assert report["has_min_samples"]
+
+
+def test_check_csv_empty_file(tmp_path: Path):
+    # Create an empty CSV file
+    file = tmp_path / "empty.csv"
+    file.touch()
+
+    report = check_file(file, purpose=FilePurpose.Eval)
+
+    assert not report["is_check_passed"]
+    assert report["message"] == "File is empty"
+    assert report["file_size"] == 0
+
+
+def test_check_csv_valid_completion(tmp_path: Path):
+    # Create a valid CSV file with conversational format
+    file = tmp_path / "valid_completion.csv"
+
+    with open(file, "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["prompt", "completion"])
+        writer.writeheader()
+        writer.writerow(
+            {
+                "prompt": "Translate the following sentence.",
+                "completion": "Hello, world!",
+            }
+        )
+
+    report = check_file(file, purpose=FilePurpose.Eval)
+    assert report["is_check_passed"]
+    assert report["utf8"]
+    assert report["num_samples"] == 1
+    assert report["has_min_samples"]
+
+
+def test_check_csv_invalid_column(tmp_path: Path):
+    # Create a CSV file with an invalid column
+    file = tmp_path / "invalid_column.csv"
+    with open(file, "w") as f:
+        writer = csv.DictWriter(f, fieldnames=["asfg"])
+        writer.writeheader()
+
+    report = check_file(file)
+
+    assert not report["is_check_passed"]
