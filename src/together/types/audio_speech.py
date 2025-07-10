@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Iterator
+from typing import Iterator, Union, BinaryIO, Optional, List
 import threading
 
 from pydantic import BaseModel, ConfigDict
@@ -108,3 +108,82 @@ class AudioSpeechStreamResponse(BaseModel):
                     audio = base64.b64decode(stream_event_response.response.data.b64)
 
                     f.write(audio)
+
+
+class AudioTranscriptionResponseFormat(str, Enum):
+    JSON = "json"
+    VERBOSE_JSON = "verbose_json"
+
+
+class AudioTimestampGranularities(str, Enum):
+    SEGMENT = "segment"
+    WORD = "word"
+
+
+class AudioTranscriptionRequest(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    file: Union[str, BinaryIO]
+    model: str = "openai/whisper-large-v3"
+    language: Optional[str] = None
+    prompt: Optional[str] = None
+    response_format: AudioTranscriptionResponseFormat = AudioTranscriptionResponseFormat.JSON
+    temperature: float = 0.0
+    timestamp_granularities: Optional[AudioTimestampGranularities] = AudioTimestampGranularities.SEGMENT
+
+
+class AudioTranslationRequest(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
+    file: Union[str, BinaryIO]
+    model: str = "openai/whisper-large-v3"
+    language: Optional[str] = None
+    prompt: Optional[str] = None
+    response_format: AudioTranscriptionResponseFormat = AudioTranscriptionResponseFormat.JSON
+    temperature: float = 0.0
+    timestamp_granularities: Optional[AudioTimestampGranularities] = AudioTimestampGranularities.SEGMENT
+
+
+class AudioTranscriptionSegment(BaseModel):
+    id: int
+    seek: Optional[int] = None
+    start: float
+    end: float
+    text: str
+    tokens: Optional[List[int]] = None
+    temperature: Optional[float] = None
+    avg_logprob: Optional[float] = None
+    compression_ratio: Optional[float] = None
+    no_speech_prob: Optional[float] = None
+
+
+class AudioTranscriptionWord(BaseModel):
+    word: str
+    start: float
+    end: float
+
+
+class AudioTranscriptionResponse(BaseModel):
+    text: str
+
+
+class AudioTranscriptionVerboseResponse(BaseModel):
+    task: Optional[str] = None
+    language: Optional[str] = None
+    duration: Optional[float] = None
+    text: str
+    segments: Optional[List[AudioTranscriptionSegment]] = None
+    words: Optional[List[AudioTranscriptionWord]] = None
+
+
+class AudioTranslationResponse(BaseModel):
+    text: str
+
+
+class AudioTranslationVerboseResponse(BaseModel):
+    task: Optional[str] = None
+    language: Optional[str] = None
+    duration: Optional[float] = None
+    text: str
+    segments: Optional[List[AudioTranscriptionSegment]] = None
+    words: Optional[List[AudioTranscriptionWord]] = None
