@@ -22,7 +22,7 @@ class TestTogetherTranscriptions:
         """
         Test basic transcription with URL audio file
         """
-        audio_url = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
+        audio_url = "https://ia801605.us.archive.org/28/items/jfks19630626/jfk_1963_0626_berliner.wav"
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url, model="openai/whisper-large-v3"
@@ -36,7 +36,7 @@ class TestTogetherTranscriptions:
         """
         Test transcription with language parameter
         """
-        audio_url = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
+        audio_url = "https://ia801605.us.archive.org/28/items/jfks19630626/jfk_1963_0626_berliner.wav"
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url, model="openai/whisper-large-v3", language="en"
@@ -50,7 +50,7 @@ class TestTogetherTranscriptions:
         """
         Test transcription with verbose JSON format and timestamps
         """
-        audio_url = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
+        audio_url = "https://ia801605.us.archive.org/28/items/jfks19630626/jfk_1963_0626_berliner.wav"
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url,
@@ -68,7 +68,7 @@ class TestTogetherTranscriptions:
         """
         Test transcription with temperature parameter
         """
-        audio_url = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
+        audio_url = "https://ia801605.us.archive.org/28/items/jfks19630626/jfk_1963_0626_berliner.wav"
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url, model="openai/whisper-large-v3", temperature=0.2
@@ -91,7 +91,7 @@ class TestTogetherTranscriptions:
         """
         Test transcription with missing model parameter - should use default model
         """
-        audio_url = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav"
+        audio_url = "https://ia801605.us.archive.org/28/items/jfks19630626/jfk_1963_0626_berliner.wav"
 
         response = sync_together_client.audio.transcriptions.create(file=audio_url)
 
