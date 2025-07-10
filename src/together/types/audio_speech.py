@@ -165,7 +165,6 @@ class AudioTranscriptionResponse(BaseModel):
 
 
 class AudioTranscriptionVerboseResponse(BaseModel):
-    task: Optional[str] = None
     language: Optional[str] = None
     duration: Optional[float] = None
     text: str
