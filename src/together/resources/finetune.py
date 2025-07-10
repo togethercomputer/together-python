@@ -76,6 +76,8 @@ def create_finetune_request(
     rpo_alpha: float | None = None,
     simpo_gamma: float | None = None,
     from_checkpoint: str | None = None,
+    hf_api_token: str | None = None,
+    hf_output_repo_name: str | None = None,
 ) -> FinetuneRequest:
     if model is not None and from_checkpoint is not None:
         raise ValueError(
@@ -262,6 +264,8 @@ def create_finetune_request(
         wandb_name=wandb_name,
         training_method=training_method_cls,
         from_checkpoint=from_checkpoint,
+        hf_api_token=hf_api_token,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
     return finetune_request
@@ -341,6 +345,8 @@ class FineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        hf_api_token: str | None = None,
+        hf_output_repo_name: str | None = None,
     ) -> FinetuneResponse:
         """
         Method to initiate a fine-tuning job
@@ -397,6 +403,8 @@ class FineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            hf_api_token (str, optional): API key for the Hugging Face Hub. Defaults to None.
+            hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -450,6 +458,8 @@ class FineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            hf_api_token=hf_api_token,
+            hf_output_repo_name=hf_output_repo_name,
         )
 
         if verbose:
@@ -762,6 +772,8 @@ class AsyncFineTuning:
         rpo_alpha: float | None = None,
         simpo_gamma: float | None = None,
         from_checkpoint: str | None = None,
+        hf_api_token: str | None = None,
+        hf_output_repo_name: str | None = None,
     ) -> FinetuneResponse:
         """
         Async method to initiate a fine-tuning job
@@ -818,6 +830,8 @@ class AsyncFineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
+            hf_api_token (str, optional): API key for the Huggging Face Hub. Defaults to None.
+            hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
         Returns:
             FinetuneResponse: Object containing information about fine-tuning job.
@@ -871,6 +885,8 @@ class AsyncFineTuning:
             rpo_alpha=rpo_alpha,
             simpo_gamma=simpo_gamma,
             from_checkpoint=from_checkpoint,
+            hf_api_token=hf_api_token,
+            hf_output_repo_name=hf_output_repo_name,
         )
 
         if verbose:

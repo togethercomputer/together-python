@@ -200,6 +200,18 @@ def fine_tuning(ctx: click.Context) -> None:
     "The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
     "The step value is optional, without it the final checkpoint will be used.",
 )
+@click.option(
+    "--hf-api-token",
+    type=str,
+    default=None,
+    help="HF API token to use for uploading a checkpoint to a private repo",
+)
+@click.option(
+    "--hf-output-repo-name",
+    type=str,
+    default=None,
+    help="HF repo to upload the fine-tuned model to",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -234,6 +246,8 @@ def create(
     rpo_alpha: float | None,
     simpo_gamma: float | None,
     from_checkpoint: str,
+    hf_api_token: str | None,
+    hf_output_repo_name: str | None,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -270,6 +284,8 @@ def create(
         rpo_alpha=rpo_alpha,
         simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
+        hf_api_token=hf_api_token,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
     if model is None and from_checkpoint is None:
@@ -280,7 +296,7 @@ def create(
         model_name = from_checkpoint.split(":")[0]
 
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model_name
+        model=model_name,
     )
 
     if lora:

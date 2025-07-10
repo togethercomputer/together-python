@@ -67,6 +67,8 @@ class FinetuneEventType(str, Enum):
     MODEL_COMPRESSION_COMPLETE = "MODEL_COMPRESSION_COMPLETE"
     MODEL_UPLOADING = "MODEL_UPLOADING"
     MODEL_UPLOAD_COMPLETE = "MODEL_UPLOAD_COMPLETE"
+    MODEL_UPLOADING_TO_HF = "MODEL_UPLOADING_TO_HF"
+    MODEL_UPLOAD_TO_HF_COMPLETE = "MODEL_UPLOAD_TO_HF_COMPLETE"
     JOB_COMPLETE = "JOB_COMPLETE"
     JOB_ERROR = "JOB_ERROR"
     JOB_USER_ERROR = "JOB_USER_ERROR"
@@ -212,6 +214,9 @@ class FinetuneRequest(BaseModel):
     )
     # from step
     from_checkpoint: str | None = None
+    # hf related fields
+    hf_api_token: str | None = None
+    hf_output_repo_name: str | None = None
 
 
 class FinetuneResponse(BaseModel):
