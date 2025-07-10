@@ -1,13 +1,12 @@
 from __future__ import annotations
 
+import base64
 from enum import Enum
-from typing import Iterator, Union, BinaryIO, Optional, List
-import threading
+from typing import BinaryIO, Iterator, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
 from together.together_response import TogetherResponse
-import base64
 
 
 class AudioResponseFormat(str, Enum):
@@ -79,23 +78,19 @@ class AudioSpeechStreamEventResponse(BaseModel):
 
 
 class AudioSpeechStreamResponse(BaseModel):
-
     response: TogetherResponse | Iterator[TogetherResponse]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def stream_to_file(self, file_path: str) -> None:
-
         if isinstance(self.response, TogetherResponse):
             # save response to file
             with open(file_path, "wb") as f:
                 f.write(self.response.data)
 
         elif isinstance(self.response, Iterator):
-
             with open(file_path, "wb") as f:
                 for chunk in self.response:
-
                     # Try to parse as stream chunk
                     stream_event_response = AudioSpeechStreamEventResponse(
                         response={"data": chunk.data}
@@ -154,15 +149,9 @@ class AudioTranslationRequest(BaseModel):
 
 class AudioTranscriptionSegment(BaseModel):
     id: int
-    seek: Optional[int] = None
     start: float
     end: float
     text: str
-    tokens: Optional[List[int]] = None
-    temperature: Optional[float] = None
-    avg_logprob: Optional[float] = None
-    compression_ratio: Optional[float] = None
-    no_speech_prob: Optional[float] = None
 
 
 class AudioTranscriptionWord(BaseModel):
