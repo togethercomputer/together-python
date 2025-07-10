@@ -122,26 +122,34 @@ class AudioTimestampGranularities(str, Enum):
 
 class AudioTranscriptionRequest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     file: Union[str, BinaryIO]
     model: str = "openai/whisper-large-v3"
     language: Optional[str] = None
     prompt: Optional[str] = None
-    response_format: AudioTranscriptionResponseFormat = AudioTranscriptionResponseFormat.JSON
+    response_format: AudioTranscriptionResponseFormat = (
+        AudioTranscriptionResponseFormat.JSON
+    )
     temperature: float = 0.0
-    timestamp_granularities: Optional[AudioTimestampGranularities] = AudioTimestampGranularities.SEGMENT
+    timestamp_granularities: Optional[AudioTimestampGranularities] = (
+        AudioTimestampGranularities.SEGMENT
+    )
 
 
 class AudioTranslationRequest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     file: Union[str, BinaryIO]
     model: str = "openai/whisper-large-v3"
     language: Optional[str] = None
     prompt: Optional[str] = None
-    response_format: AudioTranscriptionResponseFormat = AudioTranscriptionResponseFormat.JSON
+    response_format: AudioTranscriptionResponseFormat = (
+        AudioTranscriptionResponseFormat.JSON
+    )
     temperature: float = 0.0
-    timestamp_granularities: Optional[AudioTimestampGranularities] = AudioTimestampGranularities.SEGMENT
+    timestamp_granularities: Optional[AudioTimestampGranularities] = (
+        AudioTimestampGranularities.SEGMENT
+    )
 
 
 class AudioTranscriptionSegment(BaseModel):

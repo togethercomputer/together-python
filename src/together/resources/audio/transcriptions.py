@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Union, BinaryIO, Optional
 from pathlib import Path
+from typing import Any, BinaryIO, Dict, Optional, Tuple, Union
 
 from together.abstract import api_requestor
-from together.together_response import TogetherResponse
 from together.types import (
-    AudioTranscriptionRequest,
-    AudioTranscriptionResponse,
-    AudioTranscriptionVerboseResponse,
-    AudioTranscriptionResponseFormat,
     AudioTimestampGranularities,
+    AudioTranscriptionResponse,
+    AudioTranscriptionResponseFormat,
+    AudioTranscriptionVerboseResponse,
     TogetherClient,
     TogetherRequest,
 )
@@ -29,7 +27,9 @@ class Transcriptions:
         prompt: Optional[str] = None,
         response_format: Union[str, AudioTranscriptionResponseFormat] = "json",
         temperature: float = 0.0,
-        timestamp_granularities: Optional[Union[str, AudioTimestampGranularities]] = None,
+        timestamp_granularities: Optional[
+            Union[str, AudioTimestampGranularities]
+        ] = None,
         **kwargs: Any,
     ) -> Union[AudioTranscriptionResponse, AudioTranscriptionVerboseResponse]:
         """
@@ -56,17 +56,17 @@ class Transcriptions:
         Returns:
             The transcribed text in the requested format.
         """
-        
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
         # Handle file input - could be a path, URL, or file object
-        files_data = {}
+        files_data: Dict[str, Union[Tuple[None, str], BinaryIO]] = {}
         params_data = {}
-        
+
         if isinstance(file, (str, Path)):
-            if isinstance(file, str) and file.startswith(('http://', 'https://')):
+            if isinstance(file, str) and file.startswith(("http://", "https://")):
                 # URL string - send as multipart field
                 files_data["file"] = (None, file)
             else:
@@ -78,22 +78,29 @@ class Transcriptions:
             files_data["file"] = file
 
         # Build request parameters
-        params_data.update({
-            "model": model,
-            "response_format": response_format if isinstance(response_format, str) else response_format.value,
-            "temperature": temperature,
-        })
-        
+        params_data.update(
+            {
+                "model": model,
+                "response_format": (
+                    response_format.value
+                    if hasattr(response_format, "value")
+                    else response_format
+                ),
+                "temperature": temperature,
+            }
+        )
+
         if language is not None:
             params_data["language"] = language
-            
+
         if prompt is not None:
             params_data["prompt"] = prompt
-            
+
         if timestamp_granularities is not None:
             params_data["timestamp_granularities"] = (
-                timestamp_granularities if isinstance(timestamp_granularities, str) 
-                else timestamp_granularities.value
+                timestamp_granularities.value
+                if hasattr(timestamp_granularities, "value")
+                else timestamp_granularities
             )
 
         # Add any additional kwargs
@@ -113,13 +120,17 @@ class Transcriptions:
             if files_data and "file" in files_data:
                 try:
                     # Only close if it's a file object (not a tuple for URL)
-                    if hasattr(files_data["file"], 'close'):
-                        files_data["file"].close()
+                    file_obj = files_data["file"]
+                    if hasattr(file_obj, "close") and not isinstance(file_obj, tuple):
+                        file_obj.close()
                 except:
                     pass
 
         # Parse response based on format
-        if response_format == "verbose_json" or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON:
+        if (
+            response_format == "verbose_json"
+            or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
+        ):
             return AudioTranscriptionVerboseResponse(**response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
@@ -133,12 +144,14 @@ class AsyncTranscriptions:
         self,
         *,
         file: Union[str, BinaryIO, Path],
-        model: str = "openai/whisper-large-v3", 
+        model: str = "openai/whisper-large-v3",
         language: Optional[str] = None,
         prompt: Optional[str] = None,
         response_format: Union[str, AudioTranscriptionResponseFormat] = "json",
         temperature: float = 0.0,
-        timestamp_granularities: Optional[Union[str, AudioTimestampGranularities]] = None,
+        timestamp_granularities: Optional[
+            Union[str, AudioTimestampGranularities]
+        ] = None,
         **kwargs: Any,
     ) -> Union[AudioTranscriptionResponse, AudioTranscriptionVerboseResponse]:
         """
@@ -165,17 +178,17 @@ class AsyncTranscriptions:
         Returns:
             The transcribed text in the requested format.
         """
-        
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
         # Handle file input - could be a path, URL, or file object
-        files_data = {}
+        files_data: Dict[str, Union[Tuple[None, str], BinaryIO]] = {}
         params_data = {}
-        
+
         if isinstance(file, (str, Path)):
-            if isinstance(file, str) and file.startswith(('http://', 'https://')):
+            if isinstance(file, str) and file.startswith(("http://", "https://")):
                 # URL string - send as multipart field
                 files_data["file"] = (None, file)
             else:
@@ -187,22 +200,37 @@ class AsyncTranscriptions:
             files_data["file"] = file
 
         # Build request parameters
-        params_data.update({
-            "model": model,
-            "response_format": response_format if isinstance(response_format, str) else response_format.value,
-            "temperature": temperature,
-        })
-        
+        params_data.update(
+            {
+                "model": model,
+                "response_format": (
+                    response_format
+                    if isinstance(response_format, str)
+                    else (
+                        response_format.value
+                        if hasattr(response_format, "value")
+                        else response_format
+                    )
+                ),
+                "temperature": temperature,
+            }
+        )
+
         if language is not None:
             params_data["language"] = language
-            
+
         if prompt is not None:
             params_data["prompt"] = prompt
-            
+
         if timestamp_granularities is not None:
             params_data["timestamp_granularities"] = (
-                timestamp_granularities if isinstance(timestamp_granularities, str) 
-                else timestamp_granularities.value
+                timestamp_granularities
+                if isinstance(timestamp_granularities, str)
+                else (
+                    timestamp_granularities.value
+                    if hasattr(timestamp_granularities, "value")
+                    else timestamp_granularities
+                )
             )
 
         # Add any additional kwargs
@@ -222,13 +250,17 @@ class AsyncTranscriptions:
             if files_data and "file" in files_data:
                 try:
                     # Only close if it's a file object (not a tuple for URL)
-                    if hasattr(files_data["file"], 'close'):
-                        files_data["file"].close()
+                    file_obj = files_data["file"]
+                    if hasattr(file_obj, "close") and not isinstance(file_obj, tuple):
+                        file_obj.close()
                 except:
                     pass
 
         # Parse response based on format
-        if response_format == "verbose_json" or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON:
+        if (
+            response_format == "verbose_json"
+            or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
+        ):
             return AudioTranscriptionVerboseResponse(**response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
