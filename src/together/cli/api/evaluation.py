@@ -203,11 +203,56 @@ def create(
             raise click.BadParameter(
                 "labels and pass_labels are required for classify evaluation"
             )
+        if any(
+            [
+                model_a_name,
+                model_a_max_tokens,
+                model_a_temperature,
+                model_a_system_template,
+                model_a_input_template,
+                model_b_name,
+                model_b_max_tokens,
+                model_b_temperature,
+                model_b_system_template,
+                model_b_input_template,
+            ]
+        ):
+            raise click.BadParameter(
+                "model_a_* and model_b_* parameters are exclusive to the compare mode"
+            )
+        if any([min_score, max_score]):
+            raise click.BadParameter(
+                "min_score and max_score parameters are exclusive to the score mode"
+            )
+
     elif type == "score":
         if min_score is None or max_score is None or pass_threshold is None:
             raise click.BadParameter(
-                "min_score, max_score, and pass_threshold are required for score evaluation"
+                "min_score, max_score and pass_threshold are required for score evaluation"
             )
+        if any(
+            [
+                model_a_name,
+                model_a_max_tokens,
+                model_a_temperature,
+                model_a_system_template,
+                model_a_input_template,
+                model_b_name,
+                model_b_max_tokens,
+                model_b_temperature,
+                model_b_system_template,
+                model_b_input_template,
+            ]
+        ):
+            raise click.BadParameter(
+                "model_a_* and model_b_* parameters are exclusive to the compare mode"
+            )
+
+        if any([labels, pass_labels]):
+            raise click.BadParametera(
+                "labels and pass_labels parameters are exclusive to the classify mode"
+            )
+
     elif type == "compare":
         # Check if either model-a or model-b config/name is provided
         model_a_provided = model_a_field or any(
@@ -231,7 +276,28 @@ def create(
 
         if not model_a_provided or not model_b_provided:
             raise click.BadParameter(
-                "model_a and model_b are required for compare evaluation"
+                "model_a and model_b parameters are required for compare evaluation"
+            )
+        if any(
+            [
+                model_field,
+                model_to_evaluate_name,
+                model_to_evaluate_max_tokens,
+                model_to_evaluate_temperature,
+                model_to_evaluate_system_template,
+                model_to_evaluate_input_template,
+            ]
+        ):
+            raise click.BadParameter(
+                "model_field and model_to_evaluate_* parameters are exclusive to classify and compare modes"
+            )
+        if any([labels, pass_labels]):
+            raise click.BadParameter(
+                "labels and pass_labels parameters are exclusive to the classify mode"
+            )
+        if any([min_score, max_score]):
+            raise click.BadParameter(
+                "min_score and max_score parameters are exclusive to the score mode"
             )
 
     # Build model configurations
