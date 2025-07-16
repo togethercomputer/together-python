@@ -242,7 +242,7 @@ def create(
                 model_a_input_template,
             ]
         )
-        model_b_provided = model_b_field or any(
+        model_b_provided = model_b_field is not None or any(
             [
                 model_b_name,
                 model_b_max_tokens,
