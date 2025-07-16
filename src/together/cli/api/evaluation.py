@@ -249,7 +249,7 @@ def create(
             )
 
         if any([labels, pass_labels]):
-            raise click.BadParametera(
+            raise click.BadParameter(
                 "labels and pass_labels parameters are exclusive to the classify mode"
             )
 
