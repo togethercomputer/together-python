@@ -105,6 +105,7 @@ class AsyncTogether:
     models: resources.AsyncModels
     fine_tuning: resources.AsyncFineTuning
     rerank: resources.AsyncRerank
+    audio: resources.AsyncAudio
     code_interpreter: CodeInterpreter
     batches: resources.AsyncBatches
     evaluation: resources.AsyncEvaluation
@@ -170,6 +171,7 @@ class AsyncTogether:
         self.models = resources.AsyncModels(self.client)
         self.fine_tuning = resources.AsyncFineTuning(self.client)
         self.rerank = resources.AsyncRerank(self.client)
+        self.audio = resources.AsyncAudio(self.client)
         self.code_interpreter = CodeInterpreter(self.client)
         self.batches = resources.AsyncBatches(self.client)
         self.evaluation = resources.AsyncEvaluation(self.client)
