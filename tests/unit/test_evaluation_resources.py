@@ -142,13 +142,6 @@ class TestEvaluation:
             input_data_file_path="file_789",
             model_a="model-a-name",
             model_b="model-b-name",
-            model_to_evaluate={
-                "model_name": "asdfg",
-                "max_tokens": 100,
-                "temperature": 0.5,
-                "system_template": "You are an assistant that compares two models",
-                "input_template": "Compare the following two models: {model_a} and {model_b}",
-            },
         )
 
         # Verify the request
