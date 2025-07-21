@@ -331,7 +331,6 @@ def test_code_interpreter_session_management(mocker):
 
 
 def test_code_interpreter_run_with_files(mocker):
-
     mock_requestor = mocker.MagicMock()
     response_data = {
         "data": {

@@ -255,7 +255,7 @@ def create(
 
     elif type == "compare":
         # Check if either model-a or model-b config/name is provided
-        model_a_provided = model_a_field or any(
+        model_a_provided = model_a_field is not None or any(
             [
                 model_a_name,
                 model_a_max_tokens,
