@@ -197,109 +197,6 @@ def create(
     labels_list = labels.split(",") if labels else None
     pass_labels_list = pass_labels.split(",") if pass_labels else None
 
-    # Validate parameters based on type
-    if type == "classify":
-        if not labels_list or not pass_labels_list:
-            raise click.BadParameter(
-                "labels and pass_labels are required for classify evaluation"
-            )
-        if any(
-            [
-                model_a_name,
-                model_a_max_tokens,
-                model_a_temperature,
-                model_a_system_template,
-                model_a_input_template,
-                model_b_name,
-                model_b_max_tokens,
-                model_b_temperature,
-                model_b_system_template,
-                model_b_input_template,
-            ]
-        ):
-            raise click.BadParameter(
-                "model_a_* and model_b_* parameters are exclusive to the compare mode"
-            )
-        if any([min_score, max_score]):
-            raise click.BadParameter(
-                "min_score and max_score parameters are exclusive to the score mode"
-            )
-
-    elif type == "score":
-        if min_score is None or max_score is None or pass_threshold is None:
-            raise click.BadParameter(
-                "min_score, max_score and pass_threshold are required for score evaluation"
-            )
-        if any(
-            [
-                model_a_name,
-                model_a_max_tokens,
-                model_a_temperature,
-                model_a_system_template,
-                model_a_input_template,
-                model_b_name,
-                model_b_max_tokens,
-                model_b_temperature,
-                model_b_system_template,
-                model_b_input_template,
-            ]
-        ):
-            raise click.BadParameter(
-                "model_a_* and model_b_* parameters are exclusive to the compare mode"
-            )
-
-        if any([labels, pass_labels]):
-            raise click.BadParameter(
-                "labels and pass_labels parameters are exclusive to the classify mode"
-            )
-
-    elif type == "compare":
-        # Check if either model-a or model-b config/name is provided
-        model_a_provided = model_a_field is not None or any(
-            [
-                model_a_name,
-                model_a_max_tokens,
-                model_a_temperature,
-                model_a_system_template,
-                model_a_input_template,
-            ]
-        )
-        model_b_provided = model_b_field is not None or any(
-            [
-                model_b_name,
-                model_b_max_tokens,
-                model_b_temperature,
-                model_b_system_template,
-                model_b_input_template,
-            ]
-        )
-
-        if not model_a_provided or not model_b_provided:
-            raise click.BadParameter(
-                "model_a and model_b parameters are required for compare evaluation"
-            )
-        if any(
-            [
-                model_field,
-                model_to_evaluate_name,
-                model_to_evaluate_max_tokens,
-                model_to_evaluate_temperature,
-                model_to_evaluate_system_template,
-                model_to_evaluate_input_template,
-            ]
-        ):
-            raise click.BadParameter(
-                "model_field and model_to_evaluate_* parameters are exclusive to classify and compare modes"
-            )
-        if any([labels, pass_labels]):
-            raise click.BadParameter(
-                "labels and pass_labels parameters are exclusive to the classify mode"
-            )
-        if any([min_score, max_score]):
-            raise click.BadParameter(
-                "min_score and max_score parameters are exclusive to the score mode"
-            )
-
     # Build model configurations
     model_to_evaluate_final: Union[Dict[str, Any], None, str] = None
 
@@ -318,27 +215,13 @@ def create(
         # Simple mode: model_field is provided
         if config_params_provided:
             raise click.BadParameter(
-                "Cannot specify both --model-field and --model-to-evaluate-* parameters"
-                "Use either --model-b-field alone if your input file has pre-generated responses,\
-                    or config parameters if you generate it on our end"
+                "Cannot specify both --model-field and --model-to-evaluate-* parameters. "
+                "Use either --model-field alone if your input file has pre-generated responses, "
+                "or config parameters if you want to generate it on our end"
             )
         model_to_evaluate_final = model_field
     elif config_params_provided:
         # Config mode: config parameters are provided
-        if not all(
-            [
-                model_to_evaluate_name,
-                model_to_evaluate_max_tokens is not None,
-                model_to_evaluate_temperature is not None,
-                model_to_evaluate_system_template,
-                model_to_evaluate_input_template,
-            ]
-        ):
-            raise click.BadParameter(
-                "All model config parameters are required when using detailed configuration: "
-                "--model-to-evaluate-name, --model-to-evaluate-max-tokens, --model-to-evaluate-temperature, "
-                "--model-to-evaluate-system-template, --model-to-evaluate-input-template"
-            )
         model_to_evaluate_final = {
             "model_name": model_to_evaluate_name,
             "max_tokens": model_to_evaluate_max_tokens,
@@ -362,18 +245,12 @@ def create(
         if any(model_a_config_params):
             raise click.BadParameter(
                 "Cannot specify both --model-a-field and config parameters (--model-a-name, etc.). "
-                "Use either --model-a-field alone if your input file has pre-generated responses,\
-                    or config parameters if you generate it on our end"
+                "Use either --model-a-field alone if your input file has pre-generated responses, "
+                "or config parameters if you want to generate it on our end"
             )
         model_a_final = model_a_field
     elif any(model_a_config_params):
         # Config mode: config parameters are provided
-        if not all(model_a_config_params):
-            raise click.BadParameter(
-                "All model config parameters are required when using detailed configuration: "
-                "--model-a-name, --model-a-max-tokens, --model-a-temperature, "
-                "--model-a-system-template, --model-a-input-template"
-            )
         model_a_final = {
             "model_name": model_a_name,
             "max_tokens": model_a_max_tokens,
@@ -397,18 +274,12 @@ def create(
         if any(model_b_config_params):
             raise click.BadParameter(
                 "Cannot specify both --model-b-field and config parameters (--model-b-name, etc.). "
-                "Use either --model-b-field alone if your input file has pre-generated responses,\
-                    or config parameters if you generate it on our end"
+                "Use either --model-b-field alone if your input file has pre-generated responses, "
+                "or config parameters if you want to generate it on our end"
             )
         model_b_final = model_b_field
     elif any(model_b_config_params):
         # Config mode: config parameters are provided
-        if not all(model_b_config_params):
-            raise click.BadParameter(
-                "All model config parameters are required when using detailed configuration: "
-                "--model-b-name, --model-b-max-tokens, --model-b-temperature, "
-                "--model-b-system-template, --model-b-input-template"
-            )
         model_b_final = {
             "model_name": model_b_name,
             "max_tokens": model_b_max_tokens,
@@ -417,20 +288,23 @@ def create(
             "input_template": model_b_input_template,
         }
 
-    response = client.evaluation.create(
-        type=type,
-        judge_model_name=judge_model_name,
-        judge_system_template=judge_system_template,
-        input_data_file_path=input_data_file_path,
-        model_to_evaluate=model_to_evaluate_final,
-        labels=labels_list,
-        pass_labels=pass_labels_list,
-        min_score=min_score,
-        max_score=max_score,
-        pass_threshold=pass_threshold,
-        model_a=model_a_final,
-        model_b=model_b_final,
-    )
+    try:
+        response = client.evaluation.create(
+            type=type,
+            judge_model_name=judge_model_name,
+            judge_system_template=judge_system_template,
+            input_data_file_path=input_data_file_path,
+            model_to_evaluate=model_to_evaluate_final,
+            labels=labels_list,
+            pass_labels=pass_labels_list,
+            min_score=min_score,
+            max_score=max_score,
+            pass_threshold=pass_threshold,
+            model_a=model_a_final,
+            model_b=model_b_final,
+        )
+    except ValueError as e:
+        raise click.BadParameter(str(e))
 
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 

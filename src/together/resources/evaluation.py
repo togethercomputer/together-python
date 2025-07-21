@@ -75,8 +75,22 @@ class Evaluation:
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
         if type == "classify":
-            if labels is None:
-                raise ValueError("labels are required for classify evaluation")
+            if labels is None or pass_labels is None:
+                raise ValueError(
+                    "labels and pass_labels are required for classify evaluation"
+                )
+            
+            # Validate that no score-specific parameters are provided
+            if any([min_score is not None, max_score is not None, pass_threshold is not None]):
+                raise ValueError(
+                    "min_score, max_score, and pass_threshold parameters are exclusive to the score mode"
+                )
+            
+            # Validate that no compare-specific parameters are provided
+            if any([model_a is not None, model_b is not None]):
+                raise ValueError(
+                    "model_a and model_b parameters are exclusive to the compare mode"
+                )
 
             parameters = ClassifyParameters(
                 judge=judge_config,
@@ -90,12 +104,32 @@ class Evaluation:
                 if isinstance(model_to_evaluate, str):
                     parameters.model_to_evaluate = model_to_evaluate
                 elif isinstance(model_to_evaluate, dict):
+                    # Validate that all required fields are present for model config
+                    required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                    missing_fields = [field for field in required_fields if field not in model_to_evaluate]
+                    if missing_fields:
+                        raise ValueError(
+                            f"All model config parameters are required when using detailed configuration. "
+                            f"Missing: {', '.join(missing_fields)}"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "score":
             if min_score is None or max_score is None or pass_threshold is None:
                 raise ValueError(
                     "min_score, max_score, and pass_threshold are required for score evaluation"
+                )
+            
+            # Validate that no classify-specific parameters are provided
+            if any([labels is not None, pass_labels is not None]):
+                raise ValueError(
+                    "labels and pass_labels parameters are exclusive to the classify mode"
+                )
+            
+            # Validate that no compare-specific parameters are provided
+            if any([model_a is not None, model_b is not None]):
+                raise ValueError(
+                    "model_a and model_b parameters are exclusive to the compare mode"
                 )
 
             parameters = ScoreParameters(
@@ -111,27 +145,73 @@ class Evaluation:
                 if isinstance(model_to_evaluate, str):
                     parameters.model_to_evaluate = model_to_evaluate
                 elif isinstance(model_to_evaluate, dict):
+                    # Validate that all required fields are present for model config
+                    required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                    missing_fields = [field for field in required_fields if field not in model_to_evaluate]
+                    if missing_fields:
+                        raise ValueError(
+                            f"All model config parameters are required when using detailed configuration. "
+                            f"Missing: {', '.join(missing_fields)}"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "compare":
+            # Validate that model_a and model_b are provided
+            if model_a is None or model_b is None:
+                raise ValueError(
+                    "model_a and model_b parameters are required for compare evaluation"
+                )
+            
+            # Validate that no classify-specific parameters are provided
+            if any([labels is not None, pass_labels is not None]):
+                raise ValueError(
+                    "labels and pass_labels parameters are exclusive to the classify mode"
+                )
+            
+            # Validate that no score-specific parameters are provided
+            if any([min_score is not None, max_score is not None, pass_threshold is not None]):
+                raise ValueError(
+                    "min_score, max_score, and pass_threshold parameters are exclusive to the score mode"
+                )
+            
+            # Validate that model_to_evaluate is not provided
+            if model_to_evaluate is not None:
+                raise ValueError(
+                    "model_to_evaluate parameter is exclusive to classify and score modes"
+                )
+
             parameters = CompareParameters(
                 judge=judge_config,
                 input_data_file_path=input_data_file_path,
             )
 
             # Handle model_a
-            if model_a is not None:
-                if isinstance(model_a, str):
-                    parameters.model_a = model_a
-                elif isinstance(model_a, dict):
-                    parameters.model_a = ModelRequest(**model_a)
+            if isinstance(model_a, str):
+                parameters.model_a = model_a
+            elif isinstance(model_a, dict):
+                # Validate that all required fields are present for model config
+                required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                missing_fields = [field for field in required_fields if field not in model_a]
+                if missing_fields:
+                    raise ValueError(
+                        f"All model config parameters are required for model_a when using detailed configuration. "
+                        f"Missing: {', '.join(missing_fields)}"
+                    )
+                parameters.model_a = ModelRequest(**model_a)
 
             # Handle model_b
-            if model_b is not None:
-                if isinstance(model_b, str):
-                    parameters.model_b = model_b
-                elif isinstance(model_b, dict):
-                    parameters.model_b = ModelRequest(**model_b)
+            if isinstance(model_b, str):
+                parameters.model_b = model_b
+            elif isinstance(model_b, dict):
+                # Validate that all required fields are present for model config
+                required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                missing_fields = [field for field in required_fields if field not in model_b]
+                if missing_fields:
+                    raise ValueError(
+                        f"All model config parameters are required for model_b when using detailed configuration. "
+                        f"Missing: {', '.join(missing_fields)}"
+                    )
+                parameters.model_b = ModelRequest(**model_b)
 
         else:
             raise ValueError(
@@ -299,8 +379,22 @@ class AsyncEvaluation:
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
         if type == "classify":
-            if labels is None:
-                raise ValueError("labels are required for classify evaluation")
+            if labels is None or pass_labels is None:
+                raise ValueError(
+                    "labels and pass_labels are required for classify evaluation"
+                )
+            
+            # Validate that no score-specific parameters are provided
+            if any([min_score is not None, max_score is not None, pass_threshold is not None]):
+                raise ValueError(
+                    "min_score, max_score, and pass_threshold parameters are exclusive to the score mode"
+                )
+            
+            # Validate that no compare-specific parameters are provided
+            if any([model_a is not None, model_b is not None]):
+                raise ValueError(
+                    "model_a and model_b parameters are exclusive to the compare mode"
+                )
 
             parameters = ClassifyParameters(
                 judge=judge_config,
@@ -314,12 +408,32 @@ class AsyncEvaluation:
                 if isinstance(model_to_evaluate, str):
                     parameters.model_to_evaluate = model_to_evaluate
                 elif isinstance(model_to_evaluate, dict):
+                    # Validate that all required fields are present for model config
+                    required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                    missing_fields = [field for field in required_fields if field not in model_to_evaluate]
+                    if missing_fields:
+                        raise ValueError(
+                            f"All model config parameters are required when using detailed configuration. "
+                            f"Missing: {', '.join(missing_fields)}"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "score":
             if min_score is None or max_score is None or pass_threshold is None:
                 raise ValueError(
                     "min_score, max_score, and pass_threshold are required for score evaluation"
+                )
+            
+            # Validate that no classify-specific parameters are provided
+            if any([labels is not None, pass_labels is not None]):
+                raise ValueError(
+                    "labels and pass_labels parameters are exclusive to the classify mode"
+                )
+            
+            # Validate that no compare-specific parameters are provided
+            if any([model_a is not None, model_b is not None]):
+                raise ValueError(
+                    "model_a and model_b parameters are exclusive to the compare mode"
                 )
 
             parameters = ScoreParameters(
@@ -335,6 +449,14 @@ class AsyncEvaluation:
                 if isinstance(model_to_evaluate, str):
                     parameters.model_to_evaluate = model_to_evaluate
                 elif isinstance(model_to_evaluate, dict):
+                    # Validate that all required fields are present for model config
+                    required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                    missing_fields = [field for field in required_fields if field not in model_to_evaluate]
+                    if missing_fields:
+                        raise ValueError(
+                            f"All model config parameters are required when using detailed configuration. "
+                            f"Missing: {', '.join(missing_fields)}"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "compare":
@@ -343,22 +465,57 @@ class AsyncEvaluation:
                 input_data_file_path=input_data_file_path,
             )
 
+            # Validate that model_a and model_b are provided
             if model_a is None or model_b is None:
-                raise ValueError("Both compared models should not be None")
+                raise ValueError(
+                    "model_a and model_b parameters are required for compare evaluation"
+                )
+            
+            # Validate that no classify-specific parameters are provided
+            if any([labels is not None, pass_labels is not None]):
+                raise ValueError(
+                    "labels and pass_labels parameters are exclusive to the classify mode"
+                )
+            
+            # Validate that no score-specific parameters are provided
+            if any([min_score is not None, max_score is not None, pass_threshold is not None]):
+                raise ValueError(
+                    "min_score, max_score, and pass_threshold parameters are exclusive to the score mode"
+                )
+            
+            # Validate that model_to_evaluate is not provided
+            if model_to_evaluate is not None:
+                raise ValueError(
+                    "model_to_evaluate parameter is exclusive to classify and score modes"
+                )
 
             # Handle model_a
-            if model_a is not None:
-                if isinstance(model_a, str):
-                    parameters.model_a = model_a
-                elif isinstance(model_a, dict):
-                    parameters.model_a = ModelRequest(**model_a)
+            if isinstance(model_a, str):
+                parameters.model_a = model_a
+            elif isinstance(model_a, dict):
+                # Validate that all required fields are present for model config
+                required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                missing_fields = [field for field in required_fields if field not in model_a]
+                if missing_fields:
+                    raise ValueError(
+                        f"All model config parameters are required for model_a when using detailed configuration. "
+                        f"Missing: {', '.join(missing_fields)}"
+                    )
+                parameters.model_a = ModelRequest(**model_a)
 
             # Handle model_b
-            if model_b is not None:
-                if isinstance(model_b, str):
-                    parameters.model_b = model_b
-                elif isinstance(model_b, dict):
-                    parameters.model_b = ModelRequest(**model_b)
+            if isinstance(model_b, str):
+                parameters.model_b = model_b
+            elif isinstance(model_b, dict):
+                # Validate that all required fields are present for model config
+                required_fields = ['model_name', 'max_tokens', 'temperature', 'system_template', 'input_template']
+                missing_fields = [field for field in required_fields if field not in model_b]
+                if missing_fields:
+                    raise ValueError(
+                        f"All model config parameters are required for model_b when using detailed configuration. "
+                        f"Missing: {', '.join(missing_fields)}"
+                    )
+                parameters.model_b = ModelRequest(**model_b)
 
         else:
             raise ValueError(
