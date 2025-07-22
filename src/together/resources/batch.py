@@ -16,7 +16,6 @@ class Batches:
         self._client = client
 
     def create_batch(self, file_id: str, endpoint: str) -> BatchJob:
-
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )

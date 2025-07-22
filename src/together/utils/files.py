@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import csv
 from pathlib import Path
 from traceback import format_exc
 from typing import Any, Dict, List
@@ -17,6 +18,7 @@ from together.constants import (
     POSSIBLE_ROLES_CONVERSATION,
     DatasetFormat,
 )
+from together.types import FilePurpose
 
 
 class InvalidFileFormatError(ValueError):
@@ -36,6 +38,7 @@ class InvalidFileFormatError(ValueError):
 
 def check_file(
     file: Path | str,
+    purpose: FilePurpose | str = FilePurpose.FineTune,
 ) -> Dict[str, Any]:
     if not isinstance(file, Path):
         file = Path(file)
@@ -52,6 +55,7 @@ def check_file(
         "has_min_samples": None,
         "num_samples": None,
         "load_json": None,
+        "load_csv": None,
     }
 
     if not file.is_file():
@@ -79,10 +83,13 @@ def check_file(
     data_report_dict = {}
     if file.suffix == ".jsonl":
         report_dict["filetype"] = "jsonl"
-        data_report_dict = _check_jsonl(file)
+        data_report_dict = _check_jsonl(file, purpose)
     elif file.suffix == ".parquet":
         report_dict["filetype"] = "parquet"
-        data_report_dict = _check_parquet(file)
+        data_report_dict = _check_parquet(file, purpose)
+    elif file.suffix == ".csv":
+        report_dict["filetype"] = "csv"
+        data_report_dict = _check_csv(file, purpose)
     else:
         report_dict["filetype"] = (
             f"Unknown extension of file {file}. "
@@ -229,9 +236,15 @@ def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
     validate_messages(example["non_preferred_output"], idx)
 
 
-def _check_jsonl(file: Path) -> Dict[str, Any]:
+def _check_utf8(file: Path) -> Dict[str, Any]:
+    """Check if the file is UTF-8 encoded.
+
+    Args:
+        file (Path): Path to the file to check.
+    Returns:
+        Dict[str, Any]: A dictionary with the results of the check.
+    """
     report_dict: Dict[str, Any] = {}
-    # Check that the file is UTF-8 encoded. If not report where the error occurs.
     try:
         with file.open(encoding="utf-8") as f:
             f.read()
@@ -240,6 +253,99 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
         report_dict["utf8"] = False
         report_dict["message"] = f"File is not UTF-8 encoded. Error raised: {e}."
         report_dict["is_check_passed"] = False
+    return report_dict
+
+
+def _check_samples_count(
+    file: Path, report_dict: Dict[str, Any], idx: int
+) -> Dict[str, Any]:
+    if idx + 1 < MIN_SAMPLES:
+        report_dict["has_min_samples"] = False
+        report_dict["message"] = (
+            f"Processing {file} resulted in only {idx + 1} samples. "
+            f"Our minimum is {MIN_SAMPLES} samples. "
+        )
+        report_dict["is_check_passed"] = False
+    else:
+        report_dict["num_samples"] = idx + 1
+        report_dict["has_min_samples"] = True
+
+    return report_dict
+
+
+def _check_csv(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
+    """Check if the file is a valid CSV file.
+
+    Args:
+        file (Path): Path to the file to check.
+        purpose (FilePurpose | str): Purpose of the file, used to determine if the file should be checked for specific columns.
+
+    Returns:
+        Dict[str, Any]: A dictionary with the results of the check.
+    """
+    report_dict: Dict[str, Any] = {}
+    if purpose != FilePurpose.Eval:
+        report_dict["is_check_passed"] = False
+        report_dict["message"] = (
+            f"CSV files are not supported for {purpose}. "
+            "Only JSONL and Parquet files are supported."
+        )
+        return report_dict
+
+    report_dict.update(_check_utf8(file))
+
+    if not report_dict["utf8"]:
+        return report_dict
+
+    with file.open() as f:
+        reader = csv.DictReader(f)
+        if not reader.fieldnames:
+            report_dict["message"] = "CSV file is empty or has no header."
+            report_dict["is_check_passed"] = False
+            return report_dict
+        idx = -1
+
+        try:
+            # for loop to iterate through the CSV rows
+            for idx, item in enumerate(reader):
+                if None in item.keys() or None in item.values():
+                    raise InvalidFileFormatError(
+                        message=f"CSV file is malformed or the number of columns found on line {idx + 1} is inconsistent with the header",
+                        line_number=idx + 1,
+                        error_source="format",
+                    )
+
+            report_dict.update(_check_samples_count(file, report_dict, idx))
+            report_dict["load_csv"] = True
+
+        except InvalidFileFormatError as e:
+            report_dict["load_csv"] = False
+            report_dict["is_check_passed"] = False
+            report_dict["message"] = e.message
+            if e.line_number is not None:
+                report_dict["line_number"] = e.line_number
+            if e.error_source is not None:
+                report_dict[e.error_source] = False
+        except ValueError:
+            report_dict["load_csv"] = False
+            if idx < 0:
+                report_dict["message"] = (
+                    "Unable to decode file. "
+                    "File may be empty or in an unsupported format. "
+                )
+            else:
+                report_dict["message"] = (
+                    f"Error parsing the CSV file. Unexpected format on line {idx + 1}."
+                )
+            report_dict["is_check_passed"] = False
+
+    return report_dict
+
+
+def _check_jsonl(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
+    report_dict: Dict[str, Any] = {}
+    report_dict.update(_check_utf8(file))
+    if not report_dict["utf8"]:
         return report_dict
 
     dataset_format = None
@@ -259,84 +365,75 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         line_number=idx + 1,
                         error_source="line_type",
                     )
-
-                current_format = None
-                for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
-                    if all(
-                        column in json_line
-                        for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
-                    ):
-                        if current_format is None:
-                            current_format = possible_format
-                        elif current_format != possible_format:
-                            raise InvalidFileFormatError(
-                                message="Found multiple dataset formats in the input file. "
-                                f"Got {current_format} and {possible_format} on line {idx + 1}.",
-                                line_number=idx + 1,
-                                error_source="format",
-                            )
-
-                        # Check that there are no extra columns
-                        for column in json_line:
-                            if (
-                                column
-                                not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
-                            ):
+                # In evals, we don't check the format of the dataset.
+                if purpose != FilePurpose.Eval:
+                    current_format = None
+                    for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
+                        if all(
+                            column in json_line
+                            for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                        ):
+                            if current_format is None:
+                                current_format = possible_format
+                            elif current_format != possible_format:
                                 raise InvalidFileFormatError(
-                                    message=f'Found extra column "{column}" in the line {idx + 1}.',
+                                    message="Found multiple dataset formats in the input file. "
+                                    f"Got {current_format} and {possible_format} on line {idx + 1}.",
                                     line_number=idx + 1,
                                     error_source="format",
                                 )
 
-                if current_format is None:
-                    raise InvalidFileFormatError(
-                        message=(
-                            f"Error parsing file. Could not detect a format for the line {idx + 1} with the columns:\n"
-                            f"{json_line.keys()}"
-                        ),
-                        line_number=idx + 1,
-                        error_source="format",
-                    )
-                if current_format == DatasetFormat.PREFERENCE_OPENAI:
-                    validate_preference_openai(json_line, idx)
-                elif current_format == DatasetFormat.CONVERSATION:
-                    message_column = JSONL_REQUIRED_COLUMNS_MAP[
-                        DatasetFormat.CONVERSATION
-                    ][0]
-                    validate_messages(json_line[message_column], idx)
-                else:
-                    for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
-                        if not isinstance(json_line[column], str):
-                            raise InvalidFileFormatError(
-                                message=f'Invalid value type for "{column}" key on line {idx + 1}. '
-                                f"Expected string. Found {type(json_line[column])}.",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
+                            # Check that there are no extra columns
+                            for column in json_line:
+                                if (
+                                    column
+                                    not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                                ):
+                                    raise InvalidFileFormatError(
+                                        message=f'Found extra column "{column}" in the line {idx + 1}.',
+                                        line_number=idx + 1,
+                                        error_source="format",
+                                    )
 
-                if dataset_format is None:
-                    dataset_format = current_format
-                elif current_format is not None:
-                    if current_format != dataset_format:
+                    if current_format is None:
                         raise InvalidFileFormatError(
-                            message="All samples in the dataset must have the same dataset format. "
-                            f"Got {dataset_format} for the first line and {current_format} "
-                            f"for the line {idx + 1}.",
+                            message=(
+                                f"Error parsing file. Could not detect a format for the line {idx + 1} with the columns:\n"
+                                f"{json_line.keys()}"
+                            ),
                             line_number=idx + 1,
                             error_source="format",
                         )
+                    if current_format == DatasetFormat.PREFERENCE_OPENAI:
+                        validate_preference_openai(json_line, idx)
+                    elif current_format == DatasetFormat.CONVERSATION:
+                        message_column = JSONL_REQUIRED_COLUMNS_MAP[
+                            DatasetFormat.CONVERSATION
+                        ][0]
+                        validate_messages(json_line[message_column], idx)
+                    else:
+                        for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
+                            if not isinstance(json_line[column], str):
+                                raise InvalidFileFormatError(
+                                    message=f'Invalid value type for "{column}" key on line {idx + 1}. '
+                                    f"Expected string. Found {type(json_line[column])}.",
+                                    line_number=idx + 1,
+                                    error_source="key_value",
+                                )
 
-            if idx + 1 < MIN_SAMPLES:
-                report_dict["has_min_samples"] = False
-                report_dict["message"] = (
-                    f"Processing {file} resulted in only {idx + 1} samples. "
-                    f"Our minimum is {MIN_SAMPLES} samples. "
-                )
-                report_dict["is_check_passed"] = False
-            else:
-                report_dict["num_samples"] = idx + 1
-                report_dict["has_min_samples"] = True
-                report_dict["is_check_passed"] = True
+                    if dataset_format is None:
+                        dataset_format = current_format
+                    elif current_format is not None:
+                        if current_format != dataset_format:
+                            raise InvalidFileFormatError(
+                                message="All samples in the dataset must have the same dataset format. "
+                                f"Got {dataset_format} for the first line and {current_format} "
+                                f"for the line {idx + 1}.",
+                                line_number=idx + 1,
+                                error_source="format",
+                            )
+
+            report_dict.update(_check_samples_count(file, report_dict, idx))
 
             report_dict["load_json"] = True
 
@@ -370,7 +467,7 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
     return report_dict
 
 
-def _check_parquet(file: Path) -> Dict[str, Any]:
+def _check_parquet(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
     try:
         # Pyarrow is optional as it's large (~80MB) and isn't compatible with older systems.
         from pyarrow import ArrowInvalid, parquet
@@ -380,6 +477,13 @@ def _check_parquet(file: Path) -> Dict[str, Any]:
         )
 
     report_dict: Dict[str, Any] = {}
+    if purpose == FilePurpose.Eval:
+        report_dict["is_check_passed"] = False
+        report_dict["message"] = (
+            f"Parquet files are not supported for {purpose}. "
+            "Only JSONL and CSV files are supported."
+        )
+        return report_dict
 
     try:
         table = parquet.read_table(str(file), memory_map=True)
@@ -399,6 +503,7 @@ def _check_parquet(file: Path) -> Dict[str, Any]:
         report_dict["is_check_passed"] = False
         return report_dict
 
+    # Don't check for eval
     for column_name in column_names:
         if column_name not in PARQUET_EXPECTED_COLUMNS:
             report_dict["load_parquet"] = (

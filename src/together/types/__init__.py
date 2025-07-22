@@ -61,6 +61,19 @@ from together.types.images import ImageRequest, ImageResponse
 from together.types.models import ModelObject
 from together.types.rerank import RerankRequest, RerankResponse
 from together.types.batch import BatchJob, BatchJobStatus, BatchEndpoint
+from together.types.evaluation import (
+    EvaluationType,
+    EvaluationStatus,
+    JudgeModelConfig,
+    ModelRequest,
+    ClassifyParameters,
+    ScoreParameters,
+    CompareParameters,
+    EvaluationRequest,
+    EvaluationCreateResponse,
+    EvaluationJob,
+    EvaluationStatusResponse,
+)
 
 
 __all__ = [
@@ -124,4 +137,15 @@ __all__ = [
     "BatchJob",
     "BatchJobStatus",
     "BatchEndpoint",
+    "EvaluationType",
+    "EvaluationStatus",
+    "JudgeModelConfig",
+    "ModelRequest",
+    "ClassifyParameters",
+    "ScoreParameters",
+    "CompareParameters",
+    "EvaluationRequest",
+    "EvaluationCreateResponse",
+    "EvaluationJob",
+    "EvaluationStatusResponse",
 ]

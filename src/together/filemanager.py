@@ -334,6 +334,8 @@ class UploadManager:
                 filetype = FileType.jsonl
             elif file.suffix == ".parquet":
                 filetype = FileType.parquet
+            elif file.suffix == ".csv":
+                filetype = FileType.csv
             else:
                 raise FileTypeError(
                     f"Unknown extension of file {file}. "

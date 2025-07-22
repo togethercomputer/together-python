@@ -87,7 +87,6 @@ def test_lora_request():
 
 @pytest.mark.parametrize("lora_dropout", [-1, 0, 0.5, 1.0, 10.0])
 def test_lora_request_with_lora_dropout(lora_dropout: float):
-
     if 0 <= lora_dropout < 1:
         request = create_finetune_request(
             model_limits=_MODEL_LIMITS,

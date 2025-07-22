@@ -9,6 +9,7 @@ from together.resources.images import AsyncImages, Images
 from together.resources.models import AsyncModels, Models
 from together.resources.rerank import AsyncRerank, Rerank
 from together.resources.batch import Batches, AsyncBatches
+from together.resources.evaluation import Evaluation, AsyncEvaluation
 
 
 __all__ = [
@@ -34,4 +35,6 @@ __all__ = [
     "Endpoints",
     "Batches",
     "AsyncBatches",
+    "Evaluation",
+    "AsyncEvaluation",
 ]
