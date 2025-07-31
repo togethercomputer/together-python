@@ -133,27 +133,22 @@ def create_finetune_request(
         min_batch_size = model_limits.full_training.min_batch_size
         max_batch_size_dpo = model_limits.full_training.max_batch_size_dpo
 
-    if batch_size == "max":
-        if training_method == "dpo":
-            batch_size = max_batch_size_dpo
-        else:
-            batch_size = max_batch_size
+    if batch_size != "max":
+        if training_method == "sft":
+            if batch_size > max_batch_size:
+                raise ValueError(
+                    f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
+                )
+        elif training_method == "dpo":
+            if batch_size > max_batch_size_dpo:
+                raise ValueError(
+                    f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size_dpo}."
+                )
 
-    if training_method == "sft":
-        if batch_size > max_batch_size:
+        if batch_size < min_batch_size:
             raise ValueError(
-                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
+                f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}."
             )
-    elif training_method == "dpo":
-        if batch_size > max_batch_size_dpo:
-            raise ValueError(
-                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size_dpo}."
-            )
-
-    if batch_size < min_batch_size:
-        raise ValueError(
-            f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}."
-        )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
         raise ValueError(f"Warmup ratio should be between 0 and 1 (got {warmup_ratio})")

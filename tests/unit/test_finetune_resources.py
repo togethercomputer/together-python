@@ -44,7 +44,7 @@ def test_simple_request():
     assert request.n_epochs > 0
     assert request.warmup_ratio == 0.0
     assert request.training_type.type == "Full"
-    assert request.batch_size == _MODEL_LIMITS.full_training.max_batch_size
+    assert request.batch_size == "max"
 
 
 def test_validation_file():
@@ -82,7 +82,7 @@ def test_lora_request():
     assert request.training_type.lora_alpha == _MODEL_LIMITS.lora_training.max_rank * 2
     assert request.training_type.lora_dropout == 0.0
     assert request.training_type.lora_trainable_modules == "all-linear"
-    assert request.batch_size == _MODEL_LIMITS.lora_training.max_batch_size
+    assert request.batch_size == "max"
 
 
 @pytest.mark.parametrize("lora_dropout", [-1, 0, 0.5, 1.0, 10.0])
