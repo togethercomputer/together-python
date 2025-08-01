@@ -89,11 +89,6 @@ def create_finetune_request(
 
     model_or_checkpoint = model or from_checkpoint
 
-    if batch_size == "max":
-        log_warn_once(
-            "Starting from together>=1.3.0, "
-            "the default batch size is set to the maximum allowed value for each model."
-        )
     if warmup_ratio is None:
         warmup_ratio = 0.0
 
