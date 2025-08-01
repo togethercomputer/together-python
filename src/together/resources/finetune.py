@@ -98,9 +98,6 @@ def create_finetune_request(
         warmup_ratio = 0.0
 
     training_type: TrainingType = FullTrainingType()
-    max_batch_size: int = 0
-    max_batch_size_dpo: int = 0
-    min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
             raise ValueError(
