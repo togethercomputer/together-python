@@ -139,6 +139,7 @@ def test_dpo_request():
     assert request.training_type.type == "Full"
     assert request.batch_size == "max"
 
+
 def test_from_checkpoint_request():
     request = create_finetune_request(
         model_limits=_MODEL_LIMITS,
