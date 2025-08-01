@@ -124,7 +124,7 @@ def test_dpo_request_lora():
     assert request.training_type.lora_alpha == _MODEL_LIMITS.lora_training.max_rank * 2
     assert request.training_type.lora_dropout == 0.0
     assert request.training_type.lora_trainable_modules == "all-linear"
-    assert request.batch_size == _MODEL_LIMITS.lora_training.max_batch_size_dpo
+    assert request.batch_size == "max"
 
 
 def test_dpo_request():
@@ -137,8 +137,7 @@ def test_dpo_request():
     )
 
     assert request.training_type.type == "Full"
-    assert request.batch_size == _MODEL_LIMITS.full_training.max_batch_size_dpo
-
+    assert request.batch_size == "max"
 
 def test_from_checkpoint_request():
     request = create_finetune_request(
