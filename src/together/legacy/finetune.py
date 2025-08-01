@@ -16,7 +16,7 @@ class Finetune:
         model: str,
         n_epochs: int = 1,
         n_checkpoints: int | None = 1,
-        batch_size: int | Literal["max"] = 32,
+        batch_size: int | Literal["max"] = "max",
         learning_rate: float = 0.00001,
         suffix: (
             str | None
