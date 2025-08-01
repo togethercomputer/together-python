@@ -89,18 +89,10 @@ def create_finetune_request(
 
     model_or_checkpoint = model or from_checkpoint
 
-    if batch_size == "max":
-        log_warn_once(
-            "Starting from together>=1.3.0, "
-            "the default batch size is set to the maximum allowed value for each model."
-        )
     if warmup_ratio is None:
         warmup_ratio = 0.0
 
     training_type: TrainingType = FullTrainingType()
-    max_batch_size: int = 0
-    max_batch_size_dpo: int = 0
-    min_batch_size: int = 0
     if lora:
         if model_limits.lora_training is None:
             raise ValueError(
@@ -133,27 +125,22 @@ def create_finetune_request(
         min_batch_size = model_limits.full_training.min_batch_size
         max_batch_size_dpo = model_limits.full_training.max_batch_size_dpo
 
-    if batch_size == "max":
-        if training_method == "dpo":
-            batch_size = max_batch_size_dpo
-        else:
-            batch_size = max_batch_size
+    if batch_size != "max":
+        if training_method == "sft":
+            if batch_size > max_batch_size:
+                raise ValueError(
+                    f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
+                )
+        elif training_method == "dpo":
+            if batch_size > max_batch_size_dpo:
+                raise ValueError(
+                    f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size_dpo}."
+                )
 
-    if training_method == "sft":
-        if batch_size > max_batch_size:
+        if batch_size < min_batch_size:
             raise ValueError(
-                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size}."
+                f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}."
             )
-    elif training_method == "dpo":
-        if batch_size > max_batch_size_dpo:
-            raise ValueError(
-                f"Requested batch size of {batch_size} is higher that the maximum allowed value of {max_batch_size_dpo}."
-            )
-
-    if batch_size < min_batch_size:
-        raise ValueError(
-            f"Requested batch size of {batch_size} is lower that the minimum allowed value of {min_batch_size}."
-        )
 
     if warmup_ratio > 1 or warmup_ratio < 0:
         raise ValueError(f"Warmup ratio should be between 0 and 1 (got {warmup_ratio})")

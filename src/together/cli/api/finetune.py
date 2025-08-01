@@ -304,13 +304,8 @@ def create(
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"
             )
-        if training_method == "dpo":
-            default_batch_size = model_limits.lora_training.max_batch_size_dpo
-        else:
-            default_batch_size = model_limits.lora_training.max_batch_size
         default_values = {
             "lora_r": model_limits.lora_training.max_rank,
-            "batch_size": default_batch_size,
             "learning_rate": 1e-3,
         }
 
@@ -334,15 +329,6 @@ def create(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
-
-        batch_size_source = ctx.get_parameter_source("batch_size")  # type: ignore[attr-defined]
-        if batch_size_source == ParameterSource.DEFAULT:
-            if training_method == "dpo":
-                training_args["batch_size"] = (
-                    model_limits.full_training.max_batch_size_dpo
-                )
-            else:
-                training_args["batch_size"] = model_limits.full_training.max_batch_size
 
     if n_evals <= 0 and validation_file:
         log_warn(

@@ -195,7 +195,7 @@ class FinetuneRequest(BaseModel):
     # number of evaluation loops to run
     n_evals: int | None = None
     # training batch size
-    batch_size: int | None = None
+    batch_size: int | Literal["max"] | None = None
     # up to 40 character suffix for output model name
     suffix: str | None = None
     # weights & biases api key
