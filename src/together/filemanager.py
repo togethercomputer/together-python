@@ -73,7 +73,6 @@ def _get_file_size(
         if len(range_parts) == 2:
             total_size_in_bytes = int(range_parts[1])
 
-
     return total_size_in_bytes
 
 
@@ -211,7 +210,6 @@ class DownloadManager:
 
                 if not fetch_metadata:
                     file_size = int(response.headers.get("content-length", 0))
-
 
                 with tqdm(
                     total=file_size,
