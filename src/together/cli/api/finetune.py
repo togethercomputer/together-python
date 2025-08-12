@@ -201,6 +201,19 @@ def fine_tuning(ctx: click.Context) -> None:
     "The step value is optional, without it the final checkpoint will be used.",
 )
 @click.option(
+    "--from-hf-model",
+    type=str,
+    default=None,
+    help="The Hugging Face repo to start training from. "
+    "Should be paired with the base model, specified in `model` argument.",
+)
+@click.option(
+    "--hf-model-revision",
+    type=str,
+    default=None,
+    help="The revision of the Hugging Face model to continue training from.",
+)
+@click.option(
     "--hf-api-token",
     type=str,
     default=None,
@@ -246,6 +259,8 @@ def create(
     rpo_alpha: float | None,
     simpo_gamma: float | None,
     from_checkpoint: str,
+    from_hf_model: str,
+    hf_model_revision: str,
     hf_api_token: str | None,
     hf_output_repo_name: str | None,
 ) -> None:
@@ -284,6 +299,8 @@ def create(
         rpo_alpha=rpo_alpha,
         simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
+        from_hf_model=from_hf_model,
+        hf_model_revision=hf_model_revision,
         hf_api_token=hf_api_token,
         hf_output_repo_name=hf_output_repo_name,
     )
