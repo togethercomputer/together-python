@@ -408,7 +408,7 @@ class FineTuning:
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
             from_hf_model (str, optional): The Hugging Face Hub repo to start training from.
-                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size"
+                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size.
             hf_model_revision (str, optional): The revision of the Hugging Face Hub model to continue training from. Defaults to None.
                 Example: hf_model_revision=None (defaults to the latest revision in `main`) or
                 hf_model_revision="607a30d783dfa663caf39e06633721c8d4cfcd7e" (specific commit).
@@ -844,7 +844,7 @@ class AsyncFineTuning:
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
             from_hf_model (str, optional): The Hugging Face Hub repo to start training from.
-                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size"
+                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size.
             hf_model_revision (str, optional): The revision of the Hugging Face Hub model to continue training from. Defaults to None.
                 Example: hf_model_revision=None (defaults to the latest revision in `main`) or
                 hf_model_revision="607a30d783dfa663caf39e06633721c8d4cfcd7e" (specific commit).

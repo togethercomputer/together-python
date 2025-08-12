@@ -204,8 +204,8 @@ def fine_tuning(ctx: click.Context) -> None:
     "--from-hf-model",
     type=str,
     help="The Hugging Face Hub repo to start training from. "
-    "Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture "
-    "and size with the base model specified by the `model` argument.",
+    "Should be as close as possible to the base model (specified by the `model` argument) "
+    "in terms of architecture and size",
 )
 @click.option(
     "--hf-model-revision",
