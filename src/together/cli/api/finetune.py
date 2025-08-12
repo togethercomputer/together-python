@@ -203,15 +203,16 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--from-hf-model",
     type=str,
-    default=None,
-    help="The Hugging Face repo to start training from. "
-    "Should be paired with the base model, specified in `model` argument.",
+    help="The Hugging Face Hub repo to start training from. "
+    "Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture "
+    "and size with the base model specified by the `model` argument.",
 )
 @click.option(
     "--hf-model-revision",
     type=str,
-    default=None,
-    help="The revision of the Hugging Face model to continue training from.",
+    help="The revision of the Hugging Face Hub model to continue training from. "
+    "Example: hf_model_revision=None (defaults to the latest revision in `main`) "
+    "or hf_model_revision='607a30d783dfa663caf39e06633721c8d4cfcd7e' (specific commit).",
 )
 @click.option(
     "--hf-api-token",

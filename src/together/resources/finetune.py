@@ -91,12 +91,13 @@ def create_finetune_request(
 
     if from_checkpoint is not None and from_hf_model is not None:
         raise ValueError(
-            "You must specify either a Hugging Face model or a checkpoint to start a job from, not both"
+            "You must specify either a Hugging Face Hub model or a previous checkpoint from "
+            "Together to start a job from, not both"
         )
 
     if from_hf_model is not None and model is None:
         raise ValueError(
-            "You must specify base model to run a fine-tuning job with a Hugging Face model"
+            "You must specify the base model to fine-tune a model from the Hugging Face Hub"
         )
 
     model_or_checkpoint = model or from_checkpoint
@@ -406,9 +407,11 @@ class FineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
-            from_hf_model (str, optional): The Hugging Face repo to start training from.
-                Should be paired with the base model, specified in `model` argument.
-            hf_model_revision (str, optional): The revision of the Hugging Face model to continue training from. Defaults to None.
+            from_hf_model (str, optional): The Hugging Face Hub repo to start training from.
+                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size"
+            hf_model_revision (str, optional): The revision of the Hugging Face Hub model to continue training from. Defaults to None.
+                Example: hf_model_revision=None (defaults to the latest revision in `main`) or
+                hf_model_revision="607a30d783dfa663caf39e06633721c8d4cfcd7e" (specific commit).
             hf_api_token (str, optional): API key for the Hugging Face Hub. Defaults to None.
             hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
@@ -840,9 +843,11 @@ class AsyncFineTuning:
             from_checkpoint (str, optional): The checkpoint identifier to continue training from a previous fine-tuning job.
                 The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}.
                 The step value is optional, without it the final checkpoint will be used.
-            from_hf_model (str, optional): The Hugging Face repo to start training from.
-                Should be paired with the base model, specified in `model` argument.
-            hf_model_revision (str, optional): The revision of the Hugging Face model to continue training from. Defaults to None.
+            from_hf_model (str, optional): The Hugging Face Hub repo to start training from.
+                Should be as close as possible to the base model (specified by the `model` argument) in terms of architecture and size"
+            hf_model_revision (str, optional): The revision of the Hugging Face Hub model to continue training from. Defaults to None.
+                Example: hf_model_revision=None (defaults to the latest revision in `main`) or
+                hf_model_revision="607a30d783dfa663caf39e06633721c8d4cfcd7e" (specific commit).
             hf_api_token (str, optional): API key for the Huggging Face Hub. Defaults to None.
             hf_output_repo_name (str, optional): HF repo to upload the fine-tuned model to. Defaults to None.
 
