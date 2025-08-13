@@ -72,6 +72,22 @@ class Batches:
         jobs = response.data or []
         return [BatchJob(**job) for job in jobs]
 
+    def cancel_batch(self, batch_job_id: str) -> BatchJob:
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url=f"batches/{batch_job_id}/cancel",
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        return BatchJob(**response.data)
+
 
 class AsyncBatches:
     def __init__(self, client: TogetherClient) -> None:
