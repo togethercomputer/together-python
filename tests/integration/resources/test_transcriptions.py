@@ -108,3 +108,21 @@ class TestTogetherTranscriptions:
         assert isinstance(response, AudioTranscriptionResponse)
         assert isinstance(response.text, str)
         assert len(response.text) > 0
+
+    def test_language_detection_hindi(self, sync_together_client):
+        """
+        Test language detection with Hindi audio file
+        """
+        audio_url = (
+            "https://voiptroubleshooter.com/open_speech/hindi/OSR_in_000_0062_16k.wav"
+        )
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url, model="openai/whisper-large-v3", response_format="verbose_json"
+        )
+
+        assert isinstance(response, AudioTranscriptionVerboseResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+        assert hasattr(response, "language")
+        assert response.language == "hi"
