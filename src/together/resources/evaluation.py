@@ -27,9 +27,11 @@ class Evaluation:
     def create(
         self,
         type: str,
-        judge_model_name: str,
+        judge_model: str,
+        judge_model_source: str,
         judge_system_template: str,
         input_data_file_path: str,
+        judge_external_api_token: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
@@ -48,9 +50,11 @@ class Evaluation:
 
         Args:
             type: The type of evaluation ("classify", "score", or "compare")
-            judge_model_name: Name of the judge model
+            judge_model: Name of the judge model
+            judge_model_source: Source of the judge model ("serverless", "dedicated", or "external")
             judge_system_template: System template for the judge
             input_data_file_path: Path to input data file
+            judge_external_api_token: Optional external API token for the judge model
             labels: List of classification labels (required for classify)
             pass_labels: List of labels considered as passing (required for classify)
             min_score: Minimum score value (required for score)
@@ -69,8 +73,10 @@ class Evaluation:
 
         # Build judge config
         judge_config = JudgeModelConfig(
-            model_name=judge_model_name,
+            model=judge_model,
+            model_source=judge_model_source,
             system_template=judge_system_template,
+            external_api_token=judge_external_api_token,
         )
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
@@ -112,7 +118,8 @@ class Evaluation:
                 elif isinstance(model_to_evaluate, dict):
                     # Validate that all required fields are present for model config
                     required_fields = [
-                        "model_name",
+                        "model",
+                        "model_source",
                         "max_tokens",
                         "temperature",
                         "system_template",
@@ -163,7 +170,8 @@ class Evaluation:
                 elif isinstance(model_to_evaluate, dict):
                     # Validate that all required fields are present for model config
                     required_fields = [
-                        "model_name",
+                        "model",
+                        "model_source",
                         "max_tokens",
                         "temperature",
                         "system_template",
@@ -379,9 +387,11 @@ class AsyncEvaluation:
     async def create(
         self,
         type: str,
-        judge_model_name: str,
+        judge_model: str,
+        judge_model_source: str,
         judge_system_template: str,
         input_data_file_path: str,
+        judge_external_api_token: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
@@ -400,9 +410,11 @@ class AsyncEvaluation:
 
         Args:
             type: The type of evaluation ("classify", "score", or "compare")
-            judge_model_name: Name of the judge model
+            judge_model: Name of the judge model
+            judge_model_source: Source of the judge model ("serverless", "dedicated", or "external")
             judge_system_template: System template for the judge
             input_data_file_path: Path to input data file
+            judge_external_api_token: Optional external API token for the judge model
             labels: List of classification labels (required for classify)
             pass_labels: List of labels considered as passing (required for classify)
             min_score: Minimum score value (required for score)
@@ -421,8 +433,10 @@ class AsyncEvaluation:
 
         # Build judge config
         judge_config = JudgeModelConfig(
-            model_name=judge_model_name,
+            model=judge_model,
+            model_source=judge_model_source,
             system_template=judge_system_template,
+            external_api_token=judge_external_api_token,
         )
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
@@ -464,7 +478,8 @@ class AsyncEvaluation:
                 elif isinstance(model_to_evaluate, dict):
                     # Validate that all required fields are present for model config
                     required_fields = [
-                        "model_name",
+                        "model",
+                        "model_source",
                         "max_tokens",
                         "temperature",
                         "system_template",
@@ -515,7 +530,8 @@ class AsyncEvaluation:
                 elif isinstance(model_to_evaluate, dict):
                     # Validate that all required fields are present for model config
                     required_fields = [
-                        "model_name",
+                        "model",
+                        "model_source",
                         "max_tokens",
                         "temperature",
                         "system_template",

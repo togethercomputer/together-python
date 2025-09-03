@@ -39,7 +39,8 @@ class TestEvaluation:
         # Test classify evaluation creation
         result = sync_together_instance.evaluation.create(
             type="classify",
-            judge_model_name="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model_source="serverless",
             judge_system_template="You are a helpful assistant",
             input_data_file_path="file_123",
             labels=["accurate", "inaccurate"],
@@ -57,9 +58,9 @@ class TestEvaluation:
         # Verify parameters structure
         params = call_args.params["parameters"]
         assert (
-            params["judge"]["model_name"]
-            == "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo"
+            params["judge"]["model"] == "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo"
         )
+        assert params["judge"]["model_source"] == "serverless"
         assert params["judge"]["system_template"] == "You are a helpful assistant"
         assert params["labels"] == ["accurate", "inaccurate"]
         assert params["pass_labels"] == ["accurate"]
@@ -87,17 +88,21 @@ class TestEvaluation:
 
         # Test score evaluation creation with ModelRequest
         model_request = {
-            "model_name": "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
+            "model": "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
+            "model_source": "dedicated",
             "max_tokens": 512,
             "temperature": 0.7,
             "system_template": "You are an assistant",
             "input_template": "Question: {input}",
+            "external_api_token": "test_token_123",
         }
 
         result = sync_together_instance.evaluation.create(
             type="score",
-            judge_model_name="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model_source="external",
             judge_system_template="Rate the response",
+            judge_external_api_token="judge_token_456",
             input_data_file_path="file_456",
             min_score=0.0,
             max_score=10.0,
@@ -114,10 +119,14 @@ class TestEvaluation:
         assert params["max_score"] == 10.0
         assert params["pass_threshold"] == 7.0
         assert (
-            params["model_to_evaluate"]["model_name"]
+            params["model_to_evaluate"]["model"]
             == "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo"
         )
+        assert params["model_to_evaluate"]["model_source"] == "dedicated"
         assert params["model_to_evaluate"]["max_tokens"] == 512
+        assert params["model_to_evaluate"]["external_api_token"] == "test_token_123"
+        assert params["judge"]["model_source"] == "external"
+        assert params["judge"]["external_api_token"] == "judge_token_456"
 
         # Verify response
         assert result.workflow_id == "eval_789012"
@@ -137,7 +146,8 @@ class TestEvaluation:
         # Test compare evaluation creation
         result = sync_together_instance.evaluation.create(
             type="compare",
-            judge_model_name="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model="meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo",
+            judge_model_source="serverless",
             judge_system_template="Compare the two responses",
             input_data_file_path="file_789",
             model_a="model-a-name",
@@ -163,7 +173,8 @@ class TestEvaluation:
         ):
             sync_together_instance.evaluation.create(
                 type="classify",
-                judge_model_name="judge-model",
+                judge_model="judge-model",
+                judge_model_source="serverless",
                 judge_system_template="template",
                 input_data_file_path="file_123",
                 model_to_evaluate="asdfg",
@@ -176,7 +187,8 @@ class TestEvaluation:
         ):
             sync_together_instance.evaluation.create(
                 type="score",
-                judge_model_name="judge-model",
+                judge_model="judge-model",
+                judge_model_source="serverless",
                 judge_system_template="template",
                 input_data_file_path="file_123",
                 model_to_evaluate="asdfg",
@@ -186,7 +198,8 @@ class TestEvaluation:
         with pytest.raises(ValueError, match="Invalid evaluation type"):
             sync_together_instance.evaluation.create(
                 type="invalid_type",
-                judge_model_name="judge-model",
+                judge_model="judge-model",
+                judge_model_source="serverless",
                 judge_system_template="template",
                 input_data_file_path="file_123",
                 model_to_evaluate="asdfg",
@@ -262,7 +275,11 @@ class TestEvaluation:
             "status": "completed",
             "results": {"accuracy": 0.92, "pass_rate": 0.88},
             "parameters": {
-                "judge": {"model_name": "judge-model", "system_template": "template"}
+                "judge": {
+                    "model": "judge-model",
+                    "model_source": "serverless",
+                    "system_template": "template",
+                }
             },
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T01:00:00Z",
@@ -331,7 +348,8 @@ class TestEvaluation:
         # Test async classify evaluation creation
         result = await async_together_instance.evaluation.create(
             type="classify",
-            judge_model_name="judge-model",
+            judge_model="judge-model",
+            judge_model_source="serverless",
             judge_system_template="template",
             input_data_file_path="file_async",
             labels=["good", "bad"],
