@@ -116,3 +116,59 @@ class TestTogetherTranscriptions:
         assert len(response.text) > 0
         assert hasattr(response, "language")
         assert response.language == "hi"
+
+    def test_transcription_mp3_format(self, sync_together_client):
+        """
+        Test transcription with MP3 format audio file
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/test_30s_clip.mp3"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url, model="openai/whisper-large-v3"
+        )
+
+        assert isinstance(response, AudioTranscriptionResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+    def test_transcription_m4a_format(self, sync_together_client):
+        """
+        Test transcription with M4A format audio file
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/test_clip.m4a"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url, model="openai/whisper-large-v3"
+        )
+
+        assert isinstance(response, AudioTranscriptionResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+    def test_transcription_webm_format(self, sync_together_client):
+        """
+        Test transcription with WebM format audio file
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/test_30s_clip.webm"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url, model="openai/whisper-large-v3"
+        )
+
+        assert isinstance(response, AudioTranscriptionResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+    def test_transcription_flac_format(self, sync_together_client):
+        """
+        Test transcription with FLAC format audio file
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/test_30s_clip.flac"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url, model="openai/whisper-large-v3"
+        )
+
+        assert isinstance(response, AudioTranscriptionResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
