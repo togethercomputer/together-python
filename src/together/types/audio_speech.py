@@ -158,6 +158,17 @@ class AudioTranscriptionWord(BaseModel):
     word: str
     start: float
     end: float
+    id: Optional[int] = None
+    speaker_id: Optional[str] = None
+
+
+class AudioSpeakerSegment(BaseModel):
+    id: int
+    speaker_id: str
+    start: float
+    end: float
+    text: str
+    words: List[AudioTranscriptionWord]
 
 
 class AudioTranscriptionResponse(BaseModel):
@@ -165,11 +176,14 @@ class AudioTranscriptionResponse(BaseModel):
 
 
 class AudioTranscriptionVerboseResponse(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    
     language: Optional[str] = None
     duration: Optional[float] = None
     text: str
     segments: Optional[List[AudioTranscriptionSegment]] = None
     words: Optional[List[AudioTranscriptionWord]] = None
+    speaker_segments: Optional[List[AudioSpeakerSegment]] = None
 
 
 class AudioTranslationResponse(BaseModel):

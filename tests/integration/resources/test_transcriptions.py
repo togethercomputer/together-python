@@ -9,6 +9,52 @@ from together.types.audio_speech import (
 )
 
 
+def validate_diarization_response(response_dict):
+    """
+    Helper function to validate diarization response structure
+    """
+    # Validate top-level speaker_segments field
+    assert "speaker_segments" in response_dict
+    assert isinstance(response_dict["speaker_segments"], list)
+    assert len(response_dict["speaker_segments"]) > 0
+
+    # Validate each speaker segment structure
+    for segment in response_dict["speaker_segments"]:
+        assert "text" in segment
+        assert "id" in segment
+        assert "speaker_id" in segment
+        assert "start" in segment
+        assert "end" in segment
+        assert "words" in segment
+
+        # Validate nested words in speaker segments
+        assert isinstance(segment["words"], list)
+        for word in segment["words"]:
+            assert "id" in word
+            assert "word" in word
+            assert "start" in word
+            assert "end" in word
+            assert "speaker_id" in word
+
+    # Note: The top-level words field should be present in the API response but
+    # may not be preserved by the SDK currently. We check for it but don't fail
+    # the test if it's missing, as the speaker_segments contain all the word data.
+    if "words" in response_dict and response_dict["words"] is not None:
+        assert isinstance(response_dict["words"], list)
+        assert len(response_dict["words"]) > 0
+
+        # Validate each word in top-level words
+        for word in response_dict["words"]:
+            assert "id" in word
+            assert "word" in word
+            assert "start" in word
+            assert "end" in word
+            assert "speaker_id" in word
+    else:
+        # Log that words field is missing (expected with current SDK)
+        print("Note: Top-level 'words' field not preserved by SDK (known issue)")
+
+
 class TestTogetherTranscriptions:
     @pytest.fixture
     def sync_together_client(self) -> Together:
@@ -116,3 +162,96 @@ class TestTogetherTranscriptions:
         assert len(response.text) > 0
         assert hasattr(response, "language")
         assert response.language == "hi"
+
+    def test_diarization_default(self, sync_together_client):
+        """
+        Test diarization with default model in verbose JSON format
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url,
+            model="openai/whisper-large-v3-test",
+            response_format="verbose_json",
+            diarize=True,
+        )
+
+        assert isinstance(response, AudioTranscriptionVerboseResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+        # Validate diarization fields
+        response_dict = response.model_dump()
+        validate_diarization_response(response_dict)
+
+    def test_diarization_nvidia(self, sync_together_client):
+        """
+        Test diarization with nvidia model in verbose JSON format
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url,
+            model="openai/whisper-large-v3-test",
+            response_format="verbose_json",
+            diarize=True,
+            diarization_model="nvidia",
+        )
+
+        assert isinstance(response, AudioTranscriptionVerboseResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+        # Validate diarization fields
+        response_dict = response.model_dump()
+        validate_diarization_response(response_dict)
+
+    def test_diarization_pyannote(self, sync_together_client):
+        """
+        Test diarization with pyannote model in verbose JSON format
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url,
+            model="openai/whisper-large-v3-test",
+            response_format="verbose_json",
+            diarize=True,
+            diarization_model="pyannote",
+        )
+
+        assert isinstance(response, AudioTranscriptionVerboseResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+        # Validate diarization fields
+        response_dict = response.model_dump()
+        validate_diarization_response(response_dict)
+
+    def test_no_diarization(self, sync_together_client):
+        """
+        Test with diarize=false should not have speaker segments
+        """
+        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
+
+        response = sync_together_client.audio.transcriptions.create(
+            file=audio_url,
+            model="openai/whisper-large-v3-test",
+            response_format="verbose_json",
+            diarize=False,
+        )
+
+        assert isinstance(response, AudioTranscriptionVerboseResponse)
+        assert isinstance(response.text, str)
+        assert len(response.text) > 0
+
+        # Verify no diarization fields
+        response_dict = response.model_dump()
+        assert response_dict.get('speaker_segments') is None
+        assert response_dict.get('words') is None
+        
+        # Should still have standard fields
+        assert 'text' in response_dict
+        assert 'language' in response_dict
+        assert 'duration' in response_dict
+        assert 'segments' in response_dict

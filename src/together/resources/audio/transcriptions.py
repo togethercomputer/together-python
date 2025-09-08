@@ -131,7 +131,8 @@ class Transcriptions:
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
         ):
-            return AudioTranscriptionVerboseResponse(**response.data)
+            # Create response with model validation that preserves extra fields
+            return AudioTranscriptionVerboseResponse.model_validate(response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
 
@@ -261,6 +262,7 @@ class AsyncTranscriptions:
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
         ):
-            return AudioTranscriptionVerboseResponse(**response.data)
+            # Create response with model validation that preserves extra fields
+            return AudioTranscriptionVerboseResponse.model_validate(response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
