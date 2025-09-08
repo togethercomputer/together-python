@@ -383,6 +383,136 @@ class TestEvaluation:
                 pass_threshold=7.0,
             )
 
+    def test_external_model_source_requires_api_token(self, sync_together_instance):
+        # Test judge model with external source requires token
+        with pytest.raises(
+            ValueError,
+            match="judge_external_api_token is required when judge_model_source is 'external'",
+        ):
+            sync_together_instance.evaluation.create(
+                type="classify",
+                judge_model="judge-model",
+                judge_model_source="external",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                labels=["good", "bad"],
+                pass_labels=["good"],
+            )
+
+        # Test model_to_evaluate with external source requires token
+        model_config_no_token = {
+            "model": "test-model",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_to_evaluate",
+        ):
+            sync_together_instance.evaluation.create(
+                type="classify",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                labels=["good", "bad"],
+                pass_labels=["good"],
+                model_to_evaluate=model_config_no_token,
+            )
+
+        # Test model_a with external source requires token
+        model_a_no_token = {
+            "model": "model-a",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System A",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_a",
+        ):
+            sync_together_instance.evaluation.create(
+                type="compare",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                model_a=model_a_no_token,
+                model_b="model-b",
+            )
+
+        # Test model_b with external source requires token
+        model_b_no_token = {
+            "model": "model-b",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System B",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_b",
+        ):
+            sync_together_instance.evaluation.create(
+                type="compare",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                model_a="model-a",
+                model_b=model_b_no_token,
+            )
+
+    def test_external_model_source_with_token_succeeds(
+        self, mocker, sync_together_instance
+    ):
+        # Mock the API requestor
+        mock_requestor = mocker.MagicMock()
+        response_data = {"workflow_id": "eval_external", "status": "pending"}
+        mock_headers = {"x-together-request-id": "req_external"}
+        mock_response = TogetherResponse(data=response_data, headers=mock_headers)
+        mock_requestor.request.return_value = (mock_response, None, None)
+        mocker.patch(
+            "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+        )
+
+        # Test with external source and token provided
+        model_config_with_token = {
+            "model": "test-model",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System",
+            "input_template": "Input: {input}",
+            "external_api_token": "valid_token",
+        }
+
+        result = sync_together_instance.evaluation.create(
+            type="score",
+            judge_model="judge-model",
+            judge_model_source="external",
+            judge_system_template="template",
+            judge_external_api_token="judge_token",
+            input_data_file_path="file_123",
+            min_score=0.0,
+            max_score=10.0,
+            pass_threshold=7.0,
+            model_to_evaluate=model_config_with_token,
+        )
+
+        # Verify the request was successful
+        assert result.workflow_id == "eval_external"
+        assert result.status == "pending"
+
     def test_create_evaluation_missing_required_params(self, sync_together_instance):
         # Test missing labels for classify
         with pytest.raises(
@@ -852,4 +982,97 @@ class TestEvaluation:
                 min_score=0.0,
                 max_score=10.0,
                 pass_threshold=7.0,
+            )
+
+    @pytest.mark.asyncio
+    async def test_async_external_model_source_requires_api_token(
+        self, async_together_instance
+    ):
+        # Test judge model with external source requires token
+        with pytest.raises(
+            ValueError,
+            match="judge_external_api_token is required when judge_model_source is 'external'",
+        ):
+            await async_together_instance.evaluation.create(
+                type="classify",
+                judge_model="judge-model",
+                judge_model_source="external",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                labels=["good", "bad"],
+                pass_labels=["good"],
+            )
+
+        # Test model_to_evaluate with external source requires token
+        model_config_no_token = {
+            "model": "test-model",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_to_evaluate",
+        ):
+            await async_together_instance.evaluation.create(
+                type="score",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                min_score=0.0,
+                max_score=10.0,
+                pass_threshold=7.0,
+                model_to_evaluate=model_config_no_token,
+            )
+
+        # Test model_a with external source requires token
+        model_a_no_token = {
+            "model": "model-a",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System A",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_a",
+        ):
+            await async_together_instance.evaluation.create(
+                type="compare",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                model_a=model_a_no_token,
+                model_b="model-b",
+            )
+
+        # Test model_b with external source requires token
+        model_b_no_token = {
+            "model": "model-b",
+            "model_source": "external",
+            "max_tokens": 512,
+            "temperature": 0.7,
+            "system_template": "System B",
+            "input_template": "Input: {input}",
+        }
+
+        with pytest.raises(
+            ValueError,
+            match="external_api_token is required when model_source is 'external' for model_b",
+        ):
+            await async_together_instance.evaluation.create(
+                type="compare",
+                judge_model="judge-model",
+                judge_model_source="serverless",
+                judge_system_template="template",
+                input_data_file_path="file_123",
+                model_a="model-a",
+                model_b=model_b_no_token,
             )

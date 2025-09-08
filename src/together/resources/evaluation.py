@@ -71,6 +71,11 @@ class Evaluation:
             client=self._client,
         )
 
+        if judge_model_source == "external" and not judge_external_api_token:
+            raise ValueError(
+                "judge_external_api_token is required when judge_model_source is 'external'"
+            )
+
         # Build judge config
         judge_config = JudgeModelConfig(
             model=judge_model,
@@ -135,6 +140,12 @@ class Evaluation:
                             f"All model config parameters are required when using detailed configuration. "
                             f"Missing: {', '.join(missing_fields)}"
                         )
+                    if model_to_evaluate.get(
+                        "model_source"
+                    ) == "external" and not model_to_evaluate.get("external_api_token"):
+                        raise ValueError(
+                            "external_api_token is required when model_source is 'external' for model_to_evaluate"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "score":
@@ -186,6 +197,12 @@ class Evaluation:
                         raise ValueError(
                             f"All model config parameters are required when using detailed configuration. "
                             f"Missing: {', '.join(missing_fields)}"
+                        )
+                    if model_to_evaluate.get(
+                        "model_source"
+                    ) == "external" and not model_to_evaluate.get("external_api_token"):
+                        raise ValueError(
+                            "external_api_token is required when model_source is 'external' for model_to_evaluate"
                         )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
@@ -246,6 +263,12 @@ class Evaluation:
                         f"All model config parameters are required for model_a when using detailed configuration. "
                         f"Missing: {', '.join(missing_fields)}"
                     )
+                if model_a.get("model_source") == "external" and not model_a.get(
+                    "external_api_token"
+                ):
+                    raise ValueError(
+                        "external_api_token is required when model_source is 'external' for model_a"
+                    )
                 parameters.model_a = ModelRequest(**model_a)
 
             # Handle model_b
@@ -268,6 +291,12 @@ class Evaluation:
                     raise ValueError(
                         f"All model config parameters are required for model_b when using detailed configuration. "
                         f"Missing: {', '.join(missing_fields)}"
+                    )
+                if model_b.get("model_source") == "external" and not model_b.get(
+                    "external_api_token"
+                ):
+                    raise ValueError(
+                        "external_api_token is required when model_source is 'external' for model_b"
                     )
                 parameters.model_b = ModelRequest(**model_b)
 
@@ -433,6 +462,11 @@ class AsyncEvaluation:
             client=self._client,
         )
 
+        if judge_model_source == "external" and not judge_external_api_token:
+            raise ValueError(
+                "judge_external_api_token is required when judge_model_source is 'external'"
+            )
+
         # Build judge config
         judge_config = JudgeModelConfig(
             model=judge_model,
@@ -497,6 +531,12 @@ class AsyncEvaluation:
                             f"All model config parameters are required when using detailed configuration. "
                             f"Missing: {', '.join(missing_fields)}"
                         )
+                    if model_to_evaluate.get(
+                        "model_source"
+                    ) == "external" and not model_to_evaluate.get("external_api_token"):
+                        raise ValueError(
+                            "external_api_token is required when model_source is 'external' for model_to_evaluate"
+                        )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
         elif type == "score":
@@ -548,6 +588,12 @@ class AsyncEvaluation:
                         raise ValueError(
                             f"All model config parameters are required when using detailed configuration. "
                             f"Missing: {', '.join(missing_fields)}"
+                        )
+                    if model_to_evaluate.get(
+                        "model_source"
+                    ) == "external" and not model_to_evaluate.get("external_api_token"):
+                        raise ValueError(
+                            "external_api_token is required when model_source is 'external' for model_to_evaluate"
                         )
                     parameters.model_to_evaluate = ModelRequest(**model_to_evaluate)
 
@@ -608,6 +654,12 @@ class AsyncEvaluation:
                         f"All model config parameters are required for model_a when using detailed configuration. "
                         f"Missing: {', '.join(missing_fields)}"
                     )
+                if model_a.get("model_source") == "external" and not model_a.get(
+                    "external_api_token"
+                ):
+                    raise ValueError(
+                        "external_api_token is required when model_source is 'external' for model_a"
+                    )
                 parameters.model_a = ModelRequest(**model_a)
 
             # Handle model_b
@@ -630,6 +682,12 @@ class AsyncEvaluation:
                     raise ValueError(
                         f"All model config parameters are required for model_b when using detailed configuration. "
                         f"Missing: {', '.join(missing_fields)}"
+                    )
+                if model_b.get("model_source") == "external" and not model_b.get(
+                    "external_api_token"
+                ):
+                    raise ValueError(
+                        "external_api_token is required when model_source is 'external' for model_b"
                     )
                 parameters.model_b = ModelRequest(**model_b)
 
