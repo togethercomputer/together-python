@@ -27,7 +27,7 @@ def evaluation(ctx: click.Context) -> None:
     "--judge-model",
     type=str,
     required=True,
-    help="Name of the judge model to use for evaluation.",
+    help="Name or URL of the judge model to use for evaluation.",
 )
 @click.option(
     "--judge-model-source",
