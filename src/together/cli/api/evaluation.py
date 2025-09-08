@@ -128,7 +128,7 @@ def evaluation(ctx: click.Context) -> None:
 @click.option(
     "--model-a",
     type=str,
-    help="Model name for model A when using detailed config.",
+    help="Model name or URL for model A when using detailed config.",
 )
 @click.option(
     "--model-a-source",
