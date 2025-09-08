@@ -50,7 +50,7 @@ class Evaluation:
 
         Args:
             type: The type of evaluation ("classify", "score", or "compare")
-            judge_model: Name of the judge model
+            judge_model: Name or URL of the judge model
             judge_model_source: Source of the judge model ("serverless", "dedicated", or "external")
             judge_system_template: System template for the judge
             input_data_file_path: Path to input data file
