@@ -231,7 +231,8 @@ class Evaluation:
             elif isinstance(model_a, dict):
                 # Validate that all required fields are present for model config
                 required_fields = [
-                    "model_name",
+                    "model",
+                    "model_source",
                     "max_tokens",
                     "temperature",
                     "system_template",
@@ -253,7 +254,8 @@ class Evaluation:
             elif isinstance(model_b, dict):
                 # Validate that all required fields are present for model config
                 required_fields = [
-                    "model_name",
+                    "model",
+                    "model_source",
                     "max_tokens",
                     "temperature",
                     "system_template",
@@ -591,7 +593,8 @@ class AsyncEvaluation:
             elif isinstance(model_a, dict):
                 # Validate that all required fields are present for model config
                 required_fields = [
-                    "model_name",
+                    "model",
+                    "model_source",
                     "max_tokens",
                     "temperature",
                     "system_template",
@@ -613,7 +616,8 @@ class AsyncEvaluation:
             elif isinstance(model_b, dict):
                 # Validate that all required fields are present for model config
                 required_fields = [
-                    "model_name",
+                    "model",
+                    "model_source",
                     "max_tokens",
                     "temperature",
                     "system_template",
