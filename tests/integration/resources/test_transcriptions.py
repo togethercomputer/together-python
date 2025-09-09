@@ -171,7 +171,7 @@ class TestTogetherTranscriptions:
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url,
-            model="openai/whisper-large-v3-test",
+            model="openai/whisper-large-v3",
             response_format="verbose_json",
             diarize=True,
         )
@@ -192,7 +192,7 @@ class TestTogetherTranscriptions:
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url,
-            model="openai/whisper-large-v3-test",
+            model="openai/whisper-large-v3",
             response_format="verbose_json",
             diarize=True,
             diarization_model="nvidia",
@@ -214,7 +214,7 @@ class TestTogetherTranscriptions:
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url,
-            model="openai/whisper-large-v3-test",
+            model="openai/whisper-large-v3",
             response_format="verbose_json",
             diarize=True,
             diarization_model="pyannote",
@@ -236,7 +236,7 @@ class TestTogetherTranscriptions:
 
         response = sync_together_client.audio.transcriptions.create(
             file=audio_url,
-            model="openai/whisper-large-v3-test",
+            model="openai/whisper-large-v3",
             response_format="verbose_json",
             diarize=False,
         )
