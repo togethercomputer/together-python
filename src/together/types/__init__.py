@@ -93,7 +93,7 @@ __all__ = [
     "FinetuneResponse",
     "FinetuneList",
     "FinetuneListEvents",
-    'FinetuneDeleteResponse',
+    "FinetuneDeleteResponse",
     "FinetuneDownloadResult",
     "FinetuneLRScheduler",
     "LinearLRScheduler",
