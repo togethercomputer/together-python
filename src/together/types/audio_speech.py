@@ -176,8 +176,7 @@ class AudioTranscriptionResponse(BaseModel):
 
 
 class AudioTranscriptionVerboseResponse(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    
+    id: Optional[str] = None
     language: Optional[str] = None
     duration: Optional[float] = None
     text: str

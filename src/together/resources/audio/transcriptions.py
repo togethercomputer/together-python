@@ -104,7 +104,12 @@ class Transcriptions:
             )
 
         # Add any additional kwargs
-        params_data.update(kwargs)
+        # Convert boolean values to lowercase strings for proper form encoding
+        for key, value in kwargs.items():
+            if isinstance(value, bool):
+                params_data[key] = str(value).lower()
+            else:
+                params_data[key] = value
 
         try:
             response, _, _ = requestor.request(
@@ -235,7 +240,12 @@ class AsyncTranscriptions:
             )
 
         # Add any additional kwargs
-        params_data.update(kwargs)
+        # Convert boolean values to lowercase strings for proper form encoding
+        for key, value in kwargs.items():
+            if isinstance(value, bool):
+                params_data[key] = str(value).lower()
+            else:
+                params_data[key] = value
 
         try:
             response, _, _ = await requestor.arequest(

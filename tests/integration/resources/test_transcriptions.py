@@ -36,23 +36,18 @@ def validate_diarization_response(response_dict):
             assert "end" in word
             assert "speaker_id" in word
 
-    # Note: The top-level words field should be present in the API response but
-    # may not be preserved by the SDK currently. We check for it but don't fail
-    # the test if it's missing, as the speaker_segments contain all the word data.
-    if "words" in response_dict and response_dict["words"] is not None:
-        assert isinstance(response_dict["words"], list)
-        assert len(response_dict["words"]) > 0
+    # Validate top-level words field
+    assert "words" in response_dict
+    assert isinstance(response_dict["words"], list)
+    assert len(response_dict["words"]) > 0
 
-        # Validate each word in top-level words
-        for word in response_dict["words"]:
-            assert "id" in word
-            assert "word" in word
-            assert "start" in word
-            assert "end" in word
-            assert "speaker_id" in word
-    else:
-        # Log that words field is missing (expected with current SDK)
-        print("Note: Top-level 'words' field not preserved by SDK (known issue)")
+    # Validate each word in top-level words
+    for word in response_dict["words"]:
+        assert "id" in word
+        assert "word" in word
+        assert "start" in word
+        assert "end" in word
+        assert "speaker_id" in word
 
 
 class TestTogetherTranscriptions:
