@@ -242,11 +242,11 @@ class TestTogetherTranscriptions:
 
         # Verify no diarization fields
         response_dict = response.model_dump()
-        assert response_dict.get('speaker_segments') is None
-        assert response_dict.get('words') is None
-        
+        assert response_dict.get("speaker_segments") is None
+        assert response_dict.get("words") is None
+
         # Should still have standard fields
-        assert 'text' in response_dict
-        assert 'language' in response_dict
-        assert 'duration' in response_dict
-        assert 'segments' in response_dict
+        assert "text" in response_dict
+        assert "language" in response_dict
+        assert "duration" in response_dict
+        assert "segments" in response_dict
