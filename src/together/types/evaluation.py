@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -23,16 +23,20 @@ class EvaluationStatus(str, Enum):
 
 
 class JudgeModelConfig(BaseModel):
-    model_name: str
+    model: str
+    model_source: Literal["serverless", "dedicated", "external"]
     system_template: str
+    external_api_token: Optional[str] = None
 
 
 class ModelRequest(BaseModel):
-    model_name: str
+    model: str
+    model_source: Literal["serverless", "dedicated", "external"]
     max_tokens: int
     temperature: float
     system_template: str
     input_template: str
+    external_api_token: Optional[str] = None
 
 
 class ClassifyParameters(BaseModel):
