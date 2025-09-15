@@ -569,7 +569,11 @@ class MultipartUploadManager:
         return etag
 
     def _complete_upload(
-        self, url: str, upload_id: str, file_id: str, completed_parts: List[Dict[str, Any]]
+        self,
+        url: str,
+        upload_id: str,
+        file_id: str,
+        completed_parts: List[Dict[str, Any]],
     ) -> FileResponse:
         """Complete the multipart upload"""
 
