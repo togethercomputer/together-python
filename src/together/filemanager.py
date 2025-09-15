@@ -1,23 +1,34 @@
 from __future__ import annotations
 
+import math
 import os
 import shutil
 import stat
 import tempfile
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from pathlib import Path
-from typing import Tuple
+from typing import Any, Dict, List, Tuple, cast
 
 import requests
 from filelock import FileLock
 from requests.structures import CaseInsensitiveDict
 from tqdm import tqdm
-from tqdm.utils import CallbackIOWrapper
 
-import together.utils
 from together.abstract import api_requestor
-from together.constants import DISABLE_TQDM, DOWNLOAD_BLOCK_SIZE, MAX_RETRIES
+from together.constants import (
+    DISABLE_TQDM,
+    DOWNLOAD_BLOCK_SIZE,
+    MAX_CONCURRENT_PARTS,
+    MAX_FILE_SIZE_GB,
+    MAX_RETRIES,
+    MIN_PART_SIZE_MB,
+    NUM_BYTES_IN_GB,
+    TARGET_PART_SIZE_MB,
+    MAX_MULTIPART_PARTS,
+    MULTIPART_UPLOAD_TIMEOUT,
+)
 from together.error import (
     APIError,
     AuthenticationError,
@@ -32,6 +43,8 @@ from together.types import (
     TogetherClient,
     TogetherRequest,
 )
+from tqdm.utils import CallbackIOWrapper
+import together.utils
 
 
 def chmod_and_replace(src: Path, dst: Path) -> None:
@@ -385,3 +398,213 @@ class UploadManager:
         assert isinstance(response, TogetherResponse)
 
         return FileResponse(**response.data)
+
+
+class MultipartUploadManager:
+    """Handles multipart uploads for large files"""
+
+    def __init__(self, client: TogetherClient) -> None:
+        self._client = client
+        self.max_concurrent_parts = MAX_CONCURRENT_PARTS
+
+    def upload(
+        self,
+        url: str,
+        file: Path,
+        purpose: FilePurpose,
+    ) -> FileResponse:
+        """Upload large file using multipart upload"""
+
+        file_size = os.stat(file.as_posix()).st_size
+
+        # Validate file size limits
+        file_size_gb = file_size / NUM_BYTES_IN_GB
+        if file_size_gb > MAX_FILE_SIZE_GB:
+            raise FileTypeError(
+                f"File size {file_size_gb:.1f}GB exceeds maximum supported size of {MAX_FILE_SIZE_GB}GB"
+            )
+
+        part_size, num_parts = self._calculate_parts(file_size)
+
+        file_type = self._get_file_type(file)
+
+        try:
+            # Phase 1: Initiate multipart upload
+            upload_info = self._initiate_upload(
+                url, file, file_size, num_parts, purpose, file_type
+            )
+
+            # Phase 2: Upload parts concurrently
+            completed_parts = self._upload_parts_concurrent(
+                file, upload_info, part_size
+            )
+
+            # Phase 3: Complete upload
+            return self._complete_upload(
+                url, upload_info["upload_id"], upload_info["file_id"], completed_parts
+            )
+
+        except Exception as e:
+            # Cleanup on failure
+            if "upload_info" in locals():
+                self._abort_upload(
+                    url, upload_info["upload_id"], upload_info["file_id"]
+                )
+            raise e
+
+    def _get_file_type(self, file: Path) -> str:
+        """Get file type from extension, defaulting to jsonl as discussed in feedback"""
+        if file.suffix == ".jsonl":
+            return "jsonl"
+        elif file.suffix == ".parquet":
+            return "parquet"
+        elif file.suffix == ".csv":
+            return "csv"
+        else:
+            return "jsonl"
+
+    def _calculate_parts(self, file_size: int) -> tuple[int, int]:
+        """Calculate optimal part size and count"""
+        min_part_size = MIN_PART_SIZE_MB * 1024 * 1024  # 5MB
+        target_part_size = TARGET_PART_SIZE_MB * 1024 * 1024  # 100MB
+
+        if file_size <= target_part_size:
+            return file_size, 1
+
+        num_parts = min(MAX_MULTIPART_PARTS, math.ceil(file_size / target_part_size))
+        part_size = math.ceil(file_size / num_parts)
+
+        # Ensure minimum part size
+        if part_size < min_part_size:
+            part_size = min_part_size
+            num_parts = math.ceil(file_size / part_size)
+
+        return part_size, num_parts
+
+    def _initiate_upload(
+        self,
+        url: str,
+        file: Path,
+        file_size: int,
+        num_parts: int,
+        purpose: FilePurpose,
+        file_type: str,
+    ) -> Dict[str, Any]:
+        """Initiate multipart upload with backend"""
+
+        requestor = api_requestor.APIRequestor(client=self._client)
+
+        payload = {
+            "file_name": file.name,
+            "file_size": file_size,
+            "num_parts": num_parts,
+            "purpose": purpose.value,
+            "file_type": file_type,
+        }
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="files/multipart/initiate",
+                params=payload,
+            ),
+        )
+
+        return cast(Dict[str, Any], response.data)
+
+    def _upload_parts_concurrent(
+        self, file: Path, upload_info: Dict[str, Any], part_size: int
+    ) -> List[Dict[str, Any]]:
+        """Upload file parts concurrently with progress tracking"""
+
+        parts = upload_info["parts"]
+        completed_parts = []
+
+        with ThreadPoolExecutor(max_workers=self.max_concurrent_parts) as executor:
+            with tqdm(total=len(parts), desc="Uploading parts", unit="part") as pbar:
+                future_to_part = {}
+
+                with open(file, "rb") as f:
+                    for part_info in parts:
+                        # Read part data
+                        f.seek((part_info["part_number"] - 1) * part_size)
+                        part_data = f.read(part_size)
+
+                        # Submit upload task
+                        future = executor.submit(
+                            self._upload_single_part, part_info, part_data
+                        )
+                        future_to_part[future] = part_info["part_number"]
+
+                # Collect results
+                for future in as_completed(future_to_part):
+                    part_number = future_to_part[future]
+                    try:
+                        etag = future.result()
+                        completed_parts.append(
+                            {"part_number": part_number, "etag": etag}
+                        )
+                        pbar.update(1)
+                    except Exception as e:
+                        raise Exception(f"Failed to upload part {part_number}: {e}")
+
+        completed_parts.sort(key=lambda x: x["part_number"])
+        return completed_parts
+
+    def _upload_single_part(self, part_info: Dict[str, Any], part_data: bytes) -> str:
+        """Upload a single part and return ETag"""
+
+        response = requests.put(
+            part_info["url"],
+            data=part_data,
+            headers=part_info.get("headers", {}),
+            timeout=MULTIPART_UPLOAD_TIMEOUT,
+        )
+        response.raise_for_status()
+
+        etag = response.headers.get("ETag", "").strip('"')
+        if not etag:
+            raise Exception(f"No ETag returned for part {part_info['part_number']}")
+
+        return etag
+
+    def _complete_upload(
+        self, url: str, upload_id: str, file_id: str, completed_parts: List[Dict[str, Any]]
+    ) -> FileResponse:
+        """Complete the multipart upload"""
+
+        requestor = api_requestor.APIRequestor(client=self._client)
+
+        payload = {
+            "upload_id": upload_id,
+            "file_id": file_id,
+            "parts": completed_parts,
+        }
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="files/multipart/complete",
+                params=payload,
+            ),
+        )
+
+        return FileResponse(**response.data["file"])
+
+    def _abort_upload(self, url: str, upload_id: str, file_id: str) -> None:
+        """Abort the multipart upload"""
+
+        requestor = api_requestor.APIRequestor(client=self._client)
+
+        payload = {
+            "upload_id": upload_id,
+            "file_id": file_id,
+        }
+
+        requestor.request(
+            options=TogetherRequest(
+                method="POST",
+                url="files/multipart/abort",
+                params=payload,
+            ),
+        )
