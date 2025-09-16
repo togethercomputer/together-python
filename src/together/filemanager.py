@@ -9,7 +9,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple
 
 import requests
 from filelock import FileLock
@@ -34,6 +34,7 @@ from together.error import (
     AuthenticationError,
     DownloadError,
     FileTypeError,
+    ResponseError,
 )
 from together.together_response import TogetherResponse
 from together.types import (
@@ -352,7 +353,7 @@ class UploadManager:
                 )
             redirect_url, file_id = self.get_upload_url(url, file, purpose, filetype)
 
-        file_size = os.stat(file.as_posix()).st_size
+        file_size = os.stat(file).st_size
 
         with tqdm(
             total=file_size,
@@ -415,9 +416,8 @@ class MultipartUploadManager:
     ) -> FileResponse:
         """Upload large file using multipart upload"""
 
-        file_size = os.stat(file.as_posix()).st_size
+        file_size = os.stat(file).st_size
 
-        # Validate file size limits
         file_size_gb = file_size / NUM_BYTES_IN_GB
         if file_size_gb > MAX_FILE_SIZE_GB:
             raise FileTypeError(
@@ -427,33 +427,31 @@ class MultipartUploadManager:
         part_size, num_parts = self._calculate_parts(file_size)
 
         file_type = self._get_file_type(file)
+        upload_info = None
 
         try:
-            # Phase 1: Initiate multipart upload
             upload_info = self._initiate_upload(
                 url, file, file_size, num_parts, purpose, file_type
             )
 
-            # Phase 2: Upload parts concurrently
             completed_parts = self._upload_parts_concurrent(
                 file, upload_info, part_size
             )
 
-            # Phase 3: Complete upload
             return self._complete_upload(
                 url, upload_info["upload_id"], upload_info["file_id"], completed_parts
             )
 
         except Exception as e:
             # Cleanup on failure
-            if "upload_info" in locals():
+            if upload_info is not None:
                 self._abort_upload(
                     url, upload_info["upload_id"], upload_info["file_id"]
                 )
             raise e
 
     def _get_file_type(self, file: Path) -> str:
-        """Get file type from extension, defaulting to jsonl as discussed in feedback"""
+        """Get file type from extension, raising ValueError for unsupported extensions"""
         if file.suffix == ".jsonl":
             return "jsonl"
         elif file.suffix == ".parquet":
@@ -461,7 +459,10 @@ class MultipartUploadManager:
         elif file.suffix == ".csv":
             return "csv"
         else:
-            return "jsonl"
+            raise ValueError(
+                f"Unsupported file extension: '{file.suffix}'. "
+                f"Supported extensions: .jsonl, .parquet, .csv"
+            )
 
     def _calculate_parts(self, file_size: int) -> tuple[int, int]:
         """Calculate optimal part size and count"""
@@ -474,7 +475,6 @@ class MultipartUploadManager:
         num_parts = min(MAX_MULTIPART_PARTS, math.ceil(file_size / target_part_size))
         part_size = math.ceil(file_size / num_parts)
 
-        # Ensure minimum part size
         if part_size < min_part_size:
             part_size = min_part_size
             num_parts = math.ceil(file_size / part_size)
@@ -489,7 +489,7 @@ class MultipartUploadManager:
         num_parts: int,
         purpose: FilePurpose,
         file_type: str,
-    ) -> Dict[str, Any]:
+    ) -> Any:
         """Initiate multipart upload with backend"""
 
         requestor = api_requestor.APIRequestor(client=self._client)
@@ -510,7 +510,7 @@ class MultipartUploadManager:
             ),
         )
 
-        return cast(Dict[str, Any], response.data)
+        return response.data
 
     def _upload_parts_concurrent(
         self, file: Path, upload_info: Dict[str, Any], part_size: int
@@ -526,11 +526,9 @@ class MultipartUploadManager:
 
                 with open(file, "rb") as f:
                     for part_info in parts:
-                        # Read part data
                         f.seek((part_info["part_number"] - 1) * part_size)
                         part_data = f.read(part_size)
 
-                        # Submit upload task
                         future = executor.submit(
                             self._upload_single_part, part_info, part_data
                         )
@@ -564,7 +562,7 @@ class MultipartUploadManager:
 
         etag = response.headers.get("ETag", "").strip('"')
         if not etag:
-            raise Exception(f"No ETag returned for part {part_info['part_number']}")
+            raise ResponseError(f"No ETag returned for part {part_info['part_number']}")
 
         return etag
 
