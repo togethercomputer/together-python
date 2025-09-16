@@ -322,6 +322,11 @@ class FinetuneListEvents(BaseModel):
     data: List[FinetuneEvent] | None = None
 
 
+class FinetuneDeleteResponse(BaseModel):
+    # delete message
+    message: str
+
+
 class FinetuneDownloadResult(BaseModel):
     # object type
     object: Literal["local"] | None = None

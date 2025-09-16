@@ -13,6 +13,7 @@ from together.types import (
     CosineLRScheduler,
     CosineLRSchedulerArgs,
     FinetuneCheckpoint,
+    FinetuneDeleteResponse,
     FinetuneDownloadResult,
     FinetuneList,
     FinetuneListEvents,
@@ -570,6 +571,37 @@ class FineTuning:
 
         return FinetuneResponse(**response.data)
 
+    def delete(self, id: str, force: bool = False) -> FinetuneDeleteResponse:
+        """
+        Method to delete a fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to delete. A string that starts with `ft-`.
+            force (bool, optional): Force deletion. Defaults to False.
+
+        Returns:
+            FinetuneDeleteResponse: Object containing deletion confirmation message.
+        """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        params = {"force": str(force).lower()}
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="DELETE",
+                url=f"fine-tunes/{id}",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneDeleteResponse(**response.data)
+
     def list_events(self, id: str) -> FinetuneListEvents:
         """
         Lists events of a fine-tune job
@@ -1006,6 +1038,37 @@ class AsyncFineTuning:
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
+
+    async def delete(self, id: str, force: bool = False) -> FinetuneDeleteResponse:
+        """
+        Async method to delete a fine-tuning job
+
+        Args:
+            id (str): Fine-tune ID to delete. A string that starts with `ft-`.
+            force (bool, optional): Force deletion. Defaults to False.
+
+        Returns:
+            FinetuneDeleteResponse: Object containing deletion confirmation message.
+        """
+
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        params = {"force": str(force).lower()}
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="DELETE",
+                url=f"fine-tunes/{id}",
+                params=params,
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+
+        return FinetuneDeleteResponse(**response.data)
 
     async def list_events(self, id: str) -> FinetuneListEvents:
         """
