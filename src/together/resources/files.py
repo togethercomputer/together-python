@@ -48,8 +48,7 @@ class Files:
 
         assert isinstance(purpose, FilePurpose)
 
-        # Size-based routing: use multipart for files > 5GB
-        file_size = os.stat(file.as_posix()).st_size
+        file_size = os.stat(file).st_size
         file_size_gb = file_size / NUM_BYTES_IN_GB
 
         if file_size_gb > MULTIPART_THRESHOLD_GB:

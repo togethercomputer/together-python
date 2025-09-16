@@ -14,7 +14,7 @@ from together.constants import (
 from together.types import FilePurpose, FileResponse
 from together.types.common import ObjectType
 from together.together_response import TogetherResponse
-from together.error import FileTypeError
+from together.error import FileTypeError, ResponseError
 
 
 class TestMultipartUploadManager:
@@ -51,10 +51,15 @@ class TestMultipartUploadManager:
         file = Path("test.csv")
         assert manager._get_file_type(file) == "csv"
 
-    def test_get_file_type_unknown_defaults_to_jsonl(self, manager):
-        """Test that unknown file types default to jsonl"""
+    def test_get_file_type_unknown_raises_error(self, manager):
+        """Test that unknown file types raise ValueError"""
         file = Path("test.txt")
-        assert manager._get_file_type(file) == "jsonl"
+        with pytest.raises(ValueError) as exc_info:
+            manager._get_file_type(file)
+
+        error_message = str(exc_info.value)
+        assert "Unsupported file extension: '.txt'" in error_message
+        assert "Supported extensions: .jsonl, .parquet, .csv" in error_message
 
     def test_calculate_parts_small_file(self, manager):
         """Test part calculation for files smaller than target part size"""
@@ -186,7 +191,7 @@ class TestMultipartUploadManager:
         part_data = b"test data"
 
         # Test
-        with pytest.raises(Exception, match="No ETag returned for part 1"):
+        with pytest.raises(ResponseError, match="No ETag returned for part 1"):
             manager._upload_single_part(part_info, part_data)
 
     @patch("together.filemanager.api_requestor.APIRequestor")
