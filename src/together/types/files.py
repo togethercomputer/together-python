@@ -52,7 +52,7 @@ class FileResponse(BaseModel):
     """
 
     id: str
-    object: Literal[ObjectType.File]
+    object: str
     # created timestamp
     created_at: int | None = None
     type: FileType | None = None
