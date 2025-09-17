@@ -104,7 +104,12 @@ class Transcriptions:
             )
 
         # Add any additional kwargs
-        params_data.update(kwargs)
+        # Convert boolean values to lowercase strings for proper form encoding
+        for key, value in kwargs.items():
+            if isinstance(value, bool):
+                params_data[key] = str(value).lower()
+            else:
+                params_data[key] = value
 
         try:
             response, _, _ = requestor.request(
@@ -131,7 +136,8 @@ class Transcriptions:
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
         ):
-            return AudioTranscriptionVerboseResponse(**response.data)
+            # Create response with model validation that preserves extra fields
+            return AudioTranscriptionVerboseResponse.model_validate(response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
 
@@ -234,7 +240,12 @@ class AsyncTranscriptions:
             )
 
         # Add any additional kwargs
-        params_data.update(kwargs)
+        # Convert boolean values to lowercase strings for proper form encoding
+        for key, value in kwargs.items():
+            if isinstance(value, bool):
+                params_data[key] = str(value).lower()
+            else:
+                params_data[key] = value
 
         try:
             response, _, _ = await requestor.arequest(
@@ -261,6 +272,7 @@ class AsyncTranscriptions:
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
         ):
-            return AudioTranscriptionVerboseResponse(**response.data)
+            # Create response with model validation that preserves extra fields
+            return AudioTranscriptionVerboseResponse.model_validate(response.data)
         else:
             return AudioTranscriptionResponse(**response.data)
