@@ -65,7 +65,7 @@ def check_file(
     else:
         report_dict["found"] = True
 
-    file_size = os.stat(file.as_posix()).st_size
+    file_size = os.stat(file).st_size
 
     if file_size > MAX_FILE_SIZE_GB * NUM_BYTES_IN_GB:
         report_dict["message"] = (
