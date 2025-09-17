@@ -159,9 +159,9 @@ class TestMultipartUploadManager:
 
         # Test data
         part_info = {
-            "part_number": 1,
-            "url": "https://presigned-url.com",
-            "headers": {"Authorization": "Bearer token"},
+            "PartNumber": 1,
+            "URL": "https://presigned-url.com",
+            "Headers": {"Authorization": "Bearer token"},
         }
         part_data = b"test data"
 
@@ -187,7 +187,7 @@ class TestMultipartUploadManager:
         mock_response.raise_for_status = Mock()
         mock_put.return_value = mock_response
 
-        part_info = {"part_number": 1, "url": "https://test.com", "headers": {}}
+        part_info = {"PartNumber": 1, "URL": "https://test.com", "Headers": {}}
         part_data = b"test data"
 
         # Test
@@ -279,8 +279,8 @@ class TestMultipartUploadManager:
         ):
             upload_info = {
                 "parts": [
-                    {"part_number": 1, "url": "url1", "headers": {}},
-                    {"part_number": 2, "url": "url2", "headers": {}},
+                    {"PartNumber": 1, "URL": "url1", "Headers": {}},
+                    {"PartNumber": 2, "URL": "url2", "Headers": {}},
                 ]
             }
 
