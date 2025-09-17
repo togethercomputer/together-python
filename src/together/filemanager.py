@@ -526,13 +526,13 @@ class MultipartUploadManager:
 
                 with open(file, "rb") as f:
                     for part_info in parts:
-                        f.seek((part_info["part_number"] - 1) * part_size)
+                        f.seek((part_info["PartNumber"] - 1) * part_size)
                         part_data = f.read(part_size)
 
                         future = executor.submit(
                             self._upload_single_part, part_info, part_data
                         )
-                        future_to_part[future] = part_info["part_number"]
+                        future_to_part[future] = part_info["PartNumber"]
 
                 # Collect results
                 for future in as_completed(future_to_part):
@@ -553,16 +553,16 @@ class MultipartUploadManager:
         """Upload a single part and return ETag"""
 
         response = requests.put(
-            part_info["url"],
+            part_info["URL"],
             data=part_data,
-            headers=part_info.get("headers", {}),
+            headers=part_info.get("Headers", {}),
             timeout=MULTIPART_UPLOAD_TIMEOUT,
         )
         response.raise_for_status()
 
         etag = response.headers.get("ETag", "").strip('"')
         if not etag:
-            raise ResponseError(f"No ETag returned for part {part_info['part_number']}")
+            raise ResponseError(f"No ETag returned for part {part_info['PartNumber']}")
 
         return etag
 
@@ -591,7 +591,7 @@ class MultipartUploadManager:
             ),
         )
 
-        return FileResponse(**response.data["file"])
+        return FileResponse(**response.data.get("file", response.data))
 
     def _abort_upload(self, url: str, upload_id: str, file_id: str) -> None:
         """Abort the multipart upload"""
