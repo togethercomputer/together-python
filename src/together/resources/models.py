@@ -143,7 +143,7 @@ class Models(ModelsBase):
 
         assert isinstance(response, TogetherResponse)
 
-        return ModelUploadResponse(**response.data)
+        return ModelUploadResponse.from_api_response(response.data)
 
 
 class AsyncModels(ModelsBase):
@@ -249,4 +249,4 @@ class AsyncModels(ModelsBase):
 
         assert isinstance(response, TogetherResponse)
 
-        return ModelUploadResponse(**response.data)
+        return ModelUploadResponse.from_api_response(response.data)
