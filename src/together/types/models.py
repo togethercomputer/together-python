@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Literal, Optional
 
 from together.types.abstract import BaseModel
 from together.types.common import ObjectType
@@ -44,3 +44,21 @@ class ModelObject(BaseModel):
     license: str | None = None
     context_length: int | None = None
     pricing: PricingObject
+
+
+class ModelUploadRequest(BaseModel):
+    model_name: str
+    model_source: str
+    model_type: Literal["model", "adapter"] = "model"
+    hf_token: Optional[str] = None
+    description: Optional[str] = None
+    base_model: Optional[str] = None
+    lora_model: Optional[str] = None
+
+
+class ModelUploadResponse(BaseModel):
+    job_id: Optional[str] = None
+    model_name: Optional[str] = None
+    model_id: Optional[str] = None
+    model_source: Optional[str] = None
+    message: str
