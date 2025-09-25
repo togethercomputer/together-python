@@ -115,13 +115,11 @@ def endpoints(ctx: click.Context) -> None:
 @click.option(
     "--no-prompt-cache",
     is_flag=True,
-    default=True, #temporary default value before configs fixed 
     help="Disable the prompt cache for this endpoint",
 )
 @click.option(
     "--no-speculative-decoding",
     is_flag=True,
-    default=True, #temporary default value before configs fixed
     help="Disable speculative decoding for this endpoint",
 )
 @click.option(
