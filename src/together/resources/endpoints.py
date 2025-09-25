@@ -56,8 +56,8 @@ class Endpoints:
         min_replicas: int,
         max_replicas: int,
         display_name: Optional[str] = None,
-        disable_prompt_cache: bool = False,
-        disable_speculative_decoding: bool = False,
+        disable_prompt_cache: bool = True,
+        disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
@@ -304,8 +304,8 @@ class AsyncEndpoints:
         min_replicas: int,
         max_replicas: int,
         display_name: Optional[str] = None,
-        disable_prompt_cache: bool = False,
-        disable_speculative_decoding: bool = False,
+        disable_prompt_cache: bool = True,
+        disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
     ) -> DedicatedEndpoint:
