@@ -52,13 +52,14 @@ from together.types.finetune import (
     FinetuneListEvents,
     FinetuneRequest,
     FinetuneResponse,
+    FinetuneDeleteResponse,
     FinetuneTrainingLimits,
     FullTrainingType,
     LoRATrainingType,
     TrainingType,
 )
 from together.types.images import ImageRequest, ImageResponse
-from together.types.models import ModelObject
+from together.types.models import ModelObject, ModelUploadRequest, ModelUploadResponse
 from together.types.rerank import RerankRequest, RerankResponse
 from together.types.batch import BatchJob, BatchJobStatus, BatchEndpoint
 from together.types.evaluation import (
@@ -92,6 +93,7 @@ __all__ = [
     "FinetuneResponse",
     "FinetuneList",
     "FinetuneListEvents",
+    "FinetuneDeleteResponse",
     "FinetuneDownloadResult",
     "FinetuneLRScheduler",
     "LinearLRScheduler",
@@ -108,6 +110,8 @@ __all__ = [
     "ImageRequest",
     "ImageResponse",
     "ModelObject",
+    "ModelUploadRequest",
+    "ModelUploadResponse",
     "TrainingType",
     "FullTrainingType",
     "LoRATrainingType",

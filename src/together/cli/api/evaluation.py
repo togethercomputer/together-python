@@ -24,10 +24,22 @@ def evaluation(ctx: click.Context) -> None:
     help="Type of evaluation to create.",
 )
 @click.option(
-    "--judge-model-name",
+    "--judge-model",
     type=str,
     required=True,
-    help="Name of the judge model to use for evaluation.",
+    help="Name or URL of the judge model to use for evaluation.",
+)
+@click.option(
+    "--judge-model-source",
+    type=click.Choice(["serverless", "dedicated", "external"]),
+    required=True,
+    help="Source of the judge model.",
+)
+@click.option(
+    "--judge-external-api-token",
+    type=str,
+    required=False,
+    help="Optional external API token for the judge model.",
 )
 @click.option(
     "--judge-system-template",
@@ -48,9 +60,19 @@ def evaluation(ctx: click.Context) -> None:
     "Can not be used when model-a-name and other model config parameters are specified",
 )
 @click.option(
-    "--model-to-evaluate-name",
+    "--model-to-evaluate",
     type=str,
     help="Model name when using the detailed config",
+)
+@click.option(
+    "--model-to-evaluate-source",
+    type=click.Choice(["serverless", "dedicated", "external"]),
+    help="Source of the model to evaluate.",
+)
+@click.option(
+    "--model-to-evaluate-external-api-token",
+    type=str,
+    help="Optional external API token for the model to evaluate.",
 )
 @click.option(
     "--model-to-evaluate-max-tokens",
@@ -104,9 +126,19 @@ def evaluation(ctx: click.Context) -> None:
         Can not be used when model-a-name and other model config parameters are specified",
 )
 @click.option(
-    "--model-a-name",
+    "--model-a",
     type=str,
-    help="Model name for model A when using detailed config.",
+    help="Model name or URL for model A when using detailed config.",
+)
+@click.option(
+    "--model-a-source",
+    type=click.Choice(["serverless", "dedicated", "external"]),
+    help="Source of model A.",
+)
+@click.option(
+    "--model-a-external-api-token",
+    type=str,
+    help="Optional external API token for model A.",
 )
 @click.option(
     "--model-a-max-tokens",
@@ -135,9 +167,19 @@ def evaluation(ctx: click.Context) -> None:
           Can not be used when model-b-name and other model config parameters are specified",
 )
 @click.option(
-    "--model-b-name",
+    "--model-b",
     type=str,
-    help="Model name for model B when using detailed config.",
+    help="Model name or URL for model B when using detailed config.",
+)
+@click.option(
+    "--model-b-source",
+    type=click.Choice(["serverless", "dedicated", "external"]),
+    help="Source of model B.",
+)
+@click.option(
+    "--model-b-external-api-token",
+    type=str,
+    help="Optional external API token for model B.",
 )
 @click.option(
     "--model-b-max-tokens",
@@ -162,11 +204,15 @@ def evaluation(ctx: click.Context) -> None:
 def create(
     ctx: click.Context,
     type: str,
-    judge_model_name: str,
+    judge_model: str,
+    judge_model_source: str,
     judge_system_template: str,
+    judge_external_api_token: Optional[str],
     input_data_file_path: str,
     model_field: Optional[str],
-    model_to_evaluate_name: Optional[str],
+    model_to_evaluate: Optional[str],
+    model_to_evaluate_source: Optional[str],
+    model_to_evaluate_external_api_token: Optional[str],
     model_to_evaluate_max_tokens: Optional[int],
     model_to_evaluate_temperature: Optional[float],
     model_to_evaluate_system_template: Optional[str],
@@ -177,13 +223,17 @@ def create(
     max_score: Optional[float],
     pass_threshold: Optional[float],
     model_a_field: Optional[str],
-    model_a_name: Optional[str],
+    model_a: Optional[str],
+    model_a_source: Optional[str],
+    model_a_external_api_token: Optional[str],
     model_a_max_tokens: Optional[int],
     model_a_temperature: Optional[float],
     model_a_system_template: Optional[str],
     model_a_input_template: Optional[str],
     model_b_field: Optional[str],
-    model_b_name: Optional[str],
+    model_b: Optional[str],
+    model_b_source: Optional[str],
+    model_b_external_api_token: Optional[str],
     model_b_max_tokens: Optional[int],
     model_b_temperature: Optional[float],
     model_b_system_template: Optional[str],
@@ -203,7 +253,8 @@ def create(
     # Check if any config parameters are provided
     config_params_provided = any(
         [
-            model_to_evaluate_name,
+            model_to_evaluate,
+            model_to_evaluate_source,
             model_to_evaluate_max_tokens,
             model_to_evaluate_temperature,
             model_to_evaluate_system_template,
@@ -223,17 +274,23 @@ def create(
     elif config_params_provided:
         # Config mode: config parameters are provided
         model_to_evaluate_final = {
-            "model_name": model_to_evaluate_name,
+            "model": model_to_evaluate,
+            "model_source": model_to_evaluate_source,
             "max_tokens": model_to_evaluate_max_tokens,
             "temperature": model_to_evaluate_temperature,
             "system_template": model_to_evaluate_system_template,
             "input_template": model_to_evaluate_input_template,
         }
+        if model_to_evaluate_external_api_token:
+            model_to_evaluate_final["external_api_token"] = (
+                model_to_evaluate_external_api_token
+            )
 
     # Build model-a configuration
     model_a_final: Union[Dict[str, Any], None, str] = None
     model_a_config_params = [
-        model_a_name,
+        model_a,
+        model_a_source,
         model_a_max_tokens,
         model_a_temperature,
         model_a_system_template,
@@ -252,17 +309,21 @@ def create(
     elif any(model_a_config_params):
         # Config mode: config parameters are provided
         model_a_final = {
-            "model_name": model_a_name,
+            "model": model_a,
+            "model_source": model_a_source,
             "max_tokens": model_a_max_tokens,
             "temperature": model_a_temperature,
             "system_template": model_a_system_template,
             "input_template": model_a_input_template,
         }
+        if model_a_external_api_token:
+            model_a_final["external_api_token"] = model_a_external_api_token
 
     # Build model-b configuration
     model_b_final: Union[Dict[str, Any], None, str] = None
     model_b_config_params = [
-        model_b_name,
+        model_b,
+        model_b_source,
         model_b_max_tokens,
         model_b_temperature,
         model_b_system_template,
@@ -281,18 +342,23 @@ def create(
     elif any(model_b_config_params):
         # Config mode: config parameters are provided
         model_b_final = {
-            "model_name": model_b_name,
+            "model": model_b,
+            "model_source": model_b_source,
             "max_tokens": model_b_max_tokens,
             "temperature": model_b_temperature,
             "system_template": model_b_system_template,
             "input_template": model_b_input_template,
         }
+        if model_b_external_api_token:
+            model_b_final["external_api_token"] = model_b_external_api_token
 
     try:
         response = client.evaluation.create(
             type=type,
-            judge_model_name=judge_model_name,
+            judge_model=judge_model,
+            judge_model_source=judge_model_source,
             judge_system_template=judge_system_template,
+            judge_external_api_token=judge_external_api_token,
             input_data_file_path=input_data_file_path,
             model_to_evaluate=model_to_evaluate_final,
             labels=labels_list,
