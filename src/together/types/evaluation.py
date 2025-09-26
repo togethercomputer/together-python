@@ -27,7 +27,7 @@ class JudgeModelConfig(BaseModel):
     model_source: Literal["serverless", "dedicated", "external"]
     system_template: str
     external_api_token: Optional[str] = None
-    external_base_url: Optional[List[str]] = None
+    external_base_url: Optional[str] = None
 
 
 class ModelRequest(BaseModel):
@@ -38,7 +38,7 @@ class ModelRequest(BaseModel):
     system_template: str
     input_template: str
     external_api_token: Optional[str] = None
-    external_base_url: Optional[List[str]] = None
+    external_base_url: Optional[str] = None
 
 
 class ClassifyParameters(BaseModel):

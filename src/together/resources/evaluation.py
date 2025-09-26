@@ -32,7 +32,7 @@ class Evaluation:
         judge_system_template: str,
         input_data_file_path: str,
         judge_external_api_token: Optional[str] = None,
-        judge_external_base_url: Optional[List[str]] = None,
+        judge_external_base_url: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
@@ -426,7 +426,7 @@ class AsyncEvaluation:
         judge_system_template: str,
         input_data_file_path: str,
         judge_external_api_token: Optional[str] = None,
-        judge_external_base_url: Optional[List[str]] = None,
+        judge_external_base_url: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
