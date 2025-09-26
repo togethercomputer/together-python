@@ -42,6 +42,12 @@ def evaluation(ctx: click.Context) -> None:
     help="Optional external API token for the judge model.",
 )
 @click.option(
+    "--judge-external-base-url",
+    type=str,
+    required=False,
+    help="Optional external base URLs for the judge model.",
+)
+@click.option(
     "--judge-system-template",
     type=str,
     required=True,
@@ -73,6 +79,11 @@ def evaluation(ctx: click.Context) -> None:
     "--model-to-evaluate-external-api-token",
     type=str,
     help="Optional external API token for the model to evaluate.",
+)
+@click.option(
+    "--model-to-evaluate-external-base-url",
+    type=str,
+    help="Optional external base URL for the model to evaluate.",
 )
 @click.option(
     "--model-to-evaluate-max-tokens",
@@ -141,6 +152,11 @@ def evaluation(ctx: click.Context) -> None:
     help="Optional external API token for model A.",
 )
 @click.option(
+    "--model-a-external-base-url",
+    type=str,
+    help="Optional external base URL for model A.",
+)
+@click.option(
     "--model-a-max-tokens",
     type=int,
     help="Max tokens for model A.",
@@ -182,6 +198,11 @@ def evaluation(ctx: click.Context) -> None:
     help="Optional external API token for model B.",
 )
 @click.option(
+    "--model-b-external-base-url",
+    type=str,
+    help="Optional external base URL for model B.",
+)
+@click.option(
     "--model-b-max-tokens",
     type=int,
     help="Max tokens for model B.",
@@ -208,11 +229,13 @@ def create(
     judge_model_source: str,
     judge_system_template: str,
     judge_external_api_token: Optional[str],
+    judge_external_base_url: Optional[str],
     input_data_file_path: str,
     model_field: Optional[str],
     model_to_evaluate: Optional[str],
     model_to_evaluate_source: Optional[str],
     model_to_evaluate_external_api_token: Optional[str],
+    model_to_evaluate_external_base_url: Optional[str],
     model_to_evaluate_max_tokens: Optional[int],
     model_to_evaluate_temperature: Optional[float],
     model_to_evaluate_system_template: Optional[str],
@@ -226,6 +249,7 @@ def create(
     model_a: Optional[str],
     model_a_source: Optional[str],
     model_a_external_api_token: Optional[str],
+    model_a_external_base_url: Optional[str],
     model_a_max_tokens: Optional[int],
     model_a_temperature: Optional[float],
     model_a_system_template: Optional[str],
@@ -234,6 +258,7 @@ def create(
     model_b: Optional[str],
     model_b_source: Optional[str],
     model_b_external_api_token: Optional[str],
+    model_b_external_base_url: Optional[str],
     model_b_max_tokens: Optional[int],
     model_b_temperature: Optional[float],
     model_b_system_template: Optional[str],
@@ -285,6 +310,10 @@ def create(
             model_to_evaluate_final["external_api_token"] = (
                 model_to_evaluate_external_api_token
             )
+        if model_to_evaluate_external_base_url:
+            model_to_evaluate_final["external_base_url"] = (
+                model_to_evaluate_external_base_url
+            )
 
     # Build model-a configuration
     model_a_final: Union[Dict[str, Any], None, str] = None
@@ -318,6 +347,8 @@ def create(
         }
         if model_a_external_api_token:
             model_a_final["external_api_token"] = model_a_external_api_token
+        if model_a_external_base_url:
+            model_a_final["external_base_url"] = model_a_external_base_url
 
     # Build model-b configuration
     model_b_final: Union[Dict[str, Any], None, str] = None
@@ -351,6 +382,8 @@ def create(
         }
         if model_b_external_api_token:
             model_b_final["external_api_token"] = model_b_external_api_token
+        if model_b_external_base_url:
+            model_b_final["external_base_url"] = model_b_external_base_url
 
     try:
         response = client.evaluation.create(
@@ -359,6 +392,7 @@ def create(
             judge_model_source=judge_model_source,
             judge_system_template=judge_system_template,
             judge_external_api_token=judge_external_api_token,
+            judge_external_base_url=judge_external_base_url,
             input_data_file_path=input_data_file_path,
             model_to_evaluate=model_to_evaluate_final,
             labels=labels_list,
