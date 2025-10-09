@@ -102,7 +102,7 @@ def check_file(
     return report_dict
 
 
-def _check_conversation_type(messages: List[Dict[str, str]], idx: int) -> None:
+def _check_conversation_type(messages: List[Dict[str, str | bool]], idx: int) -> None:
     """Check that the conversation has correct type.
 
     Args:
@@ -174,7 +174,7 @@ def _check_conversation_roles(
         )
 
 
-def _check_message_weight(message: Dict[str, str], idx: int) -> None:
+def _check_message_weight(message: Dict[str, str | bool], idx: int) -> None:
     """Check that the message has a weight with the correct type and value.
 
     Args:
@@ -201,7 +201,7 @@ def _check_message_weight(message: Dict[str, str], idx: int) -> None:
 
 
 def _check_message_role(
-    message: Dict[str, str], previous_role: str | None, idx: int
+    message: Dict[str, str | bool], previous_role: str | None, idx: int
 ) -> str:
     """Check that the message has correct roles.
 
