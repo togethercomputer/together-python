@@ -202,7 +202,7 @@ def _check_message_weight(message: Dict[str, str | bool], idx: int) -> None:
 
 def _check_message_role(
     message: Dict[str, str | bool], previous_role: str | None, idx: int
-) -> str:
+) -> str | bool:
     """Check that the message has correct roles.
 
     Args:
