@@ -532,7 +532,7 @@ def _check_jsonl(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
                         validate_messages(
                             json_line[message_column],
                             idx,
-                            require_assistant_role=require_assistant
+                            require_assistant_role=require_assistant,
                         )
                     else:
                         for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
