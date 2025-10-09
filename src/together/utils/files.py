@@ -152,7 +152,9 @@ def _check_conversation_type(messages: List[Dict[str, str]], idx: int) -> None:
                 )
 
 
-def _check_conversation_roles(require_assistant_role: bool, assistant_role_exists: bool, idx: int) -> None:
+def _check_conversation_roles(
+    require_assistant_role: bool, assistant_role_exists: bool, idx: int
+) -> None:
     """Check that the conversation has correct roles.
 
     Args:
@@ -198,7 +200,9 @@ def _check_message_weight(message: Dict[str, str], idx: int) -> None:
             )
 
 
-def _check_message_role(message: Dict[str, str], previous_role: str | None, idx: int) -> str:
+def _check_message_role(
+    message: Dict[str, str], previous_role: str | None, idx: int
+) -> str:
     """Check that the message has correct roles.
 
     Args:
@@ -229,7 +233,9 @@ def _check_message_role(message: Dict[str, str], previous_role: str | None, idx:
     return message["role"]
 
 
-def validate_messages(messages: List[Dict[str, str | bool]], idx: int, require_assistant_role: bool = True) -> None:
+def validate_messages(
+    messages: List[Dict[str, str | bool]], idx: int, require_assistant_role: bool = True
+) -> None:
     """Validate the messages column.
 
     Args:
@@ -523,7 +529,11 @@ def _check_jsonl(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
                             DatasetFormat.CONVERSATION
                         ][0]
                         require_assistant = purpose != FilePurpose.Eval
-                        validate_messages(json_line[message_column], idx, require_assistant_role=require_assistant)
+                        validate_messages(
+                            json_line[message_column],
+                            idx,
+                            require_assistant_role=require_assistant
+                        )
                     else:
                         for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
                             if not isinstance(json_line[column], str):
