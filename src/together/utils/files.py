@@ -140,13 +140,13 @@ def _check_conversation_type(messages: List[Dict[str, str | bool]], idx: int) ->
         for column in REQUIRED_COLUMNS_MESSAGE:
             if column not in message:
                 raise InvalidFileFormatError(
-                    message=f"Missing required column '{column}' in message on line {idx + 1}.",
+                    message=f"Missing required column `{column}` in message on line {idx + 1}.",
                     line_number=idx + 1,
                     error_source="key_value",
                 )
             if not isinstance(message[column], str):
                 raise InvalidFileFormatError(
-                    message=f"Column '{column}' is not a string on line {idx + 1}. Found {type(message[column])}",
+                    message=f"Column `{column}` is not a string on line {idx + 1}. Found {type(message[column])}",
                     line_number=idx + 1,
                     error_source="text_field",
                 )
@@ -218,7 +218,7 @@ def _check_message_role(
     """
     if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
         raise InvalidFileFormatError(
-            message=f"Invalid role {message['role']} in conversation on line {idx + 1}. "
+            message=f"Invalid role `{message['role']}` in conversation on line {idx + 1}. "
             f"Possible roles: {', '.join(POSSIBLE_ROLES_CONVERSATION)}",
             line_number=idx + 1,
             error_source="key_value",
