@@ -207,7 +207,7 @@ def test_check_jsonl_invalid_role(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "Found invalid role `invalid_role`" in report["message"]
+    assert "Invalid role `invalid_role` in conversation" in report["message"]
 
 
 def test_check_jsonl_non_alternating_roles(tmp_path: Path):
@@ -257,7 +257,7 @@ def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Field `content` is missing for a turn" in report["message"]
+    assert "Missing required column `content`" in report["message"]
 
 
 def test_check_jsonl_wrong_turn_type(tmp_path: Path):
@@ -277,7 +277,7 @@ def test_check_jsonl_wrong_turn_type(tmp_path: Path):
     report = check_file(file)
     assert not report["is_check_passed"]
     assert (
-        "Invalid format on line 1 of the input file. Expected a dictionary"
+        "Invalid format on line 1 of the input file. The `messages` column must be a list of dicts."
         in report["message"]
     )
 
