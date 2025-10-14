@@ -301,9 +301,7 @@ def test_check_jsonl_empty_messages(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert (
-        "The `messages` column must not be empty" in report["message"]
-    )
+    assert "The `messages` column must not be empty" in report["message"]
 
 
 def test_check_jsonl_valid_weights_all_messages(tmp_path: Path):
