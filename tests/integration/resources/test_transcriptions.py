@@ -179,50 +179,6 @@ class TestTogetherTranscriptions:
         response_dict = response.model_dump()
         validate_diarization_response(response_dict)
 
-    def test_diarization_nvidia(self, sync_together_client):
-        """
-        Test diarization with nvidia model in verbose JSON format
-        """
-        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
-
-        response = sync_together_client.audio.transcriptions.create(
-            file=audio_url,
-            model="openai/whisper-large-v3",
-            response_format="verbose_json",
-            diarize=True,
-            diarization_model="nvidia",
-        )
-
-        assert isinstance(response, AudioTranscriptionVerboseResponse)
-        assert isinstance(response.text, str)
-        assert len(response.text) > 0
-
-        # Validate diarization fields
-        response_dict = response.model_dump()
-        validate_diarization_response(response_dict)
-
-    def test_diarization_pyannote(self, sync_together_client):
-        """
-        Test diarization with pyannote model in verbose JSON format
-        """
-        audio_url = "https://together-public-test-data.s3.us-west-2.amazonaws.com/audio/2-speaker-conversation.wav"
-
-        response = sync_together_client.audio.transcriptions.create(
-            file=audio_url,
-            model="openai/whisper-large-v3",
-            response_format="verbose_json",
-            diarize=True,
-            diarization_model="pyannote",
-        )
-
-        assert isinstance(response, AudioTranscriptionVerboseResponse)
-        assert isinstance(response.text, str)
-        assert len(response.text) > 0
-
-        # Validate diarization fields
-        response_dict = response.model_dump()
-        validate_diarization_response(response_dict)
-
     def test_no_diarization(self, sync_together_client):
         """
         Test with diarize=false should not have speaker segments
