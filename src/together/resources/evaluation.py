@@ -32,6 +32,7 @@ class Evaluation:
         judge_system_template: str,
         input_data_file_path: str,
         judge_external_api_token: Optional[str] = None,
+        judge_external_base_url: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
@@ -55,6 +56,7 @@ class Evaluation:
             judge_system_template: System template for the judge
             input_data_file_path: Path to input data file
             judge_external_api_token: Optional external API token for the judge model
+            judge_external_base_url: Optional external base URLs for the judge model
             labels: List of classification labels (required for classify)
             pass_labels: List of labels considered as passing (required for classify)
             min_score: Minimum score value (required for score)
@@ -82,6 +84,7 @@ class Evaluation:
             model_source=judge_model_source,
             system_template=judge_system_template,
             external_api_token=judge_external_api_token,
+            external_base_url=judge_external_base_url,
         )
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
@@ -423,6 +426,7 @@ class AsyncEvaluation:
         judge_system_template: str,
         input_data_file_path: str,
         judge_external_api_token: Optional[str] = None,
+        judge_external_base_url: Optional[str] = None,
         # Classify-specific parameters
         labels: Optional[List[str]] = None,
         pass_labels: Optional[List[str]] = None,
@@ -446,6 +450,7 @@ class AsyncEvaluation:
             judge_system_template: System template for the judge
             input_data_file_path: Path to input data file
             judge_external_api_token: Optional external API token for the judge model
+            judge_external_base_url: Optional external base URLs for the judge model
             labels: List of classification labels (required for classify)
             pass_labels: List of labels considered as passing (required for classify)
             min_score: Minimum score value (required for score)
@@ -473,6 +478,7 @@ class AsyncEvaluation:
             model_source=judge_model_source,
             system_template=judge_system_template,
             external_api_token=judge_external_api_token,
+            external_base_url=judge_external_base_url,
         )
         parameters: Union[ClassifyParameters, ScoreParameters, CompareParameters]
         # Build parameters based on type
