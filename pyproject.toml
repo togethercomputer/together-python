@@ -67,6 +67,7 @@ optional = true
 pytest = ">=7.4.2,<9.0.0"
 pytest-watch = "^4.2.0"
 pytest-mock = "^3.14.0"
+pytest-asyncio = "^0.24.0"
 tox = "^4.14.1"
 
 [tool.poetry.group.examples]
