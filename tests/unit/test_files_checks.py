@@ -182,7 +182,12 @@ def test_check_jsonl_inconsistent_dataset_format(tmp_path: Path):
     # Create a JSONL file with inconsistent dataset formats
     file = tmp_path / "inconsistent_format.jsonl"
     content = [
-        {"messages": [{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hi! How can I help you?"}]},
+        {
+            "messages": [
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant", "content": "Hi! How can I help you?"},
+            ]
+        },
         {"text": "How are you?"},  # Missing 'messages'
     ]
     with file.open("w") as f:
@@ -240,7 +245,10 @@ def test_check_jsonl_non_alternating_roles(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "At least one message with the assistant role must be present" in report["message"]
+    assert (
+        "At least one message with the assistant role must be present"
+        in report["message"]
+    )
 
 
 def test_check_jsonl_invalid_value_type(tmp_path: Path):
