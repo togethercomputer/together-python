@@ -45,7 +45,7 @@ class Videos:
         Args:
             prompt (str): A description of the desired video. Positive prompt for the generation.
 
-            model (str): The model to use for video generation (e.g., "google/veo-3.0-fast").
+            model (str): The model to use for video generation.
 
             height (int, optional): Height of the video to generate in pixels.
 
@@ -191,7 +191,7 @@ class AsyncVideos:
         Args:
             prompt (str): A description of the desired video. Positive prompt for the generation.
 
-            model (str): The model to use for video generation (e.g., "google/veo-3.0-fast").
+            model (str): The model to use for video generation.
 
             height (int, optional): Height of the video to generate in pixels.
 
