@@ -127,7 +127,6 @@ class Videos:
 
     def retrieve(
         self,
-        *,
         id: str,
     ) -> VideoResource:
         """
