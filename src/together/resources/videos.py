@@ -9,9 +9,9 @@ from together.types import (
     TogetherRequest,
 )
 from together.types.videos import (
-    VideoGenerateResponse,
-    VideoRequest,
-    VideoStatusResponse,
+    CreateVideoResponse,
+    CreateVideoBody,
+    VideoResource,
 )
 
 
@@ -19,7 +19,7 @@ class Videos:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
-    def generate(
+    def create(
         self,
         *,
         prompt: str,
@@ -31,14 +31,13 @@ class Videos:
         steps: int | None = None,
         seed: int | None = None,
         guidance_scale: float | None = None,
-        output_format: str | None = None,
+        output_format: Literal["MP4", "WEBM"] | None = None,
         output_quality: int | None = None,
         negative_prompt: str | None = None,
         frame_images: List[Dict[str, Any]] | None = None,
-        reference_images: List[Dict[str, Any]] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        reference_images: List[str] | None = None,
         **kwargs: Any,
-    ) -> VideoGenerateResponse:
+    ) -> CreateVideoResponse:
         """
         Method to generate videos based on a given prompt using a specified model.
 
@@ -82,22 +81,20 @@ class Videos:
                 like keyframes. If size 1, starting frame; if size 2, starting and ending frame;
                 if more than 2 then frame must be specified. Defaults to None.
 
-            reference_images (List[Dict[str, Any]], optional): An array containing reference images
+            reference_images (List[str], optional): An array containing reference images
                 used to condition the generation process. These images provide visual guidance to
                 help the model generate content that aligns with the style, composition, or
                 characteristics of the reference materials. Defaults to None.
 
-            metadata (Dict[str, Any], optional): Additional metadata for the request. Defaults to None.
-
         Returns:
-            VideoGenerateResponse: Object containing video generation job id
+            CreateVideoResponse: Object containing video generation job id
         """
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        parameter_payload = VideoRequest(
+        parameter_payload = CreateVideoBody(
             prompt=prompt,
             model=model,
             height=height,
@@ -112,7 +109,6 @@ class Videos:
             negative_prompt=negative_prompt,
             frame_images=frame_images,
             reference_images=reference_images,
-            metadata=metadata,
             **kwargs,
         ).model_dump(exclude_none=True)
 
@@ -127,21 +123,20 @@ class Videos:
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoGenerateResponse(**response.data)
+        return CreateVideoResponse(**response.data)
 
-    def status(
+    def retrieve(
         self,
-        *,
         id: str,
-    ) -> VideoStatusResponse:
+    ) -> VideoResource:
         """
-        Method to check the status of a video generation job.
+        Method to retrieve a video creation job.
 
         Args:
-            id (str): The ID of the video generation job to check.
+            id (str): The ID of the video creation job to retrieve.
 
         Returns:
-            VideoStatusResponse: Object containing the current status and details of the video generation job
+            VideoResource: Object containing the current status and details of the video creation job
         """
 
         requestor = api_requestor.APIRequestor(
@@ -158,14 +153,14 @@ class Videos:
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoStatusResponse(**response.data)
+        return VideoResource(**response.data)
 
 
 class AsyncVideos:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
-    async def generate(
+    async def create(
         self,
         *,
         prompt: str,
@@ -177,16 +172,15 @@ class AsyncVideos:
         steps: int | None = None,
         seed: int | None = None,
         guidance_scale: float | None = None,
-        output_format: str | None = None,
+        output_format: Literal["MP4", "WEBM"] | None = None,
         output_quality: int | None = None,
         negative_prompt: str | None = None,
         frame_images: List[Dict[str, Any]] | None = None,
-        reference_images: List[Dict[str, Any]] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        reference_images: List[str] | None = None,
         **kwargs: Any,
-    ) -> VideoGenerateResponse:
+    ) -> CreateVideoResponse:
         """
-        Async method to generate videos based on a given prompt using a specified model.
+        Async method to create videos based on a given prompt using a specified model.
 
         Args:
             prompt (str): A description of the desired video. Positive prompt for the generation.
@@ -216,7 +210,7 @@ class AsyncVideos:
                 most video models. Values above 12 may cause over-guidance artifacts or unnatural
                 motion patterns. Defaults to 8.
 
-            output_format (str, optional): Specifies the format of the output video. Either "MP4"
+            output_format (Literal["MP4", "WEBM"], optional): Specifies the format of the output video. Either "MP4"
                 or "WEBM". Defaults to "MP4".
 
             output_quality (int, optional): Compression quality. Defaults to 20.
@@ -228,22 +222,20 @@ class AsyncVideos:
                 like keyframes. If size 1, starting frame; if size 2, starting and ending frame;
                 if more than 2 then frame must be specified. Defaults to None.
 
-            reference_images (List[Dict[str, Any]], optional): An array containing reference images
+            reference_images (List[str], optional): An array containing reference images
                 used to condition the generation process. These images provide visual guidance to
                 help the model generate content that aligns with the style, composition, or
                 characteristics of the reference materials. Defaults to None.
 
-            metadata (Dict[str, Any], optional): Additional metadata for the request. Defaults to None.
-
         Returns:
-            VideoGenerateResponse: Object containing video generation job id
+            CreateVideoResponse: Object containing video creation job id
         """
 
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
 
-        parameter_payload = VideoRequest(
+        parameter_payload = CreateVideoBody(
             prompt=prompt,
             model=model,
             height=height,
@@ -258,7 +250,6 @@ class AsyncVideos:
             negative_prompt=negative_prompt,
             frame_images=frame_images,
             reference_images=reference_images,
-            metadata=metadata,
             **kwargs,
         ).model_dump(exclude_none=True)
 
@@ -273,13 +264,13 @@ class AsyncVideos:
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoGenerateResponse(**response.data)
+        return CreateVideoResponse(**response.data)
 
     async def status(
         self,
         *,
         id: str,
-    ) -> VideoStatusResponse:
+    ) -> VideoResource:
         """
         Async method to check the status of a video generation job.
 
@@ -287,7 +278,7 @@ class AsyncVideos:
             id (str): The ID of the video generation job to check.
 
         Returns:
-            VideoStatusResponse: Object containing the current status and details of the video generation job
+            VideoResource: Object containing the current status and details of the video generation job
         """
 
         requestor = api_requestor.APIRequestor(
@@ -304,4 +295,4 @@ class AsyncVideos:
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoStatusResponse(**response.data)
+        return VideoResource(**response.data)
