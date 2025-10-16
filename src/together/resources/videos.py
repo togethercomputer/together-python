@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List
+import sys
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -13,6 +14,11 @@ from together.types.videos import (
     CreateVideoBody,
     VideoResource,
 )
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 
 class Videos:

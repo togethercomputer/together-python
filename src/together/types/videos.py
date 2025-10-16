@@ -22,7 +22,9 @@ class CreateVideoBody(BaseModel):
     steps: int | None = None  # Denoising steps, min 10 max 50, default 20
     seed: int | None = None
     guidance_scale: float | None = None  # Default 8, recommended 6.0-10.0
-    output_format: Literal["MP4", "WEBM"] | None = None  # "MP4" or "WEBM", default "MP4"
+    output_format: Literal["MP4", "WEBM"] | None = (
+        None  # "MP4" or "WEBM", default "MP4"
+    )
     output_quality: int | None = None  # Compression quality, default 20
     negative_prompt: str | None = None
 
@@ -37,11 +39,13 @@ class VideoOutputs(BaseModel):
     cost: float
     video_url: str
 
+
 class VideoInfoError(BaseModel):
     """Error about the video creation request"""
 
     code: str
     message: str
+
 
 class VideoInfo(BaseModel):
     """Info about the video creation request"""
