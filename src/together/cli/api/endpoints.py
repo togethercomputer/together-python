@@ -133,6 +133,10 @@ def endpoints(ctx: click.Context) -> None:
     help="Number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable.",
 )
 @click.option(
+    "--user-specified-avzone",
+    help="User-specified availability zone (e.g., us-central-4b)",
+)
+@click.option(
     "--wait",
     is_flag=True,
     default=True,
@@ -152,6 +156,7 @@ def create(
     no_speculative_decoding: bool,
     no_auto_start: bool,
     inactive_timeout: int | None,
+    user_specified_avzone: str | None,
     wait: bool,
 ) -> None:
     """Create a new dedicated inference endpoint."""
@@ -177,6 +182,7 @@ def create(
             disable_speculative_decoding=no_speculative_decoding,
             state="STOPPED" if no_auto_start else "STARTED",
             inactive_timeout=inactive_timeout,
+            user_specified_avzone=user_specified_avzone,
         )
     except InvalidRequestError as e:
         print_api_error(e)
@@ -203,6 +209,8 @@ def create(
         click.echo("  Auto-start: disabled", err=True)
     if inactive_timeout is not None:
         click.echo(f"  Inactive timeout: {inactive_timeout} minutes", err=True)
+    if user_specified_avzone:
+        click.echo(f"  Availability zone: {user_specified_avzone}", err=True)
 
     click.echo(f"Endpoint created successfully, id: {response.id}", err=True)
 
@@ -432,3 +440,23 @@ def update(
 
     click.echo("Successfully updated endpoint", err=True)
     click.echo(endpoint_id)
+
+@endpoints.command()
+@click.option("--json", is_flag=True, help="Print output in JSON format")
+@click.pass_obj
+@handle_api_errors
+def avzones(client: Together, json: bool) -> None:
+    """List all available availability zones."""
+    avzones = client.endpoints.list_avzones()
+    
+    if not avzones:
+        click.echo("No availability zones found", err=True)
+        return
+    
+    if json:
+        import json as json_lib
+        click.echo(json_lib.dumps({"avzones": avzones}, indent=2))
+    else:
+        click.echo("Available zones:", err=True)
+        for avzone in sorted(avzones):
+            click.echo(f"  {avzone}")
