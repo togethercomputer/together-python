@@ -26,6 +26,7 @@ class Together:
     batches: resources.Batches
     code_interpreter: CodeInterpreter
     evaluation: resources.Evaluation
+    videos: resources.Videos
 
     # client options
     client: TogetherClient
@@ -94,6 +95,7 @@ class Together:
         self.code_interpreter = CodeInterpreter(self.client)
         self.batches = resources.Batches(self.client)
         self.evaluation = resources.Evaluation(self.client)
+        self.videos = resources.Videos(self.client)
 
 
 class AsyncTogether:
@@ -109,6 +111,7 @@ class AsyncTogether:
     code_interpreter: CodeInterpreter
     batches: resources.AsyncBatches
     evaluation: resources.AsyncEvaluation
+    videos: resources.AsyncVideos
     # client options
     client: TogetherClient
 
@@ -175,6 +178,7 @@ class AsyncTogether:
         self.code_interpreter = CodeInterpreter(self.client)
         self.batches = resources.AsyncBatches(self.client)
         self.evaluation = resources.AsyncEvaluation(self.client)
+        self.videos = resources.AsyncVideos(self.client)
 
 
 Client = Together
