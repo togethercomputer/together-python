@@ -10,14 +10,14 @@ class CreateVideoBody(BaseModel):
 
     # Required parameters
     model: str
-    prompt: str
 
     # Optional dimension parameters
+    prompt: str | None = None
     height: int | None = None
     width: int | None = None
 
     # Optional generation parameters
-    seconds: float | None = None  # Min 1 max 10
+    seconds: str | None = None  # Min 1 max 10
     fps: int | None = None  # Frames per second, min 15 max 60, default 24
     steps: int | None = None  # Denoising steps, min 10 max 50, default 20
     seed: int | None = None

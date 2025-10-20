@@ -28,11 +28,11 @@ class Videos:
     def create(
         self,
         *,
-        prompt: str,
         model: str,
+        prompt: str | None = None,
         height: int | None = None,
         width: int | None = None,
-        seconds: float | None = None,
+        seconds: str | None = None,
         fps: int | None = None,
         steps: int | None = None,
         seed: int | None = None,
@@ -48,15 +48,15 @@ class Videos:
         Method to generate videos based on a given prompt using a specified model.
 
         Args:
-            prompt (str): A description of the desired video. Positive prompt for the generation.
-
             model (str): The model to use for video generation.
+
+            prompt (str): A description of the desired video. Positive prompt for the generation.
 
             height (int, optional): Height of the video to generate in pixels.
 
             width (int, optional): Width of the video to generate in pixels.
 
-            seconds (float, optional): Length of generated video in seconds. Min 1 max 10.
+            seconds (str, optional): Length of generated video in seconds. Min 1 max 10.
 
             fps (int, optional): Frames per second, min 15 max 60. Defaults to 24.
 
