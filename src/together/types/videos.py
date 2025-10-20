@@ -34,24 +34,17 @@ class CreateVideoBody(BaseModel):
 
 
 class VideoOutputs(BaseModel):
-    """Response from video creation request"""
+    """Artifacts generated from video creation job"""
 
     cost: float
     video_url: str
 
 
-class VideoInfoError(BaseModel):
-    """Error about the video creation request"""
+class Error(BaseModel):
+    """Error information about the video job"""
 
-    code: str
+    code: str | None = None
     message: str
-
-
-class VideoInfo(BaseModel):
-    """Info about the video creation request"""
-
-    user_id: str
-    errors: List[VideoInfoError] | None = None
 
 
 class CreateVideoResponse(BaseModel):
@@ -60,15 +53,17 @@ class CreateVideoResponse(BaseModel):
     id: str
 
 
-class VideoResource(BaseModel):
-    """Response from video status check"""
+class VideoJob(BaseModel):
+    """Structured information describing a generated video job."""
 
     id: str
     model: str
+    object: Literal["video"]
     status: Literal["queued", "in_progress", "completed", "failed", "cancelled"]
-    info: VideoInfo | None = None
-    inputs: Dict[str, Any]
+    seconds: str
+    size: str
+    created_at: int
+
+    error: Error | None = None
     outputs: VideoOutputs | None = None
-    created_at: str
-    claimed_at: str
-    done_at: str
+    completed_at: int | None = None

@@ -12,7 +12,7 @@ from together.types import (
 from together.types.videos import (
     CreateVideoResponse,
     CreateVideoBody,
-    VideoResource,
+    VideoJob,
 )
 
 if sys.version_info >= (3, 8):
@@ -134,7 +134,7 @@ class Videos:
     def retrieve(
         self,
         id: str,
-    ) -> VideoResource:
+    ) -> VideoJob:
         """
         Method to retrieve a video creation job.
 
@@ -142,7 +142,7 @@ class Videos:
             id (str): The ID of the video creation job to retrieve.
 
         Returns:
-            VideoResource: Object containing the current status and details of the video creation job
+            VideoJob: Object containing the current status and details of the video creation job
         """
 
         requestor = api_requestor.APIRequestor(
@@ -152,14 +152,14 @@ class Videos:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url=f"../v2/videos/status?id={id}",
+                url=f"../v2/videos/{id}",
             ),
             stream=False,
         )
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoResource(**response.data)
+        return VideoJob(**response.data)
 
 
 class AsyncVideos:
@@ -272,19 +272,18 @@ class AsyncVideos:
 
         return CreateVideoResponse(**response.data)
 
-    async def status(
+    async def retrieve(
         self,
-        *,
         id: str,
-    ) -> VideoResource:
+    ) -> VideoJob:
         """
-        Async method to check the status of a video generation job.
+        Async method to retrieve a video creation job.
 
         Args:
-            id (str): The ID of the video generation job to check.
+            id (str): The ID of the video creation job to retrieve.
 
         Returns:
-            VideoResource: Object containing the current status and details of the video generation job
+            VideoJob: Object containing the current status and details of the video creation job
         """
 
         requestor = api_requestor.APIRequestor(
@@ -294,11 +293,11 @@ class AsyncVideos:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url=f"../v2/videos/status?id={id}",
+                url=f"../v2/videos/{id}",
             ),
             stream=False,
         )
 
         assert isinstance(response, TogetherResponse)
 
-        return VideoResource(**response.data)
+        return VideoJob(**response.data)
