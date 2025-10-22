@@ -17,6 +17,7 @@ class ModelType(str, Enum):
     RERANK = "rerank"
     AUDIO = "audio"
     TRANSCRIBE = "transcribe"
+    VIDEO = "video"
 
 
 class PricingObject(BaseModel):
