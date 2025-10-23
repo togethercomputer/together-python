@@ -19,7 +19,7 @@ class Endpoints:
         mine: Optional[bool] = None,
     ) -> List[ListEndpoint]:
         """
-        List all endpoints, can be filtered by endpointtype, usage type, and ownership.
+        List all endpoints, can be filtered by endpoint type, usage type, and ownership.
 
         Args:
             type (str, optional): Filter endpoints by endpoint type ("dedicated" or "serverless"). Defaults to None.
