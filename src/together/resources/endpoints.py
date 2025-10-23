@@ -33,7 +33,7 @@ class Endpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[str, str] = {}
         if type is not None:
             params["type"] = type
         if usage_type is not None:
@@ -247,7 +247,7 @@ class Endpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[str, str] = {}
         if model is not None:
             params["model"] = model
 
@@ -292,7 +292,7 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[str, str] = {}
         if type is not None:
             params["type"] = type
         if usage_type is not None:
