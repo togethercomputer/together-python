@@ -182,7 +182,12 @@ def test_check_jsonl_inconsistent_dataset_format(tmp_path: Path):
     # Create a JSONL file with inconsistent dataset formats
     file = tmp_path / "inconsistent_format.jsonl"
     content = [
-        {"messages": [{"role": "user", "content": "Hi"}]},
+        {
+            "messages": [
+                {"role": "user", "content": "Hi"},
+                {"role": "assistant", "content": "Hi! How can I help you?"},
+            ]
+        },
         {"text": "How are you?"},  # Missing 'messages'
     ]
     with file.open("w") as f:
@@ -207,7 +212,7 @@ def test_check_jsonl_invalid_role(tmp_path: Path):
     report = check_file(file)
 
     assert not report["is_check_passed"]
-    assert "Found invalid role `invalid_role`" in report["message"]
+    assert "Invalid role `invalid_role` in conversation" in report["message"]
 
 
 def test_check_jsonl_non_alternating_roles(tmp_path: Path):
@@ -228,6 +233,22 @@ def test_check_jsonl_non_alternating_roles(tmp_path: Path):
 
     assert not report["is_check_passed"]
     assert "Invalid role turns" in report["message"]
+
+
+def test_check_jsonl_assistant_role_exists(tmp_path: Path):
+    # Create a JSONL file with no assistant role
+    file = tmp_path / "assistant_role_exists.jsonl"
+    content = [{"messages": [{"role": "user", "content": "Hi"}]}]
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+
+    assert not report["is_check_passed"]
+    assert (
+        "At least one message with the assistant role must be present"
+        in report["message"]
+    )
 
 
 def test_check_jsonl_invalid_value_type(tmp_path: Path):
@@ -257,7 +278,7 @@ def test_check_jsonl_missing_field_in_conversation(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert "Field `content` is missing for a turn" in report["message"]
+    assert "Missing required column `content`" in report["message"]
 
 
 def test_check_jsonl_wrong_turn_type(tmp_path: Path):
@@ -277,7 +298,7 @@ def test_check_jsonl_wrong_turn_type(tmp_path: Path):
     report = check_file(file)
     assert not report["is_check_passed"]
     assert (
-        "Invalid format on line 1 of the input file. Expected a dictionary"
+        "Invalid format on line 1 of the input file. The `messages` column must be a list of dicts."
         in report["message"]
     )
 
@@ -301,9 +322,7 @@ def test_check_jsonl_empty_messages(tmp_path: Path):
 
     report = check_file(file)
     assert not report["is_check_passed"]
-    assert (
-        "Expected a non-empty list of messages. Found empty list" in report["message"]
-    )
+    assert "The `messages` column must not be empty" in report["message"]
 
 
 def test_check_jsonl_valid_weights_all_messages(tmp_path: Path):
