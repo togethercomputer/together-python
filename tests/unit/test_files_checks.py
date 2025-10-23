@@ -235,9 +235,9 @@ def test_check_jsonl_non_alternating_roles(tmp_path: Path):
     assert "Invalid role turns" in report["message"]
 
 
-def test_check_jsonl_non_alternating_roles(tmp_path: Path):
-    # Create a JSONL file with non-alternating user/assistant roles
-    file = tmp_path / "non_alternating_roles.jsonl"
+def test_check_jsonl_assistant_role_exists(tmp_path: Path):
+    # Create a JSONL file with no assistant role
+    file = tmp_path / "assistant_role_exists.jsonl"
     content = [{"messages": [{"role": "user", "content": "Hi"}]}]
     with file.open("w") as f:
         f.write("\n".join(json.dumps(item) for item in content))
