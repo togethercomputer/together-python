@@ -337,17 +337,6 @@ def delete(client: Together, endpoint_id: str) -> None:
     type=click.Choice(["dedicated", "serverless"]),
     help="Filter by endpoint type",
 )
-@click.option(
-    "--usage-type",
-    type=click.Choice(["on-demand", "reserved"]),
-    help="Filter by usage type",
-)
-@click.option(
-    "--mine",
-    is_flag=True,
-    default=False,
-    help="Show only endpoints owned by you",
-)
 
 @click.pass_obj
 @handle_api_errors
