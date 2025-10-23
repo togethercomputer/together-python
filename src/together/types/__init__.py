@@ -75,6 +75,11 @@ from together.types.evaluation import (
     EvaluationJob,
     EvaluationStatusResponse,
 )
+from together.types.videos import (
+    CreateVideoBody,
+    CreateVideoResponse,
+    VideoJob,
+)
 
 
 __all__ = [
@@ -152,4 +157,7 @@ __all__ = [
     "EvaluationCreateResponse",
     "EvaluationJob",
     "EvaluationStatusResponse",
+    "CreateVideoBody",
+    "CreateVideoResponse",
+    "VideoJob",
 ]
