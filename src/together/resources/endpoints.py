@@ -33,13 +33,11 @@ class Endpoints:
             client=self._client,
         )
 
-        params: Dict[str, str] = {}
+        params = {}
         if type is not None:
             params["type"] = type
-        if usage_type is not None:
-            params["usage_type"] = usage_type
         if mine is not None:
-            params["mine"] = str(mine).lower()
+            params["mine"] = mine
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -292,13 +290,11 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        params: Dict[str, str] = {}
+        params = {}
         if type is not None:
             params["type"] = type
-        if usage_type is not None:
-            params["usage_type"] = usage_type
         if mine is not None:
-            params["mine"] = str(mine).lower()
+            params["mine"] = mine
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
