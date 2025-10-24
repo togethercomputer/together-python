@@ -243,7 +243,7 @@ class Endpoints:
             client=self._client,
         )
 
-        params: Dict[str, str] = {}
+        params = {}
         if model is not None:
             params["model"] = model
 
