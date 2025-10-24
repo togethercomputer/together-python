@@ -339,8 +339,9 @@ def delete(client: Together, endpoint_id: str) -> None:
 )
 @click.option(
     "--mine",
-    is_flag=True,
-    help="Show only endpoints owned by me",
+    type=click.BOOL,
+    default=None,
+    help="true (only mine), false (exclude mine), default=all",
 )
 @click.pass_obj
 @handle_api_errors
