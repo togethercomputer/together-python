@@ -341,7 +341,7 @@ def delete(client: Together, endpoint_id: str) -> None:
     "--mine",
     type=click.BOOL,
     default=None,
-    help="true (only mine), false (exclude mine), default=all",
+    help="true (only mine), default=all",
 )
 @click.option(
     "--usage-type",

@@ -24,7 +24,7 @@ class Endpoints:
         Args:
             type (str, optional): Filter endpoints by endpoint type ("dedicated" or "serverless"). Defaults to None.
             usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
-            mine (bool, optional): If True, return only endpoints owned by the caller. If False, return endpoints not owned by the caller. Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
@@ -290,7 +290,7 @@ class AsyncEndpoints:
         Args:
             type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
             usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
-            mine (bool, optional): If True, return only endpoints owned by the caller. If False, return endpoints not owned by the caller. Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
