@@ -43,6 +43,7 @@ numpy = [
     { version = ">=1.26.0", python = ">=3.12" },
 ]
 pillow = "^11.1.0"
+black = "^25.9.0"
 
 [tool.poetry.extras]
 pyarrow = ["pyarrow"]
