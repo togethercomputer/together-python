@@ -345,13 +345,30 @@ def delete(client: Together, endpoint_id: str) -> None:
     type=click.Choice(["dedicated", "serverless"]),
     help="Filter by endpoint type",
 )
+@click.option(
+    "--mine",
+    type=click.BOOL,
+    default=None,
+    help="true (only mine), default=all",
+)
+@click.option(
+    "--usage-type",
+    type=click.Choice(["on-demand", "reserved"]),
+    help="Filter by endpoint usage type",
+)
 @click.pass_obj
 @handle_api_errors
 def list(
-    client: Together, json: bool, type: Literal["dedicated", "serverless"] | None
+    client: Together,
+    json: bool,
+    type: Literal["dedicated", "serverless"] | None,
+    usage_type: Literal["on-demand", "reserved"] | None,
+    mine: bool | None,
 ) -> None:
     """List all inference endpoints (includes both dedicated and serverless endpoints)."""
-    endpoints: List[ListEndpoint] = client.endpoints.list(type=type)
+    endpoints: List[ListEndpoint] = client.endpoints.list(
+        type=type, usage_type=usage_type, mine=mine
+    )
 
     if not endpoints:
         click.echo("No dedicated endpoints found", err=True)

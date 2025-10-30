@@ -21,7 +21,6 @@ class Images:
         *,
         prompt: str,
         model: str,
-        steps: int | None = 20,
         seed: int | None = None,
         n: int | None = 1,
         height: int | None = 1024,
@@ -37,8 +36,6 @@ class Images:
 
             model (str, optional): The model to use for image generation.
 
-            steps (int, optional): Number of generation steps. Defaults to 20
-
             seed (int, optional): Seed used for generation. Can be used to reproduce image generations.
                 Defaults to None.
 
@@ -51,7 +48,8 @@ class Images:
             negative_prompt (str, optional): The prompt or prompts not to guide the image generation.
                 Defaults to None
 
-            image_base64: (str, optional): Reference image used for generation. Defaults to None.
+            **kwargs: Additional parameters like steps (int, optional): Number of generation steps,
+                image_base64 (str, optional): Reference image used for generation, etc.
 
         Returns:
             ImageResponse: Object containing image data
@@ -64,7 +62,6 @@ class Images:
         parameter_payload = ImageRequest(
             prompt=prompt,
             model=model,
-            steps=steps,
             seed=seed,
             n=n,
             height=height,
@@ -96,7 +93,6 @@ class AsyncImages:
         *,
         prompt: str,
         model: str,
-        steps: int | None = 20,
         seed: int | None = None,
         n: int | None = 1,
         height: int | None = 1024,
@@ -112,8 +108,6 @@ class AsyncImages:
 
             model (str, optional): The model to use for image generation.
 
-            steps (int, optional): Number of generation steps. Defaults to 20
-
             seed (int, optional): Seed used for generation. Can be used to reproduce image generations.
                 Defaults to None.
 
@@ -126,7 +120,8 @@ class AsyncImages:
             negative_prompt (str, optional): The prompt or prompts not to guide the image generation.
                 Defaults to None
 
-            image_base64: (str, optional): Reference image used for generation. Defaults to None.
+            **kwargs: Additional parameters like steps (int, optional): Number of generation steps,
+                image_base64 (str, optional): Reference image used for generation, etc.
 
         Returns:
             ImageResponse: Object containing image data
@@ -139,7 +134,6 @@ class AsyncImages:
         parameter_payload = ImageRequest(
             prompt=prompt,
             model=model,
-            steps=steps,
             seed=seed,
             n=n,
             height=height,
