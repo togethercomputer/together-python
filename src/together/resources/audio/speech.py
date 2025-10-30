@@ -30,7 +30,7 @@ class Speech:
         response_format: str = "wav",
         language: str = "en",
         response_encoding: str = "pcm_f32le",
-        sample_rate: int = 44100,
+        sample_rate: int | None = None,
         stream: bool = False,
         **kwargs: Any,
     ) -> AudioSpeechStreamResponse:
@@ -49,13 +49,19 @@ class Speech:
             response_encoding (str, optional): Audio encoding of response.
                 Defaults to "pcm_f32le".
             sample_rate (int, optional): Sampling rate to use for the output audio.
-                Defaults to 44100.
+                Defaults to None. If not provided, the default sampling rate for the model will be used.
             stream (bool, optional): If true, output is streamed for several characters at a time.
                 Defaults to False.
 
         Returns:
             Union[bytes, Iterator[AudioSpeechStreamChunk]]: The generated audio as bytes or an iterator over audio stream chunks.
         """
+
+        if sample_rate is None:
+            if 'cartesia' in model:
+                sample_rate = 44100
+            else:
+                sample_rate = 24000
 
         requestor = api_requestor.APIRequestor(
             client=self._client,

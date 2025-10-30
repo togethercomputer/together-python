@@ -30,6 +30,7 @@ class Transcriptions:
         timestamp_granularities: Optional[
             Union[str, AudioTimestampGranularities]
         ] = None,
+        diarize: bool = False,
         **kwargs: Any,
     ) -> Union[AudioTranscriptionResponse, AudioTranscriptionVerboseResponse]:
         """
@@ -52,7 +53,11 @@ class Transcriptions:
             timestamp_granularities: The timestamp granularities to populate for this
                 transcription. response_format must be set verbose_json to use timestamp
                 granularities. Either or both of these options are supported: word, or segment.
-
+            diarize: Whether to enable speaker diarization. When enabled, you will get the speaker id for each word in the transcription.
+                In the response, in the words array, you will get the speaker id for each word.
+                In addition, we also return the speaker_segments array which contains the speaker id for each speaker segment along with the start and end time of the segment along with all the words in the segment.
+                You can use the speaker_id to group the words by speaker.
+                You can use the speaker_segments to get the start and end time of each speaker segment.
         Returns:
             The transcribed text in the requested format.
         """
@@ -103,6 +108,9 @@ class Transcriptions:
                 else timestamp_granularities
             )
 
+        if diarize:
+            params_data["diarize"] = diarize
+
         # Add any additional kwargs
         # Convert boolean values to lowercase strings for proper form encoding
         for key, value in kwargs.items():
@@ -135,6 +143,7 @@ class Transcriptions:
         if (
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
+            or diarize
         ):
             # Create response with model validation that preserves extra fields
             return AudioTranscriptionVerboseResponse.model_validate(response.data)
@@ -158,6 +167,7 @@ class AsyncTranscriptions:
         timestamp_granularities: Optional[
             Union[str, AudioTimestampGranularities]
         ] = None,
+        diarize: bool = False,
         **kwargs: Any,
     ) -> Union[AudioTranscriptionResponse, AudioTranscriptionVerboseResponse]:
         """
@@ -180,7 +190,11 @@ class AsyncTranscriptions:
             timestamp_granularities: The timestamp granularities to populate for this
                 transcription. response_format must be set verbose_json to use timestamp
                 granularities. Either or both of these options are supported: word, or segment.
-
+            diarize: Whether to enable speaker diarization. When enabled, you will get the speaker id for each word in the transcription.
+                In the response, in the words array, you will get the speaker id for each word.
+                In addition, we also return the speaker_segments array which contains the speaker id for each speaker segment along with the start and end time of the segment along with all the words in the segment.
+                You can use the speaker_id to group the words by speaker.
+                You can use the speaker_segments to get the start and end time of each speaker segment.
         Returns:
             The transcribed text in the requested format.
         """
@@ -239,6 +253,9 @@ class AsyncTranscriptions:
                 )
             )
 
+        if diarize:
+            params_data["diarize"] = diarize
+
         # Add any additional kwargs
         # Convert boolean values to lowercase strings for proper form encoding
         for key, value in kwargs.items():
@@ -271,6 +288,7 @@ class AsyncTranscriptions:
         if (
             response_format == "verbose_json"
             or response_format == AudioTranscriptionResponseFormat.VERBOSE_JSON
+            or diarize
         ):
             # Create response with model validation that preserves extra fields
             return AudioTranscriptionVerboseResponse.model_validate(response.data)
