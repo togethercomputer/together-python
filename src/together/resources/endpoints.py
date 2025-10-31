@@ -13,13 +13,18 @@ class Endpoints:
         self._client = client
 
     def list(
-        self, type: Optional[Literal["dedicated", "serverless"]] = None
+        self,
+        type: Optional[Literal["dedicated", "serverless"]] = None,
+        usage_type: Optional[Literal["on-demand", "reserved"]] = None,
+        mine: Optional[bool] = None,
     ) -> List[ListEndpoint]:
         """
-        List all endpoints, can be filtered by type.
+        List all endpoints, can be filtered by endpoint type and ownership.
 
         Args:
-            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+            type (str, optional): Filter endpoints by endpoint type ("dedicated" or "serverless"). Defaults to None.
+            usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
@@ -28,9 +33,20 @@ class Endpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[
+            str,
+            Union[
+                Literal["dedicated", "serverless"],
+                Literal["on-demand", "reserved"],
+                bool,
+            ],
+        ] = {}
         if type is not None:
             params["type"] = type
+        if usage_type is not None:
+            params["usage_type"] = usage_type
+        if mine is not None:
+            params["mine"] = mine
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -263,13 +279,18 @@ class AsyncEndpoints:
         self._client = client
 
     async def list(
-        self, type: Optional[Literal["dedicated", "serverless"]] = None
+        self,
+        type: Optional[Literal["dedicated", "serverless"]] = None,
+        usage_type: Optional[Literal["on-demand", "reserved"]] = None,
+        mine: Optional[bool] = None,
     ) -> List[ListEndpoint]:
         """
-        List all endpoints, can be filtered by type.
+        List all endpoints, can be filtered by type and ownership.
 
         Args:
             type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+            usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
@@ -278,9 +299,20 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[
+            str,
+            Union[
+                Literal["dedicated", "serverless"],
+                Literal["on-demand", "reserved"],
+                bool,
+            ],
+        ] = {}
         if type is not None:
             params["type"] = type
+        if usage_type is not None:
+            params["usage_type"] = usage_type
+        if mine is not None:
+            params["mine"] = mine
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
