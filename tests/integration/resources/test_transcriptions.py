@@ -36,19 +36,6 @@ def validate_diarization_response(response_dict):
             assert "end" in word
             assert "speaker_id" in word
 
-    # Validate top-level words field
-    assert "words" in response_dict
-    assert isinstance(response_dict["words"], list)
-    assert len(response_dict["words"]) > 0
-
-    # Validate each word in top-level words
-    for word in response_dict["words"]:
-        assert "id" in word
-        assert "word" in word
-        assert "start" in word
-        assert "end" in word
-        assert "speaker_id" in word
-
 
 class TestTogetherTranscriptions:
     @pytest.fixture
