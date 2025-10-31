@@ -76,7 +76,7 @@ class Endpoints:
         disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
-        user_specified_avzone: Optional[str] = None,
+        availability_zone: Optional[str] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -91,7 +91,7 @@ class Endpoints:
             disable_speculative_decoding (bool, optional): Whether to disable speculative decoding. Defaults to False.
             state (str, optional): The desired state of the endpoint. Defaults to "STARTED".
             inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
-            user_specified_avzone (str, optional): Start endpoint in specified availability zone (e.g., us-central-4b).
+            availability_zone (str, optional): Start endpoint in specified availability zone (e.g., us-central-4b).
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -118,8 +118,8 @@ class Endpoints:
         if inactive_timeout is not None:
             data["inactive_timeout"] = inactive_timeout
 
-        if user_specified_avzone is not None:
-            data["user_specified_avzone"] = user_specified_avzone
+        if availability_zone is not None:
+            data["availability_zone"] = availability_zone
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -292,7 +292,7 @@ class Endpoints:
         response, _, _ = requestor.request(
             options=TogetherRequest(
                 method="GET",
-                url="clusters/avzones",
+                url="clusters/availability-zones",
             ),
             stream=False,
         )
@@ -370,7 +370,7 @@ class AsyncEndpoints:
         disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
-        user_specified_avzone: Optional[str] = None,
+        availability_zone: Optional[str] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -411,8 +411,8 @@ class AsyncEndpoints:
         if inactive_timeout is not None:
             data["inactive_timeout"] = inactive_timeout
 
-        if user_specified_avzone is not None:
-            data["user_specified_avzone"] = user_specified_avzone
+        if availability_zone is not None:
+            data["availability_zone"] = availability_zone
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
@@ -575,7 +575,7 @@ class AsyncEndpoints:
 
     async def list_avzones(self) -> List[str]:
         """
-        List all available availability zones.
+        List all availability zones.
 
         Returns:
             List[str]: List of unique availability zones
@@ -587,7 +587,7 @@ class AsyncEndpoints:
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
                 method="GET",
-                url="clusters/avzones",
+                url="clusters/availability-zones",
             ),
             stream=False,
         )
