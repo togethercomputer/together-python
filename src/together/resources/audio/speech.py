@@ -58,7 +58,7 @@ class Speech:
         """
 
         if sample_rate is None:
-            if 'cartesia' in model:
+            if "cartesia" in model:
                 sample_rate = 44100
             else:
                 sample_rate = 24000
