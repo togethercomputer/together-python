@@ -619,14 +619,29 @@ class APIRequestor:
     ) -> Tuple[TogetherResponse | Iterator[TogetherResponse], bool]:
         """Returns the response(s) and a bool indicating whether it is a stream."""
         content_type = result.headers.get("Content-Type", "")
+
         if stream and "text/event-stream" in content_type:
+            # SSE format streaming
             return (
                 self._interpret_response_line(
                     line, result.status_code, result.headers, stream=True
                 )
                 for line in parse_stream(result.iter_lines())
             ), True
+        elif stream and content_type in [
+            "audio/wav",
+            "audio/mpeg",
+            "application/octet-stream",
+        ]:
+            # Binary audio streaming - return chunks as binary data
+            def binary_stream_generator() -> Iterator[TogetherResponse]:
+                for chunk in result.iter_content(chunk_size=8192):
+                    if chunk:  # Skip empty chunks
+                        yield TogetherResponse(chunk, dict(result.headers))
+
+            return binary_stream_generator(), True
         else:
+            # Non-streaming response
             if content_type in ["application/octet-stream", "audio/wav", "audio/mpeg"]:
                 content = result.content
             else:
@@ -648,23 +663,49 @@ class APIRequestor:
         | tuple[TogetherResponse, bool]
     ):
         """Returns the response(s) and a bool indicating whether it is a stream."""
-        if stream and "text/event-stream" in result.headers.get("Content-Type", ""):
+        content_type = result.headers.get("Content-Type", "")
+
+        if stream and "text/event-stream" in content_type:
+            # SSE format streaming
             return (
                 self._interpret_response_line(
                     line, result.status, result.headers, stream=True
                 )
                 async for line in parse_stream_async(result.content)
             ), True
+        elif stream and content_type in [
+            "audio/wav",
+            "audio/mpeg",
+            "application/octet-stream",
+        ]:
+            # Binary audio streaming - return chunks as binary data
+            async def binary_stream_generator() -> (
+                AsyncGenerator[TogetherResponse, None]
+            ):
+                async for chunk in result.content.iter_chunked(8192):
+                    if chunk:  # Skip empty chunks
+                        yield TogetherResponse(chunk, dict(result.headers))
+
+            return binary_stream_generator(), True
         else:
+            # Non-streaming response
             try:
-                await result.read()
+                content = await result.read()
             except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
                 raise error.Timeout("Request timed out") from e
             except aiohttp.ClientError as e:
                 utils.log_warn(e, body=result.content)
+
+            if content_type in ["application/octet-stream", "audio/wav", "audio/mpeg"]:
+                # Binary content - keep as bytes
+                response_content: str | bytes = content
+            else:
+                # Text content - decode to string
+                response_content = content.decode("utf-8")
+
             return (
                 self._interpret_response_line(
-                    (await result.read()).decode("utf-8"),
+                    response_content,
                     result.status,
                     result.headers,
                     stream=False,
