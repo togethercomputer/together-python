@@ -15,6 +15,8 @@ from together.types.audio_speech import (
     AudioTranslationVerboseResponse,
     AudioTranscriptionResponseFormat,
     AudioTimestampGranularities,
+    ModelVoices,
+    VoiceListResponse,
 )
 from together.types.chat_completions import (
     ChatCompletionChunk,
@@ -140,6 +142,8 @@ __all__ = [
     "AudioTranslationVerboseResponse",
     "AudioTranscriptionResponseFormat",
     "AudioTimestampGranularities",
+    "ModelVoices",
+    "VoiceListResponse",
     "DedicatedEndpoint",
     "ListEndpoint",
     "Autoscaling",
