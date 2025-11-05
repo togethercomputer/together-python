@@ -347,9 +347,9 @@ def delete(client: Together, endpoint_id: str) -> None:
 )
 @click.option(
     "--mine",
-    type=click.BOOL,
-    default=None,
-    help="true (only mine), default=all",
+    is_flag=True,
+    default=False,
+    help="Only show endpoints owned by the caller",
 )
 @click.option(
     "--usage-type",
@@ -363,11 +363,13 @@ def list(
     json: bool,
     type: Literal["dedicated", "serverless"] | None,
     usage_type: Literal["on-demand", "reserved"] | None,
-    mine: bool | None,
+    mine: bool,
 ) -> None:
     """List all inference endpoints (includes both dedicated and serverless endpoints)."""
+    # Convert False (flag not provided) to None for API call
+    mine_param = True if mine else None
     endpoints: List[ListEndpoint] = client.endpoints.list(
-        type=type, usage_type=usage_type, mine=mine
+        type=type, usage_type=usage_type, mine=mine_param
     )
 
     if not endpoints:
