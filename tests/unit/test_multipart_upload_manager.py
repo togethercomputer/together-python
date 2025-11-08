@@ -276,7 +276,7 @@ class TestMultipartUploadManager:
         # Mock as_completed
         with patch(
             "together.filemanager.as_completed",
-            return_value=[mock_future1, mock_future2],
+            side_effect=[iter([mock_future1]), iter([mock_future2])],
         ):
             upload_info = {
                 "parts": [
