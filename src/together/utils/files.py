@@ -366,11 +366,10 @@ def _check_utf8(file: Path) -> Dict[str, Any]:
     report_dict: Dict[str, Any] = {}
 
     try:
-        # Stream file in chunks to avoid loading entire file into memory
-        chunk_size = 8192  # 8KB chunks
+        chunk_size = 8192
         with file.open(encoding="utf-8") as f:
             for chunk in iter(lambda: f.read(chunk_size), ""):
-                pass  # UTF-8 decoding happens automatically during read
+                pass
 
         report_dict["utf8"] = True
     except UnicodeDecodeError as e:
