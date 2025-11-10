@@ -167,6 +167,15 @@ class TrainingMethodDPO(TrainingMethod):
     simpo_gamma: float | None = None
 
 
+class FinetuneProgress(BaseModel):
+    """
+    Fine-tune job progress
+    """
+
+    estimate_available: bool = False
+    seconds_remaining: float = 0
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -296,6 +305,8 @@ class FinetuneResponse(BaseModel):
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
     from_checkpoint: str | None = None
+
+    progress: FinetuneProgress | None = None
 
     @field_validator("training_type")
     @classmethod

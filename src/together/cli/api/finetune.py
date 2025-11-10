@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
@@ -24,6 +23,7 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
+    generate_progress_bar,
 )
 
 
@@ -420,6 +420,9 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     # remove events from response for cleaner output
     response.events = None
 
+    progress_text = generate_progress_bar(response)
+
+    rprint(progress_text)
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
 
 
