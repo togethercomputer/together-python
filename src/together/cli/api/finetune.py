@@ -8,10 +8,11 @@ from typing import Any, Literal
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
 from rich import print as rprint
-from tabulate import tabulate
+from rich.table import Table
+from rich.json import JSON
 
 from together import Together
-from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX, generate_progress_bar
 from together.types.finetune import (
     DownloadCheckpointType,
     FinetuneEventType,
@@ -23,7 +24,6 @@ from together.utils import (
     log_warn,
     log_warn_once,
     parse_timestamp,
-    generate_progress_bar,
 )
 
 
@@ -390,22 +390,27 @@ def list(ctx: click.Context) -> None:
     epoch_start = datetime.fromtimestamp(0, tz=timezone.utc)
     response.data.sort(key=lambda x: parse_timestamp(x.created_at or "") or epoch_start)
 
-    display_list = []
-    for i in response.data:
-        display_list.append(
-            {
-                "Fine-tune ID": i.id,
-                "Model Output Name": "\n".join(wrap(i.output_name or "", width=30)),
-                "Status": i.status,
-                "Created At": i.created_at,
-                "Price": f"""${
-                    finetune_price_to_dollars(float(str(i.total_price)))
-                }""",  # convert to string for mypy typing
-            }
-        )
-    table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+    finetune_table = Table(show_lines=True)
+    finetune_table.add_column("Fine-tune ID", style="cyan")
+    finetune_table.add_column("Model Output Name", style="magenta")
+    finetune_table.add_column("Status", style="green")
+    finetune_table.add_column("Created At", style="blue")
+    finetune_table.add_column("Price", style="yellow")
+    finetune_table.add_column("Progress", style="red")
 
-    click.echo(table)
+    for i in response.data:
+        finetune_table.add_row(
+            i.id,
+            i.output_name or "",
+            i.status.value,
+            i.created_at,
+            f"""${
+                finetune_price_to_dollars(float(str(i.total_price)))
+            }""",  # convert to string for mypy typing
+            generate_progress_bar(i, datetime.now().astimezone()),
+        )
+
+    rprint(finetune_table)
 
 
 @fine_tuning.command()
@@ -420,10 +425,10 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     # remove events from response for cleaner output
     response.events = None
 
-    progress_text = generate_progress_bar(response)
-
-    rprint(progress_text)
-    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
+    rprint(JSON.from_data(response.model_dump(exclude_none=True)))
+    progress_text = generate_progress_bar(response, datetime.now().astimezone())
+    prefix = f"Status: [bold]{response.status.value}[/bold],"
+    rprint(f"{prefix} {progress_text}")
 
 
 @fine_tuning.command()
@@ -459,19 +464,19 @@ def list_events(ctx: click.Context, fine_tune_id: str) -> None:
 
     response.data = response.data or []
 
-    display_list = []
-    for i in response.data:
-        display_list.append(
-            {
-                "Message": "\n".join(wrap(i.message or "", width=50)),
-                "Type": i.type,
-                "Created At": parse_timestamp(i.created_at or ""),
-                "Hash": i.hash,
-            }
-        )
-    table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
+    event_table = Table(show_lines=True)
+    event_table.add_column("Message", style="cyan")
+    event_table.add_column("Type", style="green")
+    event_table.add_column("Created At", style="blue")
 
-    click.echo(table)
+    for i in response.data:
+        event_table.add_row(
+            i.message,
+            i.type,
+            i.created_at or "",
+        )
+
+    rprint(event_table)
 
 
 @fine_tuning.command()
@@ -483,23 +488,24 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 
     checkpoints = client.fine_tuning.list_checkpoints(fine_tune_id)
 
-    display_list = []
+    checkpoint_table = Table(show_lines=True)
+    checkpoint_table.add_column("Type", style="cyan")
+    checkpoint_table.add_column("Timestamp", style="green")
+    checkpoint_table.add_column("Name", style="yellow")
+
     for checkpoint in checkpoints:
-        display_list.append(
-            {
-                "Type": checkpoint.type,
-                "Timestamp": format_timestamp(checkpoint.timestamp),
-                "Name": checkpoint.name,
-            }
+        checkpoint_table.add_row(
+            checkpoint.type,
+            format_timestamp(checkpoint.timestamp),
+            checkpoint.name,
         )
 
-    if display_list:
-        click.echo(f"Job {fine_tune_id} contains the following checkpoints:")
-        table = tabulate(display_list, headers="keys", tablefmt="grid")
-        click.echo(table)
-        click.echo("\nTo download a checkpoint, use `together fine-tuning download`")
+    if len(checkpoints) > 0:
+        rprint(f"Job [bold]{fine_tune_id}[/bold] contains the following checkpoints:")
+        rprint(checkpoint_table)
+        rprint("\nTo download a checkpoint, use [blue]together fine-tuning download[/blue]")
     else:
-        click.echo(f"No checkpoints found for job {fine_tune_id}")
+        rprint(f"No checkpoints found for job [bold]{fine_tune_id}[/bold]s")
 
 
 @fine_tuning.command()

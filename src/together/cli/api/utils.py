@@ -7,7 +7,7 @@ from datetime import datetime
 
 import click
 
-from together.types.finetune import FinetuneResponse
+from together.types.finetune import FinetuneResponse, COMPLETED_STATUSES
 
 _PROGRESS_BAR_WIDTH = 40
 
@@ -91,20 +91,28 @@ def _human_readable_time(timedelta: float) -> str:
     return " ".join(parts) if parts else "0s"
 
 
-def generate_progress_bar(finetune_job: FinetuneResponse) -> str:
+def generate_progress_bar(
+    finetune_job: FinetuneResponse, current_time: datetime
+) -> str:
     """Generate a progress bar for a finetune job.
 
     Args:
         finetune_job: The finetune job to generate a progress bar for.
+        current_time: The current time.
 
     Returns:
         A string representing the progress bar.
     """
-    progress = "Progress: [bold red]unavailable[/bold red]"
+    if finetune_job.status in COMPLETED_STATUSES:
+        return f"Progress: [bold green]completed[/bold green]"
+
+    progress = f"Progress: [bold red]unavailable[/bold red]"
+    update_at = datetime.fromisoformat(
+        finetune_job.updated_at
+    ).astimezone()
 
     if finetune_job.progress is not None:
-        current_time = datetime.now()
-        if current_time < finetune_job.updated_at.astimezone():
+        if current_time < update_at:
             return progress
 
         if not finetune_job.progress.estimate_available:
@@ -113,9 +121,7 @@ def generate_progress_bar(finetune_job: FinetuneResponse) -> str:
         if finetune_job.progress.seconds_remaining <= 0:
             return progress
 
-        elapsed_time = (
-            current_time - finetune_job.updated_at.astimezone()
-        ).total_seconds()
+        elapsed_time = (current_time - update_at).total_seconds()
         ratio_filled = min(elapsed_time / finetune_job.progress.seconds_remaining, 1.0)
         percentage = ratio_filled * 100
         filled = math.ceil(ratio_filled * _PROGRESS_BAR_WIDTH)
@@ -126,6 +132,6 @@ def generate_progress_bar(finetune_job: FinetuneResponse) -> str:
                 finetune_job.progress.seconds_remaining - elapsed_time
             )
         time_text = f"{time_left} left"
-        progress = f"{bar} Progress: [bold]{percentage:>3.0f}%[/bold] [yellow]{time_text}[/yellow]"
+        progress = f"Progress: {bar} [bold]{percentage:>3.0f}%[/bold] [yellow]{time_text}[/yellow]"
 
     return progress

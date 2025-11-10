@@ -28,6 +28,9 @@ class FinetuneJobStatus(str, Enum):
     STATUS_COMPLETED = "completed"
 
 
+COMPLETED_STATUSES = [FinetuneJobStatus.STATUS_ERROR, FinetuneJobStatus.STATUS_USER_ERROR, FinetuneJobStatus.STATUS_COMPLETED, FinetuneJobStatus.STATUS_CANCELLED]
+
+
 class FinetuneEventLevels(str, Enum):
     """
     Fine-tune job event status levels
