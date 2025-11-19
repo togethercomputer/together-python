@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import cmd
 import json
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import click
 
@@ -181,6 +181,12 @@ def interactive(
     "--frequency-penalty", type=float, help="Frequency penalty sampling method"
 )
 @click.option("--min-p", type=float, help="Min p sampling")
+@click.option(
+    "--audio-url",
+    type=str,
+    multiple=True,
+    help="Audio URL to attach to the last user message",
+)
 @click.option("--no-stream", is_flag=True, help="Disable streaming")
 @click.option("--logprobs", type=int, help="Return logprobs. Only works with --raw.")
 @click.option("--echo", is_flag=True, help="Echo prompt. Only works with --raw.")
@@ -200,6 +206,7 @@ def chat(
     presence_penalty: float | None = None,
     frequency_penalty: float | None = None,
     min_p: float | None = None,
+    audio_url: List[str] | None = None,
     no_stream: bool = False,
     logprobs: int | None = None,
     echo: bool | None = None,
@@ -210,7 +217,22 @@ def chat(
     """Generate chat completions from messages"""
     client: Together = ctx.obj
 
-    messages = [{"role": msg[0], "content": msg[1]} for msg in message]
+    messages: List[Dict[str, Any]] = [
+        {"role": msg[0], "content": msg[1]} for msg in message
+    ]
+
+    if audio_url and messages:
+        last_msg = messages[-1]
+        if last_msg["role"] == "user":
+            # Convert content to list if it is string
+            if isinstance(last_msg["content"], str):
+                last_msg["content"] = [{"type": "text", "text": last_msg["content"]}]
+
+            # Append audio URLs
+            for url in audio_url:
+                last_msg["content"].append(  # type: ignore
+                    {"type": "audio_url", "audio_url": {"url": url}}
+                )
 
     response = client.chat.completions.create(
         model=model,
