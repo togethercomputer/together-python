@@ -230,7 +230,7 @@ def chat(
 
             # Append audio URLs
             for url in audio_url:
-                last_msg["content"].append(  # type: ignore
+                last_msg["content"].append(
                     {"type": "audio_url", "audio_url": {"url": url}}
                 )
 
