@@ -366,9 +366,9 @@ def _check_utf8(file: Path) -> Dict[str, Any]:
     report_dict: Dict[str, Any] = {}
 
     try:
-        chunk_size = 8192
+        # Dry-run UTF-8 decode: iterate through file to validate encoding
         with file.open(encoding="utf-8") as f:
-            for chunk in iter(lambda: f.read(chunk_size), ""):
+            for _ in f:
                 pass
 
         report_dict["utf8"] = True
