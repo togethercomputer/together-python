@@ -540,7 +540,7 @@ class MultipartUploadManager:
                     part_index = 0
 
                     # Submit initial batch limited by max_concurrent_parts
-                    for i in range(min(self.max_concurrent_parts, len(parts))):
+                    for _ in range(min(self.max_concurrent_parts, len(parts))):
                         part_info = parts[part_index]
                         future = self._submit_part(executor, f, part_info, part_size)
                         future_to_part[future] = part_info["PartNumber"]
