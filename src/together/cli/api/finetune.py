@@ -17,6 +17,8 @@ from together.types.finetune import (
     DownloadCheckpointType,
     FinetuneEventType,
     FinetuneTrainingLimits,
+    FullTrainingType,
+    LoRATrainingType,
 )
 from together.utils import (
     finetune_price_to_dollars,
@@ -32,6 +34,15 @@ _CONFIRMATION_MESSAGE = (
     "The cost of your job will be determined by the model size, the number of tokens "
     "in the training file, the number of tokens in the validation file, the number of epochs, and "
     "the number of evaluations. Visit https://www.together.ai/pricing to get a price estimate.\n"
+    "You can pass `-y` or `--confirm` to your command to skip this message.\n\n"
+    "Do you want to proceed?"
+)
+
+_PRICE_ESTIMATION_CONFIRMATION_MESSAGE = (
+    "The estimated price of the fine-tuning job is {} which is significantly "
+    "greater than your current credit limit and balance. "
+    "It will likely fail due to insufficient funds. "
+    "Please consider increasing your credit limit at https://api.together.xyz/settings/profile\n"
     "You can pass `-y` or `--confirm` to your command to skip this message.\n\n"
     "Do you want to proceed?"
 )
@@ -358,20 +369,49 @@ def create(
         )
 
     if confirm or click.confirm(_CONFIRMATION_MESSAGE, default=True, show_default=True):
-        response = client.fine_tuning.create(
-            **training_args,
-            verbose=True,
+        price_estimation_response = client.fine_tuning.estimate_price(
+            training_file=training_file,
+            validation_file=validation_file,
+            model=model,
+            n_epochs=n_epochs,
+            n_evals=n_evals,
+            training_type="lora" if lora else "full",
+            training_method=training_method,
         )
-
-        report_string = f"Successfully submitted a fine-tuning job {response.id}"
-        if response.created_at is not None:
-            created_time = datetime.strptime(
-                response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z"
+        proceed = (
+            confirm
+            or price_estimation_response.allowed_to_proceed
+            or (
+                not price_estimation_response.allowed_to_proceed
+                and click.confirm(
+                    click.style(
+                        _PRICE_ESTIMATION_CONFIRMATION_MESSAGE.format(
+                            price_estimation_response.estimated_total_price
+                        ),
+                        fg="red",
+                        bold=True,
+                    ),
+                    default=True,
+                    show_default=True,
+                )
             )
-            # created_at reports UTC time, we use .astimezone() to convert to local time
-            formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
-            report_string += f" at {formatted_time}"
-        rprint(report_string)
+        )
+        if proceed:
+            response = client.fine_tuning.create(
+                **training_args,
+                verbose=True,
+            )
+            report_string = f"Successfully submitted a fine-tuning job {response.id}"
+            if response.created_at is not None:
+                created_time = datetime.strptime(
+                    response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z"
+                )
+                # created_at reports UTC time, we use .astimezone() to convert to local time
+                formatted_time = created_time.astimezone().strftime(
+                    "%m/%d/%Y, %H:%M:%S"
+                )
+                report_string += f" at {formatted_time}"
+            rprint(report_string)
     else:
         click.echo("No confirmation received, stopping job launch")
 
