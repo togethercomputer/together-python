@@ -412,6 +412,8 @@ def create(
                 )
                 report_string += f" at {formatted_time}"
             rprint(report_string)
+        else:
+            click.echo("No confirmation received, stopping job launch")
     else:
         click.echo("No confirmation received, stopping job launch")
 

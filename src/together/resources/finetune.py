@@ -550,6 +550,8 @@ class FineTuning:
             raise ValueError(f"Unknown training method: {training_method}")
 
         if training_type.lower() == "lora":
+            # parameters of lora are unused in price estimation
+            # but we need to set them to valid values
             training_type_cls = LoRATrainingType(
                 type="Lora",
                 lora_r=16,
