@@ -26,6 +26,7 @@ class UsageData(BaseModel):
 
 
 class ObjectType(str, Enum):
+    TextCompletion = "text_completion"
     Completion = "text.completion"
     CompletionChunk = "completion.chunk"
     ChatCompletion = "chat.completion"
