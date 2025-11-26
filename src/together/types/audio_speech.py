@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import base64
 from enum import Enum
-from typing import BinaryIO, Iterator, List, Optional, Union
+from re import S
+from typing import BinaryIO, Dict, Iterator, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -295,3 +296,16 @@ class AudioTranslationVerboseResponse(BaseModel):
     text: str
     segments: Optional[List[AudioTranscriptionSegment]] = None
     words: Optional[List[AudioTranscriptionWord]] = None
+
+
+class ModelVoices(BaseModel):
+    """Represents a model with its available voices."""
+
+    model: str
+    voices: List[Dict[str, str]]  # Each voice is a dict with 'name' key
+
+
+class VoiceListResponse(BaseModel):
+    """Response containing a list of models and their available voices."""
+
+    data: List[ModelVoices]

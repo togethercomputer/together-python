@@ -15,6 +15,7 @@ class FilePurpose(str, Enum):
     FineTune = "fine-tune"
     BatchAPI = "batch-api"
     Eval = "eval"
+    EvalOutput = "eval-output"
 
 
 class FileType(str, Enum):

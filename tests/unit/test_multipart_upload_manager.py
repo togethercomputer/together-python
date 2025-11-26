@@ -74,8 +74,8 @@ class TestMultipartUploadManager:
         file_size = 500 * 1024 * 1024  # 500MB
         part_size, num_parts = manager._calculate_parts(file_size)
 
-        expected_parts = 5  # 500MB / 100MB = 5 parts
-        expected_part_size = 100 * 1024 * 1024  # 100MB
+        expected_parts = 2  # 500MB / 250MB = 2 parts
+        expected_part_size = 250 * 1024 * 1024  # 250MB
 
         assert num_parts == expected_parts
         assert part_size == expected_part_size
@@ -85,10 +85,11 @@ class TestMultipartUploadManager:
         file_size = 50 * 1024 * 1024 * 1024  # 50GB
         part_size, num_parts = manager._calculate_parts(file_size)
 
-        # Should use maximum parts and scale part size
-        assert num_parts == MAX_MULTIPART_PARTS  # 250
-        expected_part_size = file_size // MAX_MULTIPART_PARTS
-        assert part_size >= expected_part_size
+        # With 250MB target part size, 50GB should use ~205 parts
+        expected_parts = 205  # 50GB / 250MB ≈ 205 parts
+        assert num_parts == expected_parts
+        # Part size should be close to target (within rounding)
+        assert part_size >= 249 * 1024 * 1024  # At least 249MB (allowing for rounding)
 
     def test_calculate_parts_respects_minimum_part_size(self, manager):
         """Test that minimum part size is respected"""
@@ -275,7 +276,7 @@ class TestMultipartUploadManager:
         # Mock as_completed
         with patch(
             "together.filemanager.as_completed",
-            return_value=[mock_future1, mock_future2],
+            side_effect=[iter([mock_future1]), iter([mock_future2])],
         ):
             upload_info = {
                 "parts": [
@@ -303,7 +304,7 @@ class TestMultipartUploadManager:
     def test_file_size_exceeds_limit_raises_error(self, mock_stat, manager):
         """Test that files exceeding size limit raise FileTypeError with clear message"""
         # Setup - file size over limit
-        file_size = int((MAX_FILE_SIZE_GB + 1) * NUM_BYTES_IN_GB)  # 26GB
+        file_size = int((MAX_FILE_SIZE_GB + 1) * NUM_BYTES_IN_GB)  # 51.1GB
         mock_stat.return_value.st_size = file_size
 
         # Should raise FileTypeError with descriptive message
@@ -311,7 +312,7 @@ class TestMultipartUploadManager:
             manager.upload("test-url", Path("test.jsonl"), FilePurpose.FineTune)
 
         error_message = str(exc_info.value)
-        assert "26.0GB exceeds maximum supported size of 25.0GB" in error_message
+        assert "51.1GB exceeds maximum supported size of 50.1GB" in error_message
 
     @patch.object(MultipartUploadManager, "_initiate_upload")
     @patch.object(MultipartUploadManager, "_upload_parts_concurrent")

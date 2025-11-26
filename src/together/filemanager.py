@@ -6,10 +6,10 @@ import shutil
 import stat
 import tempfile
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from functools import partial
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, BinaryIO, Dict, List, Tuple
 
 import requests
 from filelock import FileLock
@@ -212,6 +212,7 @@ class DownloadManager:
                     ),
                     remaining_retries=MAX_RETRIES,
                     stream=True,
+                    request_timeout=3600,
                 )
 
                 try:
@@ -512,6 +513,18 @@ class MultipartUploadManager:
 
         return response.data
 
+    def _submit_part(
+        self,
+        executor: ThreadPoolExecutor,
+        f: BinaryIO,
+        part_info: Dict[str, Any],
+        part_size: int,
+    ) -> Future[str]:
+        """Submit a single part for upload and return the future"""
+        f.seek((part_info["PartNumber"] - 1) * part_size)
+        part_data = f.read(part_size)
+        return executor.submit(self._upload_single_part, part_info, part_data)
+
     def _upload_parts_concurrent(
         self, file: Path, upload_info: Dict[str, Any], part_size: int
     ) -> List[Dict[str, Any]]:
@@ -522,29 +535,39 @@ class MultipartUploadManager:
 
         with ThreadPoolExecutor(max_workers=self.max_concurrent_parts) as executor:
             with tqdm(total=len(parts), desc="Uploading parts", unit="part") as pbar:
-                future_to_part = {}
-
                 with open(file, "rb") as f:
-                    for part_info in parts:
-                        f.seek((part_info["PartNumber"] - 1) * part_size)
-                        part_data = f.read(part_size)
+                    future_to_part = {}
+                    part_index = 0
 
-                        future = executor.submit(
-                            self._upload_single_part, part_info, part_data
-                        )
+                    # Submit initial batch limited by max_concurrent_parts
+                    for _ in range(min(self.max_concurrent_parts, len(parts))):
+                        part_info = parts[part_index]
+                        future = self._submit_part(executor, f, part_info, part_size)
                         future_to_part[future] = part_info["PartNumber"]
+                        part_index += 1
 
-                # Collect results
-                for future in as_completed(future_to_part):
-                    part_number = future_to_part[future]
-                    try:
-                        etag = future.result()
-                        completed_parts.append(
-                            {"part_number": part_number, "etag": etag}
-                        )
-                        pbar.update(1)
-                    except Exception as e:
-                        raise Exception(f"Failed to upload part {part_number}: {e}")
+                    # Process completions and submit new parts (sliding window)
+                    while future_to_part:
+                        done_future = next(as_completed(future_to_part))
+                        part_number = future_to_part.pop(done_future)
+
+                        try:
+                            etag = done_future.result()
+                            completed_parts.append(
+                                {"part_number": part_number, "etag": etag}
+                            )
+                            pbar.update(1)
+                        except Exception as e:
+                            raise Exception(f"Failed to upload part {part_number}: {e}")
+
+                        # Submit next part if available
+                        if part_index < len(parts):
+                            part_info = parts[part_index]
+                            future = self._submit_part(
+                                executor, f, part_info, part_size
+                            )
+                            future_to_part[future] = part_info["PartNumber"]
+                            part_index += 1
 
         completed_parts.sort(key=lambda x: x["part_number"])
         return completed_parts
