@@ -376,17 +376,17 @@ def create(
         training_type="lora" if lora else "full",
         training_method=training_method,
     )
-    
+
     price = click.style(
         f"${finetune_price_estimation_result.estimated_total_price:.2f}",
         bold=True,
     )
-    
+
     if not finetune_price_estimation_result.allowed_to_proceed:
         warning = click.style(_WARNING_MESSAGE_INSUFFICIENT_FUNDS, fg="red", bold=True)
     else:
         warning = ""
-    
+
     confirmation_message = _CONFIRMATION_MESSAGE.format(
         price=price,
         warning=warning,
@@ -403,9 +403,7 @@ def create(
                 response.created_at, "%Y-%m-%dT%H:%M:%S.%f%z"
             )
             # created_at reports UTC time, we use .astimezone() to convert to local time
-            formatted_time = created_time.astimezone().strftime(
-                "%m/%d/%Y, %H:%M:%S"
-            )
+            formatted_time = created_time.astimezone().strftime("%m/%d/%Y, %H:%M:%S")
             report_string += f" at {formatted_time}"
         rprint(report_string)
     else:
