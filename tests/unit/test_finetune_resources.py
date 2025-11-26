@@ -1,6 +1,10 @@
 import pytest
+from unittest.mock import MagicMock, Mock, patch
 
+from together.client import Together
 from together.resources.finetune import create_finetune_request
+from together.together_response import TogetherResponse
+from together.types import TogetherRequest
 from together.types.finetune import (
     FinetuneFullTrainingLimits,
     FinetuneLoraTrainingLimits,
@@ -29,6 +33,41 @@ _MODEL_LIMITS = FinetuneTrainingLimits(
         target_modules=["q", "k", "v", "o", "mlp"],
     ),
 )
+
+
+def mock_request(options: TogetherRequest, *args, **kwargs):
+    if options.url == "fine-tunes/estimate-price":
+        return (
+            TogetherResponse(
+                data={
+                    "estimated_total_price": 100,
+                    "allowed_to_proceed": True,
+                    "estimated_train_token_count": 1000,
+                    "estimated_eval_token_count": 100,
+                    "user_limit": 1000,
+                },
+                headers={},
+            ),
+            None,
+            None,
+        )
+    elif options.url == "fine-tunes":
+        return (
+            TogetherResponse(
+                data={
+                    "id": "ft-12345678-1234-1234-1234-1234567890ab",
+                },
+                headers={},
+            ),
+            None,
+            None,
+        )
+    else:
+        return (
+            TogetherResponse(data=_MODEL_LIMITS.model_dump(), headers={}),
+            None,
+            None,
+        )
 
 
 def test_simple_request():
@@ -335,3 +374,87 @@ def test_train_on_inputs_not_supported_for_dpo():
             training_method="dpo",
             train_on_inputs=True,
         )
+
+
+@patch("together.abstract.api_requestor.APIRequestor.request")
+def test_price_estimation_request(mocker):
+    test_data = [
+        {
+            "training_type": "lora",
+            "training_method": "sft",
+        },
+        {
+            "training_type": "lora",
+            "training_method": "dpo",
+        },
+        {
+            "training_type": "full",
+            "training_method": "sft",
+        },
+    ]
+    mocker.return_value = (
+        TogetherResponse(
+            data={
+                "estimated_total_price": 100,
+                "allowed_to_proceed": True,
+                "estimated_train_token_count": 1000,
+                "estimated_eval_token_count": 100,
+                "user_limit": 1000,
+            },
+            headers={},
+        ),
+        None,
+        None,
+    )
+    client = Together()
+    for test_case in test_data:
+        response = client.fine_tuning.estimate_price(
+            training_file=_TRAINING_FILE,
+            model=_MODEL_NAME,
+            validation_file=_VALIDATION_FILE,
+            n_epochs=1,
+            n_evals=0,
+            training_type=test_case["training_type"],
+            training_method=test_case["training_method"],
+        )
+        assert response.estimated_total_price > 0
+        assert response.allowed_to_proceed
+        assert response.estimated_train_token_count > 0
+        assert response.estimated_eval_token_count > 0
+
+
+def test_create_ft_job(mocker):
+    mock_requestor = Mock()
+    mock_requestor.request = MagicMock()
+    mock_requestor.request.side_effect = mock_request
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
+
+    client = Together()
+    response = client.fine_tuning.create(
+        training_file=_TRAINING_FILE,
+        model=_MODEL_NAME,
+        validation_file=_VALIDATION_FILE,
+        n_epochs=1,
+        n_evals=0,
+        lora=True,
+        training_method="sft",
+    )
+
+    assert mock_requestor.request.call_count == 3
+    assert response.id == "ft-12345678-1234-1234-1234-1234567890ab"
+
+    response = client.fine_tuning.create(
+        training_file=_TRAINING_FILE,
+        model=None,
+        validation_file=_VALIDATION_FILE,
+        n_epochs=1,
+        n_evals=0,
+        lora=True,
+        training_method="sft",
+        from_checkpoint=_FROM_CHECKPOINT,
+    )
+
+    assert mock_requestor.request.call_count == 5
+    assert response.id == "ft-12345678-1234-1234-1234-1234567890ab"

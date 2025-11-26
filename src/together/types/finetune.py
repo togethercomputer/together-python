@@ -316,10 +316,10 @@ class FinetunePriceEstimationRequest(BaseModel):
     training_file: str
     validation_file: str | None = None
     model: str
-    n_epochs: int | None = None
-    n_evals: int | None = None
-    training_type: TrainingType | None = None
-    training_method: TrainingMethodSFT | TrainingMethodDPO
+    n_epochs: int
+    n_evals: int
+    training_type: TrainingType
+    training_method: TrainingMethod
 
 
 class FinetunePriceEstimationResponse(BaseModel):

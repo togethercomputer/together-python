@@ -47,8 +47,8 @@ AVAILABLE_TRAINING_METHODS = {
 _WARNING_MESSAGE_INSUFFICIENT_FUNDS = (
     "The estimated price of the fine-tuning job is {} which is significantly "
     "greater than your current credit limit and balance combined. "
-    "It will likely fail due to insufficient funds. "
-    "Please proceed at your own risk."
+    "It will likely get cancelled due to insufficient funds. "
+    "Proceed at your own risk."
 )
 
 
@@ -481,16 +481,25 @@ class FineTuning:
             hf_api_token=hf_api_token,
             hf_output_repo_name=hf_output_repo_name,
         )
-
-        price_estimation_result = self.estimate_price(
-            training_file=training_file,
-            validation_file=validation_file,
-            model=model_name,
-            n_epochs=n_epochs,
-            n_evals=n_evals,
-            training_type="lora" if lora else "full",
-            training_method=training_method,
-        )
+        if from_checkpoint is None:
+            price_estimation_result = self.estimate_price(
+                training_file=training_file,
+                validation_file=validation_file,
+                model=model_name,
+                n_epochs=finetune_request.n_epochs,
+                n_evals=finetune_request.n_evals,
+                training_type="lora" if lora else "full",
+                training_method=training_method,
+            )
+        else:
+            # unsupported case
+            price_estimation_result = FinetunePriceEstimationResponse(
+                estimated_total_price=0.0,
+                allowed_to_proceed=True,
+                estimated_train_token_count=0,
+                estimated_eval_token_count=0,
+                user_limit=0.0,
+            )
 
         if verbose:
             rprint(
@@ -523,10 +532,10 @@ class FineTuning:
         self,
         *,
         training_file: str,
-        model: str | None,
+        model: str,
         validation_file: str | None = None,
-        n_epochs: int | None = None,
-        n_evals: int | None = None,
+        n_epochs: int | None = 1,
+        n_evals: int | None = 0,
         training_type: str = "lora",
         training_method: str = "sft",
     ) -> FinetunePriceEstimationResponse:
@@ -539,8 +548,8 @@ class FineTuning:
         Returns:
             FinetunePriceEstimationResponse: Object containing the estimated price.
         """
-        training_type_cls: TrainingType | None = None
-        training_method_cls: TrainingMethod | None = None
+        training_type_cls: TrainingType
+        training_method_cls: TrainingMethod
 
         if training_method == "sft":
             training_method_cls = TrainingMethodSFT(method="sft")
@@ -1036,15 +1045,25 @@ class AsyncFineTuning:
             hf_output_repo_name=hf_output_repo_name,
         )
 
-        price_estimation_result = await self.estimate_price(
-            training_file=training_file,
-            validation_file=validation_file,
-            model=model_name,
-            n_epochs=n_epochs,
-            n_evals=n_evals,
-            training_type=finetune_request.training_type,
-            training_method=finetune_request.training_method,
-        )
+        if from_checkpoint is not None:
+            price_estimation_result = await self.estimate_price(
+                training_file=training_file,
+                validation_file=validation_file,
+                model=model_name,
+                n_epochs=finetune_request.n_epochs,
+                n_evals=finetune_request.n_evals,
+                training_type="lora" if lora else "full",
+                training_method=training_method,
+            )
+        else:
+            # unsupported case
+            price_estimation_result = FinetunePriceEstimationResponse(
+                estimated_total_price=0.0,
+                allowed_to_proceed=True,
+                estimated_train_token_count=0,
+                estimated_eval_token_count=0,
+                user_limit=0.0,
+            )
 
         if verbose:
             rprint(
@@ -1080,13 +1099,13 @@ class AsyncFineTuning:
         training_file: str,
         model: str,
         validation_file: str | None = None,
-        n_epochs: int | None = None,
-        n_evals: int | None = None,
-        training_type: TrainingType | None = None,
-        training_method: TrainingMethodSFT | TrainingMethodDPO | None = None,
+        n_epochs: int | None = 1,
+        n_evals: int | None = 0,
+        training_type: str = "lora",
+        training_method: str = "sft",
     ) -> FinetunePriceEstimationResponse:
         """
-        Async method to estimate the price of a fine-tuning job
+        Estimates the price of a fine-tuning job
 
         Args:
             request (FinetunePriceEstimationRequest): Request object containing the parameters for the price estimation.
@@ -1094,14 +1113,39 @@ class AsyncFineTuning:
         Returns:
             FinetunePriceEstimationResponse: Object containing the estimated price.
         """
+        training_type_cls: TrainingType
+        training_method_cls: TrainingMethod
+
+        if training_method == "sft":
+            training_method_cls = TrainingMethodSFT(method="sft")
+        elif training_method == "dpo":
+            training_method_cls = TrainingMethodDPO(method="dpo")
+        else:
+            raise ValueError(f"Unknown training method: {training_method}")
+
+        if training_type.lower() == "lora":
+            # parameters of lora are unused in price estimation
+            # but we need to set them to valid values
+            training_type_cls = LoRATrainingType(
+                type="Lora",
+                lora_r=16,
+                lora_alpha=16,
+                lora_dropout=0.0,
+                lora_trainable_modules="all-linear",
+            )
+        elif training_type.lower() == "full":
+            training_type_cls = FullTrainingType(type="Full")
+        else:
+            raise ValueError(f"Unknown training type: {training_type}")
+
         request = FinetunePriceEstimationRequest(
             training_file=training_file,
             validation_file=validation_file,
             model=model,
             n_epochs=n_epochs,
             n_evals=n_evals,
-            training_type=training_type,
-            training_method=training_method,
+            training_type=training_type_cls,
+            training_method=training_method_cls,
         )
         parameter_payload = request.model_dump(exclude_none=True)
         requestor = api_requestor.APIRequestor(
