@@ -431,7 +431,7 @@ def test_create_ft_job(mocker):
         "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
     )
 
-    client = Together()
+    client = Together(api_key="fake_api_key")
     response = client.fine_tuning.create(
         training_file=_TRAINING_FILE,
         model=_MODEL_NAME,
