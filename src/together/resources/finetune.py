@@ -46,7 +46,7 @@ AVAILABLE_TRAINING_METHODS = {
 }
 _WARNING_MESSAGE_INSUFFICIENT_FUNDS = (
     "The estimated price of the fine-tuning job is {} which is significantly "
-    "greater than your current credit limit and balance. "
+    "greater than your current credit limit and balance combined. "
     "It will likely fail due to insufficient funds. "
     "Please proceed at your own risk."
 )

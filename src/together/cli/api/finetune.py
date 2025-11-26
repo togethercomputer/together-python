@@ -41,7 +41,7 @@ _CONFIRMATION_MESSAGE = (
 )
 
 _WARNING_MESSAGE_INSUFFICIENT_FUNDS = (
-    "The estimated price of this job is significantly greater than your current credit limit and balance. "
+    "The estimated price of this job is significantly greater than your current credit limit and balance combined. "
     "It will likely fail due to insufficient funds. "
     "Please consider increasing your credit limit at https://api.together.xyz/settings/profile\n"
 )
