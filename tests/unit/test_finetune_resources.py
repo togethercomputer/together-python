@@ -406,7 +406,7 @@ def test_price_estimation_request(mocker):
         None,
         None,
     )
-    client = Together()
+    client = Together(api_key="fake_api_key")
     for test_case in test_data:
         response = client.fine_tuning.estimate_price(
             training_file=_TRAINING_FILE,
