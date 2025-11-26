@@ -10,8 +10,6 @@ class ImageRequest(BaseModel):
     prompt: str
     # model to query
     model: str
-    # num generation steps
-    steps: int | None = 20
     # seed
     seed: int | None = None
     # number of results to return

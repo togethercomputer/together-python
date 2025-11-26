@@ -38,7 +38,7 @@ class ChatCompletions:
         echo: bool | None = None,
         n: int | None = None,
         safety_model: str | None = None,
-        response_format: Dict[str, str | Dict[str, Any]] | None = None,
+        response_format: Dict[str, Any] | None = None,
         tools: List[Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
         **kwargs: Any,

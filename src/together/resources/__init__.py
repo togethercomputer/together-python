@@ -8,6 +8,9 @@ from together.resources.finetune import AsyncFineTuning, FineTuning
 from together.resources.images import AsyncImages, Images
 from together.resources.models import AsyncModels, Models
 from together.resources.rerank import AsyncRerank, Rerank
+from together.resources.batch import Batches, AsyncBatches
+from together.resources.evaluation import Evaluation, AsyncEvaluation
+from together.resources.videos import AsyncVideos, Videos
 
 
 __all__ = [
@@ -31,4 +34,10 @@ __all__ = [
     "Audio",
     "AsyncEndpoints",
     "Endpoints",
+    "Batches",
+    "AsyncBatches",
+    "Evaluation",
+    "AsyncEvaluation",
+    "AsyncVideos",
+    "Videos",
 ]

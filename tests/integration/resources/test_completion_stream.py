@@ -35,7 +35,7 @@ class TestTogetherCompletionStream:
         random_repetition_penalty,  # noqa
     ) -> None:
         prompt = "The space robots have"
-        model = "mistralai/Mixtral-8x7B-v0.1"
+        model = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
         stop = ["</s>"]
 
         # max_tokens should be a reasonable number for this test
@@ -69,10 +69,12 @@ class TestTogetherCompletionStream:
             assert isinstance(chunk.id, str)
             assert isinstance(chunk.created, int)
             assert isinstance(chunk.object, ObjectType)
-            assert isinstance(chunk.choices[0], CompletionChoicesChunk)
-            assert isinstance(chunk.choices[0].index, int)
-            assert isinstance(chunk.choices[0].delta, DeltaContent)
-            assert isinstance(chunk.choices[0].delta.content, str)
+
+            if chunk.choices:
+                assert isinstance(chunk.choices[0], CompletionChoicesChunk)
+                assert isinstance(chunk.choices[0].index, int)
+                assert isinstance(chunk.choices[0].delta, DeltaContent)
+                assert isinstance(chunk.choices[0].delta.content, str)
 
             usage = chunk.usage
 

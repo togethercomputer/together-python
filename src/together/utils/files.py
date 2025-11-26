@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import csv
 from pathlib import Path
 from traceback import format_exc
 from typing import Any, Dict, List
 
-from pyarrow import ArrowInvalid, parquet
+from tqdm import tqdm
 
 from together.constants import (
     MAX_FILE_SIZE_GB,
@@ -18,6 +19,7 @@ from together.constants import (
     POSSIBLE_ROLES_CONVERSATION,
     DatasetFormat,
 )
+from together.types import FilePurpose
 
 
 class InvalidFileFormatError(ValueError):
@@ -37,6 +39,7 @@ class InvalidFileFormatError(ValueError):
 
 def check_file(
     file: Path | str,
+    purpose: FilePurpose | str = FilePurpose.FineTune,
 ) -> Dict[str, Any]:
     if not isinstance(file, Path):
         file = Path(file)
@@ -53,6 +56,7 @@ def check_file(
         "has_min_samples": None,
         "num_samples": None,
         "load_json": None,
+        "load_csv": None,
     }
 
     if not file.is_file():
@@ -62,7 +66,7 @@ def check_file(
     else:
         report_dict["found"] = True
 
-    file_size = os.stat(file.as_posix()).st_size
+    file_size = os.stat(file).st_size
 
     if file_size > MAX_FILE_SIZE_GB * NUM_BYTES_IN_GB:
         report_dict["message"] = (
@@ -80,10 +84,13 @@ def check_file(
     data_report_dict = {}
     if file.suffix == ".jsonl":
         report_dict["filetype"] = "jsonl"
-        data_report_dict = _check_jsonl(file)
+        data_report_dict = _check_jsonl(file, purpose)
     elif file.suffix == ".parquet":
         report_dict["filetype"] = "parquet"
-        data_report_dict = _check_parquet(file)
+        data_report_dict = _check_parquet(file, purpose)
+    elif file.suffix == ".csv":
+        report_dict["filetype"] = "csv"
+        data_report_dict = _check_csv(file, purpose)
     else:
         report_dict["filetype"] = (
             f"Unknown extension of file {file}. "
@@ -96,81 +103,163 @@ def check_file(
     return report_dict
 
 
-def validate_messages(messages: List[Dict[str, str | bool]], idx: int) -> None:
-    """Validate the messages column."""
+def _check_conversation_type(messages: List[Dict[str, str | bool]], idx: int) -> None:
+    """Check that the conversation has correct type.
+
+    Args:
+        messages: The messages in the conversation.
+            Can be any type, this function ensures that the messages are a list of dictionaries.
+        idx: Line number in the file.
+
+    Raises:
+        InvalidFileFormatError: If the conversation type is invalid.
+    """
     if not isinstance(messages, list):
         raise InvalidFileFormatError(
             message=f"Invalid format on line {idx + 1} of the input file. "
-            f"Expected a list of messages. Found {type(messages)}",
+            f"The `messages` column must be a list. Found {type(messages)}",
             line_number=idx + 1,
             error_source="key_value",
         )
-    if not messages:
+    if len(messages) == 0:
         raise InvalidFileFormatError(
             message=f"Invalid format on line {idx + 1} of the input file. "
-            f"Expected a non-empty list of messages. Found empty list",
+            f"The `messages` column must not be empty.",
             line_number=idx + 1,
             error_source="key_value",
         )
 
-    has_weights = any("weight" in message for message in messages)
-
-    previous_role = None
     for message in messages:
         if not isinstance(message, dict):
             raise InvalidFileFormatError(
                 message=f"Invalid format on line {idx + 1} of the input file. "
-                f"Expected a dictionary in the messages list. Found {type(message)}",
+                f"The `messages` column must be a list of dicts. Found {type(message)}",
                 line_number=idx + 1,
                 error_source="key_value",
             )
+
         for column in REQUIRED_COLUMNS_MESSAGE:
             if column not in message:
                 raise InvalidFileFormatError(
-                    message=f"Field `{column}` is missing for a turn `{message}` on line {idx + 1} "
-                    "of the the input file.",
+                    message=f"Missing required column `{column}` in message on line {idx + 1}.",
                     line_number=idx + 1,
                     error_source="key_value",
                 )
-            else:
-                if not isinstance(message[column], str):
-                    raise InvalidFileFormatError(
-                        message=f"Invalid format on line {idx + 1} in the column {column} for turn `{message}` "
-                        f"of the input file. Expected string. Found {type(message[column])}",
-                        line_number=idx + 1,
-                        error_source="text_field",
-                    )
+            if not isinstance(message[column], str):
+                raise InvalidFileFormatError(
+                    message=f"Column `{column}` is not a string on line {idx + 1}. Found {type(message[column])}",
+                    line_number=idx + 1,
+                    error_source="text_field",
+                )
 
-        if has_weights and "weight" in message:
-            weight = message["weight"]
-            if not isinstance(weight, int):
-                raise InvalidFileFormatError(
-                    message="Weight must be an integer",
-                    line_number=idx + 1,
-                    error_source="key_value",
-                )
-            if weight not in {0, 1}:
-                raise InvalidFileFormatError(
-                    message="Weight must be either 0 or 1",
-                    line_number=idx + 1,
-                    error_source="key_value",
-                )
-        if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
+
+def _check_conversation_roles(
+    require_assistant_role: bool, assistant_role_exists: bool, idx: int
+) -> None:
+    """Check that the conversation has correct roles.
+
+    Args:
+        require_assistant_role: Whether to require at least one assistant role.
+        assistant_role_exists: Whether an assistant role exists in the conversation.
+        idx: Line number in the file.
+
+    Raises:
+        InvalidFileFormatError: If the conversation roles are invalid.
+    """
+    if require_assistant_role and not assistant_role_exists:
+        raise InvalidFileFormatError(
+            message=f"Invalid format on line {idx + 1} of the input file. "
+            "At least one message with the assistant role must be present in the example.",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+
+
+def _check_message_weight(message: Dict[str, str | bool], idx: int) -> None:
+    """Check that the message has a weight with the correct type and value.
+
+    Args:
+        message: The message to check.
+        idx: Line number in the file.
+
+    Raises:
+        InvalidFileFormatError: If the message weight is invalid.
+    """
+    if "weight" in message:
+        weight = message["weight"]
+        if not isinstance(weight, int):
             raise InvalidFileFormatError(
-                message=f"Found invalid role `{message['role']}` in the messages on the line {idx + 1}. "
-                f"Possible roles in the conversation are: {POSSIBLE_ROLES_CONVERSATION}",
+                message=f"Weight must be an integer on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+        if weight not in {0, 1}:
+            raise InvalidFileFormatError(
+                message=f"Weight must be either 0 or 1 on line {idx + 1}.",
                 line_number=idx + 1,
                 error_source="key_value",
             )
 
-        if previous_role == message["role"]:
-            raise InvalidFileFormatError(
-                message=f"Invalid role turns on line {idx + 1} of the input file. "
-                "`user` and `assistant` roles must alternate user/assistant/user/assistant/...",
-                line_number=idx + 1,
-                error_source="key_value",
-            )
-        previous_role = message["role"]
+
+def _check_message_role(
+    message: Dict[str, str | bool], previous_role: str | None, idx: int
+) -> str | bool:
+    """Check that the message has correct roles.
+
+    Args:
+        message: The message to check.
+        previous_role: The role of the previous message.
+        idx: Line number in the file.
+
+    Returns:
+        str: The role of the current message.
+
+    Raises:
+        InvalidFileFormatError: If the message role is invalid.
+    """
+    if message["role"] not in POSSIBLE_ROLES_CONVERSATION:
+        raise InvalidFileFormatError(
+            message=f"Invalid role `{message['role']}` in conversation on line {idx + 1}. "
+            f"Possible roles: {', '.join(POSSIBLE_ROLES_CONVERSATION)}",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+    if previous_role is not None and message["role"] == previous_role:
+        raise InvalidFileFormatError(
+            message=f"Invalid role turns on line {idx + 1} of the input file. "
+            "After the optional system message, conversation roles must alternate between user/assistant/user/assistant.",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+    return message["role"]
+
+
+def validate_messages(
+    messages: List[Dict[str, str | bool]], idx: int, require_assistant_role: bool = True
+) -> None:
+    """Validate the messages column.
+
+    Args:
+        messages: List of message dictionaries to validate.
+        idx: Line number in the file.
+        require_assistant_role: Whether to require at least one assistant role.
+
+    Raises:
+        InvalidFileFormatError: If the messages are invalid.
+    """
+    _check_conversation_type(messages, idx)
+
+    has_weights = any("weight" in message for message in messages)
+    previous_role = None
+    assistant_role_exists = False
+
+    for message in messages:
+        if has_weights:
+            _check_message_weight(message, idx)
+        previous_role = _check_message_role(message, previous_role, idx)
+        assistant_role_exists |= previous_role == "assistant"
+
+    _check_conversation_roles(require_assistant_role, assistant_role_exists, idx)
 
 
 def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
@@ -197,57 +286,197 @@ def validate_preference_openai(example: Dict[str, Any], idx: int = 0) -> None:
             error_source="key_value",
         )
 
-    validate_messages(example["input"]["messages"], idx)
+    validate_messages(example["input"]["messages"], idx, require_assistant_role=False)
 
-    for output_field in ["preferred_output", "non_preferred_output"]:
-        if not isinstance(example[output_field], list):
+    if example["input"]["messages"][-1]["role"] == "assistant":
+        raise InvalidFileFormatError(
+            message=f"The last message in the input conversation must not be from the assistant on line {idx + 1}.",
+            line_number=idx + 1,
+            error_source="key_value",
+        )
+
+    keys = ["preferred_output", "non_preferred_output"]
+
+    for key in keys:
+        if key not in example:
             raise InvalidFileFormatError(
-                message=f"The dataset is malformed, the `{output_field}` field must be a list.",
+                message=f"The dataset is malformed, the `{key}` field must be present in the input dictionary on line {idx + 1}.",
                 line_number=idx + 1,
                 error_source="key_value",
             )
 
-        if len(example[output_field]) != 1:
+        if not isinstance(example[key], list):
             raise InvalidFileFormatError(
-                message=f"The dataset is malformed, the `{output_field}` list must contain exactly one message.",
-                line_number=idx + 1,
-                error_source="key_value",
-            )
-        if "role" not in example[output_field][0]:
-            raise InvalidFileFormatError(
-                message=f"The dataset is malformed, the `{output_field}` message is missing the `role` field.",
-                line_number=idx + 1,
-                error_source="key_value",
-            )
-        elif example[output_field][0]["role"] != "assistant":
-            raise InvalidFileFormatError(
-                message=f"The dataset is malformed, the `{output_field}` must contain an assistant message.",
+                message=f"The dataset is malformed, the `{key}` field must be a list on line {idx + 1}.",
                 line_number=idx + 1,
                 error_source="key_value",
             )
 
-    validate_messages(example["preferred_output"], idx)
-    validate_messages(example["non_preferred_output"], idx)
+        if len(example[key]) != 1:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the `{key}` list must contain exactly one message on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if not isinstance(example[key][0], dict):
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the first element of `{key}` must be a dictionary on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if "role" not in example[key][0]:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the first element of `{key}` must have a 'role' field on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if example[key][0]["role"] != "assistant":
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the first element of `{key}` must have the 'assistant' role on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if "content" not in example[key][0]:
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the first element of `{key}` must have a 'content' field on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
+
+        if not isinstance(example[key][0]["content"], str):
+            raise InvalidFileFormatError(
+                message=f"The dataset is malformed, the 'content' field in `{key}` must be a string on line {idx + 1}.",
+                line_number=idx + 1,
+                error_source="key_value",
+            )
 
 
-def _check_jsonl(file: Path) -> Dict[str, Any]:
+def _check_utf8(file: Path) -> Dict[str, Any]:
+    """Check if the file is UTF-8 encoded.
+
+    Args:
+        file (Path): Path to the file to check.
+    Returns:
+        Dict[str, Any]: A dictionary with the results of the check.
+    """
     report_dict: Dict[str, Any] = {}
-    # Check that the file is UTF-8 encoded. If not report where the error occurs.
+
     try:
+        # Dry-run UTF-8 decode: iterate through file to validate encoding
         with file.open(encoding="utf-8") as f:
-            f.read()
+            for _ in f:
+                pass
+
         report_dict["utf8"] = True
     except UnicodeDecodeError as e:
         report_dict["utf8"] = False
         report_dict["message"] = f"File is not UTF-8 encoded. Error raised: {e}."
         report_dict["is_check_passed"] = False
+
+    return report_dict
+
+
+def _check_samples_count(
+    file: Path, report_dict: Dict[str, Any], idx: int
+) -> Dict[str, Any]:
+    if idx + 1 < MIN_SAMPLES:
+        report_dict["has_min_samples"] = False
+        report_dict["message"] = (
+            f"Processing {file} resulted in only {idx + 1} samples. "
+            f"Our minimum is {MIN_SAMPLES} samples. "
+        )
+        report_dict["is_check_passed"] = False
+    else:
+        report_dict["num_samples"] = idx + 1
+        report_dict["has_min_samples"] = True
+
+    return report_dict
+
+
+def _check_csv(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
+    """Check if the file is a valid CSV file.
+
+    Args:
+        file (Path): Path to the file to check.
+        purpose (FilePurpose | str): Purpose of the file, used to determine if the file should be checked for specific columns.
+
+    Returns:
+        Dict[str, Any]: A dictionary with the results of the check.
+    """
+    report_dict: Dict[str, Any] = {}
+    if purpose != FilePurpose.Eval:
+        report_dict["is_check_passed"] = False
+        report_dict["message"] = (
+            f"CSV files are not supported for {purpose}. "
+            "Only JSONL and Parquet files are supported."
+        )
+        return report_dict
+
+    report_dict.update(_check_utf8(file))
+
+    if not report_dict["utf8"]:
+        return report_dict
+
+    with file.open() as f:
+        reader = csv.DictReader(f)
+        if not reader.fieldnames:
+            report_dict["message"] = "CSV file is empty or has no header."
+            report_dict["is_check_passed"] = False
+            return report_dict
+        idx = -1
+
+        try:
+            # for loop to iterate through the CSV rows
+            for idx, item in enumerate(reader):
+                if None in item.keys() or None in item.values():
+                    raise InvalidFileFormatError(
+                        message=f"CSV file is malformed or the number of columns found on line {idx + 1} is inconsistent with the header",
+                        line_number=idx + 1,
+                        error_source="format",
+                    )
+
+            report_dict.update(_check_samples_count(file, report_dict, idx))
+            report_dict["load_csv"] = True
+
+        except InvalidFileFormatError as e:
+            report_dict["load_csv"] = False
+            report_dict["is_check_passed"] = False
+            report_dict["message"] = e.message
+            if e.line_number is not None:
+                report_dict["line_number"] = e.line_number
+            if e.error_source is not None:
+                report_dict[e.error_source] = False
+        except ValueError:
+            report_dict["load_csv"] = False
+            if idx < 0:
+                report_dict["message"] = (
+                    "Unable to decode file. "
+                    "File may be empty or in an unsupported format. "
+                )
+            else:
+                report_dict["message"] = (
+                    f"Error parsing the CSV file. Unexpected format on line {idx + 1}."
+                )
+            report_dict["is_check_passed"] = False
+
+    return report_dict
+
+
+def _check_jsonl(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
+    report_dict: Dict[str, Any] = {}
+    report_dict.update(_check_utf8(file))
+    if not report_dict["utf8"]:
         return report_dict
 
     dataset_format = None
     with file.open() as f:
         idx = -1
         try:
-            for idx, line in enumerate(f):
+            for idx, line in tqdm(enumerate(f), desc="Validating file", unit=" lines"):
                 json_line = json.loads(line)
 
                 if not isinstance(json_line, dict):
@@ -260,84 +489,80 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
                         line_number=idx + 1,
                         error_source="line_type",
                     )
-
-                current_format = None
-                for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
-                    if all(
-                        column in json_line
-                        for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
-                    ):
-                        if current_format is None:
-                            current_format = possible_format
-                        elif current_format != possible_format:
-                            raise InvalidFileFormatError(
-                                message="Found multiple dataset formats in the input file. "
-                                f"Got {current_format} and {possible_format} on line {idx + 1}.",
-                                line_number=idx + 1,
-                                error_source="format",
-                            )
-
-                        # Check that there are no extra columns
-                        for column in json_line:
-                            if (
-                                column
-                                not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
-                            ):
+                # In evals, we don't check the format of the dataset.
+                if purpose != FilePurpose.Eval:
+                    current_format = None
+                    for possible_format in JSONL_REQUIRED_COLUMNS_MAP:
+                        if all(
+                            column in json_line
+                            for column in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                        ):
+                            if current_format is None:
+                                current_format = possible_format
+                            elif current_format != possible_format:
                                 raise InvalidFileFormatError(
-                                    message=f'Found extra column "{column}" in the line {idx + 1}.',
+                                    message="Found multiple dataset formats in the input file. "
+                                    f"Got {current_format} and {possible_format} on line {idx + 1}.",
                                     line_number=idx + 1,
                                     error_source="format",
                                 )
 
-                if current_format is None:
-                    raise InvalidFileFormatError(
-                        message=(
-                            f"Error parsing file. Could not detect a format for the line {idx + 1} with the columns:\n"
-                            f"{json_line.keys()}"
-                        ),
-                        line_number=idx + 1,
-                        error_source="format",
-                    )
-                if current_format == DatasetFormat.PREFERENCE_OPENAI:
-                    validate_preference_openai(json_line, idx)
-                elif current_format == DatasetFormat.CONVERSATION:
-                    message_column = JSONL_REQUIRED_COLUMNS_MAP[
-                        DatasetFormat.CONVERSATION
-                    ][0]
-                    validate_messages(json_line[message_column], idx)
-                else:
-                    for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
-                        if not isinstance(json_line[column], str):
-                            raise InvalidFileFormatError(
-                                message=f'Invalid value type for "{column}" key on line {idx + 1}. '
-                                f"Expected string. Found {type(json_line[column])}.",
-                                line_number=idx + 1,
-                                error_source="key_value",
-                            )
+                            # Check that there are no extra columns
+                            for column in json_line:
+                                if (
+                                    column
+                                    not in JSONL_REQUIRED_COLUMNS_MAP[possible_format]
+                                ):
+                                    raise InvalidFileFormatError(
+                                        message=f'Found extra column "{column}" in the line {idx + 1}.',
+                                        line_number=idx + 1,
+                                        error_source="format",
+                                    )
 
-                if dataset_format is None:
-                    dataset_format = current_format
-                elif current_format is not None:
-                    if current_format != dataset_format:
+                    if current_format is None:
                         raise InvalidFileFormatError(
-                            message="All samples in the dataset must have the same dataset format. "
-                            f"Got {dataset_format} for the first line and {current_format} "
-                            f"for the line {idx + 1}.",
+                            message=(
+                                f"Error parsing file. Could not detect a format for the line {idx + 1} with the columns:\n"
+                                f"{json_line.keys()}"
+                            ),
                             line_number=idx + 1,
                             error_source="format",
                         )
+                    if current_format == DatasetFormat.PREFERENCE_OPENAI:
+                        validate_preference_openai(json_line, idx)
+                    elif current_format == DatasetFormat.CONVERSATION:
+                        message_column = JSONL_REQUIRED_COLUMNS_MAP[
+                            DatasetFormat.CONVERSATION
+                        ][0]
+                        require_assistant = purpose != FilePurpose.Eval
+                        validate_messages(
+                            json_line[message_column],
+                            idx,
+                            require_assistant_role=require_assistant,
+                        )
+                    else:
+                        for column in JSONL_REQUIRED_COLUMNS_MAP[current_format]:
+                            if not isinstance(json_line[column], str):
+                                raise InvalidFileFormatError(
+                                    message=f'Invalid value type for "{column}" key on line {idx + 1}. '
+                                    f"Expected string. Found {type(json_line[column])}.",
+                                    line_number=idx + 1,
+                                    error_source="key_value",
+                                )
 
-            if idx + 1 < MIN_SAMPLES:
-                report_dict["has_min_samples"] = False
-                report_dict["message"] = (
-                    f"Processing {file} resulted in only {idx + 1} samples. "
-                    f"Our minimum is {MIN_SAMPLES} samples. "
-                )
-                report_dict["is_check_passed"] = False
-            else:
-                report_dict["num_samples"] = idx + 1
-                report_dict["has_min_samples"] = True
-                report_dict["is_check_passed"] = True
+                    if dataset_format is None:
+                        dataset_format = current_format
+                    elif current_format is not None:
+                        if current_format != dataset_format:
+                            raise InvalidFileFormatError(
+                                message="All samples in the dataset must have the same dataset format. "
+                                f"Got {dataset_format} for the first line and {current_format} "
+                                f"for the line {idx + 1}.",
+                                line_number=idx + 1,
+                                error_source="format",
+                            )
+
+            report_dict.update(_check_samples_count(file, report_dict, idx))
 
             report_dict["load_json"] = True
 
@@ -371,8 +596,23 @@ def _check_jsonl(file: Path) -> Dict[str, Any]:
     return report_dict
 
 
-def _check_parquet(file: Path) -> Dict[str, Any]:
+def _check_parquet(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
+    try:
+        # Pyarrow is optional as it's large (~80MB) and isn't compatible with older systems.
+        from pyarrow import ArrowInvalid, parquet
+    except ImportError:
+        raise ImportError(
+            "pyarrow is not installed and is required to use parquet files. Please install it via `pip install together[pyarrow]`"
+        )
+
     report_dict: Dict[str, Any] = {}
+    if purpose == FilePurpose.Eval:
+        report_dict["is_check_passed"] = False
+        report_dict["message"] = (
+            f"Parquet files are not supported for {purpose}. "
+            "Only JSONL and CSV files are supported."
+        )
+        return report_dict
 
     try:
         table = parquet.read_table(str(file), memory_map=True)
@@ -392,6 +632,7 @@ def _check_parquet(file: Path) -> Dict[str, Any]:
         report_dict["is_check_passed"] = False
         return report_dict
 
+    # Don't check for eval
     for column_name in column_names:
         if column_name not in PARQUET_EXPECTED_COLUMNS:
             report_dict["load_parquet"] = (

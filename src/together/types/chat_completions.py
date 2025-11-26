@@ -28,6 +28,7 @@ class MessageRole(str, Enum):
 class ResponseFormatType(str, Enum):
     JSON_OBJECT = "json_object"
     JSON_SCHEMA = "json_schema"
+    REGEX = "regex"
 
 
 class FunctionCall(BaseModel):
@@ -45,6 +46,7 @@ class ChatCompletionMessageContentType(str, Enum):
     TEXT = "text"
     IMAGE_URL = "image_url"
     VIDEO_URL = "video_url"
+    AUDIO_URL = "audio_url"
 
 
 class ChatCompletionMessageContentImageURL(BaseModel):
@@ -55,11 +57,16 @@ class ChatCompletionMessageContentVideoURL(BaseModel):
     url: str
 
 
+class ChatCompletionMessageContentAudioURL(BaseModel):
+    url: str
+
+
 class ChatCompletionMessageContent(BaseModel):
     type: ChatCompletionMessageContentType
     text: str | None = None
     image_url: ChatCompletionMessageContentImageURL | None = None
     video_url: ChatCompletionMessageContentVideoURL | None = None
+    audio_url: ChatCompletionMessageContentAudioURL | None = None
 
 
 class ChatCompletionMessage(BaseModel):
@@ -71,9 +78,15 @@ class ChatCompletionMessage(BaseModel):
 class ResponseFormat(BaseModel):
     type: ResponseFormatType
     schema_: Dict[str, Any] | None = None
+    pattern: str | None = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"schema": self.schema_, "type": self.type}
+        result: Dict[str, Any] = {"type": self.type.value}
+        if self.schema_ is not None:
+            result["schema"] = self.schema_
+        if self.pattern is not None:
+            result["pattern"] = self.pattern
+        return result
 
 
 class FunctionTool(BaseModel):
@@ -98,6 +111,7 @@ class ToolChoice(BaseModel):
 
 class ToolChoiceEnum(str, Enum):
     Auto = "auto"
+    Required = "required"
 
 
 class ChatCompletionRequest(BaseModel):

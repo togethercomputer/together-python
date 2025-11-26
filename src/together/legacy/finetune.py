@@ -16,7 +16,7 @@ class Finetune:
         model: str,
         n_epochs: int = 1,
         n_checkpoints: int | None = 1,
-        batch_size: int | None = 32,
+        batch_size: int | Literal["max"] = "max",
         learning_rate: float = 0.00001,
         suffix: (
             str | None
@@ -43,7 +43,7 @@ class Finetune:
             model=model,
             n_epochs=n_epochs,
             n_checkpoints=n_checkpoints,
-            batch_size=batch_size if isinstance(batch_size, int) else "max",
+            batch_size=batch_size,
             learning_rate=learning_rate,
             suffix=suffix,
             wandb_api_key=wandb_api_key,

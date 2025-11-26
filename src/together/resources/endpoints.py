@@ -13,13 +13,18 @@ class Endpoints:
         self._client = client
 
     def list(
-        self, type: Optional[Literal["dedicated", "serverless"]] = None
+        self,
+        type: Optional[Literal["dedicated", "serverless"]] = None,
+        usage_type: Optional[Literal["on-demand", "reserved"]] = None,
+        mine: Optional[bool] = None,
     ) -> List[ListEndpoint]:
         """
-        List all endpoints, can be filtered by type.
+        List all endpoints, can be filtered by endpoint type and ownership.
 
         Args:
-            type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+            type (str, optional): Filter endpoints by endpoint type ("dedicated" or "serverless"). Defaults to None.
+            usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
@@ -28,9 +33,20 @@ class Endpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[
+            str,
+            Union[
+                Literal["dedicated", "serverless"],
+                Literal["on-demand", "reserved"],
+                bool,
+            ],
+        ] = {}
         if type is not None:
             params["type"] = type
+        if usage_type is not None:
+            params["usage_type"] = usage_type
+        if mine is not None:
+            params["mine"] = mine
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -56,10 +72,11 @@ class Endpoints:
         min_replicas: int,
         max_replicas: int,
         display_name: Optional[str] = None,
-        disable_prompt_cache: bool = False,
-        disable_speculative_decoding: bool = False,
+        disable_prompt_cache: bool = True,
+        disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
+        availability_zone: Optional[str] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -74,6 +91,7 @@ class Endpoints:
             disable_speculative_decoding (bool, optional): Whether to disable speculative decoding. Defaults to False.
             state (str, optional): The desired state of the endpoint. Defaults to "STARTED".
             inactive_timeout (int, optional): The number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable automatic timeout.
+            availability_zone (str, optional): Start endpoint in specified availability zone (e.g., us-central-4b).
 
         Returns:
             DedicatedEndpoint: Object containing endpoint information
@@ -99,6 +117,9 @@ class Endpoints:
 
         if inactive_timeout is not None:
             data["inactive_timeout"] = inactive_timeout
+
+        if availability_zone is not None:
+            data["availability_zone"] = availability_zone
 
         response, _, _ = requestor.request(
             options=TogetherRequest(
@@ -257,19 +278,49 @@ class Endpoints:
 
         return [HardwareWithStatus(**item) for item in response.data["data"]]
 
+    def list_avzones(self) -> List[str]:
+        """
+        List all available availability zones.
+
+        Returns:
+            List[str]: List of unique availability zones
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="GET",
+                url="clusters/availability-zones",
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, dict)
+        assert isinstance(response.data["avzones"], list)
+
+        return response.data["avzones"]
+
 
 class AsyncEndpoints:
     def __init__(self, client: TogetherClient) -> None:
         self._client = client
 
     async def list(
-        self, type: Optional[Literal["dedicated", "serverless"]] = None
+        self,
+        type: Optional[Literal["dedicated", "serverless"]] = None,
+        usage_type: Optional[Literal["on-demand", "reserved"]] = None,
+        mine: Optional[bool] = None,
     ) -> List[ListEndpoint]:
         """
-        List all endpoints, can be filtered by type.
+        List all endpoints, can be filtered by type and ownership.
 
         Args:
             type (str, optional): Filter endpoints by type ("dedicated" or "serverless"). Defaults to None.
+            usage_type (str, optional): Filter endpoints by usage type ("on-demand" or "reserved"). Defaults to None.
+            mine (bool, optional): If True, return only endpoints owned by the caller. Defaults to None.
 
         Returns:
             List[ListEndpoint]: List of endpoint objects
@@ -278,9 +329,20 @@ class AsyncEndpoints:
             client=self._client,
         )
 
-        params = {}
+        params: Dict[
+            str,
+            Union[
+                Literal["dedicated", "serverless"],
+                Literal["on-demand", "reserved"],
+                bool,
+            ],
+        ] = {}
         if type is not None:
             params["type"] = type
+        if usage_type is not None:
+            params["usage_type"] = usage_type
+        if mine is not None:
+            params["mine"] = mine
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
@@ -304,10 +366,11 @@ class AsyncEndpoints:
         min_replicas: int,
         max_replicas: int,
         display_name: Optional[str] = None,
-        disable_prompt_cache: bool = False,
-        disable_speculative_decoding: bool = False,
+        disable_prompt_cache: bool = True,
+        disable_speculative_decoding: bool = True,
         state: Literal["STARTED", "STOPPED"] = "STARTED",
         inactive_timeout: Optional[int] = None,
+        availability_zone: Optional[str] = None,
     ) -> DedicatedEndpoint:
         """
         Create a new dedicated endpoint.
@@ -347,6 +410,9 @@ class AsyncEndpoints:
 
         if inactive_timeout is not None:
             data["inactive_timeout"] = inactive_timeout
+
+        if availability_zone is not None:
+            data["availability_zone"] = availability_zone
 
         response, _, _ = await requestor.arequest(
             options=TogetherRequest(
@@ -506,3 +572,28 @@ class AsyncEndpoints:
         assert isinstance(response.data["data"], list)
 
         return [HardwareWithStatus(**item) for item in response.data["data"]]
+
+    async def list_avzones(self) -> List[str]:
+        """
+        List all availability zones.
+
+        Returns:
+            List[str]: List of unique availability zones
+        """
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="GET",
+                url="clusters/availability-zones",
+            ),
+            stream=False,
+        )
+
+        assert isinstance(response, TogetherResponse)
+        assert isinstance(response.data, dict)
+        assert isinstance(response.data["avzones"], list)
+
+        return response.data["avzones"]

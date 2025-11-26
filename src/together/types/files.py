@@ -13,11 +13,15 @@ from together.types.common import (
 
 class FilePurpose(str, Enum):
     FineTune = "fine-tune"
+    BatchAPI = "batch-api"
+    Eval = "eval"
+    EvalOutput = "eval-output"
 
 
 class FileType(str, Enum):
     jsonl = "jsonl"
     parquet = "parquet"
+    csv = "csv"
 
 
 class FileRequest(BaseModel):
@@ -49,7 +53,7 @@ class FileResponse(BaseModel):
     """
 
     id: str
-    object: Literal[ObjectType.File]
+    object: str
     # created timestamp
     created_at: int | None = None
     type: FileType | None = None

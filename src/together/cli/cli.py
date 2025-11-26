@@ -9,6 +9,7 @@ import together
 from together.cli.api.chat import chat, interactive
 from together.cli.api.completions import completions
 from together.cli.api.endpoints import endpoints
+from together.cli.api.evaluation import evaluation
 from together.cli.api.files import files
 from together.cli.api.finetune import fine_tuning
 from together.cli.api.images import images
@@ -74,6 +75,7 @@ main.add_command(files)
 main.add_command(fine_tuning)
 main.add_command(models)
 main.add_command(endpoints)
+main.add_command(evaluation)
 
 if __name__ == "__main__":
     main()

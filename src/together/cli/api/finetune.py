@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
-import re
 
 import click
 from click.core import ParameterSource  # type: ignore[attr-defined]
@@ -13,17 +13,17 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX
+from together.types.finetune import (
+    DownloadCheckpointType,
+    FinetuneEventType,
+    FinetuneTrainingLimits,
+)
 from together.utils import (
     finetune_price_to_dollars,
+    format_timestamp,
     log_warn,
     log_warn_once,
     parse_timestamp,
-    format_timestamp,
-)
-from together.types.finetune import (
-    DownloadCheckpointType,
-    FinetuneTrainingLimits,
-    FinetuneEventType,
 )
 
 
@@ -58,19 +58,33 @@ def fine_tuning(ctx: click.Context) -> None:
 @fine_tuning.command()
 @click.pass_context
 @click.option(
-    "--training-file", type=str, required=True, help="Training file ID from Files API"
+    "--training-file",
+    "-t",
+    type=str,
+    required=True,
+    help="Training file ID from Files API",
 )
-@click.option("--model", type=str, required=True, help="Base model name")
-@click.option("--n-epochs", type=int, default=1, help="Number of epochs to train for")
+@click.option("--model", "-m", type=str, help="Base model name")
+@click.option(
+    "--n-epochs", "-ne", type=int, default=1, help="Number of epochs to train for"
+)
 @click.option(
     "--validation-file", type=str, default="", help="Validation file ID from Files API"
 )
 @click.option("--n-evals", type=int, default=0, help="Number of evaluation loops")
 @click.option(
-    "--n-checkpoints", type=int, default=1, help="Number of checkpoints to save"
+    "--n-checkpoints", "-c", type=int, default=1, help="Number of checkpoints to save"
 )
-@click.option("--batch-size", type=INT_WITH_MAX, default="max", help="Train batch size")
-@click.option("--learning-rate", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--batch-size", "-b", type=INT_WITH_MAX, default="max", help="Train batch size"
+)
+@click.option("--learning-rate", "-lr", type=float, default=1e-5, help="Learning rate")
+@click.option(
+    "--lr-scheduler-type",
+    type=click.Choice(["linear", "cosine"]),
+    default="cosine",
+    help="Learning rate scheduler type",
+)
 @click.option(
     "--min-lr-ratio",
     type=float,
@@ -78,10 +92,16 @@ def fine_tuning(ctx: click.Context) -> None:
     help="The ratio of the final learning rate to the peak learning rate",
 )
 @click.option(
+    "--scheduler-num-cycles",
+    type=float,
+    default=0.5,
+    help="Number or fraction of cycles for the cosine learning rate scheduler.",
+)
+@click.option(
     "--warmup-ratio",
     type=float,
     default=0.0,
-    help="Warmup ratio for learning rate scheduler.",
+    help="Warmup ratio for the learning rate scheduler.",
 )
 @click.option(
     "--max-grad-norm",
@@ -119,11 +139,39 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--dpo-beta",
     type=float,
-    default=0.1,
+    default=None,
     help="Beta parameter for DPO training (only used when '--training-method' is 'dpo')",
 )
 @click.option(
-    "--suffix", type=str, default=None, help="Suffix for the fine-tuned model name"
+    "--dpo-normalize-logratios-by-length",
+    type=bool,
+    default=False,
+    help=(
+        "Whether to normalize logratios by sample length "
+        "(only used when '--training-method' is 'dpo')"
+    ),
+)
+@click.option(
+    "--rpo-alpha",
+    type=float,
+    default=None,
+    help=(
+        "RPO alpha parameter of DPO training to include NLL in the loss "
+        "(only used when '--training-method' is 'dpo')"
+    ),
+)
+@click.option(
+    "--simpo-gamma",
+    type=float,
+    default=None,
+    help="SimPO gamma parameter (only used when '--training-method' is 'dpo')",
+)
+@click.option(
+    "--suffix",
+    "-s",
+    type=str,
+    default=None,
+    help="Suffix for the fine-tuned model name",
 )
 @click.option("--wandb-api-key", type=str, default=None, help="Wandb API key")
 @click.option("--wandb-base-url", type=str, default=None, help="Wandb base URL")
@@ -140,7 +188,7 @@ def fine_tuning(ctx: click.Context) -> None:
 @click.option(
     "--train-on-inputs",
     type=BOOL_WITH_AUTO,
-    default="auto",
+    default=None,
     help="Whether to mask the user messages in conversational data or prompts in instruction data. "
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
@@ -152,6 +200,32 @@ def fine_tuning(ctx: click.Context) -> None:
     "The format: {$JOB_ID/$OUTPUT_MODEL_NAME}:{$STEP}. "
     "The step value is optional, without it the final checkpoint will be used.",
 )
+@click.option(
+    "--from-hf-model",
+    type=str,
+    help="The Hugging Face Hub repo to start training from. "
+    "Should be as close as possible to the base model (specified by the `model` argument) "
+    "in terms of architecture and size",
+)
+@click.option(
+    "--hf-model-revision",
+    type=str,
+    help="The revision of the Hugging Face Hub model to continue training from. "
+    "Example: hf_model_revision=None (defaults to the latest revision in `main`) "
+    "or hf_model_revision='607a30d783dfa663caf39e06633721c8d4cfcd7e' (specific commit).",
+)
+@click.option(
+    "--hf-api-token",
+    type=str,
+    default=None,
+    help="HF API token to use for uploading a checkpoint to a private repo",
+)
+@click.option(
+    "--hf-output-repo-name",
+    type=str,
+    default=None,
+    help="HF repo to upload the fine-tuned model to",
+)
 def create(
     ctx: click.Context,
     training_file: str,
@@ -162,7 +236,9 @@ def create(
     n_checkpoints: int,
     batch_size: int | Literal["max"],
     learning_rate: float,
+    lr_scheduler_type: Literal["linear", "cosine"],
     min_lr_ratio: float,
+    scheduler_num_cycles: float,
     warmup_ratio: float,
     max_grad_norm: float,
     weight_decay: float,
@@ -179,8 +255,15 @@ def create(
     confirm: bool,
     train_on_inputs: bool | Literal["auto"],
     training_method: str,
-    dpo_beta: float,
+    dpo_beta: float | None,
+    dpo_normalize_logratios_by_length: bool,
+    rpo_alpha: float | None,
+    simpo_gamma: float | None,
     from_checkpoint: str,
+    from_hf_model: str,
+    hf_model_revision: str,
+    hf_api_token: str | None,
+    hf_output_repo_name: str | None,
 ) -> None:
     """Start fine-tuning"""
     client: Together = ctx.obj
@@ -194,7 +277,9 @@ def create(
         n_checkpoints=n_checkpoints,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        lr_scheduler_type=lr_scheduler_type,
         min_lr_ratio=min_lr_ratio,
+        scheduler_num_cycles=scheduler_num_cycles,
         warmup_ratio=warmup_ratio,
         max_grad_norm=max_grad_norm,
         weight_decay=weight_decay,
@@ -211,11 +296,25 @@ def create(
         train_on_inputs=train_on_inputs,
         training_method=training_method,
         dpo_beta=dpo_beta,
+        dpo_normalize_logratios_by_length=dpo_normalize_logratios_by_length,
+        rpo_alpha=rpo_alpha,
+        simpo_gamma=simpo_gamma,
         from_checkpoint=from_checkpoint,
+        from_hf_model=from_hf_model,
+        hf_model_revision=hf_model_revision,
+        hf_api_token=hf_api_token,
+        hf_output_repo_name=hf_output_repo_name,
     )
 
+    if model is None and from_checkpoint is None:
+        raise click.BadParameter("You must specify either a model or a checkpoint")
+
+    model_name = model
+    if from_checkpoint is not None:
+        model_name = from_checkpoint.split(":")[0]
+
     model_limits: FinetuneTrainingLimits = client.fine_tuning.get_model_limits(
-        model=model
+        model=model_name,
     )
 
     if lora:
@@ -223,10 +322,8 @@ def create(
             raise click.BadParameter(
                 f"LoRA fine-tuning is not supported for the model `{model}`"
             )
-
         default_values = {
             "lora_r": model_limits.lora_training.max_rank,
-            "batch_size": model_limits.lora_training.max_batch_size,
             "learning_rate": 1e-3,
         }
 
@@ -250,10 +347,6 @@ def create(
                     f"You set LoRA parameter `{param}` for a full fine-tuning job. "
                     f"Please change the job type with --lora or remove `{param}` from the arguments"
                 )
-
-        batch_size_source = ctx.get_parameter_source("batch_size")  # type: ignore[attr-defined]
-        if batch_size_source == ParameterSource.DEFAULT:
-            training_args["batch_size"] = model_limits.full_training.max_batch_size
 
     if n_evals <= 0 and validation_file:
         log_warn(
@@ -305,9 +398,9 @@ def list(ctx: click.Context) -> None:
                 "Model Output Name": "\n".join(wrap(i.output_name or "", width=30)),
                 "Status": i.status,
                 "Created At": i.created_at,
-                "Price": f"""${finetune_price_to_dollars(
-                    float(str(i.total_price))
-                )}""",  # convert to string for mypy typing
+                "Price": f"""${
+                    finetune_price_to_dollars(float(str(i.total_price)))
+                }""",  # convert to string for mypy typing
             }
         )
     table = tabulate(display_list, headers="keys", tablefmt="grid", showindex=True)
@@ -411,6 +504,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 @click.argument("fine_tune_id", type=str, required=True)
 @click.option(
     "--output_dir",
+    "-o",
     type=click.Path(exists=True, file_okay=False, resolve_path=True),
     required=False,
     default=None,
@@ -418,6 +512,7 @@ def list_checkpoints(ctx: click.Context, fine_tune_id: str) -> None:
 )
 @click.option(
     "--checkpoint-step",
+    "-s",
     type=int,
     required=False,
     default=None,
@@ -446,5 +541,32 @@ def download(
         checkpoint_step=checkpoint_step,
         checkpoint_type=checkpoint_type,
     )
+
+    click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))
+
+
+@fine_tuning.command()
+@click.pass_context
+@click.argument("fine_tune_id", type=str, required=True)
+@click.option("--force", is_flag=True, help="Force deletion without confirmation")
+@click.option(
+    "--quiet", is_flag=True, help="Do not prompt for confirmation before deleting job"
+)
+def delete(
+    ctx: click.Context, fine_tune_id: str, force: bool = False, quiet: bool = False
+) -> None:
+    """Delete fine-tuning job"""
+    client: Together = ctx.obj
+
+    if not quiet:
+        confirm_response = input(
+            f"Are you sure you want to delete fine-tuning job {fine_tune_id}? "
+            "This action cannot be undone. [y/N] "
+        )
+        if confirm_response.lower() != "y":
+            click.echo("Deletion cancelled")
+            return
+
+    response = client.fine_tuning.delete(fine_tune_id, force=force)
 
     click.echo(json.dumps(response.model_dump(exclude_none=True), indent=4))

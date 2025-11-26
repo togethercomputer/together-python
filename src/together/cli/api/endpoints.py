@@ -82,7 +82,7 @@ def endpoints(ctx: click.Context) -> None:
 @click.option(
     "--model",
     required=True,
-    help="The model to deploy (e.g. mistralai/Mixtral-8x7B-Instruct-v0.1)",
+    help="The model to deploy (e.g. meta-llama/Llama-4-Scout-17B-16E-Instruct)",
 )
 @click.option(
     "--min-replicas",
@@ -133,6 +133,10 @@ def endpoints(ctx: click.Context) -> None:
     help="Number of minutes of inactivity after which the endpoint will be automatically stopped. Set to 0 to disable.",
 )
 @click.option(
+    "--availability-zone",
+    help="Start endpoint in specified availability zone (e.g., us-central-4b)",
+)
+@click.option(
     "--wait/--no-wait",
     default=True,
     help="Wait for the endpoint to be ready after creation",
@@ -151,6 +155,7 @@ def create(
     no_speculative_decoding: bool,
     no_auto_start: bool,
     inactive_timeout: int | None,
+    availability_zone: str | None,
     wait: bool,
 ) -> None:
     """Create a new dedicated inference endpoint."""
@@ -176,6 +181,7 @@ def create(
             disable_speculative_decoding=no_speculative_decoding,
             state="STOPPED" if no_auto_start else "STARTED",
             inactive_timeout=inactive_timeout,
+            availability_zone=availability_zone,
         )
     except InvalidRequestError as e:
         print_api_error(e)
@@ -202,6 +208,8 @@ def create(
         click.echo("  Auto-start: disabled", err=True)
     if inactive_timeout is not None:
         click.echo(f"  Inactive timeout: {inactive_timeout} minutes", err=True)
+    if availability_zone:
+        click.echo(f"  Availability zone: {availability_zone}", err=True)
 
     click.echo(f"Endpoint created successfully, id: {response.id}", err=True)
 
@@ -340,13 +348,30 @@ def delete(client: Together, endpoint_id: str) -> None:
     type=click.Choice(["dedicated", "serverless"]),
     help="Filter by endpoint type",
 )
+@click.option(
+    "--mine",
+    type=click.BOOL,
+    default=None,
+    help="true (only mine), default=all",
+)
+@click.option(
+    "--usage-type",
+    type=click.Choice(["on-demand", "reserved"]),
+    help="Filter by endpoint usage type",
+)
 @click.pass_obj
 @handle_api_errors
 def list(
-    client: Together, json: bool, type: Literal["dedicated", "serverless"] | None
+    client: Together,
+    json: bool,
+    type: Literal["dedicated", "serverless"] | None,
+    usage_type: Literal["on-demand", "reserved"] | None,
+    mine: bool | None,
 ) -> None:
     """List all inference endpoints (includes both dedicated and serverless endpoints)."""
-    endpoints: List[ListEndpoint] = client.endpoints.list(type=type)
+    endpoints: List[ListEndpoint] = client.endpoints.list(
+        type=type, usage_type=usage_type, mine=mine
+    )
 
     if not endpoints:
         click.echo("No dedicated endpoints found", err=True)
@@ -435,3 +460,25 @@ def update(
 
     click.echo("Successfully updated endpoint", err=True)
     click.echo(endpoint_id)
+
+
+@endpoints.command()
+@click.option("--json", is_flag=True, help="Print output in JSON format")
+@click.pass_obj
+@handle_api_errors
+def availability_zones(client: Together, json: bool) -> None:
+    """List all availability zones."""
+    avzones = client.endpoints.list_avzones()
+
+    if not avzones:
+        click.echo("No availability zones found", err=True)
+        return
+
+    if json:
+        import json as json_lib
+
+        click.echo(json_lib.dumps({"avzones": avzones}, indent=2))
+    else:
+        click.echo("Available zones:", err=True)
+        for availability_zone in sorted(avzones):
+            click.echo(f"  {availability_zone}")

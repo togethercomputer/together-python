@@ -7,10 +7,10 @@
 # Together Python API library
 
 [![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
-[![Discord](https://dcbadge.vercel.app/api/server/9Rk6sSeWEG?style=flat&compact=true)](https://discord.com/invite/9Rk6sSeWEG)
+[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/9Rk6sSeWEG?style=flat&theme=discord-inverted)](https://discord.com/invite/9Rk6sSeWEG)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/togethercompute.svg?style=social&label=Follow%20%40togethercompute)](https://twitter.com/togethercompute)
 
-The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.8+ applications with easy to use synchronous and asynchronous clients.
+The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.10+ applications with easy to use synchronous and asynchronous clients.
 
 
 
@@ -58,7 +58,7 @@ client = Together()
 
 # Simple text message
 response = client.chat.completions.create(
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
     messages=[{"role": "user", "content": "tell me about new york"}],
 )
 print(response.choices[0].message.content)
@@ -148,7 +148,7 @@ from together import Together
 
 client = Together()
 stream = client.chat.completions.create(
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+    model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
     messages=[{"role": "user", "content": "tell me about new york"}],
     stream=True,
 )
@@ -173,7 +173,7 @@ async def async_chat_completion(messages):
     async_client = AsyncTogether()
     tasks = [
         async_client.chat.completions.create(
-            model="mistralai/Mixtral-8x7B-Instruct-v0.1",
+            model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
             messages=[{"role": "user", "content": message}],
         )
         for message in messages
@@ -185,6 +185,30 @@ async def async_chat_completion(messages):
 
 asyncio.run(async_chat_completion(messages))
 ```
+
+#### Fetching logprobs
+
+Logprobs are logarithms of token-level generation probabilities that indicate the likelihood of the generated token based on the previous tokens in the context. Logprobs allow us to estimate the model's confidence in its outputs, which can be used to decide how to optimally consume the model's output (e.g. rejecting low confidence outputs, retrying or ensembling model outputs etc).
+
+```python
+from together import Together
+
+client = Together()
+
+response = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-3B-Instruct-Turbo",
+    messages=[{"role": "user", "content": "tell me about new york"}],
+    logprobs=1
+)
+
+response_lobprobs = response.choices[0].logprobs
+
+print(dict(zip(response_lobprobs.tokens, response_lobprobs.token_logprobs)))
+# {'New': -2.384e-07, ' York': 0.0, ',': 0.0, ' also': -0.20703125, ' known': -0.20214844, ' as': -8.34465e-07, ... }
+```
+
+More details about using logprobs in Together's API can be found [here](https://docs.together.ai/docs/logprobs).
+
 
 ### Completions
 
@@ -323,7 +347,7 @@ client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a 
 
 ### Fine-tunes
 
-The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
+The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-quickstart).
 
 ```python
 from together import Together
@@ -332,7 +356,7 @@ client = Together()
 
 client.fine_tuning.create(
   training_file = 'file-d0d318cb-b7d9-493a-bd70-1cfe089d3815',
-  model = 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+  model = 'meta-llama/Llama-3.2-3B-Instruct',
   n_epochs = 3,
   n_checkpoints = 1,
   batch_size = "max",
@@ -362,6 +386,33 @@ for model in models:
     print(model)
 ```
 
+### Batch Inference
+
+The batch API allows you to submit larger inference jobs for completion with a 24 hour turn-around time, below is an example. To learn more refer to the [docs here](https://docs.together.ai/docs/batch-inference).
+
+```python
+from together import Together
+
+client = Together()
+
+# Upload the batch file
+batch_file = client.files.upload(file="simpleqa_batch_student.jsonl", purpose="batch-api")
+
+# Create the batch job
+batch = client.batches.create_batch(file_id=batch_file.id, endpoint="/v1/chat/completions")
+
+# Monitor the batch status
+batch_stat = client.batches.get_batch(batch.id)
+
+# List all batches - contains other batches as well
+client.batches.list_batches()
+
+# Download the file content if job completed
+if batch_stat.status == 'COMPLETED':
+    output_response = client.files.retrieve_content(id=batch_stat.output_file_id,
+                                                    output="simpleqa_v3_output.jsonl")
+```
+
 ## Usage – CLI
 
 ### Chat Completions
@@ -370,7 +421,7 @@ for model in models:
 together chat.completions \
   --message "system" "You are a helpful assistant named Together" \
   --message "user" "What is your name?" \
-  --model mistralai/Mixtral-8x7B-Instruct-v0.1
+  --model meta-llama/Llama-4-Scout-17B-16E-Instruct
 ```
 
 The Chat Completions CLI enables streaming tokens to stdout by default. To disable streaming, use `--no-stream`.
@@ -380,7 +431,7 @@ The Chat Completions CLI enables streaming tokens to stdout by default. To disab
 ```bash
 together completions \
   "Large language models are " \
-  --model mistralai/Mixtral-8x7B-v0.1 \
+  --model meta-llama/Llama-4-Scout-17B-16E-Instruct \
   --max-tokens 512 \
   --stop "."
 ```

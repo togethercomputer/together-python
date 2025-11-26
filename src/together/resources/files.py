@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from pprint import pformat
 
 from together.abstract import api_requestor
+from together.constants import MULTIPART_THRESHOLD_GB, NUM_BYTES_IN_GB
 from together.error import FileTypeError
-from together.filemanager import DownloadManager, UploadManager
+from together.filemanager import DownloadManager, UploadManager, MultipartUploadManager
 from together.together_response import TogetherResponse
 from together.types import (
     FileDeleteResponse,
@@ -30,9 +32,8 @@ class Files:
         purpose: FilePurpose | str = FilePurpose.FineTune,
         check: bool = True,
     ) -> FileResponse:
-        upload_manager = UploadManager(self._client)
 
-        if check:
+        if check and purpose == FilePurpose.FineTune:
             report_dict = check_file(file)
             if not report_dict["is_check_passed"]:
                 raise FileTypeError(
@@ -47,7 +48,15 @@ class Files:
 
         assert isinstance(purpose, FilePurpose)
 
-        return upload_manager.upload("files", file, purpose=purpose, redirect=True)
+        file_size = os.stat(file).st_size
+        file_size_gb = file_size / NUM_BYTES_IN_GB
+
+        if file_size_gb > MULTIPART_THRESHOLD_GB:
+            multipart_manager = MultipartUploadManager(self._client)
+            return multipart_manager.upload("files", file, purpose)
+        else:
+            upload_manager = UploadManager(self._client)
+            return upload_manager.upload("files", file, purpose=purpose, redirect=True)
 
     def list(self) -> FileList:
         requestor = api_requestor.APIRequestor(
