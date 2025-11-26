@@ -44,7 +44,7 @@ AVAILABLE_TRAINING_METHODS = {
     TrainingMethodSFT().method,
     TrainingMethodDPO().method,
 }
-_CONFIRMATION_MESSAGE_INSUFFICIENT_FUNDS = (
+_WARNING_MESSAGE_INSUFFICIENT_FUNDS = (
     "The estimated price of the fine-tuning job is {} which is significantly "
     "greater than your current credit limit and balance. "
     "It will likely fail due to insufficient funds. "
@@ -500,7 +500,7 @@ class FineTuning:
             if not price_estimation_result.allowed_to_proceed:
                 rprint(
                     "[red]"
-                    + _CONFIRMATION_MESSAGE_INSUFFICIENT_FUNDS.format(
+                    + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
                         price_estimation_result.estimated_total_price
                     )
                     + "[/red]",
@@ -1054,7 +1054,7 @@ class AsyncFineTuning:
             if not price_estimation_result.allowed_to_proceed:
                 rprint(
                     "[red]"
-                    + _CONFIRMATION_MESSAGE_INSUFFICIENT_FUNDS.format(
+                    + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
                         price_estimation_result.estimated_total_price
                     )
                     + "[/red]",
