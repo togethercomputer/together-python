@@ -34,7 +34,7 @@ _CONFIRMATION_MESSAGE = (
     "The estimated price of this job is {price}. "
     "The actual cost of your job will be determined by the model size, the number of tokens "
     "in the training file, the number of tokens in the validation file, the number of epochs, and "
-    "the number of evaluations. Visit https://www.together.ai/pricing to learn more about pricing.\n"
+    "the number of evaluations. Visit https://www.together.ai/pricing to learn more about fine-tuning pricing.\n"
     "{warning}"
     "You can pass `-y` or `--confirm` to your command to skip this message.\n\n"
     "Do you want to proceed?"
