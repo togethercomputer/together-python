@@ -491,22 +491,17 @@ class FineTuning:
                 training_type="lora" if lora else "full",
                 training_method=training_method,
             )
+            price_limit_passed = price_estimation_result.allowed_to_proceed
         else:
             # unsupported case
-            price_estimation_result = FinetunePriceEstimationResponse(
-                estimated_total_price=0.0,
-                allowed_to_proceed=True,
-                estimated_train_token_count=0,
-                estimated_eval_token_count=0,
-                user_limit=0.0,
-            )
+            price_limit_passed = True
 
         if verbose:
             rprint(
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
-            if not price_estimation_result.allowed_to_proceed:
+            if not price_limit_passed:
                 rprint(
                     "[red]"
                     + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
@@ -543,10 +538,16 @@ class FineTuning:
         Estimates the price of a fine-tuning job
 
         Args:
-            request (FinetunePriceEstimationRequest): Request object containing the parameters for the price estimation.
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            validation_file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
+            training_type (str, optional): Training type. Defaults to "lora".
+            training_method (str, optional): Training method. Defaults to "sft".
 
         Returns:
-            FinetunePriceEstimationResponse: Object containing the estimated price.
+            FinetunePriceEstimationResponse: Object containing the price estimation result.
         """
         training_type_cls: TrainingType
         training_method_cls: TrainingMethod
@@ -1055,22 +1056,17 @@ class AsyncFineTuning:
                 training_type="lora" if lora else "full",
                 training_method=training_method,
             )
+            price_limit_passed = price_estimation_result.allowed_to_proceed
         else:
             # unsupported case
-            price_estimation_result = FinetunePriceEstimationResponse(
-                estimated_total_price=0.0,
-                allowed_to_proceed=True,
-                estimated_train_token_count=0,
-                estimated_eval_token_count=0,
-                user_limit=0.0,
-            )
+            price_limit_passed = True
 
         if verbose:
             rprint(
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
-            if not price_estimation_result.allowed_to_proceed:
+            if not price_limit_passed:
                 rprint(
                     "[red]"
                     + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
@@ -1108,10 +1104,16 @@ class AsyncFineTuning:
         Estimates the price of a fine-tuning job
 
         Args:
-            request (FinetunePriceEstimationRequest): Request object containing the parameters for the price estimation.
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            validation_file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
+            training_type (str, optional): Training type. Defaults to "lora".
+            training_method (str, optional): Training method. Defaults to "sft".
 
         Returns:
-            FinetunePriceEstimationResponse: Object containing the estimated price.
+            FinetunePriceEstimationResponse: Object containing the price estimation result.
         """
         training_type_cls: TrainingType
         training_method_cls: TrainingMethod

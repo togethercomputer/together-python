@@ -16,6 +16,7 @@ _MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct-Reference"
 _TRAINING_FILE = "file-7dbce5e9-7993-4520-9f3e-a7ece6c39d84"
 _VALIDATION_FILE = "file-7dbce5e9-7553-4520-9f3e-a7ece6c39d84"
 _FROM_CHECKPOINT = "ft-12345678-1234-1234-1234-1234567890ab"
+_DUMMY_ID = "ft-12345678-1234-1234-1234-1234567890ab"
 _MODEL_LIMITS = FinetuneTrainingLimits(
     max_num_epochs=20,
     max_learning_rate=1.0,
@@ -55,19 +56,21 @@ def mock_request(options: TogetherRequest, *args, **kwargs):
         return (
             TogetherResponse(
                 data={
-                    "id": "ft-12345678-1234-1234-1234-1234567890ab",
+                    "id": _DUMMY_ID,
                 },
                 headers={},
             ),
             None,
             None,
         )
-    else:
+    elif options.url == "fine-tunes/models/limits":
         return (
             TogetherResponse(data=_MODEL_LIMITS.model_dump(), headers={}),
             None,
             None,
         )
+    else:
+        raise ValueError(f"Unknown URL: {options.url}")
 
 
 def test_simple_request():
@@ -376,8 +379,13 @@ def test_train_on_inputs_not_supported_for_dpo():
         )
 
 
-@patch("together.abstract.api_requestor.APIRequestor.request")
 def test_price_estimation_request(mocker):
+    mock_requestor = Mock()
+    mock_requestor.request = MagicMock()
+    mock_requestor.request.side_effect = mock_request
+    mocker.patch(
+        "together.abstract.api_requestor.APIRequestor", return_value=mock_requestor
+    )
     test_data = [
         {
             "training_type": "lora",
@@ -392,20 +400,6 @@ def test_price_estimation_request(mocker):
             "training_method": "sft",
         },
     ]
-    mocker.return_value = (
-        TogetherResponse(
-            data={
-                "estimated_total_price": 100,
-                "allowed_to_proceed": True,
-                "estimated_train_token_count": 1000,
-                "estimated_eval_token_count": 100,
-                "user_limit": 1000,
-            },
-            headers={},
-        ),
-        None,
-        None,
-    )
     client = Together(api_key="fake_api_key")
     for test_case in test_data:
         response = client.fine_tuning.estimate_price(
@@ -443,7 +437,7 @@ def test_create_ft_job(mocker):
     )
 
     assert mock_requestor.request.call_count == 3
-    assert response.id == "ft-12345678-1234-1234-1234-1234567890ab"
+    assert response.id == _DUMMY_ID
 
     response = client.fine_tuning.create(
         training_file=_TRAINING_FILE,
@@ -457,4 +451,4 @@ def test_create_ft_job(mocker):
     )
 
     assert mock_requestor.request.call_count == 5
-    assert response.id == "ft-12345678-1234-1234-1234-1234567890ab"
+    assert response.id == _DUMMY_ID
