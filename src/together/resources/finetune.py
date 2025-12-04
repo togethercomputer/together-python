@@ -20,6 +20,8 @@ from together.types import (
     FinetuneLRScheduler,
     FinetuneRequest,
     FinetuneResponse,
+    FinetunePriceEstimationRequest,
+    FinetunePriceEstimationResponse,
     FinetuneTrainingLimits,
     FullTrainingType,
     LinearLRScheduler,
@@ -31,7 +33,7 @@ from together.types import (
     TrainingMethodSFT,
     TrainingType,
 )
-from together.types.finetune import DownloadCheckpointType
+from together.types.finetune import DownloadCheckpointType, TrainingMethod
 from together.utils import log_warn_once, normalize_key
 
 
@@ -42,6 +44,12 @@ AVAILABLE_TRAINING_METHODS = {
     TrainingMethodSFT().method,
     TrainingMethodDPO().method,
 }
+_WARNING_MESSAGE_INSUFFICIENT_FUNDS = (
+    "The estimated price of the fine-tuning job is {} which is significantly "
+    "greater than your current credit limit and balance combined. "
+    "It will likely get cancelled due to insufficient funds. "
+    "Proceed at your own risk."
+)
 
 
 def create_finetune_request(
@@ -473,12 +481,34 @@ class FineTuning:
             hf_api_token=hf_api_token,
             hf_output_repo_name=hf_output_repo_name,
         )
+        if from_checkpoint is None and from_hf_model is None:
+            price_estimation_result = self.estimate_price(
+                training_file=training_file,
+                validation_file=validation_file,
+                model=model_name,
+                n_epochs=finetune_request.n_epochs,
+                n_evals=finetune_request.n_evals,
+                training_type="lora" if lora else "full",
+                training_method=training_method,
+            )
+            price_limit_passed = price_estimation_result.allowed_to_proceed
+        else:
+            # unsupported case
+            price_limit_passed = True
 
         if verbose:
             rprint(
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
+            if not price_limit_passed:
+                rprint(
+                    "[red]"
+                    + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
+                        price_estimation_result.estimated_total_price
+                    )
+                    + "[/red]",
+                )
         parameter_payload = finetune_request.model_dump(exclude_none=True)
 
         response, _, _ = requestor.request(
@@ -492,6 +522,81 @@ class FineTuning:
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
+
+    def estimate_price(
+        self,
+        *,
+        training_file: str,
+        model: str,
+        validation_file: str | None = None,
+        n_epochs: int | None = 1,
+        n_evals: int | None = 0,
+        training_type: str = "lora",
+        training_method: str = "sft",
+    ) -> FinetunePriceEstimationResponse:
+        """
+        Estimates the price of a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            validation_file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
+            training_type (str, optional): Training type. Defaults to "lora".
+            training_method (str, optional): Training method. Defaults to "sft".
+
+        Returns:
+            FinetunePriceEstimationResponse: Object containing the price estimation result.
+        """
+        training_type_cls: TrainingType
+        training_method_cls: TrainingMethod
+
+        if training_method == "sft":
+            training_method_cls = TrainingMethodSFT(method="sft")
+        elif training_method == "dpo":
+            training_method_cls = TrainingMethodDPO(method="dpo")
+        else:
+            raise ValueError(f"Unknown training method: {training_method}")
+
+        if training_type.lower() == "lora":
+            # parameters of lora are unused in price estimation
+            # but we need to set them to valid values
+            training_type_cls = LoRATrainingType(
+                type="Lora",
+                lora_r=16,
+                lora_alpha=16,
+                lora_dropout=0.0,
+                lora_trainable_modules="all-linear",
+            )
+        elif training_type.lower() == "full":
+            training_type_cls = FullTrainingType(type="Full")
+        else:
+            raise ValueError(f"Unknown training type: {training_type}")
+
+        request = FinetunePriceEstimationRequest(
+            training_file=training_file,
+            validation_file=validation_file,
+            model=model,
+            n_epochs=n_epochs,
+            n_evals=n_evals,
+            training_type=training_type_cls,
+            training_method=training_method_cls,
+        )
+        parameter_payload = request.model_dump(exclude_none=True)
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = requestor.request(
+            options=TogetherRequest(
+                method="POST", url="fine-tunes/estimate-price", params=parameter_payload
+            ),
+            stream=False,
+        )
+        assert isinstance(response, TogetherResponse)
+
+        return FinetunePriceEstimationResponse(**response.data)
 
     def list(self) -> FinetuneList:
         """
@@ -941,11 +1046,34 @@ class AsyncFineTuning:
             hf_output_repo_name=hf_output_repo_name,
         )
 
+        if from_checkpoint is None and from_hf_model is None:
+            price_estimation_result = await self.estimate_price(
+                training_file=training_file,
+                validation_file=validation_file,
+                model=model_name,
+                n_epochs=finetune_request.n_epochs,
+                n_evals=finetune_request.n_evals,
+                training_type="lora" if lora else "full",
+                training_method=training_method,
+            )
+            price_limit_passed = price_estimation_result.allowed_to_proceed
+        else:
+            # unsupported case
+            price_limit_passed = True
+
         if verbose:
             rprint(
                 "Submitting a fine-tuning job with the following parameters:",
                 finetune_request,
             )
+            if not price_limit_passed:
+                rprint(
+                    "[red]"
+                    + _WARNING_MESSAGE_INSUFFICIENT_FUNDS.format(
+                        price_estimation_result.estimated_total_price
+                    )
+                    + "[/red]",
+                )
         parameter_payload = finetune_request.model_dump(exclude_none=True)
 
         response, _, _ = await requestor.arequest(
@@ -960,6 +1088,81 @@ class AsyncFineTuning:
         assert isinstance(response, TogetherResponse)
 
         return FinetuneResponse(**response.data)
+
+    async def estimate_price(
+        self,
+        *,
+        training_file: str,
+        model: str,
+        validation_file: str | None = None,
+        n_epochs: int | None = 1,
+        n_evals: int | None = 0,
+        training_type: str = "lora",
+        training_method: str = "sft",
+    ) -> FinetunePriceEstimationResponse:
+        """
+        Estimates the price of a fine-tuning job
+
+        Args:
+            training_file (str): File-ID of a file uploaded to the Together API
+            model (str): Name of the base model to run fine-tune job on
+            validation_file (str, optional): File ID of a file uploaded to the Together API for validation.
+            n_epochs (int, optional): Number of epochs for fine-tuning. Defaults to 1.
+            n_evals (int, optional): Number of evaluation loops to run. Defaults to 0.
+            training_type (str, optional): Training type. Defaults to "lora".
+            training_method (str, optional): Training method. Defaults to "sft".
+
+        Returns:
+            FinetunePriceEstimationResponse: Object containing the price estimation result.
+        """
+        training_type_cls: TrainingType
+        training_method_cls: TrainingMethod
+
+        if training_method == "sft":
+            training_method_cls = TrainingMethodSFT(method="sft")
+        elif training_method == "dpo":
+            training_method_cls = TrainingMethodDPO(method="dpo")
+        else:
+            raise ValueError(f"Unknown training method: {training_method}")
+
+        if training_type.lower() == "lora":
+            # parameters of lora are unused in price estimation
+            # but we need to set them to valid values
+            training_type_cls = LoRATrainingType(
+                type="Lora",
+                lora_r=16,
+                lora_alpha=16,
+                lora_dropout=0.0,
+                lora_trainable_modules="all-linear",
+            )
+        elif training_type.lower() == "full":
+            training_type_cls = FullTrainingType(type="Full")
+        else:
+            raise ValueError(f"Unknown training type: {training_type}")
+
+        request = FinetunePriceEstimationRequest(
+            training_file=training_file,
+            validation_file=validation_file,
+            model=model,
+            n_epochs=n_epochs,
+            n_evals=n_evals,
+            training_type=training_type_cls,
+            training_method=training_method_cls,
+        )
+        parameter_payload = request.model_dump(exclude_none=True)
+        requestor = api_requestor.APIRequestor(
+            client=self._client,
+        )
+
+        response, _, _ = await requestor.arequest(
+            options=TogetherRequest(
+                method="POST", url="fine-tunes/estimate-price", params=parameter_payload
+            ),
+            stream=False,
+        )
+        assert isinstance(response, TogetherResponse)
+
+        return FinetunePriceEstimationResponse(**response.data)
 
     async def list(self) -> FinetuneList:
         """

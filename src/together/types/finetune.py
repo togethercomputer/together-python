@@ -308,6 +308,32 @@ class FinetuneResponse(BaseModel):
             raise ValueError("Unknown training type")
 
 
+class FinetunePriceEstimationRequest(BaseModel):
+    """
+    Fine-tune price estimation request type
+    """
+
+    training_file: str
+    validation_file: str | None = None
+    model: str
+    n_epochs: int
+    n_evals: int
+    training_type: TrainingType
+    training_method: TrainingMethod
+
+
+class FinetunePriceEstimationResponse(BaseModel):
+    """
+    Fine-tune price estimation response type
+    """
+
+    estimated_total_price: float
+    user_limit: float
+    estimated_train_token_count: int
+    estimated_eval_token_count: int
+    allowed_to_proceed: bool
+
+
 class FinetuneList(BaseModel):
     # object type
     object: Literal["list"] | None = None
