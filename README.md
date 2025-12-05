@@ -4,6 +4,34 @@
   </a>
 </div>
 
+> [!NOTE]
+> ## 🚀 Together Python SDK 2.0 is now available!
+>
+> Check out the new SDK: **[together-py](https://github.com/togethercomputer/together-py)**
+>
+> 📖 **Migration Guide:** [https://docs.together.ai/docs/pythonv2-migration-guide](https://docs.together.ai/docs/pythonv2-migration-guide)
+>
+> ### Install the Beta
+>
+> **Using uv (Recommended):**
+> ```bash
+> # Install uv if you haven't already
+> curl -LsSf https://astral.sh/uv/install.sh | sh
+>
+> # Install together python SDK
+> uv add together --prerelease allow
+>
+> # Or upgrade an existing installation
+> uv sync --upgrade-package together --prerelease allow
+> ```
+>
+> **Using pip:**
+> ```bash
+> pip install --pre together
+> ```
+>
+> This package will be maintained until January 2026.
+
 # Together Python API library
 
 [![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
