@@ -2,34 +2,24 @@ from __future__ import annotations
 
 import os
 import sys
-import warnings
 
 # =============================================================================
-# DEPRECATION NOTICE
+# SDK 2.0 ANNOUNCEMENT
 # =============================================================================
-_DEPRECATION_MESSAGE = """
+_ANNOUNCEMENT_MESSAGE = """
 ================================================================================
-DEPRECATION WARNING: The 'together' package is deprecated and will no longer
-be maintained after January 2026.
+Together Python SDK 2.0 is now available!
 
-Please migrate to the new SDK: https://github.com/togethercomputer/together-py
-
+Install: pip install --pre together
+New SDK: https://github.com/togethercomputer/together-py
 Migration guide: https://docs.together.ai/docs/pythonv2-migration-guide
+
+This package will be maintained until January 2026.
 ================================================================================
 """
 
-# Show deprecation warning (visible to developers with warnings enabled)
-warnings.warn(
-    "The 'together' package is deprecated and will no longer be maintained after "
-    "January 2026. Please migrate to the new SDK: "
-    "https://github.com/togethercomputer/together-py "
-    "Migration guide: https://docs.together.ai/docs/pythonv2-migration-guide",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
-# Also print a visible notice to stderr (unless suppressed)
-if not os.environ.get("TOGETHER_SUPPRESS_DEPRECATION_WARNING"):
+# Show info banner (unless suppressed)
+if not os.environ.get("TOGETHER_NO_BANNER"):
     try:
         from rich.console import Console
         from rich.panel import Panel
@@ -37,23 +27,23 @@ if not os.environ.get("TOGETHER_SUPPRESS_DEPRECATION_WARNING"):
         console = Console(stderr=True)
         console.print(
             Panel(
-                "[bold yellow]DEPRECATION WARNING[/bold yellow]\n\n"
-                "The [cyan]together[/cyan] package is deprecated and will no longer "
-                "be maintained after [bold]January 2026[/bold].\n\n"
-                "Please migrate to the new SDK:\n"
-                "[link=https://github.com/togethercomputer/together-py]"
-                "https://github.com/togethercomputer/together-py[/link]\n\n"
-                "Migration guide:\n"
-                "[link=https://docs.together.ai/docs/pythonv2-migration-guide]"
+                "[bold cyan]Together Python SDK 2.0 is now available![/bold cyan]\n\n"
+                "Install the beta:\n"
+                "[green]pip install --pre together[/green]  or  "
+                "[green]uv add together --prerelease allow[/green]\n\n"
+                "New SDK: [link=https://github.com/togethercomputer/together-py]"
+                "https://github.com/togethercomputer/together-py[/link]\n"
+                "Migration guide: [link=https://docs.together.ai/docs/pythonv2-migration-guide]"
                 "https://docs.together.ai/docs/pythonv2-migration-guide[/link]\n\n"
-                "[dim]Set TOGETHER_SUPPRESS_DEPRECATION_WARNING=1 to hide this message.[/dim]",
-                title="⚠️  Deprecation Notice",
-                border_style="yellow",
+                "[dim]This package will be maintained until January 2026.\n"
+                "Set TOGETHER_NO_BANNER=1 to hide this message.[/dim]",
+                title="🚀 New SDK Available",
+                border_style="cyan",
             )
         )
     except ImportError:
         # Fallback if rich is not available
-        print(_DEPRECATION_MESSAGE, file=sys.stderr)
+        print(_ANNOUNCEMENT_MESSAGE, file=sys.stderr)
 
 # =============================================================================
 

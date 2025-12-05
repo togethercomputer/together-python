@@ -4,21 +4,35 @@
   </a>
 </div>
 
-> [!CAUTION]
-> ## ⚠️ DEPRECATION NOTICE
+> [!NOTE]
+> ## 🚀 Together Python SDK 2.0 is now available!
 >
-> **This package (`together`) is deprecated and will no longer be maintained after January 2026.**
->
-> Please migrate to the new SDK: **[together-ai](https://github.com/togethercomputer/together-py)**
+> Check out the new SDK: **[together-py](https://github.com/togethercomputer/together-py)**
 >
 > 📖 **Migration Guide:** [https://docs.together.ai/docs/pythonv2-migration-guide](https://docs.together.ai/docs/pythonv2-migration-guide)
 >
+> ### Install the Beta
+>
+> **Using uv (Recommended):**
 > ```bash
-> pip uninstall together
-> pip install together-ai
+> # Install uv if you haven't already
+> curl -LsSf https://astral.sh/uv/install.sh | sh
+>
+> # Install together python SDK
+> uv add together --prerelease allow
+>
+> # Or upgrade an existing installation
+> uv sync --upgrade-package together --prerelease allow
 > ```
+>
+> **Using pip:**
+> ```bash
+> pip install --pre together
+> ```
+>
+> This package will be maintained until January 2026.
 
-# Together Python API library (DEPRECATED)
+# Together Python API library
 
 [![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/9Rk6sSeWEG?style=flat&theme=discord-inverted)](https://discord.com/invite/9Rk6sSeWEG)
