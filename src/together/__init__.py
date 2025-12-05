@@ -41,9 +41,13 @@ if not os.environ.get("TOGETHER_NO_BANNER"):
                 border_style="cyan",
             )
         )
-    except ImportError:
-        # Fallback if rich is not available
-        print(_ANNOUNCEMENT_MESSAGE, file=sys.stderr)
+    except Exception:
+        # Fallback for any error (ImportError, OSError in daemons, rich errors, etc.)
+        # Banner display should never break module imports
+        try:
+            print(_ANNOUNCEMENT_MESSAGE, file=sys.stderr)
+        except Exception:
+            pass  # Silently ignore if even stderr is unavailable
 
 # =============================================================================
 
