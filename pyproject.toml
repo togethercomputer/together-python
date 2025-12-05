@@ -18,7 +18,6 @@ description = "[DEPRECATED - Use together-py instead] Python client for Together
 readme = "README.md"
 license = "Apache-2.0"
 classifiers = [
-    "Development Status :: 7 - Inactive",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
