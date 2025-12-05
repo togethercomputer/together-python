@@ -4,7 +4,21 @@
   </a>
 </div>
 
-# Together Python API library
+> [!CAUTION]
+> ## ⚠️ DEPRECATION NOTICE
+>
+> **This package (`together`) is deprecated and will no longer be maintained after January 2026.**
+>
+> Please migrate to the new SDK: **[together-ai](https://github.com/togethercomputer/together-py)**
+>
+> 📖 **Migration Guide:** [https://docs.together.ai/docs/pythonv2-migration-guide](https://docs.together.ai/docs/pythonv2-migration-guide)
+>
+> ```bash
+> pip uninstall together
+> pip install together-ai
+> ```
+
+# Together Python API library (DEPRECATED)
 
 [![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/9Rk6sSeWEG?style=flat&theme=discord-inverted)](https://discord.com/invite/9Rk6sSeWEG)

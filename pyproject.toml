@@ -14,10 +14,11 @@ build-backend = "poetry.masonry.api"
 name = "together"
 version = "1.5.31"
 authors = ["Together AI <support@together.ai>"]
-description = "Python client for Together's Cloud Platform!"
+description = "[DEPRECATED - Use together-py instead] Python client for Together's Cloud Platform. See https://github.com/togethercomputer/together-py for the new SDK."
 readme = "README.md"
 license = "Apache-2.0"
 classifiers = [
+    "Development Status :: 7 - Inactive",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: POSIX :: Linux",
