@@ -459,7 +459,9 @@ def retrieve(ctx: click.Context, fine_tune_id: str) -> None:
     response.events = None
 
     rprint(JSON.from_data(response.model_dump(exclude_none=True)))
-    progress_text = generate_progress_bar(response, datetime.now().astimezone(), use_rich=True)
+    progress_text = generate_progress_bar(
+        response, datetime.now().astimezone(), use_rich=True
+    )
     status = "Unknown"
     if response.status is not None:
         status = response.status.value
