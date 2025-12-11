@@ -105,7 +105,7 @@ def generate_progress_bar(
         progress = "Progress: [bold green]completed[/bold green]"
     elif finetune_job.updated_at is not None:
         # Replace 'Z' with '+00:00' for Python 3.10 compatibility
-        updated_at_str = finetune_job.updated_at.replace('Z', '+00:00')
+        updated_at_str = finetune_job.updated_at.replace("Z", "+00:00")
         update_at = datetime.fromisoformat(updated_at_str).astimezone()
 
         if finetune_job.progress is not None:
