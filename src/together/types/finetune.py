@@ -28,6 +28,14 @@ class FinetuneJobStatus(str, Enum):
     STATUS_COMPLETED = "completed"
 
 
+COMPLETED_STATUSES = [
+    FinetuneJobStatus.STATUS_ERROR,
+    FinetuneJobStatus.STATUS_USER_ERROR,
+    FinetuneJobStatus.STATUS_COMPLETED,
+    FinetuneJobStatus.STATUS_CANCELLED,
+]
+
+
 class FinetuneEventLevels(str, Enum):
     """
     Fine-tune job event status levels
@@ -167,6 +175,15 @@ class TrainingMethodDPO(TrainingMethod):
     simpo_gamma: float | None = None
 
 
+class FinetuneProgress(BaseModel):
+    """
+    Fine-tune job progress
+    """
+
+    estimate_available: bool = False
+    seconds_remaining: float = 0
+
+
 class FinetuneRequest(BaseModel):
     """
     Fine-tune request type
@@ -296,6 +313,8 @@ class FinetuneResponse(BaseModel):
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
     from_checkpoint: str | None = None
+
+    progress: FinetuneProgress | None = None
 
     @field_validator("training_type")
     @classmethod
