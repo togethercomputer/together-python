@@ -5,6 +5,7 @@ import os
 import shutil
 import stat
 import tempfile
+import time
 import uuid
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from functools import partial
@@ -204,48 +205,103 @@ class DownloadManager:
         lock_path = Path(file_path.as_posix() + ".lock")
 
         with FileLock(lock_path.as_posix()):
-            with temp_file_manager() as temp_file:
-                response = requestor.request_raw(
-                    options=TogetherRequest(
-                        method="GET",
-                        url=url,
-                    ),
-                    remaining_retries=MAX_RETRIES,
-                    stream=True,
-                    request_timeout=3600,
-                )
+            temp_file_path = None
+            downloaded_bytes = 0
+            chunk_retry_count = 0
+            max_chunk_retries = MAX_RETRIES
 
-                try:
-                    response.raise_for_status()
-                except Exception as e:
-                    os.remove(lock_path)
-                    raise APIError(
-                        "Error downloading file", http_status=response.status_code
-                    ) from e
+            try:
+                with temp_file_manager() as temp_file:
+                    temp_file_path = temp_file.name
 
-                if not fetch_metadata:
-                    file_size = int(response.headers.get("content-length", 0))
+                    if not fetch_metadata:
+                        # Get file size from initial request
+                        response = requestor.request_raw(
+                            options=TogetherRequest(
+                                method="HEAD",
+                                url=url,
+                            ),
+                            remaining_retries=MAX_RETRIES,
+                            stream=False,
+                        )
+                        file_size = int(response.headers.get("content-length", 0))
 
-                with tqdm(
-                    total=file_size,
-                    unit="B",
-                    unit_scale=True,
-                    desc=f"Downloading file {file_path.name}",
-                    disable=bool(DISABLE_TQDM),
-                ) as pbar:
-                    for chunk in response.iter_content(DOWNLOAD_BLOCK_SIZE):
-                        pbar.update(len(chunk))
-                        temp_file.write(chunk)
+                    with tqdm(
+                        total=file_size,
+                        unit="B",
+                        unit_scale=True,
+                        desc=f"Downloading file {file_path.name}",
+                        disable=bool(DISABLE_TQDM),
+                    ) as pbar:
+                        while downloaded_bytes < file_size:
+                            try:
+                                # Request remaining bytes using Range header
+                                headers = {}
+                                if downloaded_bytes > 0:
+                                    headers["Range"] = f"bytes={downloaded_bytes}-"
 
-            # Raise exception if remote file size does not match downloaded file size
-            if os.stat(temp_file.name).st_size != file_size:
-                DownloadError(
-                    f"Downloaded file size `{pbar.n}` bytes does not match "
-                    f"remote file size `{file_size}` bytes."
-                )
+                                response = requestor.request_raw(
+                                    options=TogetherRequest(
+                                        method="GET",
+                                        url=url,
+                                        headers=headers,
+                                    ),
+                                    remaining_retries=MAX_RETRIES,
+                                    stream=True,
+                                    request_timeout=3600,
+                                )
 
-            # Moves temp file to output file path
-            chmod_and_replace(Path(temp_file.name), file_path)
+                                try:
+                                    response.raise_for_status()
+                                except Exception as e:
+                                    raise APIError(
+                                        "Error downloading file", http_status=response.status_code
+                                    ) from e
+
+                                # Download chunks
+                                for chunk in response.iter_content(DOWNLOAD_BLOCK_SIZE):
+                                    temp_file.write(chunk)
+                                    chunk_size = len(chunk)
+                                    downloaded_bytes += chunk_size
+                                    pbar.update(chunk_size)
+
+                                # Reset retry counter on successful chunk batch
+                                chunk_retry_count = 0
+
+                            except (APIError, requests.exceptions.RequestException) as e:
+                                chunk_retry_count += 1
+                                if chunk_retry_count > max_chunk_retries:
+                                    raise DownloadError(
+                                        f"Failed to download file after {max_chunk_retries} chunk retries. "
+                                        f"Last error: {str(e)}"
+                                    ) from e
+
+                                # Wait before retrying (exponential backoff)
+                                time.sleep(min(2 ** chunk_retry_count, 30))
+
+                                # Continue the while loop to retry from current position
+                                continue
+
+                # Verify downloaded file size matches expected size
+                final_size = os.stat(temp_file_path).st_size
+                if final_size != file_size:
+                    raise DownloadError(
+                        f"Downloaded file size `{final_size}` bytes does not match "
+                        f"remote file size `{file_size}` bytes."
+                    )
+
+                # Moves temp file to output file path
+                chmod_and_replace(Path(temp_file_path), file_path)
+
+            except Exception as e:
+                # Clean up incomplete temp file if it exists
+                if temp_file_path and os.path.exists(temp_file_path):
+                    try:
+                        os.remove(temp_file_path)
+                    except OSError:
+                        pass
+                os.remove(lock_path)
+                raise
 
         os.remove(lock_path)
 
