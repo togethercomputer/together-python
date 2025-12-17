@@ -337,8 +337,8 @@ class FinetunePriceEstimationRequest(BaseModel):
     model: str
     n_epochs: int
     n_evals: int
-    training_type: TrainingType
-    training_method: TrainingMethod
+    training_type: LoRATrainingType | FullTrainingType
+    training_method: TrainingMethodSFT | TrainingMethodDPO
 
 
 class FinetunePriceEstimationResponse(BaseModel):
