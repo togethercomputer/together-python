@@ -41,6 +41,7 @@ class ChatCompletions:
         response_format: Dict[str, Any] | None = None,
         tools: List[Dict[str, Any]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
+        reasoning: Dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> ChatCompletionResponse | Iterator[ChatCompletionChunk]:
         """
@@ -103,6 +104,9 @@ class ChatCompletions:
                     via {"type": "function", "function": {"name": "my_function"}} forces the model to call that function.
                     Sets to `auto` if None.
                 Defaults to None.
+            reasoning (Dict[str, Any], optional): Configuration for reasoning models. Should contain "enabled" key.
+                    Can optionally contain "effort" key with values "low", "medium", "high", or "auto".
+                Defaults to None.
 
         Returns:
             ChatCompletionResponse | Iterator[ChatCompletionChunk]: Object containing the completions
@@ -135,6 +139,7 @@ class ChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
+            reasoning=reasoning,
             **kwargs,
         ).model_dump(exclude_none=True)
 
@@ -183,6 +188,7 @@ class AsyncChatCompletions:
         response_format: Dict[str, Any] | None = None,
         tools: Dict[str, str | Dict[str, str | Dict[str, Any]]] | None = None,
         tool_choice: str | Dict[str, str | Dict[str, str]] | None = None,
+        reasoning: Dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse:
         """
@@ -245,6 +251,9 @@ class AsyncChatCompletions:
                     via {"type": "function", "function": {"name": "my_function"}} forces the model to call that function.
                     Sets to `auto` if None.
                 Defaults to None.
+            reasoning (Dict[str, Any], optional): Configuration for reasoning models. Should contain "enabled" key.
+                    Can optionally contain "effort" key with values "low", "medium", "high", or "auto".
+                Defaults to None.
 
         Returns:
             AsyncGenerator[ChatCompletionChunk, None] | ChatCompletionResponse: Object containing the completions
@@ -277,6 +286,7 @@ class AsyncChatCompletions:
             response_format=response_format,
             tools=tools,
             tool_choice=tool_choice,
+            reasoning=reasoning,
             **kwargs,
         ).model_dump(exclude_none=True)
 

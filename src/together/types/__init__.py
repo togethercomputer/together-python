@@ -22,6 +22,8 @@ from together.types.chat_completions import (
     ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
+    Reasoning,
+    ReasoningEffort,
 )
 from together.types.common import TogetherRequest
 from together.types.completions import (
@@ -95,6 +97,8 @@ __all__ = [
     "ChatCompletionChunk",
     "ChatCompletionRequest",
     "ChatCompletionResponse",
+    "Reasoning",
+    "ReasoningEffort",
     "EmbeddingRequest",
     "EmbeddingResponse",
     "FinetuneCheckpoint",

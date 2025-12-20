@@ -73,6 +73,7 @@ class ChatCompletionMessage(BaseModel):
     role: MessageRole
     content: str | List[ChatCompletionMessageContent] | None = None
     tool_calls: List[ToolCalls] | None = None
+    reasoning: str | None = None
 
 
 class ResponseFormat(BaseModel):
@@ -114,6 +115,18 @@ class ToolChoiceEnum(str, Enum):
     Required = "required"
 
 
+class ReasoningEffort(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    AUTO = "auto"
+
+
+class Reasoning(BaseModel):
+    enabled: bool
+    effort: ReasoningEffort | None = None
+
+
 class ChatCompletionRequest(BaseModel):
     # list of messages
     messages: List[ChatCompletionMessage]
@@ -148,6 +161,8 @@ class ChatCompletionRequest(BaseModel):
     response_format: ResponseFormat | None = None
     tools: List[Tools] | None = None
     tool_choice: ToolChoice | ToolChoiceEnum | None = None
+    # reasoning configuration
+    reasoning: Reasoning | None = None
 
     # Raise warning if repetition_penalty is used with presence_penalty or frequency_penalty
     @model_validator(mode="after")
@@ -183,6 +198,8 @@ class ChatCompletionResponse(BaseModel):
     prompt: List[PromptPart] | List[None] | None = None
     # token usage data
     usage: UsageData | None = None
+    # metadata (may include weight_version, reasoning stats, etc.)
+    metadata: Dict[str, Any] | None = None
 
 
 class ChatCompletionChoicesChunk(BaseModel):
