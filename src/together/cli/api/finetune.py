@@ -363,7 +363,7 @@ def create(
         )
 
     if model_limits.supports_vision:
-        # Don't show price estimation for multimodal models
+        # Don't show price estimation for multimodal models yet
         confirm = True
 
     finetune_price_estimation_result = client.fine_tuning.estimate_price(
