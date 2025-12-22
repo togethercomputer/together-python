@@ -159,12 +159,6 @@ def _check_conversation_type(
                     line_number=idx + 1,
                     error_source="key_value",
                 )
-            if not isinstance(message[column], str):
-                raise InvalidFileFormatError(
-                    message=f"Column `{column}` is not a string on line {idx + 1}. Found {type(message[column])}",
-                    line_number=idx + 1,
-                    error_source="text_field",
-                )
 
 
 def _check_conversation_roles(
