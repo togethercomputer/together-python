@@ -487,6 +487,37 @@ def test_check_jsonl_invalid_weight(tmp_path: Path):
     assert "Weight must be either 0 or 1" in report["message"]
 
 
+def test_check_jsonl_invalid_multimodal_content(tmp_path: Path):
+    file = tmp_path / "invalid_multimodal_content.jsonl"
+    content = [
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Hello"},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": "<malformed_base64_image>"},
+                        },
+                    ],
+                },
+                {
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": "Hi there!"}],
+                },
+            ]
+        }
+    ]
+
+    with file.open("w") as f:
+        f.write("\n".join(json.dumps(item) for item in content))
+
+    report = check_file(file)
+    assert not report["is_check_passed"]
+    assert "field must be either a JPEG, PNG or WEBP" in report["message"]
+
+
 def test_check_csv_valid_general(tmp_path: Path):
     # Create a valid CSV file
     file = tmp_path / "valid.csv"
