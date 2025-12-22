@@ -7,6 +7,7 @@ from pathlib import Path
 from traceback import format_exc
 from typing import Any, Dict, List
 
+from tqdm import tqdm
 
 from together.constants import (
     MAX_FILE_SIZE_GB,
@@ -363,14 +364,19 @@ def _check_utf8(file: Path) -> Dict[str, Any]:
         Dict[str, Any]: A dictionary with the results of the check.
     """
     report_dict: Dict[str, Any] = {}
+
     try:
+        # Dry-run UTF-8 decode: iterate through file to validate encoding
         with file.open(encoding="utf-8") as f:
-            f.read()
+            for _ in f:
+                pass
+
         report_dict["utf8"] = True
     except UnicodeDecodeError as e:
         report_dict["utf8"] = False
         report_dict["message"] = f"File is not UTF-8 encoded. Error raised: {e}."
         report_dict["is_check_passed"] = False
+
     return report_dict
 
 
@@ -470,7 +476,7 @@ def _check_jsonl(file: Path, purpose: FilePurpose | str) -> Dict[str, Any]:
     with file.open() as f:
         idx = -1
         try:
-            for idx, line in enumerate(f):
+            for idx, line in tqdm(enumerate(f), desc="Validating file", unit=" lines"):
                 json_line = json.loads(line)
 
                 if not isinstance(json_line, dict):
