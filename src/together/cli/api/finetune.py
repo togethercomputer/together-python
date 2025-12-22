@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime, timezone
 from textwrap import wrap
 from typing import Any, Literal
@@ -14,18 +13,11 @@ from tabulate import tabulate
 
 from together import Together
 from together.cli.api.utils import BOOL_WITH_AUTO, INT_WITH_MAX, generate_progress_bar
-from together.types.finetune import (
-    DownloadCheckpointType,
-    FinetuneEventType,
-    FinetuneTrainingLimits,
-    FullTrainingType,
-    LoRATrainingType,
-)
+from together.types.finetune import DownloadCheckpointType, FinetuneTrainingLimits
 from together.utils import (
     finetune_price_to_dollars,
     format_timestamp,
     log_warn,
-    log_warn_once,
     parse_timestamp,
 )
 
@@ -258,6 +250,7 @@ def create(
     lora_dropout: float,
     lora_alpha: float,
     lora_trainable_modules: str,
+    train_vision: bool,
     suffix: str,
     wandb_api_key: str,
     wandb_base_url: str,
@@ -299,6 +292,7 @@ def create(
         lora_dropout=lora_dropout,
         lora_alpha=lora_alpha,
         lora_trainable_modules=lora_trainable_modules,
+        train_vision=train_vision,
         suffix=suffix,
         wandb_api_key=wandb_api_key,
         wandb_base_url=wandb_base_url,
@@ -367,6 +361,10 @@ def create(
         raise click.BadParameter(
             "You have specified a number of evaluation loops but no validation file."
         )
+
+    if model_limits.supports_vision:
+        # Don't show price estimation for multimodal models
+        confirm = True
 
     finetune_price_estimation_result = client.fine_tuning.estimate_price(
         training_file=training_file,
