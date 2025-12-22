@@ -1,10 +1,8 @@
-import json
-import pytest
 import csv
+import json
 from pathlib import Path
 
-from together.constants import MIN_SAMPLES
-from together.utils.files import check_file, FilePurpose
+from together.utils.files import FilePurpose, check_file
 
 
 def test_check_jsonl_valid_general(tmp_path: Path):

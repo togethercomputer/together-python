@@ -377,7 +377,8 @@ def _check_message_content(
         return True, num_images
 
     raise InvalidFileFormatError(
-        message=f"Invalid content type on line {idx + 1} of the input file. Found {type(message_content)}",
+        f"Invalid content type on line {idx + 1} of the input file. Expected string or multimodal list of dicts, "
+        f"found {type(message_content)}",
         line_number=idx + 1,
         error_source="key_value",
     )
