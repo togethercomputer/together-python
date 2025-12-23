@@ -53,6 +53,7 @@ class PromptPart(BaseModel):
 
 class DeltaContent(BaseModel):
     content: str | None = None
+    reasoning: str | None = None
 
 
 class TogetherRequest(BaseModel):
