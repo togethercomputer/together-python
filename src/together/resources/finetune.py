@@ -1064,7 +1064,11 @@ class AsyncFineTuning:
             hf_output_repo_name=hf_output_repo_name,
         )
 
-        if from_checkpoint is None and from_hf_model is None:
+        if (
+            from_checkpoint is None
+            and from_hf_model is None
+            and not model_limits.supports_vision
+        ):
             price_estimation_result = await self.estimate_price(
                 training_file=training_file,
                 validation_file=validation_file,
