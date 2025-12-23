@@ -271,6 +271,7 @@ def _check_message_content(
 
     Args:
         message: The message to check.
+        role: The role of the message.
         idx: Line number in the file.
 
     Returns:
@@ -421,7 +422,7 @@ def validate_messages(
         elif messages_are_multimodal != is_multimodal:
             # Due to the format limitation, we cannot mix multimodal and text only messages in the same sample.
             raise InvalidFileFormatError(
-                "Messages in the conversation must be either all in multimodal or all intext only format.",
+                "Messages in the conversation must be either all in multimodal or all in text-only format.",
                 line_number=idx + 1,
                 error_source="key_value",
             )

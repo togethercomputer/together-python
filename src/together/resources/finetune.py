@@ -256,7 +256,7 @@ def create_finetune_request(
 
     if model_limits.supports_vision:
         multimodal_params = FinetuneMultimodalParams(train_vision=train_vision)
-    elif train_vision:
+    elif not model_limits.supports_vision and train_vision:
         raise ValueError(
             f"Vision encoder training is not supported for the non-multimodal model `{model}`"
         )
