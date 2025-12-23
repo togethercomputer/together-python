@@ -321,6 +321,8 @@ class FinetuneResponse(BaseModel):
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
     from_checkpoint: str | None = None
+    # multimodal parameters
+    multimodal_params: FinetuneMultimodalParams | None = None
 
     progress: FinetuneProgress | None = None
 

@@ -196,6 +196,12 @@ def fine_tuning(ctx: click.Context) -> None:
     "`auto` will automatically determine whether to mask the inputs based on the data format.",
 )
 @click.option(
+    "--train-vision",
+    type=bool,
+    default=False,
+    help="Whether to train the vision encoder. Only supported for multimodal models.",
+)
+@click.option(
     "--from-checkpoint",
     type=str,
     default=None,
