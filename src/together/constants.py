@@ -1,5 +1,6 @@
 import enum
 
+
 # Session constants
 TIMEOUT_SECS = 600
 MAX_SESSION_LIFETIME_SECS = 180
@@ -40,6 +41,11 @@ MIN_SAMPLES = 1
 # the number of bytes in a gigabyte, used to convert bytes to GB for readable comparison
 NUM_BYTES_IN_GB = 2**30
 
+# Multimodal limits
+MAX_IMAGES_PER_EXAMPLE = 10
+MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10MB
+# Max length = Header length + base64 factor (4/3) * image bytes
+MAX_BASE64_IMAGE_LENGTH = len("data:image/jpeg;base64,") + 4 * MAX_IMAGE_BYTES // 3
 
 # expected columns for Parquet files
 PARQUET_EXPECTED_COLUMNS = ["input_ids", "attention_mask", "labels"]

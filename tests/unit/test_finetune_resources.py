@@ -1,5 +1,6 @@
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import MagicMock, Mock, patch
 
 from together.client import Together
 from together.resources.finetune import create_finetune_request

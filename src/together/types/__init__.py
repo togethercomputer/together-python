@@ -7,17 +7,18 @@ from together.types.audio_speech import (
     AudioSpeechStreamChunk,
     AudioSpeechStreamEvent,
     AudioSpeechStreamResponse,
+    AudioTimestampGranularities,
     AudioTranscriptionRequest,
-    AudioTranslationRequest,
     AudioTranscriptionResponse,
+    AudioTranscriptionResponseFormat,
     AudioTranscriptionVerboseResponse,
+    AudioTranslationRequest,
     AudioTranslationResponse,
     AudioTranslationVerboseResponse,
-    AudioTranscriptionResponseFormat,
-    AudioTimestampGranularities,
     ModelVoices,
     VoiceListResponse,
 )
+from together.types.batch import BatchEndpoint, BatchJob, BatchJobStatus
 from together.types.chat_completions import (
     ChatCompletionChunk,
     ChatCompletionRequest,
@@ -31,6 +32,19 @@ from together.types.completions import (
 )
 from together.types.embeddings import EmbeddingRequest, EmbeddingResponse
 from together.types.endpoints import Autoscaling, DedicatedEndpoint, ListEndpoint
+from together.types.evaluation import (
+    ClassifyParameters,
+    CompareParameters,
+    EvaluationCreateResponse,
+    EvaluationJob,
+    EvaluationRequest,
+    EvaluationStatus,
+    EvaluationStatusResponse,
+    EvaluationType,
+    JudgeModelConfig,
+    ModelRequest,
+    ScoreParameters,
+)
 from together.types.files import (
     FileDeleteResponse,
     FileList,
@@ -41,49 +55,32 @@ from together.types.files import (
     FileType,
 )
 from together.types.finetune import (
-    TrainingMethodDPO,
-    TrainingMethodSFT,
-    FinetuneCheckpoint,
     CosineLRScheduler,
     CosineLRSchedulerArgs,
+    FinetuneCheckpoint,
+    FinetuneDeleteResponse,
     FinetuneDownloadResult,
-    LinearLRScheduler,
-    LinearLRSchedulerArgs,
-    FinetuneLRScheduler,
     FinetuneList,
     FinetuneListEvents,
-    FinetuneRequest,
-    FinetuneResponse,
+    FinetuneLRScheduler,
+    FinetuneMultimodalParams,
     FinetunePriceEstimationRequest,
     FinetunePriceEstimationResponse,
-    FinetuneDeleteResponse,
+    FinetuneRequest,
+    FinetuneResponse,
     FinetuneTrainingLimits,
     FullTrainingType,
+    LinearLRScheduler,
+    LinearLRSchedulerArgs,
     LoRATrainingType,
+    TrainingMethodDPO,
+    TrainingMethodSFT,
     TrainingType,
 )
 from together.types.images import ImageRequest, ImageResponse
 from together.types.models import ModelObject, ModelUploadRequest, ModelUploadResponse
 from together.types.rerank import RerankRequest, RerankResponse
-from together.types.batch import BatchJob, BatchJobStatus, BatchEndpoint
-from together.types.evaluation import (
-    EvaluationType,
-    EvaluationStatus,
-    JudgeModelConfig,
-    ModelRequest,
-    ClassifyParameters,
-    ScoreParameters,
-    CompareParameters,
-    EvaluationRequest,
-    EvaluationCreateResponse,
-    EvaluationJob,
-    EvaluationStatusResponse,
-)
-from together.types.videos import (
-    CreateVideoBody,
-    CreateVideoResponse,
-    VideoJob,
-)
+from together.types.videos import CreateVideoBody, CreateVideoResponse, VideoJob
 
 
 __all__ = [
@@ -131,6 +128,7 @@ __all__ = [
     "RerankRequest",
     "RerankResponse",
     "FinetuneTrainingLimits",
+    "FinetuneMultimodalParams",
     "AudioSpeechRequest",
     "AudioResponseFormat",
     "AudioLanguage",
