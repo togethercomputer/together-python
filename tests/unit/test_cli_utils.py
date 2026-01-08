@@ -12,7 +12,7 @@ from together.types.finetune import (
 
 def create_finetune_response(
     status: FinetuneJobStatus = FinetuneJobStatus.STATUS_RUNNING,
-    created_at: str = "2024-01-01T12:00:00Z",
+    started_at: str = "2024-01-01T12:00:00Z",
     progress: FinetuneProgress | None = None,
     job_id: str = "ft-test-123",
 ) -> FinetuneResponse:
@@ -30,7 +30,8 @@ def create_finetune_response(
     return FinetuneResponse(
         id=job_id,
         progress=progress,
-        created_at=created_at,
+        updated_at=started_at,
+        started_at=started_at,
         status=status,
     )
 
