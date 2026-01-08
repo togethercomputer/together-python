@@ -103,13 +103,13 @@ def generate_progress_bar(
     progress = "Progress: [bold red]unavailable[/bold red]"
     if finetune_job.status in COMPLETED_STATUSES:
         progress = "Progress: [bold green]completed[/bold green]"
-    elif finetune_job.updated_at is not None:
+    elif finetune_job.started_at is not None:
         # Replace 'Z' with '+00:00' for Python 3.10 compatibility
-        updated_at_str = finetune_job.updated_at.replace("Z", "+00:00")
-        update_at = datetime.fromisoformat(updated_at_str).astimezone()
+        started_at_str = finetune_job.started_at.replace("Z", "+00:00")
+        started_at = datetime.fromisoformat(started_at_str).astimezone()
 
         if finetune_job.progress is not None:
-            if current_time < update_at:
+            if current_time < started_at:
                 return progress
 
             if not finetune_job.progress.estimate_available:
@@ -118,7 +118,7 @@ def generate_progress_bar(
             if finetune_job.progress.seconds_remaining <= 0:
                 return progress
 
-            elapsed_time = (current_time - update_at).total_seconds()
+            elapsed_time = (current_time - started_at).total_seconds()
             ratio_filled = min(
                 elapsed_time / finetune_job.progress.seconds_remaining, 1.0
             )

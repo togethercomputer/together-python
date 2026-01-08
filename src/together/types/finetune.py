@@ -286,6 +286,7 @@ class FinetuneResponse(BaseModel):
     # created/updated datetime stamps
     created_at: str | None = None
     updated_at: str | None = None
+    started_at: str | None = None
     # job status
     status: FinetuneJobStatus | None = None
     # job id
