@@ -12,7 +12,7 @@ from together.types.finetune import (
 
 def create_finetune_response(
     status: FinetuneJobStatus = FinetuneJobStatus.STATUS_RUNNING,
-    updated_at: str = "2024-01-01T12:00:00Z",
+    started_at: str = "2024-01-01T12:00:00Z",
     progress: FinetuneProgress | None = None,
     job_id: str = "ft-test-123",
 ) -> FinetuneResponse:
@@ -30,7 +30,8 @@ def create_finetune_response(
     return FinetuneResponse(
         id=job_id,
         progress=progress,
-        updated_at=updated_at,
+        updated_at=started_at,
+        started_at=started_at,
         status=status,
     )
 
@@ -359,7 +360,7 @@ class TestGenerateProgressBarCornerCases:
         """Test with different timezone for updated_at."""
         current_time = datetime(2024, 1, 1, 12, 0, 30, tzinfo=timezone.utc)
         finetune_job = create_finetune_response(
-            updated_at="2024-01-01T07:00:00-05:00",  # Same as 12:00:00 UTC (EST = UTC-5)
+            started_at="2024-01-01T07:00:00-05:00",  # Same as 12:00:00 UTC (EST = UTC-5)
             progress=FinetuneProgress(estimate_available=True, seconds_remaining=60.0),
         )
 
@@ -385,7 +386,7 @@ class TestGenerateProgressBarCornerCases:
         """Test unusual case where current time appears before updated_at."""
         current_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         finetune_job = create_finetune_response(
-            updated_at="2024-01-01T12:00:30Z",  # In the "future"
+            started_at="2024-01-01T12:00:30Z",  # In the "future"
             progress=FinetuneProgress(estimate_available=True, seconds_remaining=100.0),
         )
 
