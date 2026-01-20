@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Literal, Optional, Union
 
 from together.abstract import api_requestor
@@ -96,6 +97,12 @@ class Endpoints:
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
+        if disable_prompt_cache:
+            warnings.warn(
+                "The 'disable_prompt_cache' parameter (CLI flag: '--no-prompt-cache') is deprecated and will be removed in a future version.",
+                stacklevel=2,
+            )
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
@@ -389,6 +396,12 @@ class AsyncEndpoints:
         Returns:
             DedicatedEndpoint: Object containing endpoint information
         """
+        if disable_prompt_cache:
+            warnings.warn(
+                "The 'disable_prompt_cache' parameter (CLI flag: '--no-prompt-cache') is deprecated and will be removed in a future version.",
+                stacklevel=2,
+            )
+
         requestor = api_requestor.APIRequestor(
             client=self._client,
         )
