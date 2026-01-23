@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from functools import wraps
 from typing import Any, Callable, Dict, List, Literal, Sequence, TypeVar, Union
 
 import click
+from tabulate import tabulate
 
 from together import Together
 from together.error import InvalidRequestError
@@ -187,12 +189,18 @@ def create(
             availability_zone=availability_zone,
         )
     except InvalidRequestError as e:
-        print_api_error(e)
-        if "check the hardware api" in str(e).lower():
+        if (
+            "check the hardware api" in str(e.args[0]).lower()
+            or "invalid hardware provided" in str(e.args[0]).lower()
+            or "the selected configuration" in str(e.args[0]).lower()
+        ):
+            click.secho("Invalid hardware selected.", fg="red", err=True)
+            click.echo("\nAvailable hardware options:")
             fetch_and_print_hardware_options(
                 client=client, model=model, print_json=False, available=True
             )
-
+        else:
+            print_api_error(e)
         sys.exit(1)
 
     # Print detailed information to stderr
@@ -259,38 +267,34 @@ def hardware(client: Together, model: str | None, json: bool, available: bool) -
     fetch_and_print_hardware_options(client, model, json, available)
 
 
-def format_hardware_table(
+def _format_hardware_options(
     hardware_options: Sequence[HardwareWithStatus],
     show_availability: bool = True,
 ) -> None:
-    """Print hardware options in a formatted table."""
+    """Print hardware options in a formatted table using tabulate."""
     if not hardware_options:
         click.echo("  No hardware options found.", err=True)
         return
 
-    # Calculate column widths
-    id_width = max(len(h.id) for h in hardware_options)
-    id_width = max(id_width, len("HARDWARE ID"))
+    display_list: List[Dict[str, Any]] = []
 
-    # Print header
-    if show_availability:
-        header = f"  {'HARDWARE ID':<{id_width}}  {'GPU':<12}  {'COUNT':<5}  {'MEMORY':<8}  {'STATUS':<12}  {'PRICE':<12}"
-        separator = f"  {'-' * id_width}  {'-' * 12}  {'-' * 5}  {'-' * 8}  {'-' * 12}  {'-' * 12}"
-    else:
-        header = f"  {'HARDWARE ID':<{id_width}}  {'GPU':<12}  {'COUNT':<5}  {'MEMORY':<8}  {'PRICE':<12}"
-        separator = f"  {'-' * id_width}  {'-' * 12}  {'-' * 5}  {'-' * 8}  {'-' * 12}"
-
-    click.echo(header, err=True)
-    click.echo(separator, err=True)
-
-    # Print each hardware option
     for hw in hardware_options:
-        gpu_type = hw.specs.gpu_type if hw.specs else "N/A"
-        gpu_count = str(hw.specs.gpu_count) if hw.specs else "N/A"
-        gpu_memory = f"{int(hw.specs.gpu_memory)}GB" if hw.specs else "N/A"
-        price = f"${hw.pricing.cents_per_minute / 100:.2f}/min" if hw.pricing else "N/A"
+        data: Dict[str, Any] = {
+            "Hardware ID": hw.id,
+            "GPU": (
+                re.sub(r"\-\d+[a-zA-Z][a-zA-Z]$", "", hw.specs.gpu_type)
+                if hw.specs and hw.specs.gpu_type
+                else "N/A"
+            ),
+            "Memory": f"{int(hw.specs.gpu_memory)}GB" if hw.specs else "N/A",
+            "Count": hw.specs.gpu_count if hw.specs else "N/A",
+            "Price (per minute)": (
+                f"${hw.pricing.cents_per_minute / 100:.2f}" if hw.pricing else "N/A"
+            ),
+        }
 
         if show_availability:
+            status_display = "—"
             if hw.availability:
                 status = hw.availability.status
                 # Add visual indicators for status
@@ -300,14 +304,11 @@ def format_hardware_table(
                     status_display = click.style("✗ unavailable", fg="red")
                 else:  # insufficient
                     status_display = click.style("⚠ insufficient", fg="yellow")
-            else:
-                status_display = "—"
+            data["Availability"] = status_display
 
-            row = f"  {hw.id:<{id_width}}  {gpu_type:<12}  {gpu_count:<5}  {gpu_memory:<8}  {status_display:<23}  {price:<12}"
-        else:
-            row = f"  {hw.id:<{id_width}}  {gpu_type:<12}  {gpu_count:<5}  {gpu_memory:<8}  {price:<12}"
+        display_list.append(data)
 
-        click.echo(row, err=True)
+    click.echo(tabulate(display_list, headers="keys", numalign="left"))
 
 
 def fetch_and_print_hardware_options(
@@ -323,9 +324,17 @@ def fetch_and_print_hardware_options(
             if hardware.availability is not None
             and hardware.availability.status == "available"
         ]
-        message = f"Available hardware options for model '{model}':" if model else "Available hardware options:"
+        message = (
+            f"Available hardware options for model '{model}':"
+            if model
+            else "Available hardware options:"
+        )
     else:
-        message = f"Hardware options for model '{model}':" if model else "All hardware options:"
+        message = (
+            f"Hardware options for model '{model}':"
+            if model
+            else "All hardware options:"
+        )
 
     click.echo(message, err=True)
     click.echo("", err=True)
@@ -336,7 +345,7 @@ def fetch_and_print_hardware_options(
     else:
         # Show availability column only when model is specified (availability info is only returned with model filter)
         show_availability = model is not None
-        format_hardware_table(hardware_options, show_availability=show_availability)
+        _format_hardware_options(hardware_options, show_availability=show_availability)
 
 
 @endpoints.command()
