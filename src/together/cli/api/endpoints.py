@@ -3,13 +3,14 @@ from __future__ import annotations
 import json
 import sys
 from functools import wraps
-from typing import Any, Callable, Dict, List, Literal, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Sequence, TypeVar, Union
 
 import click
 
 from together import Together
 from together.error import InvalidRequestError
 from together.types import DedicatedEndpoint, ListEndpoint
+from together.types.endpoints import HardwareWithStatus
 
 
 def print_endpoint(
@@ -258,14 +259,63 @@ def hardware(client: Together, model: str | None, json: bool, available: bool) -
     fetch_and_print_hardware_options(client, model, json, available)
 
 
+def format_hardware_table(
+    hardware_options: Sequence[HardwareWithStatus],
+    show_availability: bool = True,
+) -> None:
+    """Print hardware options in a formatted table."""
+    if not hardware_options:
+        click.echo("  No hardware options found.", err=True)
+        return
+
+    # Calculate column widths
+    id_width = max(len(h.id) for h in hardware_options)
+    id_width = max(id_width, len("HARDWARE ID"))
+
+    # Print header
+    if show_availability:
+        header = f"  {'HARDWARE ID':<{id_width}}  {'GPU':<12}  {'COUNT':<5}  {'MEMORY':<8}  {'STATUS':<12}  {'PRICE':<12}"
+        separator = f"  {'-' * id_width}  {'-' * 12}  {'-' * 5}  {'-' * 8}  {'-' * 12}  {'-' * 12}"
+    else:
+        header = f"  {'HARDWARE ID':<{id_width}}  {'GPU':<12}  {'COUNT':<5}  {'MEMORY':<8}  {'PRICE':<12}"
+        separator = f"  {'-' * id_width}  {'-' * 12}  {'-' * 5}  {'-' * 8}  {'-' * 12}"
+
+    click.echo(header, err=True)
+    click.echo(separator, err=True)
+
+    # Print each hardware option
+    for hw in hardware_options:
+        gpu_type = hw.specs.gpu_type if hw.specs else "N/A"
+        gpu_count = str(hw.specs.gpu_count) if hw.specs else "N/A"
+        gpu_memory = f"{int(hw.specs.gpu_memory)}GB" if hw.specs else "N/A"
+        price = f"${hw.pricing.cents_per_minute / 100:.2f}/min" if hw.pricing else "N/A"
+
+        if show_availability:
+            if hw.availability:
+                status = hw.availability.status
+                # Add visual indicators for status
+                if status == "available":
+                    status_display = click.style("✓ available", fg="green")
+                elif status == "unavailable":
+                    status_display = click.style("✗ unavailable", fg="red")
+                else:  # insufficient
+                    status_display = click.style("⚠ insufficient", fg="yellow")
+            else:
+                status_display = "—"
+
+            row = f"  {hw.id:<{id_width}}  {gpu_type:<12}  {gpu_count:<5}  {gpu_memory:<8}  {status_display:<23}  {price:<12}"
+        else:
+            row = f"  {hw.id:<{id_width}}  {gpu_type:<12}  {gpu_count:<5}  {gpu_memory:<8}  {price:<12}"
+
+        click.echo(row, err=True)
+
+
 def fetch_and_print_hardware_options(
     client: Together, model: str | None, print_json: bool, available: bool
 ) -> None:
     """Print hardware options for a model."""
-
-    message = "Available hardware options:" if available else "All hardware options:"
-    click.echo(message, err=True)
     hardware_options = client.endpoints.list_hardware(model)
+
     if available:
         hardware_options = [
             hardware
@@ -273,13 +323,20 @@ def fetch_and_print_hardware_options(
             if hardware.availability is not None
             and hardware.availability.status == "available"
         ]
+        message = f"Available hardware options for model '{model}':" if model else "Available hardware options:"
+    else:
+        message = f"Hardware options for model '{model}':" if model else "All hardware options:"
+
+    click.echo(message, err=True)
+    click.echo("", err=True)
 
     if print_json:
         json_output = [hardware.model_dump() for hardware in hardware_options]
         click.echo(json.dumps(json_output, indent=2))
     else:
-        for hardware in hardware_options:
-            click.echo(f"  {hardware.id}", err=True)
+        # Show availability column only when model is specified (availability info is only returned with model filter)
+        show_availability = model is not None
+        format_hardware_table(hardware_options, show_availability=show_availability)
 
 
 @endpoints.command()
