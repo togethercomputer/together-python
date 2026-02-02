@@ -45,14 +45,30 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def print_api_error(
     e: InvalidRequestError,
+    endpoint_id: str | None = None,
 ) -> None:
     error_details = e.api_response.message
+    error_lower = error_details.lower() if error_details else ""
 
-    if error_details and (
-        "credentials" in error_details.lower()
-        or "authentication" in error_details.lower()
-    ):
+    if "credentials" in error_lower or "authentication" in error_lower:
         click.echo("Error: Invalid API key or authentication failed", err=True)
+    elif "not found" in error_lower and "endpoint" in error_lower:
+        endpoint_display = f"'{endpoint_id}'" if endpoint_id else ""
+        click.echo(f"Error: Endpoint {endpoint_display} not found.", err=True)
+        click.echo(
+            "The endpoint may have been deleted or the ID may be incorrect.",
+            err=True,
+        )
+        click.echo(
+            "Use 'together endpoints list --mine true' to see your endpoints.",
+            err=True,
+        )
+    elif "permission" in error_lower or "forbidden" in error_lower or "unauthorized" in error_lower:
+        click.echo("Error: You don't have permission to access this endpoint.", err=True)
+        click.echo(
+            "This endpoint may belong to another user or organization.",
+            err=True,
+        )
     else:
         click.echo(f"Error: {error_details}", err=True)
 
@@ -65,7 +81,9 @@ def handle_api_errors(f: F) -> F:
         try:
             return f(*args, **kwargs)
         except InvalidRequestError as e:
-            print_api_error(e)
+            # Try to extract endpoint_id from kwargs for better error messages
+            endpoint_id = kwargs.get("endpoint_id")
+            print_api_error(e, endpoint_id=endpoint_id)
             sys.exit(1)
         except Exception as e:
             click.echo(f"Error: An unexpected error occurred - {str(e)}", err=True)
@@ -79,6 +97,92 @@ def handle_api_errors(f: F) -> F:
 def endpoints(ctx: click.Context) -> None:
     """Endpoints API commands"""
     pass
+
+
+def _print_hardware_error(
+    client: Together,
+    model: str,
+    hardware_id: str,
+    gpu: str,
+    gpu_count: int,
+    *,
+    speculative_decoding_enabled: bool = False,
+) -> None:
+    """Print a detailed error message when hardware selection fails."""
+    click.echo(
+        f"Error: Cannot create endpoint with {gpu_count}x {gpu.upper()} for model '{model}'",
+        err=True,
+    )
+
+    # Fetch hardware options for this model to provide specific guidance
+    try:
+        hardware_options = client.endpoints.list_hardware(model)
+    except Exception:
+        # If we can't fetch hardware options, just show a generic message
+        click.echo(
+            "\nUse 'together endpoints hardware --model <model>' to see available options.",
+            err=True,
+        )
+        return
+
+    # Check if the requested hardware exists for this model
+    requested_hw = next((hw for hw in hardware_options if hw.id == hardware_id), None)
+
+    if requested_hw is None:
+        # Hardware configuration is not compatible with this model
+        click.echo(
+            f"\nThe hardware configuration '{hardware_id}' is not compatible with this model.",
+            err=True,
+        )
+    elif requested_hw.availability:
+        status = requested_hw.availability.status
+        if status == "unavailable":
+            click.echo(
+                f"\nThe {gpu_count}x {gpu.upper()} configuration is currently unavailable. "
+                "This hardware type has no available capacity at this time.",
+                err=True,
+            )
+        elif status == "insufficient":
+            click.echo(
+                f"\nThe {gpu_count}x {gpu.upper()} configuration has insufficient capacity. "
+                "Not enough GPUs available for the requested number of replicas.",
+                err=True,
+            )
+        elif status == "available":
+            # Hardware is available but request failed - suggest toggling speculative decoding
+            if speculative_decoding_enabled:
+                click.echo(
+                    "\nHardware is available but this configuration is not supported. "
+                    "Try adding --no-speculative-decoding.",
+                    err=True,
+                )
+            else:
+                click.echo(
+                    "\nHardware is available but this configuration is not supported. "
+                    "Try removing --no-speculative-decoding to enable speculative decoding.",
+                    err=True,
+                )
+            return
+
+    # Show available alternatives
+    available_options = [
+        hw
+        for hw in hardware_options
+        if hw.availability is not None and hw.availability.status == "available"
+    ]
+
+    if available_options:
+        click.echo("\nAvailable hardware options for this model:", err=True)
+        click.echo("", err=True)
+        _format_hardware_options(available_options, show_availability=True)
+    else:
+        click.echo(
+            "\nNo hardware is currently available for this model. Please try again later.",
+            err=True,
+        )
+        click.echo("\nAll hardware options for this model:", err=True)
+        click.echo("", err=True)
+        _format_hardware_options(hardware_options, show_availability=True)
 
 
 @endpoints.command()
@@ -162,6 +266,51 @@ def create(
     wait: bool,
 ) -> None:
     """Create a new dedicated inference endpoint."""
+    # Client-side validation for replicas
+    if min_replicas < 0:
+        click.echo(
+            f"Error: --min-replicas must be non-negative, got {min_replicas}", err=True
+        )
+        sys.exit(1)
+    if max_replicas < 0:
+        click.echo(
+            f"Error: --max-replicas must be non-negative, got {max_replicas}", err=True
+        )
+        sys.exit(1)
+    if min_replicas > max_replicas:
+        click.echo(
+            f"Error: --min-replicas ({min_replicas}) cannot be greater than "
+            f"--max-replicas ({max_replicas})",
+            err=True,
+        )
+        sys.exit(1)
+
+    # Validate GPU count
+    valid_gpu_counts = [1, 2, 4, 8]
+    if gpu_count not in valid_gpu_counts:
+        click.echo(
+            f"Error: --gpu-count must be one of {valid_gpu_counts}, got {gpu_count}",
+            err=True,
+        )
+        sys.exit(1)
+
+    # Validate availability zone if specified
+    if availability_zone:
+        try:
+            valid_zones = client.endpoints.list_avzones()
+            if availability_zone not in valid_zones:
+                click.echo(
+                    f"Error: Invalid availability zone '{availability_zone}'", err=True
+                )
+                if valid_zones:
+                    click.echo("Available zones:", err=True)
+                    for zone in sorted(valid_zones):
+                        click.echo(f"  {zone}", err=True)
+                sys.exit(1)
+        except Exception:
+            # If we can't fetch zones, let the API validate it
+            pass
+
     # Map GPU types to their full hardware ID names
     gpu_map = {
         "b200": "nvidia_b200_180gb_sxm",
@@ -189,16 +338,55 @@ def create(
             availability_zone=availability_zone,
         )
     except InvalidRequestError as e:
+        error_msg = str(e.args[0]).lower() if e.args else ""
         if (
-            "check the hardware api" in str(e.args[0]).lower()
-            or "invalid hardware provided" in str(e.args[0]).lower()
-            or "the selected configuration" in str(e.args[0]).lower()
+            "check the hardware api" in error_msg
+            or "invalid hardware provided" in error_msg
+            or "the selected configuration" in error_msg
         ):
-            click.secho("Invalid hardware selected.", fg="red", err=True)
-            click.echo("\nAvailable hardware options:")
-            fetch_and_print_hardware_options(
-                client=client, model=model, print_json=False, available=True
+            # speculative decoding is enabled when --no-speculative-decoding is NOT passed
+            speculative_decoding_enabled = not no_speculative_decoding
+            _print_hardware_error(
+                client,
+                model,
+                hardware_id,
+                gpu,
+                gpu_count,
+                speculative_decoding_enabled=speculative_decoding_enabled,
             )
+        elif "model" in error_msg and (
+            "not found" in error_msg
+            or "invalid" in error_msg
+            or "does not exist" in error_msg
+            or "not supported" in error_msg
+        ):
+            click.echo(
+                f"Error: Model '{model}' was not found or is not available for "
+                "dedicated endpoints.",
+                err=True,
+            )
+            click.echo(
+                "Please check that the model name is correct and that it supports "
+                "dedicated endpoint deployment.",
+                err=True,
+            )
+            click.echo(
+                "You can browse available models at: https://api.together.ai/models",
+                err=True,
+            )
+        elif "availability" in error_msg and "zone" in error_msg:
+            click.echo(
+                f"Error: Availability zone '{availability_zone}' is not valid.",
+                err=True,
+            )
+            try:
+                valid_zones = client.endpoints.list_avzones()
+                if valid_zones:
+                    click.echo("\nAvailable zones:", err=True)
+                    for zone in sorted(valid_zones):
+                        click.echo(f"  {zone}", err=True)
+            except Exception:
+                pass
         else:
             print_api_error(e)
         sys.exit(1)
