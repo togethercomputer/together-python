@@ -36,7 +36,7 @@ if not os.environ.get("TOGETHER_NO_BANNER"):
                 "New SDK: [link=https://github.com/togethercomputer/together-py]"
                 "https://github.com/togethercomputer/together-py[/link]\n"
                 "Migration guide: [link=https://docs.together.ai/docs/pythonv2-migration-guide]"
-                "https://docs.together.ai/docs/pythonv2-migration-guide[/link]"
+                "https://docs.together.ai/docs/pythonv2-migration-guide[/link]\n\n"
                 "[dim]Together V1 is now deprecated and will be maintained in maintanence mode. All new features and development will occur in the 2.0 SDK.[/dim]\n",
                 title="🚀 New SDK Available",
                 border_style="cyan",
