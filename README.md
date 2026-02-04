@@ -22,7 +22,7 @@
 >
 > **Using pip:**
 > ```bash
-> pip install --upgarde together
+> pip install --upgrade together
 > ```
 >
 
