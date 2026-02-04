@@ -7,36 +7,32 @@
 > [!NOTE]
 > ## 🚀 Together Python SDK 2.0 is now available!
 >
+> V1 is now considered deprecated and will be maintained in maintanence mode. All new features and development will occur in the 2.0 SDK.
+>
 > Check out the new SDK: **[together-py](https://github.com/togethercomputer/together-py)**
 >
 > 📖 **Migration Guide:** [https://docs.together.ai/docs/pythonv2-migration-guide](https://docs.together.ai/docs/pythonv2-migration-guide)
 >
-> ### Install the Beta
+> ### Upgrade
 >
 > **Using uv (Recommended):**
 > ```bash
-> # Install uv if you haven't already
-> curl -LsSf https://astral.sh/uv/install.sh | sh
->
-> # Install together python SDK
-> uv add together --prerelease allow
->
-> # Or upgrade an existing installation
-> uv sync --upgrade-package together --prerelease allow
+> uv sync --upgrade-package together
 > ```
 >
 > **Using pip:**
 > ```bash
-> pip install --pre together
+> pip install --upgrade together
 > ```
 >
-> This package will be maintained until January 2026.
 
-# Together Python API library
+# Together V1
 
 [![PyPI version](https://img.shields.io/pypi/v/together.svg)](https://pypi.org/project/together/)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/9Rk6sSeWEG?style=flat&theme=discord-inverted)](https://discord.com/invite/9Rk6sSeWEG)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/togethercompute.svg?style=social&label=Follow%20%40togethercompute)](https://twitter.com/togethercompute)
+
+> Note: You are looking at the codebase for Together Python V1. The latest Together Python SDK can be found **[here.](https://github.com/togethercomputer/together-py)**
 
 The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.10+ applications with easy to use synchronous and asynchronous clients.
 
@@ -44,13 +40,10 @@ The [Together Python API Library](https://pypi.org/project/together/) is the off
 
 ## Installation
 
-> 🚧
-> The Library was rewritten in v1.0.0 released in April of 2024. There were significant changes made.
-
 To install Together Python Library from PyPI, simply run:
 
 ```shell Shell
-pip install --upgrade together
+pip install together
 ```
 
 ### Setting up API Key

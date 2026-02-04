@@ -10,11 +10,13 @@ _ANNOUNCEMENT_MESSAGE = """
 ================================================================================
 Together Python SDK 2.0 is now available!
 
-Install: pip install --pre together
+Install: pip install together --upgrade
+Install: uv sync --upgrade-package together
 New SDK: https://github.com/togethercomputer/together-py
 Migration guide: https://docs.together.ai/docs/pythonv2-migration-guide
 
-This package will be maintained until January 2026.
+Together V1 is now deprecated and will be maintained in maintanence mode.
+All new features and development will occur in the 2.0 SDK.
 ================================================================================
 """
 
@@ -28,15 +30,14 @@ if not os.environ.get("TOGETHER_NO_BANNER"):
         console.print(
             Panel(
                 "[bold cyan]Together Python SDK 2.0 is now available![/bold cyan]\n\n"
-                "Install the beta:\n"
-                "[green]pip install --pre together[/green]  or  "
-                "[green]uv add together --prerelease allow[/green]\n\n"
+                "Upgrade to the latest version:\n"
+                "[green]pip install together --upgrade[/green]  or  "
+                "[green]uv sync --upgrade-package together[/green]\n\n"
                 "New SDK: [link=https://github.com/togethercomputer/together-py]"
                 "https://github.com/togethercomputer/together-py[/link]\n"
                 "Migration guide: [link=https://docs.together.ai/docs/pythonv2-migration-guide]"
                 "https://docs.together.ai/docs/pythonv2-migration-guide[/link]\n\n"
-                "[dim]This package will be maintained until January 2026.\n"
-                "Set TOGETHER_NO_BANNER=1 to hide this message.[/dim]",
+                "[dim]Together V1 is now deprecated and will be maintained in maintanence mode. All new features and development will occur in the 2.0 SDK.[/dim]\n",
                 title="🚀 New SDK Available",
                 border_style="cyan",
             )
