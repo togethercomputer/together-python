@@ -44,7 +44,8 @@ class TogetherException(Exception):
                 "status": self.http_status,
                 "request_id": self.request_id,
                 "headers": self.headers,
-            }
+            },
+            default=str,
         )
         return "%s(%r)" % (self.__class__.__name__, repr_message)
 
