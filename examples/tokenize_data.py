@@ -81,20 +81,29 @@ def pack_sequences(
     position_buffer = []
 
     for input_ids in batch["input_ids"]:
-        # Position IDs reset to 0 at the start of each sub-sequence; EOS gets the next position.
-        seq_positions = list(range(len(input_ids) + 1))
-        buffer.extend(input_ids)
-        buffer.append(eos_token_id)  # Add EOS at the end of each sequence
+        # Truncate sequences that individually exceed max_seq_len (including EOS token).
+        seq_with_eos = (input_ids + [eos_token_id])[:max_seq_len]
+        # Position IDs reset to 0 at the start of each sub-sequence.
+        seq_positions = list(range(len(seq_with_eos)))
+
+        # If adding this sequence would overflow, flush the current buffer first.
+        # This ensures every chunk starts at a sequence boundary (position_ids[0] == 0).
+        if buffer and len(buffer) + len(seq_with_eos) > max_seq_len:
+            padding_length = max_seq_len - len(buffer)
+            packed_sequences.append(buffer + [pad_token_id] * padding_length)
+            packed_position_ids.append(position_buffer + [0] * padding_length)
+            buffer = []
+            position_buffer = []
+
+        buffer.extend(seq_with_eos)
         position_buffer.extend(seq_positions)
 
-        # Check if buffer needs to be split into chunks
-        while len(buffer) > max_seq_len:
-            # Take a full chunk from the buffer and append it to packed_sequences
-            packed_sequences.append(buffer[:max_seq_len])
-            packed_position_ids.append(position_buffer[:max_seq_len])
-            # Remove the processed chunk from the buffer
-            buffer = buffer[max_seq_len:]
-            position_buffer = position_buffer[max_seq_len:]
+        # Flush immediately if exactly full (no padding needed).
+        if len(buffer) == max_seq_len:
+            packed_sequences.append(buffer)
+            packed_position_ids.append(position_buffer)
+            buffer = []
+            position_buffer = []
 
     # Add the last buffer if it's exactly chunk_size
     if len(buffer) == max_seq_len:
