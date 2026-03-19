@@ -1,5 +1,5 @@
 completion_test_model_list = [
-    "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    "meta-llama/Llama-3.3-70B-Instruct-Turbo",
 ]
 chat_test_model_list = []
 embedding_test_model_list = []

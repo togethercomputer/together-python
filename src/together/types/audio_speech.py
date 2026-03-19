@@ -41,14 +41,6 @@ class AudioResponseEncoding(str, Enum):
     PCM_ALAW = "pcm_alaw"
 
 
-class AudioObjectType(str, Enum):
-    AUDIO_TTS_CHUNK = "audio.tts.chunk"
-
-
-class StreamSentinelType(str, Enum):
-    DONE = "[DONE]"
-
-
 class AudioSpeechRequest(BaseModel):
     model: str
     input: str
@@ -61,21 +53,8 @@ class AudioSpeechRequest(BaseModel):
 
 
 class AudioSpeechStreamChunk(BaseModel):
-    object: AudioObjectType = AudioObjectType.AUDIO_TTS_CHUNK
-    model: str
-    b64: str
-
-
-class AudioSpeechStreamEvent(BaseModel):
-    data: AudioSpeechStreamChunk
-
-
-class StreamSentinel(BaseModel):
-    data: StreamSentinelType = StreamSentinelType.DONE
-
-
-class AudioSpeechStreamEventResponse(BaseModel):
-    response: AudioSpeechStreamEvent | StreamSentinel
+    type: str = "conversation.item.audio_output.delta"
+    delta: str
 
 
 class AudioSpeechStreamResponse(BaseModel):
@@ -127,18 +106,10 @@ class AudioSpeechStreamResponse(BaseModel):
                 if isinstance(chunk.data, bytes):
                     audio_chunks.append(chunk.data)
                 elif isinstance(chunk.data, dict):
-                    # SSE format with JSON/base64
-                    try:
-                        stream_event = AudioSpeechStreamEventResponse(
-                            response={"data": chunk.data}
-                        )
-                        if isinstance(stream_event.response, StreamSentinel):
-                            break
-                        audio_chunks.append(
-                            base64.b64decode(stream_event.response.data.b64)
-                        )
-                    except Exception:
-                        continue  # Skip malformed chunks
+                    # SSE format: {"type": "conversation.item.audio_output.delta", "delta": "<base64>"}
+                    delta = chunk.data.get("delta")
+                    if delta:
+                        audio_chunks.append(base64.b64decode(delta))
 
             if not audio_chunks:
                 raise ValueError("No audio data received in streaming response")
