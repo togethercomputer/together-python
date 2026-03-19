@@ -10,7 +10,6 @@ from together.types import (
     AudioLanguage,
     AudioResponseEncoding,
     AudioSpeechStreamChunk,
-    AudioSpeechStreamEvent,
     AudioSpeechStreamResponse,
     TogetherClient,
     TogetherRequest,
