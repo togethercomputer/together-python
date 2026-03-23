@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from typing import Any, Dict
 
 from requests import RequestException
 
 from together.types.error import TogetherErrorResponse
+
+
+def _json_safe_headers(headers: str | Dict[Any, Any] | None) -> str | Dict[Any, Any]:
+    if headers is None:
+        return {}
+    if isinstance(headers, str):
+        return headers
+    if isinstance(headers, Mapping):
+        return {str(key): value for key, value in headers.items()}
+    return str(headers)
 
 
 class TogetherException(Exception):
@@ -43,8 +54,9 @@ class TogetherException(Exception):
                 "response": self._message,
                 "status": self.http_status,
                 "request_id": self.request_id,
-                "headers": self.headers,
-            }
+                "headers": _json_safe_headers(self.headers),
+            },
+            default=str,
         )
         return "%s(%r)" % (self.__class__.__name__, repr_message)
 
