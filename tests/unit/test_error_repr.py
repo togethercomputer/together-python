@@ -3,37 +3,16 @@
 from __future__ import annotations
 
 import json
-from collections import OrderedDict
-from typing import Any, Iterator
 from unittest.mock import MagicMock
 
-import pytest
+from multidict import CIMultiDict, CIMultiDictProxy
 
 from together.error import (
-    TogetherException,
+    APIError,
     AuthenticationError,
     ResponseError,
-    APIError,
+    TogetherException,
 )
-
-
-class FakeMultiDictProxy:
-    """Simulates aiohttp's CIMultiDictProxy — not JSON serializable."""
-
-    def __init__(self, data: dict[str, str]) -> None:
-        self._data = data
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._data)
-
-    def __len__(self) -> int:
-        return len(self._data)
-
-    def __getitem__(self, key: str) -> str:
-        return self._data[key]
-
-    def __repr__(self) -> str:
-        return f"<FakeMultiDictProxy({self._data!r})>"
 
 
 class TestExceptionReprNonSerializable:
@@ -52,21 +31,28 @@ class TestExceptionReprNonSerializable:
         assert "test error" in result
 
     def test_repr_with_multidict_proxy_headers(self) -> None:
-        """CIMultiDictProxy-like headers must not crash repr (issue #108)."""
-        fake_headers = FakeMultiDictProxy(
-            {"Content-Type": "application/json", "X-Request-Id": "abc"}
+        """Real CIMultiDictProxy headers must not crash repr (issue #108)."""
+        headers = CIMultiDictProxy(
+            CIMultiDict(
+                {"Content-Type": "application/json", "X-Request-Id": "abc"}
+            )
         )
         exc = TogetherException(
             message="server error",
-            headers=fake_headers,  # type: ignore[arg-type]
+            headers=headers,  # type: ignore[arg-type]
             http_status=500,
             request_id="req-456",
         )
-        # Before fix: TypeError: Object of type FakeMultiDictProxy
+        # Before fix: TypeError: Object of type CIMultiDictProxy
         #             is not JSON serializable
         result = repr(exc)
         assert "TogetherException" in result
         assert "server error" in result
+        parsed = json.loads(result[len("TogetherException(") + 1 : -2])
+        assert parsed["headers"] == {
+            "Content-Type": "application/json",
+            "X-Request-Id": "abc",
+        }
 
     def test_repr_with_none_headers(self) -> None:
         """None headers (default) should work."""
@@ -110,12 +96,12 @@ class TestExceptionReprNonSerializable:
 
     def test_subclass_repr_with_non_serializable_headers(self) -> None:
         """Subclasses should also benefit from the fix."""
-        fake_headers = FakeMultiDictProxy({"X-Rate-Limit": "100"})
+        headers = CIMultiDictProxy(CIMultiDict({"X-Rate-Limit": "100"}))
 
         for ExcClass in (AuthenticationError, ResponseError, APIError):
             exc = ExcClass(
                 message="subclass test",
-                headers=fake_headers,  # type: ignore[arg-type]
+                headers=headers,  # type: ignore[arg-type]
                 http_status=429,
             )
             result = repr(exc)
