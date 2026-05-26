@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Literal
 
 from pydantic import model_validator
 from typing_extensions import Self
@@ -132,6 +132,8 @@ class ChatCompletionRequest(BaseModel):
     frequency_penalty: float | None = None
     min_p: float | None = None
     logit_bias: Dict[str, float] | None = None
+    # behavior when max_tokens exceeds the model context length
+    context_length_exceeded_behavior: Literal["truncate", "error"] | None = None
     seed: int | None = None
     # stream SSE token chunks
     stream: bool = False

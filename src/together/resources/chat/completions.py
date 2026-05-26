@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, AsyncGenerator, Dict, Iterator, List
+from typing import Any, AsyncGenerator, Dict, Iterator, List, Literal
 
 from together.abstract import api_requestor
 from together.together_response import TogetherResponse
@@ -32,6 +32,7 @@ class ChatCompletions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        context_length_exceeded_behavior: Literal["truncate", "error"] | None = None,
         seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
@@ -80,6 +81,9 @@ class ChatCompletions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            context_length_exceeded_behavior ("truncate" | "error", optional): Behavior when max_tokens exceeds the
+                model context length. "error" returns a 400, while "truncate" overrides max_tokens with the model's
+                maximum context length.
             seed (int, optional): A seed value to use for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
@@ -126,6 +130,7 @@ class ChatCompletions:
             frequency_penalty=frequency_penalty,
             min_p=min_p,
             logit_bias=logit_bias,
+            context_length_exceeded_behavior=context_length_exceeded_behavior,
             seed=seed,
             stream=stream,
             logprobs=logprobs,
@@ -174,6 +179,7 @@ class AsyncChatCompletions:
         frequency_penalty: float | None = None,
         min_p: float | None = None,
         logit_bias: Dict[str, float] | None = None,
+        context_length_exceeded_behavior: Literal["truncate", "error"] | None = None,
         seed: int | None = None,
         stream: bool = False,
         logprobs: int | None = None,
@@ -222,6 +228,9 @@ class AsyncChatCompletions:
             logit_bias (Dict[str, float], optional): A dictionary of tokens and their bias values that modify the
                 likelihood of specific tokens being sampled. Bias values must be in the range [-100, 100].
                 Defaults to None.
+            context_length_exceeded_behavior ("truncate" | "error", optional): Behavior when max_tokens exceeds the
+                model context length. "error" returns a 400, while "truncate" overrides max_tokens with the model's
+                maximum context length.
             seed (int, optional): A seed value to use for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
@@ -268,6 +277,7 @@ class AsyncChatCompletions:
             frequency_penalty=frequency_penalty,
             min_p=min_p,
             logit_bias=logit_bias,
+            context_length_exceeded_behavior=context_length_exceeded_behavior,
             seed=seed,
             stream=stream,
             logprobs=logprobs,
