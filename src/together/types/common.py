@@ -42,6 +42,8 @@ class LogprobsPart(BaseModel):
     tokens: List[str | None] | None = None
     # token logprob list
     token_logprobs: List[float | None] | None = None
+    # top-k logprobs per token
+    top_logprobs: List[Dict[str, float]] | None = None
 
 
 class PromptPart(BaseModel):
