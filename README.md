@@ -7,7 +7,7 @@
 > [!NOTE]
 > ## 🚀 Together Python SDK 2.0 is now available!
 >
-> V1 is now considered deprecated and will be maintained in maintanence mode. All new features and development will occur in the 2.0 SDK.
+> V1 is now considered deprecated and will be maintained in maintenance mode. All new features and development will occur in the 2.0 SDK.
 >
 > Check out the new SDK: **[together-py](https://github.com/togethercomputer/together-py)**
 >
@@ -352,7 +352,7 @@ Read more about Reranking [here](https://docs.together.ai/docs/rerank-overview).
 
 ### Files
 
-The files API is used for fine-tuning and allows developers to upload data to fine-tune on. It also has several methods to list all files, retrive files, and delete files. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
+The files API is used for fine-tuning and allows developers to upload data to fine-tune on. It also has several methods to list all files, retrieve files, and delete files. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-python).
 
 ```python
 from together import Together
@@ -368,7 +368,7 @@ client.files.delete(id="file-d0d318cb-b7d9-493a-bd70-1cfe089d3815") # deletes a 
 
 ### Fine-tunes
 
-The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrive statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-quickstart).
+The finetune API is used for fine-tuning and allows developers to create finetuning jobs. It also has several methods to list all jobs, retrieve statuses and get checkpoints. Please refer to our fine-tuning docs [here](https://docs.together.ai/docs/fine-tuning-quickstart).
 
 ```python
 from together import Together
