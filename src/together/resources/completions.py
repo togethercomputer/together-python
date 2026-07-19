@@ -79,7 +79,9 @@ class Completions:
             seed (int, optional): Seed value for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
-            logprobs (int, optional): Number of top-k logprobs to return
+            logprobs (int, optional): Number of top tokens to return log probabilities for
+                at each generation step, instead of only the sampled token.
+                Must be in the range [0, 20].
                 Defaults to None.
             echo (bool, optional): Echo prompt in output. Can be used with logprobs to return prompt logprobs.
                 Defaults to None.
@@ -203,7 +205,9 @@ class AsyncCompletions:
             seed (int, optional): Seed value for reproducibility.
             stream (bool, optional): Flag indicating whether to stream the generated completions.
                 Defaults to False.
-            logprobs (int, optional): Number of top-k logprobs to return
+            logprobs (int, optional): Number of top tokens to return log probabilities for
+                at each generation step, instead of only the sampled token.
+                Must be in the range [0, 20].
                 Defaults to None.
             echo (bool, optional): Echo prompt in output. Can be used with logprobs to return prompt logprobs.
                 Defaults to None.
