@@ -185,12 +185,53 @@ class ChatCompletionResponse(BaseModel):
     usage: UsageData | None = None
 
 
+class ChatCompletionDeltaToolCalls(ToolCalls):
+    """One tool call fragment inside a streaming delta.
+
+    Streaming splits a single tool call across several chunks, so every
+    fragment carries an ``index`` naming the call it belongs to. The
+    non-streaming :class:`ToolCalls` has no such field, so the index is
+    declared on a streaming-only subclass. Putting it on the shared class
+    instead would add an ``index`` key to non-streaming
+    :class:`ChatCompletionMessage` dumps, which is why the subclass exists.
+    """
+
+    index: int | None = None
+
+
+class ChatCompletionDeltaContent(DeltaContent):
+    """Streaming delta for chat completion chunks.
+
+    The API returns an explicit ``null`` for ``choices[n].delta.tool_calls`` on
+    text-only chunks, and for ``function.name`` / ``function.arguments`` inside
+    tool-call fragments, where the OpenAI streaming format either omits the
+    field or sends an empty string, never ``null``
+    (https://github.com/togethercomputer/together-python/issues/160).
+
+    Declaring these as typed optional fields makes ``null`` and *missing* parse
+    identically (to ``None``) and validates the items into
+    :class:`ChatCompletionDeltaToolCalls`, matching the non-streaming
+    :class:`ChatCompletionMessage`, so ``model_dump(exclude_none=True)``
+    produces OpenAI-shaped deltas with the nulls omitted.
+
+    ``role`` is declared for the same reason. It is sent on the first chunk of
+    a response and left out of later ones, so while it was undeclared a present
+    role and an absent one behaved differently for callers. It is typed as
+    ``str`` rather than :class:`MessageRole` on purpose: chunks are parsed one
+    at a time inside the streaming generator, so an unrecognised role value
+    would otherwise raise part way through and end the stream.
+    """
+
+    role: str | None = None
+    tool_calls: List[ChatCompletionDeltaToolCalls] | None = None
+
+
 class ChatCompletionChoicesChunk(BaseModel):
     index: int | None = None
     logprobs: float | None = None
     seed: int | None = None
     finish_reason: FinishReason | None = None
-    delta: DeltaContent | None = None
+    delta: ChatCompletionDeltaContent | None = None
 
 
 class ChatCompletionChunk(BaseModel):
