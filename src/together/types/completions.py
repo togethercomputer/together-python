@@ -3,7 +3,7 @@ from __future__ import annotations
 import warnings
 from typing import Dict, List
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from typing_extensions import Self
 
 from together.types.abstract import BaseModel
@@ -38,8 +38,9 @@ class CompletionRequest(BaseModel):
     seed: int | None = None
     # stream SSE token chunks
     stream: bool = False
-    # return logprobs
-    logprobs: int | None = None
+    # return logprobs. The API accepts 0 to 20, the number of top tokens to
+    # return log probabilities for at each generation step.
+    logprobs: int | None = Field(default=None, ge=0, le=20)
     # echo prompt.
     # can be used with logprobs to return prompt logprobs
     echo: bool | None = None
