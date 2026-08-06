@@ -46,6 +46,16 @@ To install Together Python Library from PyPI, simply run:
 pip install together
 ```
 
+### Type hints
+
+This package ships inline type annotations and a [PEP 561](https://peps.python.org/pep-0561/) `py.typed` marker, so type checkers such as mypy and pyright use them automatically — no separate stub package and no `follow_untyped_imports` override needed:
+
+```python
+from together import Together
+
+client = Together()  # fully typed
+```
+
 ### Setting up API Key
 
 > 🚧 You will need to create an account with [Together.ai](https://api.together.xyz/) to obtain a Together API Key.
