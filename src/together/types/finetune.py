@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Literal, Any
+from typing import Any, List, Literal
 
 from pydantic import Field, StrictBool, field_validator
 
 from together.types.abstract import BaseModel
-from together.types.common import (
-    ObjectType,
-)
+from together.types.common import ObjectType
 
 
 class FinetuneJobStatus(str, Enum):
@@ -175,6 +173,14 @@ class TrainingMethodDPO(TrainingMethod):
     simpo_gamma: float | None = None
 
 
+class FinetuneMultimodalParams(BaseModel):
+    """
+    Multimodal parameters
+    """
+
+    train_vision: bool = False
+
+
 class FinetuneProgress(BaseModel):
     """
     Fine-tune job progress
@@ -231,6 +237,8 @@ class FinetuneRequest(BaseModel):
     )
     # from step
     from_checkpoint: str | None = None
+    # multimodal parameters
+    multimodal_params: FinetuneMultimodalParams | None = None
     # hf related fields
     hf_api_token: str | None = None
     hf_output_repo_name: str | None = None
@@ -278,6 +286,7 @@ class FinetuneResponse(BaseModel):
     # created/updated datetime stamps
     created_at: str | None = None
     updated_at: str | None = None
+    started_at: str | None = None
     # job status
     status: FinetuneJobStatus | None = None
     # job id
@@ -313,6 +322,8 @@ class FinetuneResponse(BaseModel):
     training_file_size: int | None = Field(None, alias="TrainingFileSize")
     train_on_inputs: StrictBool | Literal["auto"] | None = "auto"
     from_checkpoint: str | None = None
+    # multimodal parameters
+    multimodal_params: FinetuneMultimodalParams | None = None
 
     progress: FinetuneProgress | None = None
 
@@ -409,6 +420,7 @@ class FinetuneTrainingLimits(BaseModel):
     min_learning_rate: float
     full_training: FinetuneFullTrainingLimits | None = None
     lora_training: FinetuneLoraTrainingLimits | None = None
+    supports_vision: bool = False
 
 
 class LinearLRSchedulerArgs(BaseModel):

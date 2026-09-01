@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Dict, Literal
+from typing import Dict, List, Literal
 
 from rich import print as rprint
 
@@ -18,10 +18,11 @@ from together.types import (
     FinetuneList,
     FinetuneListEvents,
     FinetuneLRScheduler,
-    FinetuneRequest,
-    FinetuneResponse,
+    FinetuneMultimodalParams,
     FinetunePriceEstimationRequest,
     FinetunePriceEstimationResponse,
+    FinetuneRequest,
+    FinetuneResponse,
     FinetuneTrainingLimits,
     FullTrainingType,
     LinearLRScheduler,
@@ -73,6 +74,7 @@ def create_finetune_request(
     lora_dropout: float | None = 0,
     lora_alpha: float | None = None,
     lora_trainable_modules: str | None = "all-linear",
+    train_vision: bool = False,
     suffix: str | None = None,
     wandb_api_key: str | None = None,
     wandb_base_url: str | None = None,
@@ -252,6 +254,15 @@ def create_finetune_request(
             simpo_gamma=simpo_gamma,
         )
 
+    if model_limits.supports_vision:
+        multimodal_params = FinetuneMultimodalParams(train_vision=train_vision)
+    elif not model_limits.supports_vision and train_vision:
+        raise ValueError(
+            f"Vision encoder training is not supported for the non-multimodal model `{model}`"
+        )
+    else:
+        multimodal_params = None
+
     finetune_request = FinetuneRequest(
         model=model,
         training_file=training_file,
@@ -272,6 +283,7 @@ def create_finetune_request(
         wandb_project_name=wandb_project_name,
         wandb_name=wandb_name,
         training_method=training_method_cls,
+        multimodal_params=multimodal_params,
         from_checkpoint=from_checkpoint,
         from_hf_model=from_hf_model,
         hf_model_revision=hf_model_revision,
@@ -342,6 +354,7 @@ class FineTuning:
         lora_dropout: float | None = 0,
         lora_alpha: float | None = None,
         lora_trainable_modules: str | None = "all-linear",
+        train_vision: bool = False,
         suffix: str | None = None,
         wandb_api_key: str | None = None,
         wandb_base_url: str | None = None,
@@ -387,6 +400,7 @@ class FineTuning:
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
             lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
             lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".
+            train_vision (bool, optional): Whether to train vision encoder in multimodal models. Defaults to False.
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
@@ -464,6 +478,7 @@ class FineTuning:
             lora_dropout=lora_dropout,
             lora_alpha=lora_alpha,
             lora_trainable_modules=lora_trainable_modules,
+            train_vision=train_vision,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
             wandb_base_url=wandb_base_url,
@@ -906,6 +921,7 @@ class AsyncFineTuning:
         lora_dropout: float | None = 0,
         lora_alpha: float | None = None,
         lora_trainable_modules: str | None = "all-linear",
+        train_vision: bool = False,
         suffix: str | None = None,
         wandb_api_key: str | None = None,
         wandb_base_url: str | None = None,
@@ -951,6 +967,7 @@ class AsyncFineTuning:
             lora_dropout (float, optional): Dropout rate for LoRA adapters. Defaults to 0.
             lora_alpha (float, optional): Alpha for LoRA adapters. Defaults to 8.
             lora_trainable_modules (str, optional): Trainable modules for LoRA adapters. Defaults to "all-linear".
+            train_vision (bool, optional): Whether to train vision encoder in multimodal models. Defaults to False.
             suffix (str, optional): Up to 40 character suffix that will be added to your fine-tuned model name.
                 Defaults to None.
             wandb_api_key (str, optional): API key for Weights & Biases integration.
@@ -1028,6 +1045,7 @@ class AsyncFineTuning:
             lora_dropout=lora_dropout,
             lora_alpha=lora_alpha,
             lora_trainable_modules=lora_trainable_modules,
+            train_vision=train_vision,
             suffix=suffix,
             wandb_api_key=wandb_api_key,
             wandb_base_url=wandb_base_url,
@@ -1046,7 +1064,11 @@ class AsyncFineTuning:
             hf_output_repo_name=hf_output_repo_name,
         )
 
-        if from_checkpoint is None and from_hf_model is None:
+        if (
+            from_checkpoint is None
+            and from_hf_model is None
+            and not model_limits.supports_vision
+        ):
             price_estimation_result = await self.estimate_price(
                 training_file=training_file,
                 validation_file=validation_file,

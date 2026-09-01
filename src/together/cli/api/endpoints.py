@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from functools import wraps
-from typing import Any, Callable, Dict, List, Literal, TypeVar, Union
+from typing import Any, Callable, Dict, List, Literal, Sequence, TypeVar, Union
 
 import click
+from tabulate import tabulate
 
 from together import Together
 from together.error import InvalidRequestError
 from together.types import DedicatedEndpoint, ListEndpoint
+from together.types.endpoints import HardwareWithStatus
 
 
 def print_endpoint(
@@ -98,7 +101,7 @@ def endpoints(ctx: click.Context) -> None:
 )
 @click.option(
     "--gpu",
-    type=click.Choice(["h100", "a100", "l40", "l40s", "rtx-6000"]),
+    type=click.Choice(["b200", "h200", "h100", "a100", "l40", "l40s", "rtx-6000"]),
     required=True,
     help="GPU type to use for inference",
 )
@@ -161,6 +164,8 @@ def create(
     """Create a new dedicated inference endpoint."""
     # Map GPU types to their full hardware ID names
     gpu_map = {
+        "b200": "nvidia_b200_180gb_sxm",
+        "h200": "nvidia_h200_140gb_sxm",
         "h100": "nvidia_h100_80gb_sxm",
         "a100": "nvidia_a100_80gb_pcie" if gpu_count == 1 else "nvidia_a100_80gb_sxm",
         "l40": "nvidia_l40",
@@ -184,12 +189,18 @@ def create(
             availability_zone=availability_zone,
         )
     except InvalidRequestError as e:
-        print_api_error(e)
-        if "check the hardware api" in str(e).lower():
+        if (
+            "check the hardware api" in str(e.args[0]).lower()
+            or "invalid hardware provided" in str(e.args[0]).lower()
+            or "the selected configuration" in str(e.args[0]).lower()
+        ):
+            click.secho("Invalid hardware selected.", fg="red", err=True)
+            click.echo("\nAvailable hardware options:")
             fetch_and_print_hardware_options(
                 client=client, model=model, print_json=False, available=True
             )
-
+        else:
+            print_api_error(e)
         sys.exit(1)
 
     # Print detailed information to stderr
@@ -256,14 +267,56 @@ def hardware(client: Together, model: str | None, json: bool, available: bool) -
     fetch_and_print_hardware_options(client, model, json, available)
 
 
+def _format_hardware_options(
+    hardware_options: Sequence[HardwareWithStatus],
+    show_availability: bool = True,
+) -> None:
+    """Print hardware options in a formatted table using tabulate."""
+    if not hardware_options:
+        click.echo("  No hardware options found.", err=True)
+        return
+
+    display_list: List[Dict[str, Any]] = []
+
+    for hw in hardware_options:
+        data: Dict[str, Any] = {
+            "Hardware ID": hw.id,
+            "GPU": (
+                re.sub(r"\-\d+[a-zA-Z][a-zA-Z]$", "", hw.specs.gpu_type)
+                if hw.specs and hw.specs.gpu_type
+                else "N/A"
+            ),
+            "Memory": f"{int(hw.specs.gpu_memory)}GB" if hw.specs else "N/A",
+            "Count": hw.specs.gpu_count if hw.specs else "N/A",
+            "Price (per minute)": (
+                f"${hw.pricing.cents_per_minute / 100:.2f}" if hw.pricing else "N/A"
+            ),
+        }
+
+        if show_availability:
+            status_display = "—"
+            if hw.availability:
+                status = hw.availability.status
+                # Add visual indicators for status
+                if status == "available":
+                    status_display = click.style("✓ available", fg="green")
+                elif status == "unavailable":
+                    status_display = click.style("✗ unavailable", fg="red")
+                else:  # insufficient
+                    status_display = click.style("⚠ insufficient", fg="yellow")
+            data["Availability"] = status_display
+
+        display_list.append(data)
+
+    click.echo(tabulate(display_list, headers="keys", numalign="left"))
+
+
 def fetch_and_print_hardware_options(
     client: Together, model: str | None, print_json: bool, available: bool
 ) -> None:
     """Print hardware options for a model."""
-
-    message = "Available hardware options:" if available else "All hardware options:"
-    click.echo(message, err=True)
     hardware_options = client.endpoints.list_hardware(model)
+
     if available:
         hardware_options = [
             hardware
@@ -271,13 +324,28 @@ def fetch_and_print_hardware_options(
             if hardware.availability is not None
             and hardware.availability.status == "available"
         ]
+        message = (
+            f"Available hardware options for model '{model}':"
+            if model
+            else "Available hardware options:"
+        )
+    else:
+        message = (
+            f"Hardware options for model '{model}':"
+            if model
+            else "All hardware options:"
+        )
+
+    click.echo(message, err=True)
+    click.echo("", err=True)
 
     if print_json:
         json_output = [hardware.model_dump() for hardware in hardware_options]
         click.echo(json.dumps(json_output, indent=2))
     else:
-        for hardware in hardware_options:
-            click.echo(f"  {hardware.id}", err=True)
+        # Show availability column only when model is specified (availability info is only returned with model filter)
+        show_availability = model is not None
+        _format_hardware_options(hardware_options, show_availability=show_availability)
 
 
 @endpoints.command()
