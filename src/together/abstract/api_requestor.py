@@ -694,7 +694,9 @@ class APIRequestor:
             except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
                 raise error.Timeout("Request timed out") from e
             except aiohttp.ClientError as e:
-                utils.log_warn(e, body=result.content)
+                raise error.APIConnectionError(
+                    "Error communicating with Together"
+                ) from e
 
             if content_type in ["application/octet-stream", "audio/wav", "audio/mpeg"]:
                 # Binary content - keep as bytes
