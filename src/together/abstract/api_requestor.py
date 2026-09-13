@@ -335,19 +335,14 @@ class APIRequestor:
         rcode: int,
         stream_error: bool = False,
     ) -> Exception:
-        try:
-            assert isinstance(resp.data, dict)
-            error_resp = resp.data.get("error")
-            assert isinstance(
-                error_resp, dict
-            ), f"Unexpected error response {error_resp}"
-            error_data = TogetherErrorResponse(**(error_resp))
-        except (KeyError, TypeError):
+        error_resp = resp.data.get("error") if isinstance(resp.data, dict) else None
+        if not isinstance(error_resp, dict):
             raise error.JSONError(
                 "Invalid response object from API: %r (HTTP response code "
                 "was %d)" % (resp.data, rcode),
                 http_status=rcode,
             )
+        error_data = TogetherErrorResponse(**error_resp)
 
         utils.log_info(
             "Together API error received",
