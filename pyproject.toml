@@ -76,7 +76,7 @@ optional = true
 
 [tool.poetry.group.examples.dependencies]
 datasets = ">=2.18,<5.0"
-transformers = "^4.39.3"
+transformers = "^5.10.1"
 
 
 [tool.poetry.urls]
