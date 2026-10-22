@@ -1,9 +1,10 @@
-FROM mcr.microsoft.com/devcontainers/python:3.11
+FROM mcr.microsoft.com/devcontainers/python:3.11@sha256:1eb48ffd772f0618d66844eff8cbfd9914785be25f6a936d0756a1ddfc866cc3
 
 ENV PYTHONUNBUFFERED=1
 
-# Pick up the fixed CA bundle (CVE-2026-111943)
+# Apply available OS security fixes, including the CA bundle (CVE-2026-111943)
 RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends --only-upgrade ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
