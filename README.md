@@ -34,7 +34,7 @@
 
 > Note: You are looking at the codebase for Together Python V1. The latest Together Python SDK can be found **[here.](https://github.com/togethercomputer/together-py)**
 
-The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.10+ applications with easy to use synchronous and asynchronous clients.
+The [Together Python API Library](https://pypi.org/project/together/) is the official Python client for Together's API platform, providing a convenient way for interacting with the REST APIs and enables easy integrations with Python 3.11+ applications with easy to use synchronous and asynchronous clients.
 
 
 

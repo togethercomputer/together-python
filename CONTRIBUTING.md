@@ -32,7 +32,7 @@ Pull requests cannot land without passing the formatting, linting, and testing c
 
 This project utilizes [Poetry](https://python-poetry.org/) v1.6.1+ as a dependency manager.
 
-❗Note: *Before installing Poetry*, if you use `Conda`, create and activate a new Conda env (e.g. `conda create -n together python=3.10`)
+❗Note: *Before installing Poetry*, if you use `Conda`, create and activate a new Conda env (e.g. `conda create -n together python=3.11`)
 
 Install Poetry: **[documentation on how to install it](https://python-poetry.org/docs/#installation)**.
 
