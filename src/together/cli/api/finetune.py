@@ -21,7 +21,6 @@ from together.utils import (
     parse_timestamp,
 )
 
-
 _CONFIRMATION_MESSAGE = (
     "You are about to create a fine-tuning job. "
     "The estimated price of this job is {price}. "

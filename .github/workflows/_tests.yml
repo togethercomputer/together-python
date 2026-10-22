@@ -16,7 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  POETRY_VERSION: "1.7.1"
+  POETRY_VERSION: "2.5.1"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -24,7 +27,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.10"
           - "3.11"
           - "3.12"
     name: "unittest python v${{ matrix.python-version }}"
@@ -37,6 +39,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ env.POETRY_VERSION }}
           cache-key: core
+          working-directory: .
 
       - name: Install dependencies
         shell: bash

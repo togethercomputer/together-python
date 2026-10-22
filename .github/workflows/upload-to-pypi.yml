@@ -5,14 +5,17 @@ on:
     types: [published]
 
 env:
-  POETRY_VERSION: "2.1.1"
+  POETRY_VERSION: "2.5.1"
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
 
     steps:
     - uses: actions/checkout@v4
@@ -22,6 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         poetry-version: ${{ env.POETRY_VERSION }}
         cache-key: core
+        working-directory: .
 
     - name: Set up cache
       uses: actions/cache@v4

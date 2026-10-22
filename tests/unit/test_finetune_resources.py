@@ -12,7 +12,6 @@ from together.types.finetune import (
     FinetuneTrainingLimits,
 )
 
-
 _MODEL_NAME = "meta-llama/Meta-Llama-3.1-8B-Instruct-Reference"
 _TRAINING_FILE = "file-7dbce5e9-7993-4520-9f3e-a7ece6c39d84"
 _VALIDATION_FILE = "file-7dbce5e9-7553-4520-9f3e-a7ece6c39d84"

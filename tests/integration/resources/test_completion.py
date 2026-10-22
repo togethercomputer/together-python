@@ -25,7 +25,6 @@ from .generate_hyperparameters import (
     random_top_p,  # noqa
 )
 
-
 STOP = ["</s>"]
 
 

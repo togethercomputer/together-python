@@ -6,7 +6,6 @@ from datetime import datetime
 import re
 from typing import Any
 
-
 logger = logging.getLogger("together")
 
 TOGETHER_LOG = os.environ.get("TOGETHER_LOG")

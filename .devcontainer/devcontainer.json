@@ -3,15 +3,6 @@
     "build": {
         "dockerfile": "Dockerfile"
     },
-    "features": {
-        "ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/node:1": {},
-        "ghcr.io/devcontainers/features/java:1": {
-            "version": "17",
-            "installMaven": false,
-            "installGradle": false
-        }
-    },
     "customizations": {
         "vscode": {
             "extensions": [
@@ -35,6 +26,6 @@
             }
         }
     },
-    "postCreateCommand": "poetry install",
+    "postCreateCommand": "poetry install --with quality,tests",
     "remoteUser": "vscode"
 }

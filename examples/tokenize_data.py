@@ -11,7 +11,6 @@ from transformers import (  # type: ignore
     PreTrainedTokenizerBase,
 )
 
-
 # see default of ignore_index
 # for https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html#torch.nn.CrossEntropyLoss
 LOSS_IGNORE_INDEX = -100
