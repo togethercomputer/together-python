@@ -5,7 +5,6 @@ from pathlib import Path
 from together.constants import MIN_SAMPLES
 from together.utils.files import check_file
 
-
 _TEST_PREFERENCE_OPENAI_CONTENT = [
     {
         "input": {

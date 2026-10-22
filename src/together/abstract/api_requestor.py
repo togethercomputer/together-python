@@ -23,7 +23,6 @@ import aiohttp
 import requests
 from tqdm.utils import CallbackIOWrapper
 
-
 if sys.version_info >= (3, 8):
     from typing import Literal
 else:
@@ -43,7 +42,6 @@ from together.constants import (
 from together.together_response import TogetherResponse
 from together.types import TogetherClient, TogetherRequest
 from together.types.error import TogetherErrorResponse
-
 
 # Has one attribute per thread, 'session'.
 _thread_context = threading.local()
@@ -457,9 +455,7 @@ class APIRequestor:
         utils.log_debug(
             "Request to Together API",
             method=options.method,
-            path=abs_url,
-            post_data=(data or data_bytes),
-            headers=json.dumps(headers),
+            path=urlsplit(abs_url).path,
         )
 
         return abs_url, headers, (data or data_bytes)
@@ -555,7 +551,7 @@ class APIRequestor:
 
         utils.log_debug(
             "Together API response",
-            path=abs_url,
+            path=urlsplit(abs_url).path,
             response_code=status_code,
             processing_ms=result_headers.get("x-total-time"),
             request_id=result_headers.get("CF-RAY"),
@@ -598,16 +594,11 @@ class APIRequestor:
             )
             utils.log_debug(
                 "Together API response",
-                path=abs_url,
+                path=urlsplit(abs_url).path,
                 response_code=result.status,
                 processing_ms=result.headers.get("x-total-time"),
                 request_id=result.headers.get("CF-RAY"),
             )
-            # Don't read the whole stream for debug logging unless necessary.
-            if together.log == "debug":
-                utils.log_debug(
-                    "API response body", body=result.content, headers=result.headers
-                )
             return result
         except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
             raise error.Timeout("Request timed out") from e
@@ -694,7 +685,7 @@ class APIRequestor:
             except (aiohttp.ServerTimeoutError, asyncio.TimeoutError) as e:
                 raise error.Timeout("Request timed out") from e
             except aiohttp.ClientError as e:
-                utils.log_warn(e, body=result.content)
+                utils.log_warn("Error reading API response")
 
             if content_type in ["application/octet-stream", "audio/wav", "audio/mpeg"]:
                 # Binary content - keep as bytes

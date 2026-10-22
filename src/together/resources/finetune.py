@@ -37,7 +37,6 @@ from together.types import (
 from together.types.finetune import DownloadCheckpointType, TrainingMethod
 from together.utils import log_warn_once, normalize_key
 
-
 _FT_JOB_WITH_STEP_REGEX = r"^ft-[\dabcdef-]+:\d+$"
 
 

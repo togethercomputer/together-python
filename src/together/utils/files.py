@@ -23,7 +23,6 @@ from together.constants import (
 )
 from together.types import FilePurpose
 
-
 # MessageContent is a string or a list of dicts with 'type': 'text' or 'image_url', and 'text' or 'image_url.url'
 # Example: "Hello" or [
 #   {"type": "text", "text": "Hello"},

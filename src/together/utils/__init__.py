@@ -12,7 +12,6 @@ from together.utils.tools import (
     get_event_step,
 )
 
-
 __all__ = [
     "check_file",
     "get_headers",

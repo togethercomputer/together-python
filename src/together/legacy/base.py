@@ -1,7 +1,6 @@
 import functools
 import warnings
 
-
 API_KEY_WARNING = (
     "The use of together.api_key is deprecated and will be removed in the next major release. "
     "Please set the TOGETHER_API_KEY environment variable instead."

@@ -81,7 +81,6 @@ from together.types.models import ModelObject, ModelUploadRequest, ModelUploadRe
 from together.types.rerank import RerankRequest, RerankResponse
 from together.types.videos import CreateVideoBody, CreateVideoResponse, VideoJob
 
-
 __all__ = [
     "TogetherClient",
     "TogetherRequest",

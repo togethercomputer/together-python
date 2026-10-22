@@ -1,6 +1,5 @@
 import enum
 
-
 # Session constants
 TIMEOUT_SECS = 600
 MAX_SESSION_LIFETIME_SECS = 180

@@ -16,7 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  POETRY_VERSION: "2.1.1"
+  POETRY_VERSION: "2.5.1"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -36,6 +39,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           poetry-version: ${{ env.POETRY_VERSION }}
           cache-key: core
+          working-directory: .
 
       - name: Install together with dependencies
         shell: bash

@@ -9,7 +9,7 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 26.10.1
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -17,5 +17,5 @@ repos:
     hooks:
       - id: mypy
         args: [--strict]
-        additional_dependencies: [types-requests, types-tqdm, types-tabulate, types-click, types-filelock, types-Pillow, rich, pyarrow-stubs, pydantic, aiohttp]
+        additional_dependencies: [types-requests, types-tqdm, types-tabulate, types-click, types-filelock, "pillow>=13.0.0,<14", rich, pyarrow-stubs, pydantic, aiohttp]
         exclude: ^tests/

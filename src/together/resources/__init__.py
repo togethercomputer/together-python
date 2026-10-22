@@ -12,7 +12,6 @@ from together.resources.batch import Batches, AsyncBatches
 from together.resources.evaluation import Evaluation, AsyncEvaluation
 from together.resources.videos import AsyncVideos, Videos
 
-
 __all__ = [
     "AsyncCompletions",
     "Completions",

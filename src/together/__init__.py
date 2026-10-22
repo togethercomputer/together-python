@@ -91,7 +91,6 @@ aiosession: ContextVar["ClientSession" | None] = ContextVar(
 
 from together.client import AsyncClient, AsyncTogether, Client, Together
 
-
 api_key: str | None = None  # To be deprecated in the next major release
 
 # Legacy functions
