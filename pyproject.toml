@@ -63,7 +63,7 @@ pytest-watch = "^4.2.0"
 pytest-mock = "^3.14.0"
 pytest-asyncio = "^1.4.0"
 tox = "^4.67.1"
-virtualenv = "^21.14.4"
+virtualenv = "^21.14.13"
 
 [tool.poetry.group.examples]
 optional = true
